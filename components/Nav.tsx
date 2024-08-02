@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 
 const Nav = () => {
     return (
-      <header className='w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200'>
+      <header className='w-full fixed top-0 left-0  bg-white shadow-md border-b border-gray-200'>
       <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 py-4'>
         <Link href="/" className='flex items-center'>
           <Image
