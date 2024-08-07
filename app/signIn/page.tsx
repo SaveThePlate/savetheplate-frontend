@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
-import { toast } from "sonner";
-import { AuthToast, ErrorToast } from "@/components/authToast";
-import { auth } from "@/lib/api";
+
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function SignIn() {
