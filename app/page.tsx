@@ -55,6 +55,7 @@ const Home = () => {
         {/* Additional cards can be added here */}
       </div>
 
+
     </main>
   );
 };
