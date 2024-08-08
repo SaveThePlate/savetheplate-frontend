@@ -120,7 +120,6 @@ const cardData = [
     </div>
   </main>
 );
-
 };
 
 export default Home;
