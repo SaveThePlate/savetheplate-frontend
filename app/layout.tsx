@@ -23,9 +23,6 @@ export default function RootLayout({
         <Nav/>
           {children}
         <Footer/>
-
-        
-        
       </body>
     </html>
   );

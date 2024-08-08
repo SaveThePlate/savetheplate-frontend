@@ -17,8 +17,8 @@ const Nav = () => {
           />
         </Link>
         <div className="flex items-center gap-5 min-w-[130px]">
-          <Button variant="secondary" className="text-gray-600 border-gray-300">Sign in as seller</Button>
-          <Button variant="secondary" className="text-gray-600 border-gray-300">Sign in as client</Button>
+          <Button  variant="secondary" className="text-gray-600 border-gray-300"><Link href="/signIn">Sign in as seller</Link></Button>
+          <Button variant="secondary" className="text-gray-600 border-gray-300"><Link href="/signIn">Sign in as client</Link></Button>
         </div>
       </nav>
     </header>)};

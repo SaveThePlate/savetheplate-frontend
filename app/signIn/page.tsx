@@ -6,35 +6,58 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { ReloadIcon } from "@radix-ui/react-icons";
+import { toast } from "@/components/ui/use-toast";
+import { AuthToast } from "@/components/authToast";
+import Image from "next/image";
+import useOpenApiFetch from "@/lib/OpenApiFetch";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
-  // async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   const response = await auth(email);
-  //   setLoading(false);
-  //   toast(AuthToast);
-  // }
+  const clientApi = useOpenApiFetch();
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    clientApi
+      .POST("/auth/send-magic-mail", {
+        body: { email: email },
+      })
+      .then((resp) => {
+        if (resp.response.status === 201) {
+          console.info("Magic link sent to your email");
+          setEmailSent(true);
+          toast(AuthToast);
+        } else {
+          console.error("Failed to send magic link to your email");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to send magic link to your email");
+        console.error(err);
+        setLoading(false);
+      });
+  }
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
       <div className="flex flex-col items-center w-3/4 sm:w-2/5 md:w-1/4">
-       
         <div className="flex flex-col items-center space-y-2">
-          <img src="fullname1.png" alt="Logo" />
+          <Image src="/fullname1.png" alt="Logo" width={100} height={100} />
           <h1 className="font-semibold text-4xl">Happy to see you again!</h1>
-          <br/>
-          <p className="font-normal text-l">Enter your email to sign in to your account</p>
-          <br/>
+          <p className="font-normal text-l">
+            Enter your email to sign in to your account
+          </p>
+          <br />
         </div>
 
         <form
           className="flex flex-col items-center w-full gap-3"
-          // onSubmit={handleSubmit}
+          onSubmit={handleSubmit}
         >
           <Input
             placeholder="name@example.com"
@@ -67,3 +90,4 @@ export default function SignIn() {
     </div>
   );
 }
+
