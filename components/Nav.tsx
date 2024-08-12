@@ -30,7 +30,7 @@ const Nav = () => {
           </Button>
 
           <Button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 border border-b-4 border-red-800 rounded">
-            <Link href="/signIn"> I want food </Link>
+            <Link href="/"> I want food </Link>
           </Button>
         
         

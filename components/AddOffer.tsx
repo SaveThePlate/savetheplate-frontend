@@ -5,7 +5,8 @@ import { DropzoneOptions } from 'react-dropzone';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
-import DatePicker from 'react-datepicker';
+import axios from 'axios';
+
 
 export function AddOffer() {
 
@@ -25,9 +26,33 @@ export function AddOffer() {
         maxSize: 1 * 1024 * 1024,
     } satisfies DropzoneOptions;
 
-    const handleSubmit = (e:any) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        //in order to solve the prob of Invalid value for argument expirationDate: premature end of input. Expected ISO-8601 DateTime.
+        const expirationDateTime = `${expirationDate}T${expirationTime}:00Z`;
+      
+        const data = {
+            title,
+            description,
+            expirationDate: expirationDateTime,
+            pickupLocation,
+            images: JSON.stringify(files) 
         };
+      
+        try {
+          const response = await axios.post('http://localhost:3001/offers', data, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+      
+          console.log('Offer submitted successfully:', response.data);
+        } catch (error) {
+          console.error('Error submitting offer:', error);
+        }
+      };
+
 
     return (
             <form onSubmit={handleSubmit} className="space-y-4">
