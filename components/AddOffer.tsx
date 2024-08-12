@@ -1,0 +1,138 @@
+import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/dropFile';
+import Image from "next/image";
+import { useState } from 'react';
+import { DropzoneOptions } from 'react-dropzone';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Button } from './ui/button';
+import DatePicker from 'react-datepicker';
+
+export function AddOffer() {
+
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [expirationDate, setExpirationDate] = useState('');
+    const [expirationTime, setExpirationTime] = useState('');
+    const [pickupLocation, setPickupLocation] = useState('');
+    const [files, setFiles] = useState<File[] | null>([]);
+
+    const dropzone = {
+        accept: {
+        "image/*": [".jpg", ".jpeg", ".png"],
+        },
+        multiple: true,
+        maxFiles: 4,
+        maxSize: 1 * 1024 * 1024,
+    } satisfies DropzoneOptions;
+
+    const handleSubmit = (e:any) => {
+        e.preventDefault();
+        };
+
+    return (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                  Title
+                </label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="mt-1 block w-full"
+                  placeholder="Enter title"
+                />
+              </div>
+        
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="mt-1 block w-full"
+                  placeholder="Enter description"
+                />
+              </div>
+
+
+            <div>
+                <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
+                Expiration Date
+                </label>
+                <Input
+                id="expirationDate"
+                type="date"
+                value={expirationDate}
+                onChange={(e) => setExpirationDate(e.target.value)}
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                />
+            </div>
+         
+            <div>
+                <label htmlFor="expirationTime" className="block text-sm font-medium text-gray-700">
+                Expiration Time
+                </label>
+                <Input
+                id="expirationTime"
+                type="time"
+                value={expirationTime}
+                onChange={(e) => setExpirationTime(e.target.value)}
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                />
+            </div>
+        
+              <div>
+                <label htmlFor="pickupLocation" className="block text-sm font-medium text-gray-700">
+                  Pickup Location
+                </label>
+                <Input
+                  id="pickupLocation"
+                  value={pickupLocation}
+                  onChange={(e) => setPickupLocation(e.target.value)}
+                  className="mt-1 block w-full"
+                  placeholder="Enter pickup location"
+                />
+              </div>
+        
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Images</label>
+                <FileUploader
+                  value={files}
+                  onValueChange={setFiles}
+                  dropzoneOptions={dropzone}
+                >
+                  <FileInput>
+                    <div className="flex items-center justify-center h-32 w-full border bg-background rounded-md">
+                      <p className="text-gray-400">Drop files here</p>
+                    </div>
+                  </FileInput>
+                  <FileUploaderContent className="flex items-center flex-row gap-2">
+                    {files?.map((file, i) => (
+                      <FileUploaderItem
+                        key={i}
+                        index={i}
+                        className="size-20 p-0 rounded-md overflow-hidden"
+                        aria-roledescription={`file ${i + 1} containing ${file.name}`}
+                      >
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          height={80}
+                          width={80}
+                          className="size-20 p-0"
+                        />
+                      </FileUploaderItem>
+                    ))}
+                  </FileUploaderContent>
+                </FileUploader>
+              </div>
+        
+              <Button type="submit" className="w-full">
+                Post Offer
+              </Button>
+            </form>
+          );
+};

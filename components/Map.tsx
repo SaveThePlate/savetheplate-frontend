@@ -10,10 +10,6 @@ export function Map() {
         mapRef.current = map
         setMapReady(true)
       }
-    
-
-
-
 
     return (
         <>
