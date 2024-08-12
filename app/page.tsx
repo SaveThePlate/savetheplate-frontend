@@ -93,7 +93,7 @@ const cardData = [
   const primaryColor = "#8B4513"; 
 
   return (
-    <main className="pt-24 sm:pt-32 p-6 bg-white min-h-screen">
+    <main className="pt-24 sm:pt-32 p-6 bg-white min-h-screen"> 
     <div className="text-center mb-6">
       <Link href="/map" className="inline-block bg-yellow-500 text-white px-4 py-2 rounded-md shadow">
         Edit Location
