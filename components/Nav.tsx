@@ -26,7 +26,7 @@ const Nav = () => {
         <div className="flex items-center gap-3">
         
           <Button className="bg-lime-400 hover:bg-lime-500 text-black font-bold py-2 px-4 border border-b-4 border-lime-600 rounded">
-            <Link href="/signIn"> I have an offer </Link>
+            <Link href="/addOffer"> I have an offer </Link>
           </Button>
 
           <Button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 border border-b-4 border-red-800 rounded">

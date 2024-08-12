@@ -1,46 +1,35 @@
 "use client"
-import React, { useEffect } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
-
+import React, { useEffect, useRef, useState } from 'react';
+import GoogleMap from 'google-maps-react-markers'
 export function Map() {
 
-    const mapRef = React.useRef<HTMLDivElement>(null);
+    const mapRef = useRef(null)
+    const [mapReady, setMapReady] = useState(false)
 
-    useEffect(() => {
-        const initMap = async () => {
-            const loader = new Loader ({
-                apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY || '',
-                version: 'weekly'
-            })
+    const onGoogleApiLoaded = ({ map, maps }:any) => {
+        mapRef.current = map
+        setMapReady(true)
+      }
+    
 
-            const { Map } = await loader.importLibrary('maps');
 
-            const { Marker } = await loader.importLibrary('marker') as google.maps.MarkerLibrary;
 
-            const position = {
-                lat: 43,
-                long: -80
-            }
-
-            // const mapOptions = google.maps.MapOptions = {
-            //     center: position,
-            //     zoom: 17,
-            //     mapId: 'MY_NEXTJS_MAPID'
-            // }
-
-            const map = new Map(mapRef.current as HTMLDivElement);
-
-            // const marker = new Marker({
-            //     map: map,
-            //     position: position
-            // })
-        }
-
-        initMap();
-    }, []);
 
     return (
-        <div style={{height: '500px'}} ref={mapRef}/> 
+        <>
+      {mapReady && <div>Map is ready. See for logs in developer console.</div>}
+      <GoogleMap
+        apiKey={process.env.NEXT_PUBLIC_MAPS_API_KEY}
+        defaultCenter={{ lat: 36.806389, lng: 10.181667 }}
+        defaultZoom={12}
+        mapMinHeight="100vh"
+        options={{}}
+        onGoogleApiLoaded={onGoogleApiLoaded}
+        onChange={(map) => console.log('Map moved', map)}
+      >
+       
+      </GoogleMap>
+    </>
     )
 }
 
