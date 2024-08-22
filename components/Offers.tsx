@@ -5,17 +5,18 @@ import CustomCard from "./CustomCard";
 
 interface Offer {
   id: number;
-  imageSrc: string;
-  imageAlt: string;
+  images: { path: string }[];
   title: string;
   description: string;
   expirationDate: string;
-  expirationTime: string;
   pickupLocation: string;
-  detailsLink: string;
-  reserveLink: string;
   primaryColor: string;
 }
+
+const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const getImage = (filename: string): string => {
+  return filename ? `${BASE_IMAGE_URL}${filename}` : "";
+};
 
 const OffersPage: React.FC = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -44,12 +45,12 @@ const OffersPage: React.FC = () => {
       {offers.map((offer) => (
         <CustomCard
           key={offer.id}
-          imageSrc={offer.imageSrc}
-          imageAlt={offer.imageAlt}
+          imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
+          imageAlt={offer.title}
           title={offer.title}
           description={offer.description}
           expirationDate={offer.expirationDate}
-          expirationTime={offer.expirationTime}
+
           pickupLocation={offer.pickupLocation}
           detailsLink={`/offers/${offer.id}`}
           reserveLink={`/reserve/${offer.id}`}

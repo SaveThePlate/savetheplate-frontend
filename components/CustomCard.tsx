@@ -9,7 +9,6 @@ interface CustomCardProps {
   title: string;
   description: string;
   expirationDate: string; 
-  expirationTime: string; 
   pickupLocation: string; 
   detailsLink: string;
   reserveLink: string;
@@ -22,7 +21,6 @@ const CustomCard: FC<CustomCardProps> = ({
   title,
   description,
   expirationDate,
-  expirationTime,
   pickupLocation,
   detailsLink,
   reserveLink,
