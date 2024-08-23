@@ -13,6 +13,7 @@ interface CustomCardProps {
   detailsLink: string;
   reserveLink: string;
   primaryColor: string;
+  onDetailsClick: () => void; 
 }
 
 const CustomCard: FC<CustomCardProps> = ({
@@ -24,7 +25,8 @@ const CustomCard: FC<CustomCardProps> = ({
   pickupLocation,
   detailsLink,
   reserveLink,
-  primaryColor
+  primaryColor,
+  onDetailsClick
 }) => {
 
   const formattedDate = new Date(expirationDate).toLocaleDateString();
@@ -44,10 +46,14 @@ const CustomCard: FC<CustomCardProps> = ({
         <p className="text-sm text-gray-500">Pickup Location: {pickupLocation}</p>
       </CardContent>
       <CardFooter className="flex justify-between items-center mt-auto">
-        <Link href={detailsLink} className="text-gray-600 border-b-2 border-transparent hover:border-primary transition">
+      <button
+          onClick={onDetailsClick} // Attach the onDetailsClick handler to the Details button
+          className="text-gray-600 border-b-2 border-transparent hover:border-primary transition"
+        >
           Details
-        </Link>
-        <Link href={reserveLink} style={{ backgroundColor: primaryColor, color: 'white' }} className="px-4 py-2 rounded-md">
+        </button>
+        
+        <Link href={reserveLink} style={{ backgroundColor: primaryColor, color: 'gray' }} className="px-4 py-2 rounded-md">
           Reserve
         </Link>
       </CardFooter>
