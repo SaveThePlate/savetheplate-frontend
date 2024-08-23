@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import CustomCard from "./CustomCard";
 import OfferDetailsModal from "./OfferDetailsModal";
-import { Button } from "react-day-picker";
+import { Button } from "./ui/button";
 
 interface Offer {
   id: number;
@@ -58,7 +58,9 @@ const OffersPage: React.FC = () => {
   return (
     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
       
-      <Button>View available offers around you</Button>
+    <div className="w-full sm:w-auto text-center mb-4">
+      <Button className="mb-4 absolute inset-x-0 top-0 h-16">View available offers around you</Button>
+    </div>
       
       {offers.map((offer) => (
         <CustomCard
