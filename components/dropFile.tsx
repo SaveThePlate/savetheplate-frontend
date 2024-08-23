@@ -148,7 +148,7 @@ export const FileUploader = forwardRef<
           setActiveIndex(-1);
         }
       },
-      [value, activeIndex, removeFileFromSet]
+      [direction, orientation, value, activeIndex, removeFileFromSet]
     );
 
     const onDrop = useCallback(
@@ -189,7 +189,7 @@ export const FileUploader = forwardRef<
           }
         }
       },
-      [reSelectAll, value]
+      [maxFiles, maxSize, onValueChange, reSelectAll, value]
     );
 
     useEffect(() => {
@@ -259,7 +259,7 @@ export const FileUploaderContent = forwardRef<
     <div
       className={cn("w-full px-1")}
       ref={containerRef}
-      aria-description="content file holder"
+      aria-describedby="content file holder"
     >
       <div
         {...props}

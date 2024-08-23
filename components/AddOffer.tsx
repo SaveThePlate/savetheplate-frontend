@@ -3,7 +3,7 @@ import {
   FileUploader,
   FileUploaderContent,
   FileUploaderItem,
-} from "@/components/dropFile";
+} from "@/components/DropFile";
 import Image from "next/image";
 import { useState } from "react";
 import { DropzoneOptions } from "react-dropzone";

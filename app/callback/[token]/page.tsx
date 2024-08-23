@@ -32,7 +32,7 @@ function AuthCallback() {
       .catch((error: any) => {
         console.log(error);
       });
-  }, [token]);
+  }, [token,clientApi, router]);
 
   return <div>Loading...</div>;
 }

@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { toast } from "@/components/ui/use-toast";
-import { AuthToast } from "@/components/authToast";
+import { AuthToast } from "@/components/AuthToast";
 import Image from "next/image";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
 
