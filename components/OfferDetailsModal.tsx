@@ -1,38 +1,40 @@
-import { FC } from "react";
+import React from "react";
 
 interface OfferDetailsModalProps {
-  isOpen: boolean; // Prop to control if the modal is open
-  offer: {
-    id: number;
-    imageSrc: string;
-    imageAlt: string;
-    title: string;
-    description: string;
-    expirationDate: string;
-    expirationTime: string;
-    pickupLocation: string;
-    detailsLink: string;
-    reserveLink: string;
-    primaryColor: string;
-  };
-  onClose: () => void; // Prop to handle closing the modal
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description: string;
+  expirationDate: string;
+  pickupLocation: string;
 }
 
-const OfferDetailsModal: FC<OfferDetailsModalProps> = ({ isOpen, offer, onClose }) => {
-  if (!isOpen) return null; // Don't render the modal if it's not open
+const OfferDetailsModal: React.FC<OfferDetailsModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  description,
+  expirationDate,
+  pickupLocation,
+}) => {
+  if (!isOpen) return null;
+
+  const date = new Date(expirationDate);
+  
+  const formattedDate = date.toLocaleDateString(); 
+  const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-md max-w-lg w-full">
-        <h2 className="text-xl font-semibold mb-4">{offer.title}</h2>
-        <p className="mb-4">{offer.description}</p>
-        <p className="mb-4">
-          Expires on: {new Date(offer.expirationDate).toLocaleDateString()} at {new Date(offer.expirationTime).toLocaleTimeString()}
-        </p>
-        <p className="mb-4">Pickup Location: {offer.pickupLocation}</p>
+      <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        <p className="mb-2">{description}</p>
+        <p className="mb-2"><strong>Expiration Date:</strong> {formattedDate}</p>
+        <p className="mb-4"><strong>Expiration Time:</strong> {formattedTime}</p>
+        <p className="mb-4"><strong>Pickup Location:</strong> {pickupLocation}</p>
         <button
-          onClick={onClose} // Attach the onClose handler to the Close button
-          className="bg-red-500 text-white px-4 py-2 rounded-md"
+          onClick={onClose}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           Close
         </button>

@@ -30,7 +30,7 @@ const CustomCard: FC<CustomCardProps> = ({
 }) => {
 
   const formattedDate = new Date(expirationDate).toLocaleDateString();
-  const formattedTime = new Date(expirationDate).toLocaleTimeString();
+  const formattedTime = new Date(expirationDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
 
   return (
     <Card className="sm:w-60">

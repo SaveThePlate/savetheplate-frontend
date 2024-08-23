@@ -28,9 +28,7 @@ export function AddOffer() {
     if (!files || files.length === 0) {
       return;
     }
-  
-    const uploadedFiles: { filename: string; blurhash: string }[] = [];
-  
+    
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append('files', file));
