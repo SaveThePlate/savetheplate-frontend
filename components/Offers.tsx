@@ -2,25 +2,30 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CustomCard from "./CustomCard";
+import OfferDetailsModal from "./OfferDetailsModal";
 
 interface Offer {
   id: number;
-  imageSrc: string;
-  imageAlt: string;
+  images: { path: string }[];
   title: string;
   description: string;
   expirationDate: string;
-  expirationTime: string;
   pickupLocation: string;
-  detailsLink: string;
-  reserveLink: string;
   primaryColor: string;
 }
 
+const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const getImage = (filename: string): string => {
+  return filename ? `${BASE_IMAGE_URL}${filename}` : "";
+};
+
 const OffersPage: React.FC = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null); // State to track selected offer
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // State to track if the modal is open
+
   useEffect(() => {
     const fetchOffers = async () => {
       try {
@@ -36,6 +41,20 @@ const OffersPage: React.FC = () => {
     fetchOffers();
   }, []);
 
+
+  const openModal = (offer: Offer) => { // Function to open the modal and set the selected offer
+    setSelectedOffer(offer);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => { // Function to close the modal and clear the selected offer
+    setIsModalOpen(false);
+    setSelectedOffer(null);
+  };
+
+
+
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -44,18 +63,33 @@ const OffersPage: React.FC = () => {
       {offers.map((offer) => (
         <CustomCard
           key={offer.id}
-          imageSrc={offer.imageSrc}
-          imageAlt={offer.imageAlt}
+          imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
+          imageAlt={offer.title}
           title={offer.title}
           description={offer.description}
           expirationDate={offer.expirationDate}
-          expirationTime={offer.expirationTime}
+
           pickupLocation={offer.pickupLocation}
           detailsLink={`/offers/${offer.id}`}
           reserveLink={`/reserve/${offer.id}`}
           primaryColor={offer.primaryColor}
+          onDetailsClick={() => openModal(offer)} // Pass the openModal function to handle details click
         />
       ))}
+
+{selectedOffer && ( 
+        <OfferDetailsModal
+          isOpen={isModalOpen} 
+          offer={selectedOffer} 
+          onClose={closeModal} 
+        />
+      )}
+
+
+      
+    
+
+
     </div>
   );
 };
