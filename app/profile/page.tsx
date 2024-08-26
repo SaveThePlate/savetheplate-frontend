@@ -36,7 +36,7 @@ const ProfilePage = () => {
       }
   ];
   return (
-    <main className="pt-24 sm:pt-32 px-4 sm:px-8 bg-white min-h-screen">
+    <main className="pt-16 sm:pt-32 p-6 bg-white min-h-screen flex flex-col items-center"> 
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-center mb-8">
           <div className="flex flex-col items-center">
@@ -55,8 +55,8 @@ const ProfilePage = () => {
         </div>
         <hr className="border-gray-300 mb-8" />
         <h2 className="text-lg font-semibold mb-4">My Offers</h2>
-        <div className="space-y-4">
-          {offers.map((offer) => (
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
+        {offers.map((offer) => (
             <CustomCard
               key={offer.id}
               imageSrc={offer.imageSrc}

@@ -55,6 +55,7 @@ const OffersPage: React.FC = () => {
   if (error) return <div>{error}</div>;
 
   return (
+    
     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
       
       {offers.map((offer) => (
@@ -66,7 +67,7 @@ const OffersPage: React.FC = () => {
           description={offer.description}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
-          detailsLink={`/offers/${offer.id}`}
+          // detailsLink={`/offers/${offer.id}`}
           reserveLink={`/reserve/${offer.id}`}
           primaryColor={offer.primaryColor}
           onDetailsClick={() => openModal(offer)}
