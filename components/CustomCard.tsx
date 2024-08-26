@@ -10,7 +10,6 @@ interface CustomCardProps {
   description: string;
   expirationDate: string; 
   pickupLocation: string; 
-  detailsLink: string;
   reserveLink: string;
   primaryColor: string;
   onDetailsClick: () => void; 
