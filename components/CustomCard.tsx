@@ -10,7 +10,6 @@ interface CustomCardProps {
   description: string;
   expirationDate: string; 
   pickupLocation: string; 
-  detailsLink: string;
   reserveLink: string;
   primaryColor: string;
   onDetailsClick: () => void; 
@@ -32,26 +31,27 @@ const CustomCard: FC<CustomCardProps> = ({
   const formattedTime = new Date(expirationDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
 
   return (
-    <Card className="sm:w-60 shadow-lg border border-gray-300 rounded-lg hover:shadow-2xl transition-shadow">
+    <Card className="sm:w-60">
       <CardHeader>
-        <div className="bg-gray-300 h-40 rounded-t-lg flex items-center justify-center mb-4 overflow-hidden">
-          <Image src={imageSrc} alt={imageAlt} width={240} height={160} className="object-cover w-full h-full" />
+        <div className="bg-gray-300 h-40 rounded-md flex items-center justify-center mb-4">
+          <Image src={imageSrc} alt={imageAlt} width={240} height={160} className="object-cover rounded-md" />
         </div>
-        <CardTitle className="text-lg font-bold text-gray-800">{title}</CardTitle>
-        <CardDescription className="text-sm text-gray-600">{description}</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
+       <CardContent>
         <p className="text-sm text-gray-500">Expires on: {formattedDate} at {formattedTime}</p>
         <p className="text-sm text-gray-500">Pickup Location: {pickupLocation}</p>
       </CardContent>
       <CardFooter className="flex justify-between items-center mt-auto">
-        <button
-          onClick={onDetailsClick}
+      <button
+          onClick={onDetailsClick} 
           className="text-gray-600 border-b-2 border-transparent hover:border-primary transition"
         >
           Details
         </button>
-        <Link href={reserveLink} style={{ backgroundColor: 'green', color: 'white' }} className="px-4 py-2 rounded-md shadow-sm hover:shadow-md transition-shadow">
+        
+        <Link href={reserveLink} style={{ backgroundColor: primaryColor, color: 'gray' }} className="px-4 py-2 rounded-md">
           Reserve
         </Link>
       </CardFooter>
