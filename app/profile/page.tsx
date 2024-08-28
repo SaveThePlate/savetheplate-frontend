@@ -1,55 +1,64 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CustomCard from '@/components/CustomCard';
+import axios from 'axios';
+interface Offer {
+  id: number;
+  owner: string;
+  images: { path: string }[];
+  title: string;
+  description: string;
+  expirationDate: string;
+  pickupLocation: string;
+  primaryColor: string;
+}
+
+const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const getImage = (filename: string): string => {
+  return filename ? `${BASE_IMAGE_URL}${filename}` : "";
+};
+
 const ProfilePage = () => {
-  const offers = [
-    {
-      id: 1,
-      imageSrc: '/path/to/image1.jpg',
-      imageAlt: 'Offer 1',
-      title: 'Offer 1',
-      description: 'This is a description of Offer 1.',
-      expirationDate: '2024-08-30T23:59:59Z',
-      expirationTime: '23:59',
-      pickupLocation: '123 Main St',
-      detailsLink: '#',
-      reserveLink: '#',
-      primaryColor: '#FFD700',
-      onDetailsClick: () => {
-        console.log('Details clicked for Offer 1');
-      }
-    },  {
-        id: 1,
-        imageSrc: '/path/to/image1.jpg',
-        imageAlt: 'Offer 1',
-        title: 'Offer 1',
-        description: 'This is a description of Offer 1.',
-        expirationDate: '2024-08-30T23:59:59Z',
-        expirationTime: '23:59',
-        pickupLocation: '123 Main St',
-        detailsLink: '#',
-        reserveLink: '#',
-        primaryColor: '#FFD700',
-        onDetailsClick: () => {
-          console.log('Details clicked for Offer 1');
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const openModal = (offer: Offer) => {
+    setSelectedOffer(offer);
+    setIsModalOpen(true);
+  };
+
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const token = localStorage.getItem('accessToken'); 
+        if (!token) {
+          throw new Error('No token found');
         }
-      },  {
-        id: 1,
-        imageSrc: '/path/to/image1.jpg',
-        imageAlt: 'Offer 1',
-        title: 'Offer 1',
-        description: 'This is a description of Offer 1.',
-        expirationDate: '2024-08-30T23:59:59Z',
-        expirationTime: '23:59',
-        pickupLocation: '123 Main St',
-        detailsLink: '#',
-        reserveLink: '#',
-        primaryColor: '#FFD700',
-        onDetailsClick: () => {
-          console.log('Details clicked for Offer 1');
-        }
+  
+        const response = await axios.get("http://localhost:3001/offers/owner", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        setOffers(response.data);
+      } catch (err) {
+        setError("Failed to fetch offers: " + (err instanceof Error ? err.message : ''));
+      } finally {
+        setLoading(false);
+
       }
-  ];
+    };
+  
+    fetchOffers();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <main className="pt-16 sm:pt-32 p-6 bg-white min-h-screen flex flex-col items-center"> 
       <div className="w-full flex justify-center mb-6 pt-6">
@@ -86,19 +95,21 @@ const ProfilePage = () => {
         {offers.map((offer) => (
 
 
-            <CustomCard
-              key={offer.id}
-              imageSrc={offer.imageSrc}
-              imageAlt={offer.imageAlt}
-              title={offer.title}
-              description={offer.description}
-              expirationDate={offer.expirationDate}
-              pickupLocation={offer.pickupLocation}
-              reserveLink={offer.reserveLink}
-              primaryColor={offer.primaryColor}
-              onDetailsClick={offer.onDetailsClick}
-            />
-          ))}
+        <CustomCard
+        key={offer.id}
+        imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
+        imageAlt={offer.title}
+        title={offer.title}
+        description={offer.description}
+        expirationDate={offer.expirationDate}
+        pickupLocation={offer.pickupLocation}
+        // detailsLink={`/offers/${offer.id}`}
+        reserveLink={`/reserve/${offer.id}`}
+        primaryColor={offer.primaryColor}
+        onDetailsClick={() => openModal(offer)}
+        />
+        ))}
+
         </div>
 
       </div>
@@ -108,3 +119,6 @@ const ProfilePage = () => {
   );
 };
 export default ProfilePage;
+
+
+

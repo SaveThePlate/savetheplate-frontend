@@ -23,7 +23,6 @@ const CustomCard: FC<CustomCardProps> = ({
   expirationDate,
   pickupLocation,
   reserveLink,
-  primaryColor,
   onDetailsClick
 }) => {
 

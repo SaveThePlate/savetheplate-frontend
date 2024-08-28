@@ -1,4 +1,10 @@
-import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "@/components/dropFile";
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/dropFile";
+
 import Image from "next/image";
 import { useState } from "react";
 import { DropzoneOptions } from "react-dropzone";
