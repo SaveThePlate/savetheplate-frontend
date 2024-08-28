@@ -62,8 +62,10 @@ export function AddOffer() {
       images: JSON.stringify(files),
     };
     try {
+      const token = localStorage.getItem('accessToken'); 
       const response = await axios.post("http://localhost:3001/offers", data, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
