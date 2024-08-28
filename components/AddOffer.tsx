@@ -42,33 +42,6 @@ export function AddOffer() {
     }
   };
 
-  const handleImage = async (files: File[] | null) => {
-    if (!files || files.length === 0) {
-      return;
-    }
-    
-    try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-  
-      const response = await axios.post('http://localhost:3001/storage/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-        
-
-    } catch (error) {
-      console.error('Error uploading files:', error);
-    }
-  };
-
-  const handleImageUpload = async (newFiles: File[] | null) => {
-    if (newFiles) {
-      setFiles(newFiles);
-      await handleImage(newFiles);
-    }
-  };
   const dropzone = {
     accept: {
       "image/*": [".jpg", ".jpeg", ".png"],
