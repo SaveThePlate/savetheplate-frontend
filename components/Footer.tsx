@@ -1,10 +1,11 @@
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="flex justify-around items-center bg-white shadow-md fixed bottom-0 w-full h-16 border-t border-gray-200">
+    <footer className="w-full sticky bottom-0 bg-white shadow-inner border-t border-gray-200 h-16">
+      <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full'>
+
       <Link href="/" className="h-full flex items-center">
         <button className="hover:bg-gray-200 text-gray-800 font-bold h-full px-4 rounded flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
@@ -28,6 +29,7 @@ const Footer = () => {
           </svg>
         </button>
       </Link>
+      </nav>
     </footer>
   );
 };
