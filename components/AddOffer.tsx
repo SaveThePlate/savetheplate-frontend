@@ -1,9 +1,4 @@
-import {
-  FileInput,
-  FileUploader,
-  FileUploaderContent,
-  FileUploaderItem,
-} from "@/components/DropFile";
+import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "@/components/dropFile";
 import Image from "next/image";
 import { useState } from "react";
 import { DropzoneOptions } from "react-dropzone";
@@ -12,8 +7,6 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
-
 export function AddOffer() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -23,6 +16,31 @@ export function AddOffer() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   const router = useRouter();
+  
+  const handleImage = async (files: File[] | null) => {
+    if (!files || files.length === 0) {
+      return;
+    }
+    const uploadedFiles: { filename: string; blurhash: string }[] = [];
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append('files', file));
+      const response = await axios.post('http://localhost:3001/storage/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    }
+  };
+
+  const handleImageUpload = async (newFiles: File[] | null) => {
+    if (newFiles) {
+      setFiles(newFiles);
+      await handleImage(newFiles);
+    }
+  };
 
   const handleImage = async (files: File[] | null) => {
     if (!files || files.length === 0) {
@@ -70,21 +88,17 @@ export function AddOffer() {
       pickupLocation,
       images: JSON.stringify(files),
     };
-
     try {
       const response = await axios.post("http://localhost:3001/offers", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
       console.log("Offer submitted successfully:", response.data);
       setSuccessMessage("Offer submitted successfully!");
-
       setTimeout(() => {
         router.push("/");
       }, 2000);
-
     } catch (error) {
       console.error("Error submitting offer:", error);
     }

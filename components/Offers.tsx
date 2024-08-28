@@ -61,7 +61,7 @@ const OffersPage: React.FC = () => {
       {offers.map((offer) => (
         <CustomCard
           key={offer.id}
-          imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
+          imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
           imageAlt={offer.title}
           title={offer.title}
           description={offer.description}
