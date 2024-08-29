@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CustomCard from "./CustomCard";
-import OfferDetailsModal from "./OfferDetailsModal";
 
 interface Offer {
   id: number;
@@ -67,23 +66,11 @@ const OffersPage: React.FC = () => {
           description={offer.description}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
-          // detailsLink={`/offers/${offer.id}`}
           reserveLink={`/reserve/${offer.id}`}
           primaryColor={offer.primaryColor}
-          onDetailsClick={() => openModal(offer)}
         />
       ))}
 
-      {selectedOffer && (
-        <OfferDetailsModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          title={selectedOffer.title}
-          description={selectedOffer.description}
-          expirationDate={selectedOffer.expirationDate}
-          pickupLocation={selectedOffer.pickupLocation}
-        />
-      )}
     </div>
   );
 };
