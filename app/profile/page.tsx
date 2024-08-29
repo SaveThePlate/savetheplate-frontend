@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import CustomCard from '@/components/CustomCard';
 import axios from 'axios';
+import { useRouter } from "next/navigation";
 interface Offer {
   id: number;
   owner: string;
@@ -24,6 +25,7 @@ const ProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const router = useRouter();
 
   const openModal = (offer: Offer) => {
     setSelectedOffer(offer);
@@ -35,7 +37,9 @@ const ProfilePage = () => {
       try {
         const token = localStorage.getItem('accessToken'); 
         if (!token) {
-          throw new Error('No token found');
+          console.log("No token found, redirecting to signIn");
+          router.push("/signIn");
+          return;
         }
   
         const response = await axios.get("http://localhost:3001/offers/owner", {
