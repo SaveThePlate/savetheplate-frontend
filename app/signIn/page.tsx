@@ -4,12 +4,11 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { toast } from "@/components/ui/use-toast";
-import { AuthToast } from "@/components/AuthToast";
 import Image from "next/image";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
+import { AuthToast } from "@/components/authToast";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
