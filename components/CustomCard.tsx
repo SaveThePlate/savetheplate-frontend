@@ -3,6 +3,18 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import Link from 'next/link';
 import Image from 'next/image';
 
+import {
+  Credenza,
+  CredenzaBody,
+  CredenzaClose,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaFooter,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "./ui/credenza"
+
 interface CustomCardProps {
   imageSrc: string;
   imageAlt: string;
@@ -12,7 +24,6 @@ interface CustomCardProps {
   pickupLocation: string; 
   reserveLink: string;
   primaryColor: string;
-  onDetailsClick: () => void; 
 }
 
 const CustomCard: FC<CustomCardProps> = ({
@@ -23,7 +34,6 @@ const CustomCard: FC<CustomCardProps> = ({
   expirationDate,
   pickupLocation,
   reserveLink,
-  onDetailsClick
 }) => {
 
   const formattedDate = new Date(expirationDate).toLocaleDateString();
@@ -43,12 +53,31 @@ const CustomCard: FC<CustomCardProps> = ({
         <p className="text-sm text-gray-500">Pickup Location: {pickupLocation}</p>
       </CardContent>
       <CardFooter className="flex justify-between items-center mt-auto">
-        <button
-          onClick={onDetailsClick}
-          className="text-gray-600 border-b-2 border-transparent hover:border-primary transition"
-        >
-          Details
-        </button>
+
+      <Credenza>
+        <CredenzaTrigger asChild>
+          <button>Details</button>
+        </CredenzaTrigger>
+        <CredenzaContent>
+          <CredenzaHeader>
+            <CredenzaTitle>{title}</CredenzaTitle>
+            <CredenzaDescription>
+            {description}
+            </CredenzaDescription>
+          </CredenzaHeader>
+          <CredenzaBody>
+            <p className="mb-2"><strong>Expiration Date:</strong> {formattedDate}</p>
+            <p className="mb-4"><strong>Expiration Time:</strong> {formattedTime}</p>
+            <p className="mb-4"><strong>Pickup Location:</strong> {pickupLocation}</p>
+          </CredenzaBody>
+          <CredenzaFooter>
+            <CredenzaClose asChild>
+              <button>Close</button>
+            </CredenzaClose>
+          </CredenzaFooter>
+        </CredenzaContent>
+      </Credenza>
+
         <Link href={reserveLink} style={{ backgroundColor: 'green', color: 'white' }} className="px-4 py-2 rounded-md shadow-sm hover:shadow-md transition-shadow">
           Reserve
         </Link>
