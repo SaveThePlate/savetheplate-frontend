@@ -110,7 +110,6 @@ const ProfilePage = () => {
         // detailsLink={`/offers/${offer.id}`}
         reserveLink={`/reserve/${offer.id}`}
         primaryColor={offer.primaryColor}
-        onDetailsClick={() => openModal(offer)}
         />
         ))}
 
