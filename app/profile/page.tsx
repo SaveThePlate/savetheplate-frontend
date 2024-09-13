@@ -32,21 +32,26 @@ const ProfilePage = () => {
     setIsModalOpen(true);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken'); 
+    router.push('/signIn');
+  };
+
   useEffect(() => {
     const fetchOffers = async () => {
       try {
         const token = localStorage.getItem('accessToken'); 
-        if (!token) {
-          console.log("No token found, redirecting to signIn");
-          router.push("/signIn");
-          return;
-        }
-  
         const response = await axios.get("http://localhost:3001/offers/owner", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (!token) {
+          console.log("No token found, redirecting to signIn");
+          router.push("/signIn");
+          return;
+        }
   
         setOffers(response.data);
       } catch (err) {
@@ -68,6 +73,8 @@ const ProfilePage = () => {
       <div className="w-full flex justify-center mb-6 pt-6">
         
       <div className="mx-auto">
+
+      <button className="bg-red-200" onClick={handleLogout}> Delete token / Log out</button> 
 
         <div className="flex items-center justify-center mb-8">
           
@@ -107,14 +114,13 @@ const ProfilePage = () => {
         description={offer.description}
         expirationDate={offer.expirationDate}
         pickupLocation={offer.pickupLocation}
-        // detailsLink={`/offers/${offer.id}`}
         reserveLink={`/reserve/${offer.id}`}
         primaryColor={offer.primaryColor}
         />
         ))}
 
         </div>
-
+       
       </div>
 
       </div>

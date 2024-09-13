@@ -5,15 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { toast } from "@/components/ui/use-toast";
-import Image from "next/image";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
-import { AuthToast } from "@/components/authToast";
+import toast from "react-hot-toast"; // Import toast
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
 
   const clientApi = useOpenApiFetch();
 
@@ -28,16 +25,22 @@ export default function SignIn() {
       .then((resp) => {
         if (resp.response.status === 201) {
           console.info("Magic link sent to your email");
-          setEmailSent(true);
-          toast(AuthToast);
+          
+          // Display success toast
+          toast.success("Magic link sent to your email!");
         } else {
           console.error("Failed to send magic link to your email");
+
+          // Display error toast
+          toast.error("Failed to send magic link. Please try again.");
         }
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to send magic link to your email");
-        console.error(err);
+        console.error("Failed to send magic link to your email", err);
+
+        // Display error toast on catch
+        toast.error("Something went wrong. Please try again.");
         setLoading(false);
       });
   }
@@ -46,8 +49,7 @@ export default function SignIn() {
     <div className="w-screen h-screen flex justify-center items-center">
       <div className="flex flex-col items-center w-3/4 sm:w-2/5 md:w-1/4">
         <div className="flex flex-col items-center space-y-2">
-          <Image src="/fullname1.png" alt="Logo" width={100} height={100} />
-          <h1 className="font-semibold text-4xl">Happy to see you again!</h1>
+          <h1 className="text-2xl font-bold">Happy to see you again!</h1>
           <p className="font-normal text-l">
             Enter your email to sign in to your account
           </p>
@@ -66,7 +68,7 @@ export default function SignIn() {
             onChange={(e) => setEmail(e.target.value)}
           />
           {loading ? (
-            <Button disabled className="w-full bg-green-900  font-medium">
+            <Button disabled className="w-full bg-green-900 font-medium">
               <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
               Please wait
             </Button>
@@ -89,4 +91,3 @@ export default function SignIn() {
     </div>
   );
 }
-

@@ -4,58 +4,64 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/dropFile";
-
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DropzoneOptions } from "react-dropzone";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { Map } from "./Map"; // Assuming Map component is in the same directory
+
 export function AddOffer() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
+  const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const [files, setFiles] = useState<File[] | null>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  
+
   const router = useRouter();
-  
-  const handleImage = async (files: File[] | null) => {
-    if (!files || files.length === 0) {
-      return;
+  const autocompleteRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const loadGoogleMapsScript = (callback: () => void) => {
+    if (typeof window !== "undefined" && !window.google) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=NEXT_PUBLIC_MAPS_API_KEY&libraries=places`;
+      script.async = true;
+      script.onload = callback;
+      document.head.appendChild(script);
+    } else {
+      callback();
     }
-    const uploadedFiles: { filename: string; blurhash: string }[] = [];
-    try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-      const response = await axios.post('http://localhost:3001/storage/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+  };
+
+  const initializeAutocomplete = () => {
+    if (window.google && inputRef.current) {
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ["establishment"],
+        componentRestrictions: { country: "TN" },
       });
-    } catch (error) {
-      console.error('Error uploading files:', error);
+
+      autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current.getPlace();
+        if (place && place.formatted_address) {
+          setPickupLocation(place.formatted_address);
+          const location = place.geometry?.location;
+          if (location) {
+            setCoordinates({ lat: location.lat(), lng: location.lng() });
+          }
+        }
+      });
     }
   };
 
-  const handleImageUpload = async (newFiles: File[] | null) => {
-    if (newFiles) {
-      setFiles(newFiles);
-      await handleImage(newFiles);
-    }
-  };
-
-  const dropzone = {
-    accept: {
-      "image/*": [".jpg", ".jpeg", ".png"],
-    },
-    multiple: true,
-    maxFiles: 4,
-    maxSize: 1 * 1024 * 1024,
-  } satisfies DropzoneOptions;
+  useEffect(() => {
+    loadGoogleMapsScript(initializeAutocomplete);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,10 +71,12 @@ export function AddOffer() {
       description,
       expirationDate: new Date(expirationDate).toISOString(),
       pickupLocation,
+      coordinates, // Include coordinates
       images: JSON.stringify(files),
     };
+
     try {
-      const token = localStorage.getItem('accessToken'); 
+      const token = localStorage.getItem("accessToken");
       const response = await axios.post("http://localhost:3001/offers", data, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -85,35 +93,95 @@ export function AddOffer() {
     }
   };
 
+  const handleImage = async (files: File[] | null) => {
+    if (!files || files.length === 0) return;
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+      await axios.post("http://localhost:3001/storage/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    } catch (error) {
+      console.error("Error uploading files:", error);
+    }
+  };
+
+  const handleImageUpload = async (newFiles: File[] | null) => {
+    if (newFiles) {
+      setFiles(newFiles);
+      await handleImage(newFiles);
+    }
+  };
+
+  const dropzone: DropzoneOptions = {
+    accept: {
+      "image/*": [".jpg", ".jpeg", ".png"],
+    },
+    multiple: true,
+    maxFiles: 4,
+    maxSize: 1 * 1024 * 1024,
+  };
+
   return (
     <div>
       {successMessage && <p className="text-green-600">{successMessage}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
-       
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 block w-full" placeholder="Enter title" />
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 block w-full"
+            placeholder="Enter title"
+          />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-          <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 block w-full" placeholder="Enter description" />
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-1 block w-full"
+            placeholder="Enter description"
+          />
         </div>
 
         <div>
-          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">Expiration Date</label>
-          <Input id="expirationDate" type="datetime-local" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" />
+          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
+            Expiration Date
+          </label>
+          <Input
+            id="expirationDate"
+            type="datetime-local"
+            value={expirationDate}
+            onChange={(e) => setExpirationDate(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+          />
         </div>
 
         <div>
-          <label htmlFor="pickupLocation" className="block text-sm font-medium text-gray-700">Pickup Location</label>
-          <Input id="pickupLocation" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} className="mt-1 block w-full" placeholder="Enter pickup location" />
+          <label htmlFor="pickupLocation" className="block text-sm font-medium text-gray-700">
+            Pickup Location
+          </label>
+          <Input
+            id="pickupLocation"
+            ref={inputRef}
+            value={pickupLocation}
+            onChange={(e) => setPickupLocation(e.target.value)}
+            className="mt-1 block w-full"
+            placeholder="Enter pickup location"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Images</label>
           <FileUploader value={files} onValueChange={handleImageUpload} dropzoneOptions={dropzone}>
-
             <FileInput>
               <div className="flex items-center justify-center h-32 w-full border bg-background rounded-md">
                 <p className="text-gray-400">Drop files here</p>
@@ -121,18 +189,32 @@ export function AddOffer() {
             </FileInput>
             <FileUploaderContent className="flex items-center flex-row gap-2">
               {files?.map((file, i) => (
-                <FileUploaderItem key={i} index={i} className="size-20 p-0 rounded-md overflow-hidden" aria-roledescription={`file ${i + 1} containing ${file.name}`}>
-                  <Image src={URL.createObjectURL(file)} alt={file.name} height={80} width={80} className="size-20 p-0" />
-
+                <FileUploaderItem
+                  key={i}
+                  index={i}
+                  className="size-20 p-0 rounded-md overflow-hidden"
+                  aria-roledescription={`file ${i + 1} containing ${file.name}`}
+                >
+                  <Image
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    height={80}
+                    width={80}
+                    className="size-20 p-0"
+                  />
                 </FileUploaderItem>
               ))}
             </FileUploaderContent>
           </FileUploader>
         </div>
 
-        <Button type="submit" className="w-full">Post Offer</Button>
-
+        <Button type="submit" className="w-full">
+          Post Offer
+        </Button>
       </form>
+
+      {/* Pass coordinates to Map */}
+      <Map coordinates={coordinates} />
     </div>
   );
 }
