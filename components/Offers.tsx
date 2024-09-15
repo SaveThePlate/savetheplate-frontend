@@ -10,7 +10,6 @@ interface Offer {
   description: string;
   expirationDate: string;
   pickupLocation: string;
-  primaryColor: string;
 }
 
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
@@ -18,7 +17,7 @@ const getImage = (filename: string): string => {
   return filename ? `${BASE_IMAGE_URL}${filename}` : "";
 };
 
-const OffersPage: React.FC = () => {
+const OffersPage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -67,7 +66,8 @@ const OffersPage: React.FC = () => {
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
           reserveLink={`/reserve/${offer.id}`}
-          primaryColor={offer.primaryColor}
+          onDetailsClick={() => openModal(offer)}
+
         />
       ))}
 

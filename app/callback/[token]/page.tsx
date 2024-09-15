@@ -25,7 +25,7 @@ function AuthCallback() {
       .then((resp: any) => {
         console.log(resp);
         LocalStorage.setItem("refresh-token", resp.data.refreshToken);
-        LocalStorage.setItem("access-token", resp.data.accessToken);
+        LocalStorage.setItem("accessToken", resp.data.accessToken);
         LocalStorage.removeItem("remember");
         router.push("/");
       })

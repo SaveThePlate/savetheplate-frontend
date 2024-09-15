@@ -23,7 +23,8 @@ interface CustomCardProps {
   expirationDate: string; 
   pickupLocation: string; 
   reserveLink: string;
-  primaryColor: string;
+  onDetailsClick: () => void; 
+
 }
 
 const CustomCard: FC<CustomCardProps> = ({
@@ -34,6 +35,8 @@ const CustomCard: FC<CustomCardProps> = ({
   expirationDate,
   pickupLocation,
   reserveLink,
+  onDetailsClick
+
 }) => {
 
   const formattedDate = new Date(expirationDate).toLocaleDateString();
