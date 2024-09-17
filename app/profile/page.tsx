@@ -1,7 +1,8 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import CustomCard from '@/components/CustomCard';
-import axios from 'axios';
+"use client";
+import CustomCard from "@/components/CustomCard";
+import axios from "axios";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
 
 interface Offer {
   id: number;
@@ -11,8 +12,7 @@ interface Offer {
   description: string;
   expirationDate: string;
   pickupLocation: string;
-
-
+}
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
@@ -26,29 +26,30 @@ const ProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Profile states
-  const [username, setUsername] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
+  const [previewImage, setPreviewImage] = useState<string>(
+    DEFAULT_PROFILE_IMAGE
+  );
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
 
-
   const openModal = (offer: Offer) => {
     setSelectedOffer(offer);
     setIsModalOpen(true);
-  };  
+  };
 
   const fetchProfileData = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      
+      const token = localStorage.getItem("accessToken");
+
       if (!token) throw new Error("Token not found");
-  
+
       const response = await axios.get("http://localhost:3001/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -58,7 +59,6 @@ const ProfilePage = () => {
       setLocation(location);
       setPhoneNumber(phoneNumber);
       setPreviewImage(getImage(profileImage) || DEFAULT_PROFILE_IMAGE);
-
     } catch (err) {
       setError("Failed to fetch profile: " + (err as Error).message);
     }
@@ -70,44 +70,45 @@ const ProfilePage = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(file);
-        setPreviewImage(reader.result as string); 
+        setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-
   const handleProfileUpdate = async () => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem("accessToken");
 
     const formData = new FormData();
-    formData.append('username', username);
-    formData.append('location', location);
-    formData.append('phoneNumber', phoneNumber);
+    formData.append("username", username);
+    formData.append("location", location);
+    formData.append("phoneNumber", phoneNumber);
     if (profileImage) {
-      formData.append('profileImage', profileImage);
+      formData.append("profileImage", profileImage);
     }
 
     try {
-      const response = await axios.put("http://localhost:3001/users/me", formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Profile updated successfully:', response.data);
+      const response = await axios.put(
+        "http://localhost:3001/users/me",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Profile updated successfully:", response.data);
       await fetchProfileData();
-      
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
     }
   };
 
-
   const fetchOffers = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('No token found');
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("No token found");
 
       const response = await axios.get("http://localhost:3001/offers/owner", {
         headers: { Authorization: `Bearer ${token}` },
@@ -135,11 +136,15 @@ const ProfilePage = () => {
         <div className="mx-auto">
           <div className="flex items-center justify-center mb-8">
             <div className="flex flex-col items-center">
-
-              <div className="w-24 h-24 bg-gray-200 rounded-full mb-4 overflow-hidden" onClick={() => document.getElementById('fileInput')?.click()}>
-                <img 
-                  src={previewImage} 
-                  alt="Profile" 
+              <div
+                className="w-24 h-24 bg-gray-200 rounded-full mb-4 overflow-hidden"
+                onClick={() => document.getElementById("fileInput")?.click()}
+              >
+                <Image
+                  width={500}
+                  height={500}
+                  src={previewImage}
+                  alt="Profile"
                   className="object-cover w-full h-full cursor-pointer"
                 />
               </div>
@@ -153,7 +158,9 @@ const ProfilePage = () => {
               />
 
               <div className="text-center">
-                <h1 className="text-xl font-semibold">{username || "Username"}</h1>
+                <h1 className="text-xl font-semibold">
+                  {username || "Username"}
+                </h1>
                 <p className="text-gray-500">{location || "Location"}</p>
                 <p className="text-gray-500">{phoneNumber || "Phone number"}</p>
               </div>
@@ -176,7 +183,9 @@ const ProfilePage = () => {
             {offers.map((offer) => (
               <CustomCard
                 key={offer.id}
-                imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
+                imageSrc={
+                  offer.images.length > 0 ? getImage(offer.images[0].path) : ""
+                }
                 imageAlt={offer.title}
                 title={offer.title}
                 description={offer.description}
@@ -187,7 +196,6 @@ const ProfilePage = () => {
               />
             ))}
           </div>
-
         </div>
       </div>
 
@@ -197,7 +205,9 @@ const ProfilePage = () => {
             <h2 className="text-lg font-bold mb-4">Edit Profile</h2>
             <form>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Username
+                </label>
                 <input
                   type="text"
                   value={username}
@@ -206,7 +216,9 @@ const ProfilePage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Location</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Location
+                </label>
                 <input
                   type="text"
                   value={location}
@@ -215,7 +227,9 @@ const ProfilePage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Phone Number
+                </label>
                 <input
                   type="text"
                   value={phoneNumber}
@@ -248,4 +262,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
