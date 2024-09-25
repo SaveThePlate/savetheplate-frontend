@@ -15,10 +15,8 @@ const Main: React.FC = () => {
       images: [], 
   });
 
-  const [error, setError] = useState('');
-
   useEffect(() => {
-    const token = localStorage.getItem("access-token");
+    const token = localStorage.getItem("accessToken");
     if (!token) {
       console.log("No token found, redirecting to signIn");
       router.push("/signIn");

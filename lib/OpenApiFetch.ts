@@ -3,11 +3,11 @@ import type { paths } from "@/generated/api/schema";
 import { LocalStorage, SessionStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-const getAccessToken = () => {
-  if (SessionStorage.getItem("access-token")) {
-    return SessionStorage.getItem("access-token");
+const getaccessToken = () => {
+  if (SessionStorage.getItem("accessToken")) {
+    return SessionStorage.getItem("accessToken");
   }
-  return LocalStorage.getItem("access-token");
+  return LocalStorage.getItem("accessToken");
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
@@ -18,7 +18,7 @@ const useOpenApiFetch = () => {
       process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover.ccdev.space",
     headers: {
       Authorization:
-        "Bearer " + (typeof window != "undefined" ? getAccessToken() : ""),
+        "Bearer " + (typeof window != "undefined" ? getaccessToken() : ""),
     },
   });
 

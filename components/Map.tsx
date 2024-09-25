@@ -9,6 +9,7 @@ interface Coordinates {
 
 interface MapProps {
   coordinates: Coordinates;
+  offers: { id: number; title: string; latitude: number; longitude: number }[]; // Include offers prop
 }
 
 interface MarkerProps {
@@ -27,7 +28,7 @@ const CustomMarker: React.FC<MarkerProps> = ({ lat, lng, children, style }) => {
   );
 };
 
-export function Map({ coordinates }: MapProps) {
+export function Map({ coordinates, offers }: MapProps) {
   const mapRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
   const [markers, setMarkers] = useState<Coordinates[]>([
@@ -53,16 +54,26 @@ export function Map({ coordinates }: MapProps) {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
         }));
-        setMarkers(restaurantMarkers);
+        setMarkers(prevMarkers => [...prevMarkers, ...restaurantMarkers]);
       }
     });
   };
   
   useEffect(() => {
     if (coordinates.lat && coordinates.lng && mapReady) {
-      setMarkers([{ lat: coordinates.lat, lng: coordinates.lng }]);
+      setMarkers([{ lat: coordinates.lat, lng: coordinates.lng }]); // Set user's location
     }
   }, [coordinates, mapReady]);
+
+  useEffect(() => {
+    if (offers.length > 0) {
+      const offerMarkers = offers.map(offer => ({
+        lat: offer.latitude,
+        lng: offer.longitude,
+      }));
+      setMarkers(prevMarkers => [...prevMarkers, ...offerMarkers]); // Add offer markers
+    }
+  }, [offers]);
 
   return (
     <>
@@ -72,7 +83,7 @@ export function Map({ coordinates }: MapProps) {
         defaultCenter={{ lat: 36.806389, lng: 10.181667 }} // Default center coordinates
         defaultZoom={12}
         mapMinHeight="100vh"
-        options={{}} // You can pass additional map options here
+        options={{}} 
         onGoogleApiLoaded={onGoogleApiLoaded}
       >
         {markers.map((marker, i) => (

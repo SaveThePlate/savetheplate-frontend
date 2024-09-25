@@ -12,66 +12,74 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Map } from "./Map"; // Assuming Map component is in the same directory
+import { Map } from "./Map"; 
 
 export function AddOffer() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
-  const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
+  // const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const [files, setFiles] = useState<File[] | null>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const [lat, setLat] = useState<number | string>(""); // Latitude
+  const [lng, setLng] = useState<number | string>(""); // Longitude
 
   const router = useRouter();
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const loadGoogleMapsScript = (callback: () => void) => {
-    if (typeof window !== "undefined" && !window.google) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=NEXT_PUBLIC_MAPS_API_KEY&libraries=places`;
-      script.async = true;
-      script.onload = callback;
-      document.head.appendChild(script);
-    } else {
-      callback();
-    }
-  };
+  // const loadGoogleMapsScript = (callback: () => void) => {
+  //   if (typeof window !== "undefined" && !window.google) {
+  //     const script = document.createElement("script");
+  //     script.src = `https://maps.googleapis.com/maps/api/js?key=NEXT_PUBLIC_MAPS_API_KEY&libraries=places`;
+  //     script.async = true;
+  //     script.onload = callback;
+  //     document.head.appendChild(script);
+  //   } else {
+  //     callback();
+  //   }
+  // };
 
-  const initializeAutocomplete = () => {
-    if (window.google && inputRef.current) {
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ["establishment"],
-        componentRestrictions: { country: "TN" },
-      });
+  // const initializeAutocomplete = () => {
+  //   if (window.google && inputRef.current) {
+  //     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+  //       types: ["establishment"],
+  //       componentRestrictions: { country: "TN" },
+  //     });
 
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current.getPlace();
-        if (place && place.formatted_address) {
-          setPickupLocation(place.formatted_address);
-          const location = place.geometry?.location;
-          if (location) {
-            setCoordinates({ lat: location.lat(), lng: location.lng() });
-          }
-        }
-      });
-    }
-  };
+  //     autocompleteRef.current.addListener("place_changed", () => {
+  //       const place = autocompleteRef.current.getPlace();
+  //       if (place && place.formatted_address) {
+  //         setPickupLocation(place.formatted_address);
+  //         const location = place.geometry?.location;
+  //         if (location) {
+  //           setCoordinates({ lat: location.lat(), lng: location.lng() });
+  //         }
+  //       }
+  //     });
+  //   }
+  // };
 
-  useEffect(() => {
-    loadGoogleMapsScript(initializeAutocomplete);
-  }, []);
+  // useEffect(() => {
+  //   loadGoogleMapsScript(initializeAutocomplete);
+  // }, []);
 
+  // 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const coordinates = { lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) };
 
     const data = {
       title,
       description,
       expirationDate: new Date(expirationDate).toISOString(),
       pickupLocation,
-      coordinates, // Include coordinates
+      latitude: coordinates.lat, 
+      longitude: coordinates.lng,
       images: JSON.stringify(files),
     };
 
@@ -179,6 +187,32 @@ export function AddOffer() {
           />
         </div>
 
+<div>
+          <label htmlFor="lat" className="block text-sm font-medium text-gray-700">
+            Latitude
+          </label>
+          <Input
+            id="lat"
+            value={lat}
+            onChange={(e) => setLat(e.target.value)}
+            className="mt-1 block w-full"
+            placeholder="Enter latitude"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="lng" className="block text-sm font-medium text-gray-700">
+            Longitude
+          </label>
+          <Input
+            id="lng"
+            value={lng}
+            onChange={(e) => setLng(e.target.value)}
+            className="mt-1 block w-full"
+            placeholder="Enter longitude"
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">Images</label>
           <FileUploader value={files} onValueChange={handleImageUpload} dropzoneOptions={dropzone}>
@@ -214,7 +248,7 @@ export function AddOffer() {
       </form>
 
       {/* Pass coordinates to Map */}
-      <Map coordinates={coordinates} />
+      <Map coordinates={{ lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) }} />
     </div>
   );
 }

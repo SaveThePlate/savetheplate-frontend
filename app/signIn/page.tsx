@@ -49,7 +49,7 @@ export default function SignIn() {
     <div className="w-screen h-screen flex justify-center items-center">
       <div className="flex flex-col items-center w-3/4 sm:w-2/5 md:w-1/4">
         <div className="flex flex-col items-center space-y-2">
-          <h1 className="text-2xl font-bold">Happy to see you again!</h1>
+          <h1 className="font-semibold text-4xl">Happy to see you again!</h1>
           <p className="font-normal text-l">
             Enter your email to sign in to your account
           </p>

@@ -1,7 +1,9 @@
 "use client"; 
 
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Trash2 as RemoveIcon } from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
@@ -14,14 +16,12 @@ import {
   useState,
 } from "react";
 import {
-  useDropzone,
+  DropzoneOptions,
   DropzoneState,
   FileRejection,
-  DropzoneOptions,
+  useDropzone,
 } from "react-dropzone";
 import { toast } from "sonner";
-import { Trash2 as RemoveIcon } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -93,6 +93,7 @@ export const FileUploader = forwardRef<
         const newFiles = value.filter((_, index) => index !== i);
         onValueChange(newFiles);
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [value, onValueChange]
     );
 
