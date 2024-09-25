@@ -9,7 +9,7 @@ interface Coordinates {
 
 interface MapProps {
   coordinates: Coordinates;
-  offers: { id: number; title: string; latitude: number; longitude: number }[]; // Include offers prop
+  offers: { id: number; title: string; latitude: number; longitude: number }[]; 
 }
 
 interface MarkerProps {
@@ -66,7 +66,7 @@ export function Map({ coordinates, offers }: MapProps) {
   }, [coordinates, mapReady]);
 
   useEffect(() => {
-    if (offers.length > 0) {
+    if (offers && offers.length > 0) {
       const offerMarkers = offers.map(offer => ({
         lat: offer.latitude,
         lng: offer.longitude,
