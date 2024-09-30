@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
-import toast from "react-hot-toast"; // Import toast
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -25,9 +27,9 @@ export default function SignIn() {
       .then((resp) => {
         if (resp.response.status === 201) {
           console.info("Magic link sent to your email");
-          
-          // Display success toast
-          toast.success("Magic link sent to your email!");
+          toast.success('Magic link sent to your email');
+          setEmailSent(true);
+
         } else {
           console.error("Failed to send magic link to your email");
 
@@ -37,16 +39,17 @@ export default function SignIn() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to send magic link to your email", err);
+        console.error("Failed to send magic link to your email");
+        toast.error('Failed to send magic link to your email');
+        console.error(err);
 
-        // Display error toast on catch
-        toast.error("Something went wrong. Please try again.");
         setLoading(false);
       });
   }
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
+      <ToastContainer />
       <div className="flex flex-col items-center w-3/4 sm:w-2/5 md:w-1/4">
         <div className="flex flex-col items-center space-y-2">
           <h1 className="font-semibold text-4xl">Happy to see you again!</h1>
