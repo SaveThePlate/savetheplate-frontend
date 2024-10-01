@@ -28,7 +28,7 @@ const CustomMarker: React.FC<MarkerProps> = ({ lat, lng, children, style }) => {
   );
 };
 
-export function Map({ coordinates, offers }: MapProps) {
+export function Map({ coordinates }: MapProps) {
   const mapRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
   const [markers, setMarkers] = useState<Coordinates[]>([
@@ -64,15 +64,15 @@ export function Map({ coordinates, offers }: MapProps) {
     }
   }, [coordinates, mapReady]);
 
-  useEffect(() => {
-    if (offers && offers.length > 0) {
-      const offerMarkers = offers.map(offer => ({
-        lat: offer.latitude,
-        lng: offer.longitude,
-      }));
-      setMarkers(prevMarkers => [...prevMarkers, ...offerMarkers]); 
-    }
-  }, [offers]);
+  // useEffect(() => {
+  //   if (offers && offers.length > 0) {
+  //     const offerMarkers = offers.map(offer => ({
+  //       lat: offer.latitude,
+  //       lng: offer.longitude,
+  //     }));
+  //     setMarkers(prevMarkers => [...prevMarkers, ...offerMarkers]); 
+  //   }
+  // }, [offers]);
 
   return (
     <>

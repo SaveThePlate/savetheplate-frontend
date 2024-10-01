@@ -14,6 +14,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { Map } from "./Map";
 
 export function AddOffer() {
 
@@ -22,6 +23,8 @@ export function AddOffer() {
   const [expirationDate, setExpirationDate] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
   // const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
+  const [ lat, setLat ] = useState("");
+  const [ lng, setLng ] = useState("");
   const [files, setFiles] = useState<File[] | null>([]);
   
   const router = useRouter();
@@ -114,23 +117,19 @@ export function AddOffer() {
     }
   };
 
-  const handleImage = async (files: File[] | null) => {
-    if (!files || files.length === 0) return;
-    try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append("files", file));
-      await axios.post("http://localhost:3001/storage/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-    } catch (error) {
-      console.error("Error uploading files:", error);
-    }
-  };
-
   const handleImageUpload = async (newFiles: File[] | null) => {
     if (newFiles) {
       setFiles(newFiles);
       await handleImage(newFiles);
+      try {
+        const formData = new FormData();
+        newFiles.forEach((file) => formData.append("files", file));
+        await axios.post("http://localhost:3001/storage/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } catch (error) {
+        console.error("Error uploading files:", error);
+      }
     }
   };
 
@@ -187,7 +186,7 @@ export function AddOffer() {
           />
         </div>
 
-        <div>
+        {/* <div>
           <label htmlFor="pickupLocation" className="block text-sm font-medium text-gray-700">
             Pickup Location
           </label>
@@ -199,9 +198,9 @@ export function AddOffer() {
             className="mt-1 block w-full"
             placeholder="Enter pickup location"
           />
-        </div>
+        </div> */}
 
-<div>
+        <div>
           <label htmlFor="lat" className="block text-sm font-medium text-gray-700">
             Latitude
           </label>
@@ -262,7 +261,7 @@ export function AddOffer() {
       </form>
 
       {/* Pass coordinates to Map */}
-      <Map coordinates={{ lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) }} offers={[]} />
+      {/* <Map coordinates={{ lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) }} /> */}
     </div>
   );
 }
