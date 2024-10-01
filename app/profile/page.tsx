@@ -1,9 +1,10 @@
-"use client";
-import CustomCard from "@/components/CustomCard";
-import axios from "axios";
-import Image from "next/image";
-import router from "next/router";
-import React, { useEffect, useState } from "react";
+'use client';
+import React, { useEffect, useState } from 'react';
+import CustomCard from '@/components/CustomCard';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
+
 
 interface Offer {
   id: number;
@@ -17,9 +18,6 @@ interface Offer {
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
-const getImage = (filename: string): string => {
-  return filename ? `${BASE_IMAGE_URL}${filename}` : "";
-};
 
 const ProfilePage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -27,13 +25,11 @@ const ProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Profile states
-  const [username, setUsername] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string>(
-    DEFAULT_PROFILE_IMAGE
-  );
+  const [username, setUsername] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE); 
+
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -45,16 +41,17 @@ const ProfilePage = () => {
     setIsModalOpen(true);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken'); 
-    router.push('/signIn');
+  const getImage = (filename: string | null): string => {
+    return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
+
   };
 
   const fetchProfileData = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) throw new Error('Token not found');
 
-      if (!token) throw new Error("Token not found");
 
       const response = await axios.get("http://localhost:3001/users/me", {
         headers: { Authorization: `Bearer ${token}` },
@@ -64,57 +61,17 @@ const ProfilePage = () => {
       setUsername(username);
       setLocation(location);
       setPhoneNumber(phoneNumber);
-      setPreviewImage(getImage(profileImage) || DEFAULT_PROFILE_IMAGE);
+      setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE); 
+
     } catch (err) {
       setError("Failed to fetch profile: " + (err as Error).message);
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(file);
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleProfileUpdate = async () => {
-    const token = localStorage.getItem("accessToken");
-
-    const formData = new FormData();
-    formData.append("username", username);
-    formData.append("location", location);
-    formData.append("phoneNumber", phoneNumber);
-    if (profileImage) {
-      formData.append("profileImage", profileImage);
-    }
-
-    try {
-      const response = await axios.put(
-        "http://localhost:3001/users/me",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("Profile updated successfully:", response.data);
-      await fetchProfileData();
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
-
   const fetchOffers = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("No token found");
+      const token = localStorage.getItem('accessToken');
+      if (!token) throw new Error('No token found');
 
       const response = await axios.get("http://localhost:3001/offers/owner", {
         headers: { Authorization: `Bearer ${token}` },
@@ -127,30 +84,83 @@ const ProfilePage = () => {
     }
   };
 
+
+  const handleImageUpload = async (newFiles: File[] | null) => {
+    if (newFiles && newFiles.length > 0) {
+      const token = localStorage.getItem('accessToken');
+      const formData = new FormData();
+      formData.append('profileImage', newFiles[0]);
+  
+      try {
+        await axios.post('http://localhost:3001/users/upload-profile-image', formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        toast.success('Image uploaded successfully!');
+        fetchProfileData(); 
+      } catch (error) {
+        toast.error('Error uploading image');
+        console.error('Image upload error:', error);
+      }
+    }
+  };
+  
+
+  const handleProfileUpdate = async () => {
+    const token = localStorage.getItem('accessToken');
+  
+    const data = {
+      username,
+      location,
+      phoneNumber,
+      profileImage: JSON.stringify(profileImage), 
+    };
+  
+    try {
+      const response = await axios.put('http://localhost:3001/users/me', data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.status === 200) {
+        await fetchProfileData();
+        toast.success('Profile updated successfully!');
+      } else {
+        toast.error('Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('An error occurred while updating the profile.');
+    }
+  };
+  
+
+
+
   useEffect(() => {
     fetchProfileData();
 
     fetchOffers();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-
   return (
     <main className="pt-16 sm:pt-32 p-6 bg-white min-h-screen flex flex-col items-center">
+      <ToastContainer />
+
+
       <div className="w-full flex justify-center mb-6 pt-6">
         <div className="mx-auto">
           <div className="flex items-center justify-center mb-8">
             <div className="flex flex-col items-center">
-              <div
-                className="w-24 h-24 bg-gray-200 rounded-full mb-4 overflow-hidden"
-                onClick={() => document.getElementById("fileInput")?.click()}
-              >
-                <Image
-                  width={500}
-                  height={500}
-                  src={previewImage}
-                  alt="Profile"
+
+              <div className="w-24 h-24 bg-gray-200 rounded-full mb-4 overflow-hidden" onClick={() => document.getElementById('fileInput')?.click()}>
+                <img 
+                  src={profileImage} 
+                  alt="Profile" 
                   className="object-cover w-full h-full cursor-pointer"
                 />
               </div>
@@ -160,13 +170,15 @@ const ProfilePage = () => {
                 id="fileInput"
                 className="hidden"
                 accept="image/*"
-                onChange={handleImageUpload}
+                onChange={(event) => {
+                  const files = event.target.files ? Array.from(event.target.files) : null;
+                  handleImageUpload(files);
+                }}
               />
 
               <div className="text-center">
-                <h1 className="text-xl font-semibold">
-                  {username || "Username"}
-                </h1>
+                <h1 className="text-xl font-semibold">{username || "Username"}</h1>
+
                 <p className="text-gray-500">{location || "Location"}</p>
                 <p className="text-gray-500">{phoneNumber || "Phone number"}</p>
               </div>
@@ -189,9 +201,8 @@ const ProfilePage = () => {
             {offers.map((offer) => (
               <CustomCard
                 key={offer.id}
-                imageSrc={
-                  offer.images.length > 0 ? getImage(offer.images[0].path) : ""
-                }
+                imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
+
                 imageAlt={offer.title}
                 title={offer.title}
                 description={offer.description}
@@ -243,20 +254,22 @@ const ProfilePage = () => {
                   className="border rounded w-full py-2 px-3 text-gray-700 focus:outline-none"
                 />
               </div>
+ 
               <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="mr-4 py-2 px-4 bg-gray-300 hover:bg-gray-400 rounded text-black"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={handleProfileUpdate}
                 >
-                  Cancel
+                  Save
                 </button>
                 <button
                   type="button"
-                  onClick={handleProfileUpdate}
-                  className="py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                  className="ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => setIsEditModalOpen(false)}
                 >
-                  Save Changes
+                  Cancel
+
                 </button>
               </div>
             </form>

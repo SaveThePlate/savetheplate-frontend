@@ -12,23 +12,37 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Map } from "./Map"; 
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function AddOffer() {
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
   // const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const [files, setFiles] = useState<File[] | null>([]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const [lat, setLat] = useState<number | string>(""); // Latitude
-  const [lng, setLng] = useState<number | string>(""); // Longitude
-
+  
   const router = useRouter();
-  const autocompleteRef = useRef<any>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const handleImage = async (files: File[] | null) => {
+    if (!files || files.length === 0) {
+      return;
+    }
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append('files', file));
+      const response = await axios.post('http://localhost:3001/storage/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    }
+  };
+
 
   // const loadGoogleMapsScript = (callback: () => void) => {
   //   if (typeof window !== "undefined" && !window.google) {
@@ -91,11 +105,10 @@ export function AddOffer() {
           "Content-Type": "application/json",
         },
       });
-      console.log("Offer submitted successfully:", response.data);
-      setSuccessMessage("Offer submitted successfully!");
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
+      // console.log("Offer submitted successfully:", response.data);
+      
+      toast.success("Offer submitted successfully!");
+      
     } catch (error) {
       console.error("Error submitting offer:", error);
     }
@@ -131,8 +144,9 @@ export function AddOffer() {
   };
 
   return (
-    <div>
-      {successMessage && <p className="text-green-600">{successMessage}</p>}
+    <div >
+       <ToastContainer />
+       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
