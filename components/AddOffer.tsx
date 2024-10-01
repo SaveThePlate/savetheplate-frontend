@@ -5,115 +5,78 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { DropzoneOptions } from "react-dropzone";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-import { Map } from "./Map";
+import "react-toastify/dist/ReactToastify.css";
+import { MapComponent } from "./MapComponent";
+import { DropzoneOptions } from "react-dropzone";
 
 export function AddOffer() {
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
-  const [pickupLocation, setPickupLocation] = useState("");
-  // const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
-  const [ lat, setLat ] = useState("");
-  const [ lng, setLng ] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [files, setFiles] = useState<File[] | null>([]);
-  
-  const router = useRouter();
-  
+  const [offers, setOffers] = useState<{ lat: number; lng: number; title: string }[]>([]);
+
   const handleImage = async (files: File[] | null) => {
     if (!files || files.length === 0) {
       return;
     }
     try {
       const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
-      const response = await axios.post('http://localhost:3001/storage/upload', formData, {
+      files.forEach((file) => formData.append("files", file));
+      await axios.post("http://localhost:3001/storage/upload", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
     } catch (error) {
-      console.error('Error uploading files:', error);
+      console.error("Error uploading files:", error);
     }
   };
 
-
-  // const loadGoogleMapsScript = (callback: () => void) => {
-  //   if (typeof window !== "undefined" && !window.google) {
-  //     const script = document.createElement("script");
-  //     script.src = `https://maps.googleapis.com/maps/api/js?key=NEXT_PUBLIC_MAPS_API_KEY&libraries=places`;
-  //     script.async = true;
-  //     script.onload = callback;
-  //     document.head.appendChild(script);
-  //   } else {
-  //     callback();
-  //   }
-  // };
-
-  // const initializeAutocomplete = () => {
-  //   if (window.google && inputRef.current) {
-  //     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-  //       types: ["establishment"],
-  //       componentRestrictions: { country: "TN" },
-  //     });
-
-  //     autocompleteRef.current.addListener("place_changed", () => {
-  //       const place = autocompleteRef.current.getPlace();
-  //       if (place && place.formatted_address) {
-  //         setPickupLocation(place.formatted_address);
-  //         const location = place.geometry?.location;
-  //         if (location) {
-  //           setCoordinates({ lat: location.lat(), lng: location.lng() });
-  //         }
-  //       }
-  //     });
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   loadGoogleMapsScript(initializeAutocomplete);
-  // }, []);
-
-  // 
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const coordinates = { lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) };
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      toast.error("Invalid latitude or longitude values!");
+      return;
+    }
 
     const data = {
       title,
       description,
       expirationDate: new Date(expirationDate).toISOString(),
-      pickupLocation,
-      latitude: coordinates.lat, 
-      longitude: coordinates.lng,
+      pickupLocation: "", 
+      latitude,
+      longitude,
       images: JSON.stringify(files),
     };
 
     try {
-      const token = localStorage.getItem("accessToken");
-      const response = await axios.post("http://localhost:3001/offers", data, {
+      const token = localStorage.getItem('accessToken');
+      await axios.post('http://localhost:3001/offers', data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      // console.log("Offer submitted successfully:", response.data);
-      
+
       toast.success("Offer submitted successfully!");
-      
+      setOffers([...offers, { lat: latitude, lng: longitude, title }]);
+    
     } catch (error) {
       console.error("Error submitting offer:", error);
+      toast.error("Error submitting offer!");
     }
   };
 
@@ -121,15 +84,6 @@ export function AddOffer() {
     if (newFiles) {
       setFiles(newFiles);
       await handleImage(newFiles);
-      try {
-        const formData = new FormData();
-        newFiles.forEach((file) => formData.append("files", file));
-        await axios.post("http://localhost:3001/storage/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } catch (error) {
-        console.error("Error uploading files:", error);
-      }
     }
   };
 
@@ -139,13 +93,16 @@ export function AddOffer() {
     },
     multiple: true,
     maxFiles: 4,
-    maxSize: 1 * 1024 * 1024,
+    maxSize: 1 * 1024 * 1024, 
   };
 
+  // map center howa Tunis
+  const defaultCenter = { lat: 36.806389, lng: 10.181667 };
+
   return (
-    <div >
-       <ToastContainer />
-       
+    <div>
+      <ToastContainer />
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
@@ -185,20 +142,6 @@ export function AddOffer() {
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
           />
         </div>
-
-        {/* <div>
-          <label htmlFor="pickupLocation" className="block text-sm font-medium text-gray-700">
-            Pickup Location
-          </label>
-          <Input
-            id="pickupLocation"
-            ref={inputRef}
-            value={pickupLocation}
-            onChange={(e) => setPickupLocation(e.target.value)}
-            className="mt-1 block w-full"
-            placeholder="Enter pickup location"
-          />
-        </div> */}
 
         <div>
           <label htmlFor="lat" className="block text-sm font-medium text-gray-700">
@@ -240,7 +183,7 @@ export function AddOffer() {
                   key={i}
                   index={i}
                   className="size-20 p-0 rounded-md overflow-hidden"
-                  aria-roledescription={`file ${i + 1} containing ${file.name}`}
+                  aria-roledescription={`File ${i + 1} containing ${file.name}`}
                 >
                   <Image
                     src={URL.createObjectURL(file)}
@@ -260,8 +203,11 @@ export function AddOffer() {
         </Button>
       </form>
 
-      {/* Pass coordinates to Map */}
-      {/* <Map coordinates={{ lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) }} /> */}
+      {offers.length > 0 ? (
+        <MapComponent markers={offers} center={offers[0] || defaultCenter} />
+      ) : (
+        <MapComponent markers={[]} center={defaultCenter} />
+      )}
     </div>
   );
 }
