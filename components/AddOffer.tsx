@@ -248,7 +248,7 @@ export function AddOffer() {
       </form>
 
       {/* Pass coordinates to Map */}
-      <Map coordinates={{ lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) }} />
+      <Map coordinates={{ lat: parseFloat(lat.toString()), lng: parseFloat(lng.toString()) }} offers={[]} />
     </div>
   );
 }

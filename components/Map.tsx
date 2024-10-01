@@ -47,7 +47,6 @@ export function Map({ coordinates, offers }: MapProps) {
       type: ['restaurant'],
     };
 
-    // Perform the nearby search for restaurants
     service.nearbySearch(request, (results: any, status: any) => {
       if (status === maps.places.PlacesServiceStatus.OK) {
         const restaurantMarkers = results.map((place: any) => ({
@@ -61,7 +60,7 @@ export function Map({ coordinates, offers }: MapProps) {
   
   useEffect(() => {
     if (coordinates.lat && coordinates.lng && mapReady) {
-      setMarkers([{ lat: coordinates.lat, lng: coordinates.lng }]); // Set user's location
+      setMarkers([{ lat: coordinates.lat, lng: coordinates.lng }]); 
     }
   }, [coordinates, mapReady]);
 
@@ -71,7 +70,7 @@ export function Map({ coordinates, offers }: MapProps) {
         lat: offer.latitude,
         lng: offer.longitude,
       }));
-      setMarkers(prevMarkers => [...prevMarkers, ...offerMarkers]); // Add offer markers
+      setMarkers(prevMarkers => [...prevMarkers, ...offerMarkers]); 
     }
   }, [offers]);
 
@@ -79,8 +78,8 @@ export function Map({ coordinates, offers }: MapProps) {
     <>
       {mapReady && <div>Map is ready. Check logs in the developer console.</div>}
       <GoogleMap
-        apiKey={process.env.NEXT_PUBLIC_MAPS_API_KEY} // Cast as string for TypeScript safety
-        defaultCenter={{ lat: 36.806389, lng: 10.181667 }} // Default center coordinates
+        apiKey={process.env.NEXT_PUBLIC_MAPS_API_KEY} 
+        defaultCenter={{ lat: 36.806389, lng: 10.181667 }} 
         defaultZoom={12}
         mapMinHeight="100vh"
         options={{}} 
@@ -98,7 +97,7 @@ export function Map({ coordinates, offers }: MapProps) {
               width: "25px",
               borderRadius: "50%",
               textAlign: "center",
-              lineHeight: "25px", // Vertically center the emoji
+              lineHeight: "25px", 
             }}
           >
             📍
