@@ -71,9 +71,11 @@ export function MapComponent({ markers, center }: any) {
         >
           <Popup>
             <strong>{offer.title}</strong> <br />
+            <strong>{offer.owner}</strong> <br />
             <strong>Pickup Location:</strong> {offer.pickupLocation} <br />
             <strong>Expiration Date:</strong> {formatDate(new Date(offer.expirationDate))} <br />
             <strong>Expiration Time:</strong> {formatTime(new Date(offer.expirationDate))} <br />
+
           </Popup>
         </Marker>
       ))}

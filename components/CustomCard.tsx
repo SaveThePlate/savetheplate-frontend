@@ -19,6 +19,7 @@ interface CustomCardProps {
   imageSrc: string;
   imageAlt: string;
   title: string;
+  owner: React.ReactNode;
   description: string;
   expirationDate: string; 
   pickupLocation: string; 
@@ -31,11 +32,11 @@ const CustomCard: FC<CustomCardProps> = ({
   imageSrc,
   imageAlt,
   title,
+  owner,
   description,
   expirationDate,
   pickupLocation,
   reserveLink,
-  onDetailsClick
 
 }) => {
 
