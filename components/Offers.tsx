@@ -8,6 +8,7 @@ interface Offer {
   images: { path: string }[];
   title: string;
   owner: string;
+  ownerId: number;
   description: string;
   expirationDate: string;
   pickupLocation: string;
@@ -48,13 +49,9 @@ const OffersPage = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedOffer(null);
-  };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div>Loading... </div>;
+  if (error) return <div>{error} </div>;
 
   return (
     
@@ -66,11 +63,8 @@ const OffersPage = () => {
           imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
           imageAlt={offer.title}
           title={offer.title}
-          owner={
-          <a href={`/profile/${offer.owner}`} className="text-blue-500 underline">
-            {offer.owner}
-          </a>
-          }
+          owner={offer.owner}
+          ownerId={offer.ownerId}
           description={offer.description}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
