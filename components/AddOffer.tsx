@@ -5,17 +5,17 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MapComponent } from "./MapComponent";
 import { DropzoneOptions } from "react-dropzone";
 
 export function AddOffer() {
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
@@ -40,6 +40,23 @@ export function AddOffer() {
       console.error("Error uploading files:", error);
     }
   };
+
+  const handleImageUpload = async (newFiles: File[] | null) => {
+    if (newFiles) {
+      setFiles(newFiles);
+      await handleImage(newFiles);
+    }
+  };
+
+  const dropzone: DropzoneOptions = {
+    accept: {
+      "image/*": [".jpg", ".jpeg", ".png"],
+    },
+    multiple: true,
+    maxFiles: 4,
+    maxSize: 1 * 1024 * 1024, 
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,30 +97,14 @@ export function AddOffer() {
     }
   };
 
-  const handleImageUpload = async (newFiles: File[] | null) => {
-    if (newFiles) {
-      setFiles(newFiles);
-      await handleImage(newFiles);
-    }
-  };
-
-  const dropzone: DropzoneOptions = {
-    accept: {
-      "image/*": [".jpg", ".jpeg", ".png"],
-    },
-    multiple: true,
-    maxFiles: 4,
-    maxSize: 1 * 1024 * 1024, 
-  };
-
-  // map center howa Tunis
-  const defaultCenter = { lat: 36.806389, lng: 10.181667 };
 
   return (
     <div>
+
       <ToastContainer />
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Title
@@ -203,11 +204,6 @@ export function AddOffer() {
         </Button>
       </form>
 
-      {offers.length > 0 ? (
-        <MapComponent markers={offers} center={offers[0] || defaultCenter} />
-      ) : (
-        <MapComponent markers={[]} center={defaultCenter} />
-      )}
     </div>
   );
 }

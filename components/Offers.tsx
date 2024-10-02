@@ -7,7 +7,7 @@ interface Offer {
   id: number;
   images: { path: string }[];
   title: string;
-  owner:string;
+  owner: string;
   description: string;
   expirationDate: string;
   pickupLocation: string;

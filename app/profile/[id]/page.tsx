@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'; 
 import CustomCard from '@/components/CustomCard';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
+import { useParams } from 'next/navigation';
 
 interface Offer {
   id: number;
@@ -30,29 +30,37 @@ const ProfilePage = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE); 
 
-  const router = useRouter(); 
-  const { id } = router.query; 
+  const params = useParams();
+  const id = params.id;
+  if (!id) return;
+
 
   const fetchProfileData = async () => {
     try {
-      if (!id) return; 
+      const token = localStorage.getItem('accessToken');
+      if (!token) throw new Error('Token not found');
+      
+      const response = await axios.get(`http://localhost:3001/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const response = await axios.get(`http://localhost:3001/users/${id}`);
       const { username, location, phoneNumber, profileImage } = response.data;
       setUsername(username);
       setLocation(location);
       setPhoneNumber(phoneNumber);
-      setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
+      setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE); 
     } catch (err) {
-      setError("Failed to fetch profile: " + (err as Error).message);
+      toast.error("Failed to fetch profile");
     }
   };
 
   const fetchOffers = async () => {
     try {
-      if (!id) return;
+      const token = localStorage.getItem('accessToken');
 
-      const response = await axios.get(`http://localhost:3001/offers/owner/${id}`);
+      const response = await axios.get(`http://localhost:3001/offers/owner/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setOffers(response.data);
     } catch (err) {
       setError("Failed to fetch offers: " + (err as Error).message);
@@ -62,11 +70,9 @@ const ProfilePage = () => {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchProfileData();
-      fetchOffers();
-    }
-  }, [id]); 
+    fetchOffers();
+    fetchProfileData();
+  }, [id]);
 
   return (
     <main className="pt-16 sm:pt-32 p-6 bg-white min-h-screen flex flex-col items-center">
