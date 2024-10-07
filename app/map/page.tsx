@@ -1,14 +1,11 @@
-
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
-import { MapComponent } from "@/components/MapComponent";
 import axios from "axios";
+import MapComponent from "@/components/MapComponent";
 
 const Map = () => {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({ lat: 36.806389, lng: 10.181667 });
   const [offers, setOffers] = useState<{ id: number; title: string; latitude: number; longitude: number }[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -16,11 +13,8 @@ const Map = () => {
         const response = await axios.get("http://localhost:3001/offers");
         setOffers(response.data);
       } catch (fetchError) {
-        setError("Error fetching offers");
         console.error(fetchError);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     fetchOffers();
@@ -32,17 +26,11 @@ const Map = () => {
         View all the available offers around you!
       </h1>
 
-      {error && <p className="text-red-500">{error}</p>}
-      
-      {loading ? (
-        <p>Loading map...</p>
-      ) : (
         <MapComponent
           markers={offers.filter(offer => offer.latitude !== null && offer.longitude !== null)}
           center={coordinates}
         />
 
-      )}
     </main>
   );
 };

@@ -4,7 +4,7 @@ import CustomCard from '@/components/CustomCard';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
-
+import Image from 'next/image';
 
 interface Offer {
   price: number;
@@ -151,7 +151,7 @@ const ProfilePage = () => {
             <div className="flex flex-col items-center">
 
               <div className="w-24 h-24 bg-gray-200 rounded-full mb-4 overflow-hidden" onClick={() => document.getElementById('fileInput')?.click()}>
-                <img 
+                <Image 
                   src={profileImage} 
                   alt="Profile" 
                   className="object-cover w-full h-full cursor-pointer"

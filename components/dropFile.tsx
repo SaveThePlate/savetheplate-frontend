@@ -134,7 +134,7 @@ export const FileUploader = forwardRef<
           movePrev();
         } else if (e.key === "Enter" || e.key === "Space") {
           if (activeIndex === -1) {
-            dropzoneState.inputRef.current?.click();
+            // dropzoneState.inputRef.current?.click();
           }
         } else if (e.key === "Delete" || e.key === "Backspace") {
           if (activeIndex !== -1) {

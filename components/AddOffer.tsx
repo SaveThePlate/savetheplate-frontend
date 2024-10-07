@@ -1,3 +1,4 @@
+"use client"
 import {
   FileInput,
   FileUploader,
@@ -13,12 +14,13 @@ import { Button } from "./ui/button";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MapComponent } from "./MapComponent";
 import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
+import MapComponent from "./MapComponent";
 
 
-export function AddOffer() {
+const AddOffer = () => {
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -232,13 +234,10 @@ export function AddOffer() {
         </Button>
       </form>
 
-      {offers.length > 0 ? (
-        <MapComponent markers={offers} center={offers[0] || defaultCenter} />
-      ) : (
-        <MapComponent markers={[]} center={defaultCenter} />
-      )}
+
     </div>
   );
 }
 
+export default AddOffer;
 

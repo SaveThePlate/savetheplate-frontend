@@ -29,8 +29,8 @@ const useOpenApiFetch = () => {
         const rawResponse = res.response;
         if (rawResponse.status === 403 || rawResponse.status === 401) {
           if (typeof window != "undefined") {
-            // window.location.href = "/signin";
-            // route.push("/signin");
+            window.location.href = "/signIn";
+            route.push("/signIn");
           }
         }
         if (res.error) throw res.error;
