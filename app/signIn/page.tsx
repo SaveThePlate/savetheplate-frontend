@@ -28,8 +28,6 @@ export default function SignIn() {
         if (resp.response.status === 201) {
           console.info("Magic link sent to your email");
           toast.success('Magic link sent to your email');
-          setEmailSent(true);
-
 
         } else {
           console.error("Failed to send magic link to your email");
