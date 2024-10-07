@@ -13,19 +13,21 @@ import { Button } from "./ui/button";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { DropzoneOptions } from "react-dropzone";
 import { MapComponent } from "./MapComponent";
+import "react-toastify/dist/ReactToastify.css";
+import { DropzoneOptions } from "react-dropzone";
 
 
 export function AddOffer() {
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
+
   const [files, setFiles] = useState<File[] | null>([]);
+
   const [offers, setOffers] = useState<{ lat: number; lng: number; price: number; title: string }[]>([]);
 
   const handleImage = async (files: File[] | null) => {
@@ -40,12 +42,11 @@ export function AddOffer() {
           "Content-Type": "multipart/form-data",
         },
       });
-
     } catch (error) {
-      console.error("Error submitting offer:", error);
-      toast.error("Error submitting offer!");
+      console.error("Error uploading files:", error);
     }
   };
+
 
   const handleImageUpload = async (newFiles: File[] | null) => {
     if (newFiles) {
@@ -157,6 +158,7 @@ export function AddOffer() {
           />
         </div>
 
+
         <div>
           <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
             Expiration Date
@@ -168,17 +170,6 @@ export function AddOffer() {
             onChange={(e) => setExpirationDate(e.target.value)}
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
           />
-          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
-            Expiration Date
-          </label>
-          <Input
-            id="expirationDate"
-            type="datetime-local"
-            value={expirationDate}
-            onChange={(e) => setExpirationDate(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-          />
-
         </div>
 
         <div>
@@ -195,16 +186,6 @@ export function AddOffer() {
         </div>
 
         <div>
-          <label htmlFor="lng" className="block text-sm font-medium text-gray-700">
-            Longitude
-          </label>
-          <Input
-            id="lng"
-            value={lng}
-            onChange={(e) => setLng(e.target.value)}
-            className="mt-1 block w-full"
-            placeholder="Enter longitude"
-          />
           <label htmlFor="lng" className="block text-sm font-medium text-gray-700">
             Longitude
           </label>
@@ -249,11 +230,7 @@ export function AddOffer() {
         <Button type="submit" className="w-full">
           Post Offer
         </Button>
-        <Button type="submit" className="w-full">
-          Post Offer
-        </Button>
       </form>
-
 
       {offers.length > 0 ? (
         <MapComponent markers={offers} center={offers[0] || defaultCenter} />
@@ -263,3 +240,5 @@ export function AddOffer() {
     </div>
   );
 }
+
+

@@ -7,10 +7,14 @@ interface Offer {
   id: number;
   images: { path: string }[];
   title: string;
+  owner:string;
   description: string;
   price: number;
   expirationDate: string;
   pickupLocation: string;
+  user: {
+    username: string;
+  };
 }
 
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
@@ -63,6 +67,11 @@ const OffersPage = () => {
           imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
           imageAlt={offer.title}
           title={offer.title}
+          owner={
+          <a href={`/profile/${offer.owner}`} className="text-blue-500 underline">
+            {offer.owner}
+          </a>
+          }
           description={offer.description}
           price={offer.price}
           expirationDate={offer.expirationDate}

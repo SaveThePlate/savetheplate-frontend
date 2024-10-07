@@ -7,13 +7,13 @@ import axios from "axios";
 
 const Main: React.FC = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-      title: '',
-      description: '',
-      expirationDate: '',
-      pickupLocation: '',
-      images: [], 
-  });
+  // const [formData, setFormData] = useState({
+  //     title: '',
+  //     description: '',
+  //     expirationDate: '',
+  //     pickupLocation: '',
+  //     images: [], 
+  // });
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");

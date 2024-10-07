@@ -137,9 +137,6 @@ const ProfilePage = () => {
       toast.error('An error occurred while updating the profile.');
     }
   };
-  
-
-
 
   useEffect(() => {
     fetchProfileData();
@@ -202,7 +199,7 @@ const ProfilePage = () => {
               <CustomCard
                 key={offer.id}
                 imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
-
+                owner={offer.owner}
                 imageAlt={offer.title}
                 title={offer.title}
                 description={offer.description}
