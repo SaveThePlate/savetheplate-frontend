@@ -1,17 +1,21 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import CustomCard from '@/components/CustomCard';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
+
 
 interface Offer {
   id: number;
   owner: string;
+  ownerId: number;
   images: { path: string }[];
   title: string;
   description: string;
+  price: number;
   expirationDate: string;
   pickupLocation: string;
 }
@@ -32,10 +36,8 @@ const ProfilePage = () => {
 
   const params = useParams();
   const id = params.id;
-  if (!id) return;
 
-
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) throw new Error('Token not found');
@@ -52,11 +54,12 @@ const ProfilePage = () => {
     } catch (err) {
       toast.error("Failed to fetch profile");
     }
-  };
+  }, [id]); 
 
-  const fetchOffers = async () => {
+  const fetchOffers = useCallback(async () => {
     try {
       const token = localStorage.getItem('accessToken');
+      if (!token) throw new Error('Token not found');
 
       const response = await axios.get(`http://localhost:3001/offers/owner/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -67,12 +70,12 @@ const ProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchOffers();
     fetchProfileData();
-  }, [id]);
+  }, [fetchOffers, fetchProfileData]);
 
   return (
     <main className="pt-16 sm:pt-32 p-6 bg-white min-h-screen flex flex-col items-center">
@@ -82,7 +85,7 @@ const ProfilePage = () => {
           <div className="flex items-center justify-center mb-8">
             <div className="flex flex-col items-center">
               <div className="w-24 h-24 bg-gray-200 rounded-full mb-4 overflow-hidden">
-                <img
+                <Image
                   src={profileImage}
                   alt="Profile"
                   className="object-cover w-full h-full"
@@ -103,14 +106,14 @@ const ProfilePage = () => {
                 key={offer.id}
                 imageSrc={offer.images.length > 0 ? `${BASE_IMAGE_URL}${offer.images[0].path}` : ''}
                 owner={offer.owner}
+                ownerId={offer.ownerId}
                 imageAlt={offer.title}
                 title={offer.title}
                 description={offer.description}
+                price={offer.price}
                 expirationDate={offer.expirationDate}
                 pickupLocation={offer.pickupLocation}
-                reserveLink={`/reserve/${offer.id}`} onDetailsClick={function (): void {
-                  throw new Error('Function not implemented.');
-                } }              />
+                reserveLink={`/reserve/${offer.id}`}  />
             ))}
           </div>
         </div>

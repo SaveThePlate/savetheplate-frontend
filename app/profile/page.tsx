@@ -10,6 +10,7 @@ interface Offer {
   price: number;
   id: number;
   owner: string;
+  ownerId: number;
   images: { path: string }[];
   title: string;
   description: string;
@@ -196,6 +197,7 @@ const ProfilePage = () => {
                 key={offer.id}
                 imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
                 owner={offer.owner}
+                ownerId={offer.ownerId}
                 imageAlt={offer.title}
                 title={offer.title}
                 price={offer.price}
