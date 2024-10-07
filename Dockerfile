@@ -20,7 +20,7 @@ COPY package.json package-lock.json* ./
 
 RUN npm install sharp --legacy-peer-deps
 
-RUN if [ -f package-lock.json ]; then npm ci --include=dev; \
+RUN if [ -f package-lock.json ]; then npm ci --include=dev  --legacy-peer-deps; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
