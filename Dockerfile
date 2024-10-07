@@ -18,7 +18,7 @@ ENV TZ="UTC"
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
 
-RUN npm install sharp
+RUN npm install sharp --legacy-peer-deps
 
 RUN if [ -f package-lock.json ]; then npm ci --include=dev; \
   else echo "Lockfile not found." && exit 1; \
