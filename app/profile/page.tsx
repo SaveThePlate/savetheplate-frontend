@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 interface Offer {
+  price: number;
   id: number;
   owner: string;
   images: { path: string }[];
@@ -35,11 +36,6 @@ const ProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
-
-  const openModal = (offer: Offer) => {
-    setSelectedOffer(offer);
-    setIsModalOpen(true);
-  };
 
   const getImage = (filename: string | null): string => {
     return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
@@ -202,11 +198,11 @@ const ProfilePage = () => {
                 owner={offer.owner}
                 imageAlt={offer.title}
                 title={offer.title}
+                price={offer.price}
                 description={offer.description}
                 expirationDate={offer.expirationDate}
                 pickupLocation={offer.pickupLocation}
                 reserveLink={`/reserve/${offer.id}`}
-                onDetailsClick={() => openModal(offer)}
               />
             ))}
           </div>
