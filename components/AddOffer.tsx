@@ -7,17 +7,13 @@ import {
 } from "@/components/dropFile";
 import Image from "next/image";
 import { useState} from "react";
-
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
-import MapComponent from "./MapComponent";
-
 
 const AddOffer = () => {
 
@@ -49,7 +45,6 @@ const AddOffer = () => {
     }
   };
 
-
   const handleImageUpload = async (newFiles: File[] | null) => {
     if (newFiles) {
       setFiles(newFiles);
@@ -65,6 +60,7 @@ const AddOffer = () => {
     maxFiles: 4,
     maxSize: 1 * 1024 * 1024, 
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,17 +101,16 @@ const AddOffer = () => {
       console.error("Error submitting offer:", error);
       toast.error("Error submitting offer!");
     }
-
   };
 
-  // map center howa Tunis
-  const defaultCenter = { lat: 36.806389, lng: 10.181667 };
 
   return (
     <div>
+
       <ToastContainer />
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Title
@@ -234,10 +229,8 @@ const AddOffer = () => {
         </Button>
       </form>
 
-
     </div>
   );
 }
 
 export default AddOffer;
-

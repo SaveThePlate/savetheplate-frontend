@@ -22,6 +22,7 @@ interface CustomCardProps {
   imageAlt: string;
   title: string;
   owner: React.ReactNode;
+  ownerId: number;
   description: string;
   price: number;
   expirationDate: string; 
@@ -35,6 +36,7 @@ const CustomCard: FC<CustomCardProps> = ({
   imageAlt,
   title,
   owner,
+  ownerId,
   description,
   price,
   expirationDate,
@@ -52,10 +54,12 @@ const CustomCard: FC<CustomCardProps> = ({
         <div className="bg-gray-300 h-40 rounded-t-lg flex items-center justify-center mb-4 overflow-hidden">
           <Image src={imageSrc} alt={imageAlt} width={240} height={160} className="object-cover w-full h-full" />
         </div>
-        <CardTitle className="text-lg font-bold text-gray-800">{title}</CardTitle>
-        <CardTitle className="text-lg font-bold text-gray-800">{owner}</CardTitle>
-        <CardTitle className="text-lg font-bold text-gray-800">{price} dt</CardTitle>
-        <hr />
+        <CardTitle className="text-lg font-bold text-gray-800">{title} | {price}dt</CardTitle>
+
+        <CardTitle className="text-sm text-gray-600">
+        <a href={`/profile/${ownerId}`} className="text-black-500 ">{owner}</a>
+        </CardTitle>
+        <hr/>
         <CardDescription className="text-sm text-gray-600">{description}</CardDescription>
       </CardHeader>
       <CardContent>

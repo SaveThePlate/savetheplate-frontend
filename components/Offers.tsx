@@ -7,7 +7,8 @@ interface Offer {
   id: number;
   images: { path: string }[];
   title: string;
-  owner:string;
+  owner: string;
+  ownerId: number;
   description: string;
   price: number;
   expirationDate: string;
@@ -43,8 +44,8 @@ const OffersPage = () => {
   }, []);
 
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div>Loading... </div>;
+  if (error) return <div>{error} </div>;
 
   return (
     
@@ -56,11 +57,8 @@ const OffersPage = () => {
           imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
           imageAlt={offer.title}
           title={offer.title}
-          owner={
-          <a href={`/profile/${offer.owner}`} className="text-blue-500 underline">
-            {offer.owner}
-          </a>
-          }
+          owner={offer.owner}
+          ownerId={offer.ownerId}
           description={offer.description}
           price={offer.price}
           expirationDate={offer.expirationDate}
