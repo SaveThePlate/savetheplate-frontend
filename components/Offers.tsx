@@ -24,10 +24,8 @@ const getImage = (filename: string): string => {
 
 const OffersPage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -44,15 +42,6 @@ const OffersPage = () => {
     fetchOffers();
   }, []);
 
-  const openModal = (offer: Offer) => {
-    setSelectedOffer(offer);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedOffer(null);
-  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -77,7 +66,7 @@ const OffersPage = () => {
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
           reserveLink={`/reserve/${offer.id}`}
-          onDetailsClick={() => openModal(offer)}
+          
 
         />
       ))}
