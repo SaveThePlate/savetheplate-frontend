@@ -20,6 +20,7 @@ interface CustomCardProps {
   imageAlt: string;
   title: string;
   description: string;
+  price: number;
   expirationDate: string; 
   pickupLocation: string; 
   reserveLink: string;
@@ -32,10 +33,10 @@ const CustomCard: FC<CustomCardProps> = ({
   imageAlt,
   title,
   description,
+  price,
   expirationDate,
   pickupLocation,
   reserveLink,
-  onDetailsClick
 
 }) => {
 
@@ -49,6 +50,8 @@ const CustomCard: FC<CustomCardProps> = ({
           <Image src={imageSrc} alt={imageAlt} width={240} height={160} className="object-cover w-full h-full" />
         </div>
         <CardTitle className="text-lg font-bold text-gray-800">{title}</CardTitle>
+        <CardTitle className="text-lg font-bold text-gray-800">{price} dt</CardTitle>
+        <hr />
         <CardDescription className="text-sm text-gray-600">{description}</CardDescription>
       </CardHeader>
       <CardContent>

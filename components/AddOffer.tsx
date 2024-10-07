@@ -5,24 +5,28 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState} from "react";
+
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MapComponent } from "./MapComponent";
 import { DropzoneOptions } from "react-dropzone";
+import { MapComponent } from "./MapComponent";
+
 
 export function AddOffer() {
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [files, setFiles] = useState<File[] | null>([]);
-  const [offers, setOffers] = useState<{ lat: number; lng: number; title: string }[]>([]);
+  const [offers, setOffers] = useState<{ lat: number; lng: number; price: number; title: string }[]>([]);
 
   const handleImage = async (files: File[] | null) => {
     if (!files || files.length === 0) {
@@ -36,44 +40,7 @@ export function AddOffer() {
           "Content-Type": "multipart/form-data",
         },
       });
-    } catch (error) {
-      console.error("Error uploading files:", error);
-    }
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const latitude = parseFloat(lat);
-    const longitude = parseFloat(lng);
-
-    if (isNaN(latitude) || isNaN(longitude)) {
-      toast.error("Invalid latitude or longitude values!");
-      return;
-    }
-
-    const data = {
-      title,
-      description,
-      expirationDate: new Date(expirationDate).toISOString(),
-      pickupLocation: "", 
-      latitude,
-      longitude,
-      images: JSON.stringify(files),
-    };
-
-    try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post('http://localhost:3001/offers', data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      toast.success("Offer submitted successfully!");
-      setOffers([...offers, { lat: latitude, lng: longitude, title }]);
-    
     } catch (error) {
       console.error("Error submitting offer:", error);
       toast.error("Error submitting offer!");
@@ -94,6 +61,48 @@ export function AddOffer() {
     multiple: true,
     maxFiles: 4,
     maxSize: 1 * 1024 * 1024, 
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+    const priceToFloat = parseFloat(price);
+
+    if (isNaN(latitude) || isNaN(longitude) || isNaN(priceToFloat)) {
+      toast.error("Invalid latitude, longitude, or price values!");
+      return;
+    }
+
+    const data = {
+      title,
+      description,
+      price: priceToFloat,
+      expirationDate: new Date(expirationDate).toISOString(),
+      pickupLocation: "", 
+      latitude,
+      longitude,
+      images: JSON.stringify(files),
+    };
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      await axios.post('http://localhost:3001/offers', data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Offer submitted successfully!");
+      setOffers([...offers, { lat: latitude, lng: longitude, price: priceToFloat, title }]);
+    
+    } catch (error) {
+      console.error("Error submitting offer:", error);
+      toast.error("Error submitting offer!");
+    }
+
   };
 
   // map center howa Tunis
@@ -131,6 +140,24 @@ export function AddOffer() {
         </div>
 
         <div>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+            Price in dinars
+          </label>
+          <Input
+            id="price"
+            value={price}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*\.?\d*$/.test(value)) {
+                setPrice(value);
+              }
+            }}
+            className="mt-1 block w-full"
+            placeholder="Enter price"
+          />
+        </div>
+
+        <div>
           <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
             Expiration Date
           </label>
@@ -141,6 +168,17 @@ export function AddOffer() {
             onChange={(e) => setExpirationDate(e.target.value)}
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
           />
+          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
+            Expiration Date
+          </label>
+          <Input
+            id="expirationDate"
+            type="datetime-local"
+            value={expirationDate}
+            onChange={(e) => setExpirationDate(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+          />
+
         </div>
 
         <div>
@@ -157,6 +195,16 @@ export function AddOffer() {
         </div>
 
         <div>
+          <label htmlFor="lng" className="block text-sm font-medium text-gray-700">
+            Longitude
+          </label>
+          <Input
+            id="lng"
+            value={lng}
+            onChange={(e) => setLng(e.target.value)}
+            className="mt-1 block w-full"
+            placeholder="Enter longitude"
+          />
           <label htmlFor="lng" className="block text-sm font-medium text-gray-700">
             Longitude
           </label>
@@ -201,7 +249,11 @@ export function AddOffer() {
         <Button type="submit" className="w-full">
           Post Offer
         </Button>
+        <Button type="submit" className="w-full">
+          Post Offer
+        </Button>
       </form>
+
 
       {offers.length > 0 ? (
         <MapComponent markers={offers} center={offers[0] || defaultCenter} />

@@ -8,6 +8,7 @@ interface Offer {
   images: { path: string }[];
   title: string;
   description: string;
+  price: number;
   expirationDate: string;
   pickupLocation: string;
 }
@@ -63,6 +64,7 @@ const OffersPage = () => {
           imageAlt={offer.title}
           title={offer.title}
           description={offer.description}
+          price={offer.price}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
           reserveLink={`/reserve/${offer.id}`}
