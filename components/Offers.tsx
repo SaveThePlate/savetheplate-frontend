@@ -63,9 +63,7 @@ const OffersPage = () => {
           price={offer.price}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
-          reserveLink={`/reserve/${offer.id}`}
-          
-
+          reserveLink={`/offers/${offer.id}`}
         />
       ))}
 

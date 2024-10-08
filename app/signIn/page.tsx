@@ -55,7 +55,7 @@ export default function SignIn() {
           <p className="font-normal text-l">
             Enter your email to sign in to your account
           </p>
-          <br />
+          <br/>
         </div>
 
         <form

@@ -93,7 +93,7 @@ const CustomCard: FC<CustomCardProps> = ({
       </Credenza>
 
         <Link href={reserveLink} style={{ backgroundColor: 'green', color: 'white' }} className="px-4 py-2 rounded-md shadow-sm hover:shadow-md transition-shadow">
-          Reserve
+          Order
         </Link>
       </CardFooter>
     </Card>
