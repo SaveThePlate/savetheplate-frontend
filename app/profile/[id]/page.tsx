@@ -89,6 +89,8 @@ const ProfilePage = () => {
                   src={profileImage}
                   alt="Profile"
                   className="object-cover w-full h-full"
+                  width={100} 
+                  height={100}
                 />
               </div>
               <div className="text-center">

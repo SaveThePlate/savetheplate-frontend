@@ -70,7 +70,10 @@ const ProfilePage = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) throw new Error('No token found');
 
-      const response = await axios.get("http://localhost:3001/offers/owner", {
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      const id = tokenPayload.id; 
+
+      const response = await axios.get(`http://localhost:3001/offers/owner/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOffers(response.data);
@@ -156,6 +159,8 @@ const ProfilePage = () => {
                   src={profileImage} 
                   alt="Profile" 
                   className="object-cover w-full h-full cursor-pointer"
+                  width={100} 
+                  height={100}
                 />
               </div>
 
