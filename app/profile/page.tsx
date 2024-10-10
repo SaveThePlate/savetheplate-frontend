@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 
 interface Offer {
   price: number;
@@ -146,8 +147,8 @@ const ProfilePage = () => {
 
   return (
     <main className="pt-16 sm:pt-32 p-6 bg-white min-h-screen flex flex-col items-center">
+      
       <ToastContainer />
-
 
       <div className="w-full flex justify-center mb-6 pt-6">
         <div className="mx-auto">
@@ -185,16 +186,18 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex justify-center mb-8">
-            <button
-              className="bg-yellow-200 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded"
+
+            <Button
+              className="bg-orange-700  text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-700 hover:shadow-xl hover:text-white"
               onClick={() => setIsEditModalOpen(true)}
             >
               Edit Profile
-            </button>
+            </Button>
+
           </div>
 
           <hr className="border-gray-300 mb-8" />
-          <h2 className="text-lg font-semibold mb-4">My Offers</h2>
+          <h2 className="text-xl font-semibold mb-4">My Offers</h2>
 
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
             {offers.map((offer) => (

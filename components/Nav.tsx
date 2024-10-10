@@ -22,18 +22,21 @@ const Nav = () => {
             className="object-contain block lg:hidden md:hidden h-full"
           />
         </Link>
+
         <div className="flex items-center gap-3 h-full">
           <Link href="/addOffer">
-            <Button className="bg-lime-400 hover:bg-lime-500 text-black font-bold py-2 px-4 border border-b-4 border-lime-600 rounded h-full">
-              Publish an offer
+            <Button className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl">
+              Publish an Offer
             </Button>
           </Link>
           <Link href="/">
-            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 border border-b-4 border-red-800 rounded h-full">
-              I want food
+            <Button className=" text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-pink-500 hover:to-rose-700 hover:shadow-xl">
+              Show Offers
             </Button>
           </Link>
         </div>
+
+
       </nav>
     </header>
   );

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   FileInput,
   FileUploader,
@@ -6,7 +6,7 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import Image from "next/image";
-import { useState} from "react";
+import { useState } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
@@ -16,16 +16,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
 
 const AddOffer = () => {
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
-  const [lat, setLat] = useState("");
-  const [lng, setLng] = useState("");
-
+  const [googleMapsLink, setGoogleMapsLink] = useState("");
   const [files, setFiles] = useState<File[] | null>([]);
-
   const [offers, setOffers] = useState<{ lat: number; lng: number; price: number; title: string }[]>([]);
 
   const handleImage = async (files: File[] | null) => {
@@ -61,16 +57,43 @@ const AddOffer = () => {
     maxSize: 1 * 1024 * 1024, 
   };
 
+  const extractLocationData = (googleMapsUrl: string) => {
+    const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const match = googleMapsUrl.match(regex);
+
+    if (!match) {
+      return { latitude: null, longitude: null, locationName: null };
+    }
+
+    const latitude = parseFloat(match[1]);
+    const longitude = parseFloat(match[2]);
+
+    // Extract the location name if available in the URL
+    const nameRegex = /maps\/place\/([^/@]+)/;
+    const nameMatch = googleMapsUrl.match(nameRegex);
+    let locationName = "";
+    
+    if (nameMatch) {
+      locationName = decodeURIComponent(nameMatch[1]).replace(/\+/g, " ");
+    }
+
+    return { latitude, longitude, locationName };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const latitude = parseFloat(lat);
-    const longitude = parseFloat(lng);
+    const { latitude, longitude, locationName } = extractLocationData(googleMapsLink);
+
+    if (!latitude || !longitude || !locationName) {
+      toast.error("Invalid Google Maps link!");
+      return;
+    }
+
     const priceToFloat = parseFloat(price);
 
-    if (isNaN(latitude) || isNaN(longitude) || isNaN(priceToFloat)) {
-      toast.error("Invalid latitude, longitude, or price values!");
+    if (isNaN(priceToFloat)) {
+      toast.error("Invalid price value!");
       return;
     }
 
@@ -79,10 +102,10 @@ const AddOffer = () => {
       description,
       price: priceToFloat,
       expirationDate: new Date(expirationDate).toISOString(),
-      pickupLocation: "", 
+      pickupLocation: locationName, // Set the scraped location name as the pickup location
       latitude,
       longitude,
-      images: JSON.stringify(files),
+      images: JSON.stringify(files), 
     };
 
     try {
@@ -96,49 +119,52 @@ const AddOffer = () => {
 
       toast.success("Offer submitted successfully!");
       setOffers([...offers, { lat: latitude, lng: longitude, price: priceToFloat, title }]);
-    
+
     } catch (error) {
       console.error("Error submitting offer:", error);
       toast.error("Error submitting offer!");
     }
   };
 
+  const handleLinkChange = (e: any) => {
+    setGoogleMapsLink(e.target.value);
+  };
 
   return (
-    <div>
-
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
       <ToastContainer />
 
+      <h1 className="text-xl font-semibold text-700">Publish your offer now!</h1>     
+      <br/>      
       <form onSubmit={handleSubmit} className="space-y-4">
-        
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Title
           </label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full"
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             placeholder="Enter title"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
             Description
           </label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 block w-full"
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             placeholder="Enter description"
           />
         </div>
 
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
             Price in dinars
           </label>
           <Input
@@ -150,14 +176,13 @@ const AddOffer = () => {
                 setPrice(value);
               }
             }}
-            className="mt-1 block w-full"
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             placeholder="Enter price"
           />
         </div>
 
-
         <div>
-          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700 mb-1">
             Expiration Date
           </label>
           <Input
@@ -170,40 +195,27 @@ const AddOffer = () => {
         </div>
 
         <div>
-          <label htmlFor="lat" className="block text-sm font-medium text-gray-700">
-            Latitude
+          <label htmlFor="googleMapsLink" className="block text-sm font-medium text-gray-700 mb-1">
+            Google Maps Link
           </label>
           <Input
-            id="lat"
-            value={lat}
-            onChange={(e) => setLat(e.target.value)}
-            className="mt-1 block w-full"
-            placeholder="Enter latitude"
+            id="googleMapsLink"
+            value={googleMapsLink}
+            onChange={handleLinkChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            placeholder="Enter Google Maps link"
           />
         </div>
 
         <div>
-          <label htmlFor="lng" className="block text-sm font-medium text-gray-700">
-            Longitude
-          </label>
-          <Input
-            id="lng"
-            value={lng}
-            onChange={(e) => setLng(e.target.value)}
-            className="mt-1 block w-full"
-            placeholder="Enter longitude"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Images</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
           <FileUploader value={files} onValueChange={handleImageUpload} dropzoneOptions={dropzone}>
             <FileInput>
-              <div className="flex items-center justify-center h-32 w-full border bg-background rounded-md">
-                <p className="text-gray-400">Drop files here</p>
+              <div className="flex items-center justify-center h-32 w-full border border-dashed border-gray-300 bg-gray-50 rounded-md">
+                <p className="text-gray-400">Drop files here or click to upload</p>
               </div>
             </FileInput>
-            <FileUploaderContent className="flex items-center flex-row gap-2">
+            <FileUploaderContent className="flex items-center flex-row gap-2 mt-2">
               {files?.map((file, i) => (
                 <FileUploaderItem
                   key={i}
@@ -224,13 +236,12 @@ const AddOffer = () => {
           </FileUploader>
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full bg-green-600 text-white hover:bg-green-700 transition duration-200">
           Post Offer
         </Button>
       </form>
-
     </div>
   );
-}
+};
 
 export default AddOffer;

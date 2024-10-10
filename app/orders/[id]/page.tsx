@@ -47,7 +47,8 @@ const Orders = () => {
 
 
   return (
-    <main className="pt-14 sm:pt-8 p-6 bg-white min-h-screen">
+    <main className="pt-16 sm:pt-32 p-6 min-h-screen items-center">
+
       <div className="w-full flex justify-center mb-6 pt-6">
         <Button className="text-lg font-bold">My Orders</Button>
       </div>
