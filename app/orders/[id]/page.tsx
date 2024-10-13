@@ -13,6 +13,7 @@ type Order = {
   userId: number;
   offerId: number;
   createdAt: string;
+  status: string; 
 };
 
 const Orders = () => {
@@ -59,7 +60,7 @@ const Orders = () => {
             <CartOrder key={order.id} order={order} />
           ))
         ) : (
-          <p>No orders found.</p>
+          <p>No orders yet.</p>
         )}
       </div>
     </main>
