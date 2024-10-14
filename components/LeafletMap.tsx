@@ -6,6 +6,7 @@ import L from "leaflet";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useRouter, useParams } from "next/navigation";
+import Image from 'next/image';
 
 interface Offer {
   id: number;
@@ -38,8 +39,6 @@ const LeafletMap = ({ markers, center }: any) => {
   const router = useRouter();
   const params = useParams();  
   
-  const { id } = params;
-
   const [offer, setOffer] = useState<Offer | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [inCart, setInCart] = useState<boolean>(false);
@@ -55,7 +54,6 @@ const LeafletMap = ({ markers, center }: any) => {
         return router.push("/signIn");
       }
       const { id } = params;
-      console.log("id ", id);
 
       axios.get(`http://localhost:3001/offers/${id}`, { 
         headers: { Authorization: `Bearer ${token}` },
@@ -68,7 +66,7 @@ const LeafletMap = ({ markers, center }: any) => {
     };
     
     fetchOffer();
-  }, [params.id]);
+  }, [params, router, offer]);
 
   
 
@@ -192,7 +190,7 @@ const LeafletMap = ({ markers, center }: any) => {
           {/* Right Side: Image and Button */}
           <div className="flex flex-col items-center space-y-2">
             <div className="w-24 h-24">
-              <img
+              <Image
                 className="w-full h-full object-cover rounded-md border border-gray-200"
                 src={offer.images.length > 0 ? getImage(offer.images[0].path) : '/default-placeholder.png'}
                 alt={offer.title}

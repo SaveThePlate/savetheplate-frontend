@@ -44,7 +44,7 @@ const Orders = () => {
       if (response.data) setOrders(response.data);
       console.log("orders ", orders);
     })
-  }, [id]);
+  }, [id, router, orders]);
 
 
   return (
