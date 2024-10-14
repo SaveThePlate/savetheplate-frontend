@@ -1,4 +1,3 @@
-"use client";
 import { useState } from 'react';
 import { useRouter } from "next/navigation";
 import styles from './Onboarding.module.css'; 
@@ -30,7 +29,6 @@ const OnboardingPage = () => {
     
             console.log('Response:', response.data);
     
-
             router.push(response.data.redirectTo); 
           
         } catch (error) {
@@ -39,8 +37,6 @@ const OnboardingPage = () => {
             setIsSubmitting(false); 
         }
     };
-    
-    
     
     return (
         <div className={styles.container}>
@@ -65,7 +61,7 @@ const OnboardingPage = () => {
             <br />
             {role && (
                 <>
-                    <p>Can't wait to have the best {role} joining our community!</p>
+                    <p>Can&apos;t wait to have the best {role} joining our community!</p>  {/* Fixed apostrophe */}
                     <button 
                         className={styles.submitButton} 
                         onClick={handleSubmit} 

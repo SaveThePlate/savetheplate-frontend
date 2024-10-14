@@ -20,11 +20,9 @@ interface Offer {
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
 
 const Offers = () => {
-  console.log('Router:', useRouter());
   const router = useRouter();
-  const params = useParams();  
-  
-  
+  const params = useParams();
+
   const { id } = params;
 
   const [offer, setOffer] = useState<Offer | null>(null);
@@ -41,34 +39,31 @@ const Offers = () => {
         setError("No access token found, please log in again.");
         return router.push("/signIn");
       }
-  
-      console.log("id ", id);
 
-      axios.get(`http://localhost:3001/offers/${id}`, { 
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(response => {
-        console.log('response.data ',response.data);
-        if (response.data) setOffer(response.data);
-        console.log("offer ", offer);
-      })
+      axios
+        .get(`http://localhost:3001/offers/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          if (response.data) setOffer(response.data);
+        });
     };
-    
+
     fetchOffer();
-  }, [id]);
+  }, [id, router]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return router.push("/signIn");
-  
-    axios.get('http://localhost:3001/auth/get-user-by-token', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then(response => {
-      console.log("response.data ",response.data);
-      if (response.data) setUserId(response.data.id);
-    })
-    .catch(() => router.push("/signIn"));
+
+    axios
+      .get("http://localhost:3001/auth/get-user-by-token", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        if (response.data) setUserId(response.data.id);
+      })
+      .catch(() => router.push("/signIn"));
   }, [router]);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
@@ -83,8 +78,8 @@ const Offers = () => {
           alert("You need to be logged in to place an order.");
           return;
         }
-  
-        const response = await axios.post(
+
+        await axios.post(
           "http://localhost:3001/orders",
           {
             userId: userId,
@@ -92,27 +87,24 @@ const Offers = () => {
             quantity: quantity,
           },
           {
-            headers: { Authorization: `Bearer ${token}` }, // Add the Authorization header
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-  
-        // Update state and show success message
+
         setInCart(true);
-        toast.success('Your order is successful');
+        toast.success("Your order is successful");
       } catch (error) {
         console.error("Error placing order:", error);
-        toast.error('Error in placing order');
+        toast.error("Error in placing order");
       }
     }
   };
-  
 
   if (!offer) {
     return <div>Loading...</div>;
   }
 
   return (
-
     <div className="container  mx-auto p-4 mt-16">
       <ToastContainer />
       <div className="image flex justify-center mb-8">
