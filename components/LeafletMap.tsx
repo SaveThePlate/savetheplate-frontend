@@ -3,6 +3,19 @@ import React, { useState, useEffect } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Circle } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useRouter, useParams } from "next/navigation";
+
+interface Offer {
+  id: number;
+  owner: string;
+  images: { path: string }[];
+  title: string;
+  description: string;
+  expirationDate: string;
+  pickupLocation: string;
+}
 
 const emojiIcon = new L.DivIcon({
   html: '<div style="font-size: 30px;">🥡</div>',
@@ -22,6 +35,43 @@ const LeafletMap = ({ markers, center }: any) => {
   const [radius, setRadius] = useState(1000);
   const [zoom, setZoom] = useState(13);
 
+  const router = useRouter();
+  const params = useParams();  
+  
+  const { id } = params;
+
+  const [offer, setOffer] = useState<Offer | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [inCart, setInCart] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchOffer = async () => {
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        setError("No access token found, please log in again.");
+        return router.push("/signIn");
+      }
+      const { id } = params;
+      console.log("id ", id);
+
+      axios.get(`http://localhost:3001/offers/${id}`, { 
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(response => {
+        console.log('response.data ',response.data);
+        if (response.data) setOffer(response.data);
+        console.log("offer ", offer);
+      })
+    };
+    
+    fetchOffer();
+  }, [params.id]);
+
+  
+
   useEffect(() => {
     if (radius < 1000) setZoom(15);
     else if (radius < 3000) setZoom(14);
@@ -31,6 +81,35 @@ const LeafletMap = ({ markers, center }: any) => {
   const formatDate = (date: Date) => date.toLocaleDateString();
   const formatTime = (date: Date) =>
     date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+
+  const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+  const getImage = (filename: string): string => {
+    return filename ? `${BASE_IMAGE_URL}${filename}` : "";
+  };
+
+  const handleOrder = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        toast.error("You need to be logged in to place an order.");
+        return;
+      }
+  
+      const response = await axios.post(
+        "http://localhost:3001/orders",
+        { userId: userId, offerId: offer?.id, quantity },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      setInCart(true);
+      toast.success("Your order is successful");
+    } catch (error) {
+      console.error("Error placing order:", error);
+      toast.error("Error in placing order");
+    }
+  };
+  
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
@@ -92,16 +171,47 @@ const LeafletMap = ({ markers, center }: any) => {
             position={[offer.latitude, offer.longitude]}
             icon={emojiIcon}
           >
-            <Popup>
-              <div className="text-sm">
-                <strong className="block mb-1">{offer.title}</strong>
-                <strong>Owner:</strong> {offer.owner} <br />
-                <strong>Pickup Location:</strong> {offer.pickupLocation} <br />
-                <strong>Expires:</strong>{" "}
-                {formatDate(new Date(offer.expirationDate))} at{" "}
-                {formatTime(new Date(offer.expirationDate))} <br />
+      <Popup>
+        <div className="flex items-center p-4 bg-white rounded-lg shadow-md text-sm space-x-4">
+
+          {/* Left Side: Offer Details */}
+          <div className="flex-1">
+            <strong className="block mb-2 text-lg text-gray-800 font-semibold">
+              {offer.title}
+            </strong>
+            <div className="text-gray-600">
+              <div className="mb-1">
+                <strong className="text-gray-700">Pickup Location:</strong> {offer.pickupLocation}
               </div>
-            </Popup>
+              <div className="mb-1">
+                <strong className="text-gray-700">Expires:</strong> {formatDate(new Date(offer.expirationDate))} at {formatTime(new Date(offer.expirationDate))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Image and Button */}
+          <div className="flex flex-col items-center space-y-2">
+            <div className="w-24 h-24">
+              <img
+                className="w-full h-full object-cover rounded-md border border-gray-200"
+                src={offer.images.length > 0 ? getImage(offer.images[0].path) : '/default-placeholder.png'}
+                alt={offer.title}
+              />
+            </div>
+
+            <button
+              onClick={handleOrder}
+              className={`py-2 px-6 rounded-md text-white w-full ${inCart ? "bg-green-600" : "bg-blue-600"}`}
+            >
+              {inCart ? "Added to Cart" : "Add to Cart"}
+            </button>
+          </div>
+        </div>
+      </Popup>
+
+
+
+
           </Marker>
         ))}
       </MapContainer>

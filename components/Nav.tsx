@@ -29,11 +29,7 @@ const Nav = () => {
               Publish an Offer
             </Button>
           </Link>
-          <Link href="/">
-            <Button className=" text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-pink-500 hover:to-rose-700 hover:shadow-xl">
-              Show Offers
-            </Button>
-          </Link>
+        
         </div>
 
 

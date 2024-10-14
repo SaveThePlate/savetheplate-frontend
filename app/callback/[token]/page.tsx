@@ -9,7 +9,6 @@ function AuthCallback() {
   const { token }: { token: string } = useParams();
 
   const router = useRouter();
-
   const clientApi = useOpenApiFetch();
 
   useEffect(() => {
@@ -27,7 +26,14 @@ function AuthCallback() {
         LocalStorage.setItem("refresh-token", resp.data.refreshToken);
         LocalStorage.setItem("accessToken", resp.data.accessToken);
         LocalStorage.removeItem("remember");
-        router.push("/");
+
+
+        if (resp.data.needsOnboarding) {
+          router.push("/onboarding"); 
+        } else {
+          router.push("/"); 
+        }
+
       })
       .catch((error: any) => {
         console.log(error);
