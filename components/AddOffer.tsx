@@ -19,10 +19,11 @@ const AddOffer = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [googleMapsLink, setGoogleMapsLink] = useState("");
   const [files, setFiles] = useState<File[] | null>([]);
-  const [offers, setOffers] = useState<{ lat: number; lng: number; price: number; title: string }[]>([]);
+  const [offers, setOffers] = useState<{ lat: number; lng: number; price: number; title: string, quantity: number }[]>([]);
 
   const handleImage = async (files: File[] | null) => {
     if (!files || files.length === 0) {
@@ -68,7 +69,6 @@ const AddOffer = () => {
     const latitude = parseFloat(match[1]);
     const longitude = parseFloat(match[2]);
 
-    // Extract the location name if available in the URL
     const nameRegex = /maps\/place\/([^/@]+)/;
     const nameMatch = googleMapsUrl.match(nameRegex);
     let locationName = "";
@@ -91,6 +91,7 @@ const AddOffer = () => {
     }
 
     const priceToFloat = parseFloat(price);
+    const quantityToFloat = parseFloat(quantity);
 
     if (isNaN(priceToFloat)) {
       toast.error("Invalid price value!");
@@ -101,8 +102,9 @@ const AddOffer = () => {
       title,
       description,
       price: priceToFloat,
+      quantity: quantityToFloat,
       expirationDate: new Date(expirationDate).toISOString(),
-      pickupLocation: locationName, // Set the scraped location name as the pickup location
+      pickupLocation: locationName, 
       latitude,
       longitude,
       images: JSON.stringify(files), 
@@ -118,7 +120,7 @@ const AddOffer = () => {
       });
 
       toast.success("Offer submitted successfully!");
-      setOffers([...offers, { lat: latitude, lng: longitude, price: priceToFloat, title }]);
+      setOffers([...offers, { lat: latitude, lng: longitude, price: priceToFloat, title, quantity: quantityToFloat }]);
 
     } catch (error) {
       console.error("Error submitting offer:", error);
@@ -178,6 +180,24 @@ const AddOffer = () => {
             }}
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             placeholder="Enter price"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+            Quantity
+          </label>
+          <Input
+            id="quantity"
+            value={quantity}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*\.?\d*$/.test(value)) {
+                setQuantity(value);
+              }
+            }}
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            placeholder="Enter quantity"
           />
         </div>
 

@@ -11,6 +11,7 @@ interface Offer {
   ownerId: number;
   description: string;
   price: number;
+  quantity: number;
   expirationDate: string;
   pickupLocation: string;
   user: {
@@ -61,6 +62,7 @@ const OffersPage = () => {
           ownerId={offer.ownerId}
           description={offer.description}
           price={offer.price}
+          quantity={offer.quantity}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
           reserveLink={`/offers/${offer.id}`}

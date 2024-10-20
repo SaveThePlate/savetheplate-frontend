@@ -24,6 +24,7 @@ interface CustomCardProps {
   ownerId: number;
   description: string;
   price: number;
+  quantity: number;
   expirationDate: string;
   pickupLocation: string;
   reserveLink: string;
@@ -37,6 +38,7 @@ const CustomCard: FC<CustomCardProps> = ({
   ownerId,
   description,
   price,
+  quantity,
   expirationDate,
   pickupLocation,
   reserveLink,
@@ -56,6 +58,9 @@ const CustomCard: FC<CustomCardProps> = ({
             <span className="text-gray-500 line-through">{price * 2} dt</span>
             <span className="text-red-600">{price} dt</span>
           </div>
+        </CardTitle>
+        <CardTitle className="flex justify-between items-center text-xl font-semibold text-gray-900">
+          <span>{quantity} pieces</span>
         </CardTitle>
         <CardTitle className="text-sm text-gray-700">
           <a href={`/profile/${ownerId}`} className="hover:underline text-black-600">{owner}</a>

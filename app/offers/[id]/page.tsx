@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -87,15 +87,22 @@ const Offers = () => {
             quantity: quantity,
           },
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` }, 
+
           }
         );
 
         setInCart(true);
-        toast.success("Your order is successful");
-      } catch (error) {
-        console.error("Error placing order:", error);
-        toast.error("Error in placing order");
+        toast.success('Your order is successful');
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) { 
+          if (error.response && error.response.data.message === 'Requested quantity exceeds available stock') {
+            toast.error('The requested quantity exceeds available stock.');
+          } 
+          toast.error('Error in placing order');
+        }
+        
+
       }
     }
   };

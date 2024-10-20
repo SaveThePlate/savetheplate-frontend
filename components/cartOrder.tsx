@@ -115,7 +115,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             height={50}
           />
         ) : (
-          <Image src="../../../assets/images/item-2.jpeg" alt="Default Item Image" className="w-16 h-16 object-cover" />
+          <img src="../../../assets/images/item-2.jpeg" alt="Default Item Image" className="w-16 h-16 object-cover" />
         )}
       </div>
       <div className="item-description flex-grow">
@@ -131,6 +131,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           </div>
         </div>
       </div>
+      {/* 
+
       <div className="item-description flex-grow">
         <div className="item-details">
           <div
@@ -144,6 +146,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           </div>
         </div>
       </div>
+      */}
+
       
       {order.status !== 'cancelled' && (
         <button
