@@ -1,20 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic"; // Dynamic import for client-side only rendering
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 
-const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
-const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), { ssr: false });
-const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLayer), { ssr: false });
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
+import L from "leaflet";
 
 const restaurantIcon = new L.DivIcon({
   html: '<div style="font-size: 30px;">📍</div>',
@@ -29,7 +31,7 @@ const FillDetails = () => {
   const [googleMapsLink, setGoogleMapsLink] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [zoom, setZoom] = useState(13);
+  const [zoom] = useState(13);
 
   const extractLocationData = (googleMapsUrl: string) => {
     const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
@@ -53,7 +55,12 @@ const FillDetails = () => {
     const data = { location: locationName, phoneNumber: +phoneNumber, latitude, longitude };
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      if (!token) {
+        toast.error("No access token found.");
+        return;
+      }
+
       const response = await axios.put("http://localhost:3001/users/update-details", data, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
@@ -77,6 +84,7 @@ const FillDetails = () => {
     setLongitude(longitude);
     setLocation(locationName || "");
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 via-green-300 to-green-200 p-6">
