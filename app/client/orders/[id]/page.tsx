@@ -23,7 +23,6 @@ const Orders = () => {
   const { id } = params;
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
 
@@ -35,14 +34,11 @@ const Orders = () => {
       return router.push("/signIn");
     }
 
-    console.log("id ", id);
     axios.get(`http://localhost:3001/orders/user/${id}`, { 
       headers: { Authorization: `Bearer ${token}` },
     })
     .then(response => {
-      console.log('response.data ',response.data);
       if (response.data) setOrders(response.data);
-      console.log("orders ", orders);
     })
   }, [id, router, orders]);
 

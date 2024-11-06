@@ -18,6 +18,7 @@ interface Offer {
   price: number;
   expirationDate: string;
   pickupLocation: string;
+  quantity: number;
 }
 
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
@@ -107,15 +108,16 @@ const ProfilePage = () => {
               <CustomCard
                 key={offer.id}
                 imageSrc={offer.images.length > 0 ? `${BASE_IMAGE_URL}${offer.images[0].path}` : ''}
-                owner={offer.owner}
                 ownerId={offer.ownerId}
                 imageAlt={offer.title}
                 title={offer.title}
+                quantity={offer.quantity}
                 description={offer.description}
                 price={offer.price}
                 expirationDate={offer.expirationDate}
                 pickupLocation={offer.pickupLocation}
-                reserveLink={`/reserve/${offer.id}`}  />
+                reserveLink={`/reserve/${offer.id}`} 
+                userRole={null}  />
             ))}
           </div>
         </div>

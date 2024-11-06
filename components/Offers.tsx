@@ -7,7 +7,6 @@ interface Offer {
   id: number;
   images: { path: string }[];
   title: string;
-  owner: string;
   ownerId: number;
   description: string;
   price: number;
@@ -19,15 +18,43 @@ interface Offer {
   };
 }
 
+const DEFAULT_IMAGE = "/logo.png";
 const BASE_IMAGE_URL = "http://localhost:3001/storage/";
-const getImage = (filename: string): string => {
-  return filename ? `${BASE_IMAGE_URL}${filename}` : "";
+const getImage = (filename: string | null): string => {
+  return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_IMAGE;
 };
 
 const OffersPage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken'); 
+
+    const fetchUserRole = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/users/get-role', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200) {
+          setUserRole(response.data.role); // Set the user role in state
+        } else {
+          console.error('Failed to fetch user role:', response.data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching user role:');
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -58,14 +85,14 @@ const OffersPage = () => {
           imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
           imageAlt={offer.title}
           title={offer.title}
-          owner={offer.owner}
           ownerId={offer.ownerId}
           description={offer.description}
           price={offer.price}
           quantity={offer.quantity}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
-          reserveLink={`/offers/${offer.id}`}
+          reserveLink={`/client/offers/${offer.id}`}
+          userRole={userRole}
         />
       ))}
 

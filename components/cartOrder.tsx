@@ -115,7 +115,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             height={50}
           />
         ) : (
-          <img src="../../../assets/images/item-2.jpeg" alt="Default Item Image" className="w-16 h-16 object-cover" />
+          <Image src="../../../assets/images/item-2.jpeg" alt="Default Item Image" className="w-16 h-16 object-cover" />
         )}
       </div>
       <div className="item-description flex-grow">
