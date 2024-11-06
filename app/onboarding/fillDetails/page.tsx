@@ -8,6 +8,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useIsClient } from 'usehooks-ts'
+
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -25,6 +27,8 @@ const restaurantIcon = new L.DivIcon({
 });
 
 const FillDetails = () => {
+  const isClient = useIsClient()
+  
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -95,7 +99,7 @@ const FillDetails = () => {
           <p className="font-light text-sm text-gray-600">Help customers find your location and get in touch with you!</p>
         </div>
 
-        {latitude && longitude ? (
+        {latitude && longitude && isClient ?  (
           <MapContainer
             center={[latitude, longitude]}
             zoom={zoom}
