@@ -4,21 +4,22 @@ import { LocalStorage, SessionStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 const getaccessToken = () => {
-  if (SessionStorage.getItem("accessToken")) {
-    return SessionStorage.getItem("accessToken");
+  if (typeof window !== "undefined") {
+    return SessionStorage.getItem("accessToken") || LocalStorage.getItem("accessToken");
   }
-  return LocalStorage.getItem("accessToken");
+  return null;
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
 const useOpenApiFetch = () => {
   const route = useRouter();
+  const accessToken = getaccessToken();
+  
   const baseClient = createClient<paths>({
     baseUrl:
       process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover.ccdev.space",
     headers: {
-      Authorization:
-        "Bearer " + (typeof window != "undefined" ? getaccessToken() : ""),
+      Authorization: accessToken ? `Bearer ${accessToken}` : "",
     },
   });
 
@@ -28,15 +29,16 @@ const useOpenApiFetch = () => {
         const res = await originalFn(...args);
         const rawResponse = res.response;
         if (rawResponse.status === 403 || rawResponse.status === 401) {
-          if (typeof window != "undefined") {
-            window.location.href = "/signIn";
+          if (typeof window !== "undefined") {
             route.push("/signIn");
           }
         }
         if (res.error) throw res.error;
 
         return res;
-      } finally {
+      } catch (error) {
+        console.error("API error:", error);
+        throw error;
       }
     };
     return wrapFn as unknown as T;
