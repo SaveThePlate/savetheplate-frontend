@@ -31,7 +31,7 @@ const OnboardingPage = () => {
       if (role === 'PROVIDER') {
         router.push('/onboarding/fillDetails');
       } else {
-        router.push(response.data.redirectTo);
+        router.push('/client/home');
       }
 
     } catch (error) {
