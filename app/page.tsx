@@ -5,7 +5,7 @@ const WelcomePage = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-600 to-green-400 text-white">
       <h1 className="text-4xl sm:text-5xl font-bold mb-4">Welcome on Board!</h1>
       <p className="text-lg sm:text-xl mb-8 text-center">
-        We are excited to have you here. When you're ready to begin, click below!
+        We are excited to have you here. When you are ready to begin, click below!
       </p>
       <a
         href="/onboarding"
