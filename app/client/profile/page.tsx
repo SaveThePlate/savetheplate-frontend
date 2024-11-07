@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import CustomCard from '@/components/CustomCard';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -170,7 +169,7 @@ const ProfilePage = () => {
       <ToastContainer />
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-6 mb-8 transition-all hover:scale-105">
         <div className="flex items-center mb-6">
-          <div className="w-32 h-32 rounded-full overflow-hidden mr-6 border-4 border-gray-100 shadow-md">
+          <div className="w-32 h-50 rounded-full overflow-hidden mr-6 border-4 border-gray-100 shadow-md">
             <Image
               src={profileImage}
               alt="Profile"
@@ -204,84 +203,7 @@ const ProfilePage = () => {
             Edit Profile
           </Button>
         </div>
-      </div>
-
-      <hr className="border-gray-300 mb-8" />
-      <h2 className=" text-xl font-semibold mb-4">My Offers</h2>
-
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
-        {offers.map((offer) => (
-          <CustomCard
-            key={offer.id}
-            imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
-            ownerId={offer.ownerId}
-            imageAlt={offer.title}
-            title={offer.title}
-            price={offer.price}
-            quantity={offer.price}
-            description={offer.description}
-            expirationDate={offer.expirationDate}
-            pickupLocation={offer.pickupLocation}
-            reserveLink={`/reserve/${offer.id}`}
-            userRole={userRole}
-          />
-        ))}
-      </div>
-
-      {isEditModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 transition-opacity duration-300">
-    <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg transform transition-transform duration-300 scale-105">
-      <h2 className="text-xl font-semibold mb-6 text-center text-gray-800">Edit Profile</h2>
-      <form>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Location</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
-          <input
-            type="text"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div className="flex justify-between items-center mt-8">
-          <Button
-            className="bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-            onClick={() => {
-              setIsEditModalOpen(false);
-              handleProfileUpdate();
-            }}
-          >
-            Save
-          </Button>
-          <Button
-            className="bg-gray-400 text-white py-2 px-6 rounded-lg shadow-md hover:bg-gray-500 transition duration-300"
-            onClick={() => setIsEditModalOpen(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
+      </div>     
 
     </main>
   );

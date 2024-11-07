@@ -8,8 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useIsClient } from 'usehooks-ts'
-
+import L from "leaflet";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -18,7 +17,6 @@ const MapContainer = dynamic(
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
-import L from "leaflet";
 
 const restaurantIcon = new L.DivIcon({
   html: '<div style="font-size: 30px;">📍</div>',
@@ -27,8 +25,7 @@ const restaurantIcon = new L.DivIcon({
 });
 
 const FillDetails = () => {
-  const isClient = useIsClient()
-  
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -89,6 +86,9 @@ const FillDetails = () => {
     setLocation(locationName || "");
   };
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 via-green-300 to-green-200 p-6">
@@ -99,7 +99,7 @@ const FillDetails = () => {
           <p className="font-light text-sm text-gray-600">Help customers find your location and get in touch with you!</p>
         </div>
 
-        {latitude && longitude && isClient ?  (
+        {latitude && longitude && isClient ? (
           <MapContainer
             center={[latitude, longitude]}
             zoom={zoom}
