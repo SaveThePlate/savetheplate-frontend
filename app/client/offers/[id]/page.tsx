@@ -17,7 +17,7 @@ interface Offer {
   pickupLocation: string;
 }
 
-const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 const Offers = () => {
   const router = useRouter();
@@ -57,7 +57,7 @@ const Offers = () => {
     if (!token) return router.push("/signIn");
 
     axios
-      .get("http://localhost:3001/auth/get-user-by-token", {
+      .get(process.env.NEXT_PUBLIC_BACKEND_URL + "/auth/get-user-by-token", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -80,7 +80,7 @@ const Offers = () => {
         }
 
         await axios.post(
-          "http://localhost:3001/orders",
+          process.env.NEXT_PUBLIC_BACKEND_URL + "/orders",
           {
             userId: userId,
             offerId: offer.id,

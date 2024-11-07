@@ -62,7 +62,7 @@ const FillDetails = () => {
       }
 
       const response = await axios.put(
-        "http://localhost:3001/users/update-details",
+        process.env.NEXT_PUBLIC_BACKEND_URL + "/users/update-details",
         data,
         {
           headers: {

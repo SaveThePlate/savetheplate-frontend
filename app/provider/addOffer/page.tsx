@@ -17,7 +17,7 @@ const AddOfferPage = () => {
 
     const verifyToken = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/auth/get-user-by-token', {
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/auth/get-user-by-token', {
           headers: { Authorization: `Bearer ${token}` },
         });
 

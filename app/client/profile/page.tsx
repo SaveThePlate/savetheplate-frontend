@@ -20,7 +20,7 @@ interface Offer {
 }
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
-const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 const getImage = (filename: string | null): string => {
   return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
@@ -44,7 +44,7 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) throw new Error('Token not found');
-      const response = await axios.get("http://localhost:3001/users/me", {
+      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const { username, location, phoneNumber, profileImage } = response.data;
@@ -83,7 +83,7 @@ const ProfilePage = () => {
       formData.append('profileImage', newFiles[0]);
 
       try {
-        const response = await axios.post('http://localhost:3001/users/upload-profile-image', formData, {
+        const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/upload-profile-image', formData, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
@@ -115,7 +115,7 @@ const ProfilePage = () => {
     };
 
     try {
-      const response = await axios.put('http://localhost:3001/users/me', data, {
+      const response = await axios.put(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/me', data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ const ProfilePage = () => {
     const token = localStorage.getItem('accessToken');
     const fetchUserRole = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users/get-role', {
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

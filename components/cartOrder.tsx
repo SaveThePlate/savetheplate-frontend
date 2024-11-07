@@ -28,7 +28,7 @@ type Offer = {
   pickupLocation: string;
 };
 
-const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const router = useRouter();

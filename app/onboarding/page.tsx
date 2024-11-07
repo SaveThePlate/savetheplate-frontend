@@ -21,7 +21,7 @@ const OnboardingPage = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const response = await axios.post('http://localhost:3001/users/set-role', {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/set-role', {
         role: role,
       },
       {

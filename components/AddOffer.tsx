@@ -31,7 +31,7 @@ const AddOffer = () => {
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append("files", file));
-      await axios.post("http://localhost:3001/storage/upload", formData, {
+      await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -81,7 +81,7 @@ const AddOffer = () => {
 
     // plus à inclure manuellement les en-têtes dans chaque requête. Toutes les requêtes envoyées via axiosInstance auront automatiquement le token
     // const axiosInstance = axios.create({
-    //   baseURL: 'http://localhost:3001',
+    //   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL + '',
     //   headers: {
     //     "Content-Type": "application/json",
     //   },
@@ -103,7 +103,7 @@ const AddOffer = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
-      await axios.post('http://localhost:3001/offers', data, {
+      await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/offers', data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
