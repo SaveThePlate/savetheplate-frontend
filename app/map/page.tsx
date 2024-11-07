@@ -10,7 +10,7 @@ const Map = () => {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/offers");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers");
         setOffers(response.data);
       } catch (fetchError) {
         console.error(fetchError);

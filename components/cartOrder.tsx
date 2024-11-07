@@ -28,7 +28,7 @@ type Offer = {
   pickupLocation: string;
 };
 
-const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const router = useRouter();
@@ -60,7 +60,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
     try {
       await axios.patch(
-        `http://localhost:3001/orders/${order.id}/cancel`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `/orders/${order.id}/cancel`,
         {},
         {
           headers: {
@@ -85,7 +85,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
     const fetchOffer = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/offers/${order.offerId}`, { 
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/${order.offerId}`, { 
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data) setOffer(response.data);

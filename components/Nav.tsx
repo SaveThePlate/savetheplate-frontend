@@ -12,7 +12,7 @@ const Nav = () => {
     const fetchUserRole = async () => {
       const token = localStorage.getItem('accessToken');
       try {
-        const response = await axios.get('http://localhost:3001/users/get-role', {
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

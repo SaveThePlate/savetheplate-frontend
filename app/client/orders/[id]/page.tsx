@@ -34,7 +34,7 @@ const Orders = () => {
       return router.push("/signIn");
     }
 
-    axios.get(`http://localhost:3001/orders/user/${id}`, { 
+    axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/orders/user/${id}`, { 
       headers: { Authorization: `Bearer ${token}` },
     })
     .then(response => {

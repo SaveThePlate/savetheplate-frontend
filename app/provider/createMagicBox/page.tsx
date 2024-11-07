@@ -51,7 +51,7 @@ const CreateMagicBoxPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/offers", 
+        process.env.NEXT_PUBLIC_BACKEND_URL + "/offers", 
         {
           title: `${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Magic Box`,
           description: magicBoxOptions[selectedSize].description,

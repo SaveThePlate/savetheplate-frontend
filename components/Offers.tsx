@@ -19,7 +19,7 @@ interface Offer {
 }
 
 const DEFAULT_IMAGE = "/logo.png";
-const BASE_IMAGE_URL = "http://localhost:3001/storage/";
+const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 const getImage = (filename: string | null): string => {
   return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_IMAGE;
 };
@@ -36,7 +36,7 @@ const OffersPage = () => {
 
     const fetchUserRole = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users/get-role', {
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ const OffersPage = () => {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/offers");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers");
         setOffers(response.data);
       } catch (err) {
         setError("Failed to fetch offers.");

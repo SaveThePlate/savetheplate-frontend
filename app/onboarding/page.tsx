@@ -21,7 +21,7 @@ const OnboardingPage = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const response = await axios.post('http://localhost:3001/users/set-role', {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/set-role', {
         role: role,
       },
       {
@@ -31,7 +31,7 @@ const OnboardingPage = () => {
       if (role === 'PROVIDER') {
         router.push('/onboarding/fillDetails');
       } else {
-        router.push(response.data.redirectTo);
+        router.push('/client/home');
       }
 
     } catch (error) {
