@@ -59,7 +59,7 @@ const LeafletMap = ({ markers, center }: any) => {
       }
 
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `offers/${id}`, {
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

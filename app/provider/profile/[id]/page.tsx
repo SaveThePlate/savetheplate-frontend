@@ -44,7 +44,7 @@ const ProfilePage = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) throw new Error('Token not found');
       
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `users/${id}`, {
+      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -63,7 +63,7 @@ const ProfilePage = () => {
       const token = localStorage.getItem('accessToken');
       if (!token) throw new Error('Token not found');
 
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `offers/owner/${id}`, {
+      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOffers(response.data);

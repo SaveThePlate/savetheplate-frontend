@@ -65,7 +65,7 @@ const ProfilePage = () => {
       const tokenPayload = JSON.parse(atob(token.split('.')[1]));
       const id = tokenPayload.id;
 
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `offers/owner/${id}`, {
+      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOffers(response.data);

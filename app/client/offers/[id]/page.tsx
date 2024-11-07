@@ -41,7 +41,7 @@ const Offers = () => {
       }
 
       axios
-        .get(process.env.NEXT_PUBLIC_BACKEND_URL + `offers/${id}`, {
+        .get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
