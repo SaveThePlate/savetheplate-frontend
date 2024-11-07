@@ -48,7 +48,7 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 via-green-300 to-green-200 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-600 to-green-400 p-6">
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md sm:max-w-lg md:max-w-md lg:max-w-xs">
         <div className="flex flex-col items-center space-y-4 mb-6 text-center">
           <h1 className="font-bold text-2xl sm:text-3xl text-green-900">
