@@ -1,20 +1,14 @@
 import { FC } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import axios from "axios";
+import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Credenza,
-  CredenzaBody,
-  CredenzaClose,
-  CredenzaContent,
-  CredenzaDescription,
-  CredenzaFooter,
-  CredenzaHeader,
-  CredenzaTitle,
-  CredenzaTrigger,
-} from "./ui/credenza";
+import { Credenza, CredenzaBody, CredenzaClose, CredenzaContent, CredenzaDescription, CredenzaFooter, CredenzaHeader, CredenzaTitle, CredenzaTrigger } from "./ui/credenza";
+import { Button } from "./ui/button";
+import { useRouter} from "next/navigation";
 
 interface CustomCardProps {
+  offerId: number;
   imageSrc: string;
   imageAlt: string;
   title: string;
@@ -25,10 +19,11 @@ interface CustomCardProps {
   expirationDate: string;
   pickupLocation: string;
   reserveLink: string;
-  userRole: 'CLIENT' | 'PROVIDER' | null; 
+  userRole: 'CLIENT' | 'PROVIDER' | null;
 }
 
 const CustomCard: FC<CustomCardProps> = ({
+  offerId,
   imageSrc,
   imageAlt,
   title,
@@ -39,10 +34,29 @@ const CustomCard: FC<CustomCardProps> = ({
   expirationDate,
   pickupLocation,
   reserveLink,
-  userRole, 
+  userRole,
 }) => {
+
   const formattedDate = new Date(expirationDate).toLocaleDateString();
   const formattedTime = new Date(expirationDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const router = useRouter();
+
+  const handleDeleteOffer = async (offerId: number) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("No token found");
+
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      alert("Offer deleted successfully");
+      router.refresh();
+    } catch (err) {
+      alert("Failed to delete offer: " + (err as Error).message);
+    }
+  };
 
   return (
     <Card className="w-full sm:w-full md:w-96 lg:w-full shadow-md border border-gray-200 rounded-lg hover:shadow-xl transition-shadow transform hover:scale-105 m-3">
@@ -52,11 +66,9 @@ const CustomCard: FC<CustomCardProps> = ({
           <Image src={imageSrc} alt={imageAlt} width={300} height={300} className="object-cover w-full h-full" />
         </div>
 
-
         {/* Content Section */}
         <div className="flex flex-col justify-between p-4 w-2/3">
           <CardHeader className="p-0">
-            {/* Title and Price Section */}
             <CardTitle className="flex justify-between items-center text-lg font-semibold text-gray-800">
               <span>{title}</span>
               <div className="flex items-center gap-1 text-sm">
@@ -65,10 +77,8 @@ const CustomCard: FC<CustomCardProps> = ({
               </div>
             </CardTitle>
             <CardTitle className="flex justify-between items-center text-sm font-semibold text-gray-500">
-          <span>{quantity} pieces left</span>
-        </CardTitle>
-
-            {/* Owner Section */}
+              <span>{quantity} pieces left</span>
+            </CardTitle>
             <CardDescription className="text-xs text-black-700 mt-1">
               <Link href={`./profile/${ownerId}`} className="hover:underline">
                 {pickupLocation}
@@ -76,11 +86,9 @@ const CustomCard: FC<CustomCardProps> = ({
             </CardDescription>
           </CardHeader>
 
-          {/* Footer Section */}
           <CardFooter className="flex justify-between items-center p-0 mt-2">
             <Credenza>
               <CredenzaTrigger asChild>
-                {/* Updated Details Button */}
                 <button className="px-4 py-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
                   Details
                 </button>
@@ -97,7 +105,6 @@ const CustomCard: FC<CustomCardProps> = ({
                 </CredenzaBody>
                 <CredenzaFooter className="flex justify-end mt-4">
                   <CredenzaClose asChild>
-                    {/* Updated Close Button */}
                     <button className="px-4 py-2 bg-gradient-to-r from-red-400 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
                       Close
                     </button>
@@ -114,11 +121,11 @@ const CustomCard: FC<CustomCardProps> = ({
                 Order
               </Link>
             ) : userRole === 'PROVIDER' ? (
-              <Link
-                href={`/edit/${ownerId}`} // Example link for the edit action
+              <Button
+                onClick={() => handleDeleteOffer(offerId)}  // Pass the offer ID here
                 className="px-4 py-2 text-xs bg-gradient-to-r from-orange-400 to-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
-                Edit
-              </Link>
+                Delete Offer
+              </Button>
             ) : null}
           </CardFooter>
         </div>

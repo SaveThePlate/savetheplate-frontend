@@ -1,6 +1,7 @@
 import React from 'react';
 
 const WelcomePage = () => {
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-600 to-green-400 text-white">
       <h1 className="text-4xl sm:text-5xl font-bold mb-4">Welcome on Board!</h1>

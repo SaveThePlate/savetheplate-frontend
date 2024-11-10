@@ -8,18 +8,17 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useIsClient } from "usehooks-ts";
-
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+// import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 const FillDetails = () => {
   const isClient = useIsClient();
-
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [googleMapsLink, setGoogleMapsLink] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [zoom] = useState(13);
 
   const extractLocationData = (googleMapsUrl: string) => {
@@ -92,6 +91,11 @@ const FillDetails = () => {
     setLatitude(latitude);
     setLongitude(longitude);
     setLocation(locationName || "");
+
+    // Update coordinates state for the map center
+    if (latitude && longitude) {
+      setCoordinates({ latitude, longitude });
+    }
   };
 
   return (
@@ -107,32 +111,8 @@ const FillDetails = () => {
           </p>
         </div>
 
-        {latitude && longitude && isClient && typeof window != "undefined" ? (
-          <MapContainer
-            center={[latitude, longitude]}
-            zoom={zoom}
-            scrollWheelZoom={true}
-            style={{
-              height: "200px",
-              width: "100%",
-              borderRadius: "10px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              marginBottom: "1rem",
-            }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[latitude, longitude]}>
-              <Popup>{location || "Restaurant location"}</Popup>
-            </Marker>
-          </MapContainer>
-        ) : (
-          <p className="text-sm text-gray-500 mb-4">
-            Enter a valid Google Maps link to display the location on the map.
-          </p>
-        )}
+
+
 
         <form
           onSubmit={(e) => {
@@ -141,14 +121,7 @@ const FillDetails = () => {
           }}
           className="space-y-4"
         >
-          <Input
-            id="location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Restaurant Name (scraped from Google Maps)"
-            disabled
-          />
+    
           <Input
             id="phoneNumber"
             value={phoneNumber}
@@ -164,6 +137,14 @@ const FillDetails = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             placeholder="Google Maps Link"
             required
+          />
+          <Input
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            placeholder="Restaurant Name (scraped from Google Maps)"
+            disabled
           />
           <Button
             type="submit"

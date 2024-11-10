@@ -3,8 +3,8 @@ import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   
@@ -12,20 +12,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [userId, setUserId] = useState<string | null>(null);
 
 
-  useEffect(() => {
-    const fetchUserId = async () => {
-      const token = localStorage.getItem("accessToken");
-      try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/auth/get-user-by-token', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUserId(response.data.id);
-      } catch (err) {
-        console.log("error ", err);
-      } 
-    };
-    fetchUserId();
-  }, []);
+ 
 
   return (
     <section>

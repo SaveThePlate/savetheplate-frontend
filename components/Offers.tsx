@@ -81,7 +81,7 @@ const OffersPage = () => {
       
       {offers.map((offer) => (
         <CustomCard
-          key={offer.id}
+          offerId={offer.id}
           imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
           imageAlt={offer.title}
           title={offer.title}

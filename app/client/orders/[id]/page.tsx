@@ -17,14 +17,12 @@ type Order = {
 };
 
 const Orders = () => {
-  const router = useRouter();
-  const params = useParams();  
-  
-  const { id } = params;
-
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const router = useRouter();
+  const params = useParams();  
+  const { id } = params;
 
   useEffect(() => { 
     const token = localStorage.getItem("accessToken");
@@ -33,6 +31,10 @@ const Orders = () => {
       setError("No access token found, please log in again.");
       return router.push("/signIn");
     }
+
+
+    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+    const id = tokenPayload.id;
 
     axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/orders/user/${id}`, { 
       headers: { Authorization: `Bearer ${token}` },

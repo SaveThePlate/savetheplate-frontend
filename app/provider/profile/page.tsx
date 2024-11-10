@@ -31,10 +31,7 @@ const ProfilePage = () => {
   const [location, setLocation] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
-
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
 
   const getImage = (filename: string | null): string => {
     return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
@@ -212,7 +209,7 @@ const ProfilePage = () => {
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
         {offers.map((offer) => (
           <CustomCard
-            key={offer.id}
+            offerId={offer.id}
             imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
             ownerId={offer.ownerId}
             imageAlt={offer.title}

@@ -10,7 +10,6 @@ const AddOfferPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      console.log("No token found, redirecting to signIn");
       router.push("/signIn");
       return;
     }
@@ -21,13 +20,10 @@ const AddOfferPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log('Token verification successful:', response.data);
-
         if (response.status !== 200) {
           throw new Error('Invalid response from server');
         }
       } catch (error) {
-        console.error('Token verification failed:', error);
         router.push("/signIn");
       }
     };

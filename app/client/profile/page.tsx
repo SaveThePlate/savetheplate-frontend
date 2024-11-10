@@ -138,31 +138,6 @@ const ProfilePage = () => {
     fetchOffers();
   }, []);
 
-  const [userRole, setUserRole] = useState(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const fetchUserRole = async () => {
-      try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.status === 200) {
-          setUserRole(response.data.role);
-        } else {
-          console.error('Failed to fetch user role:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching user role:');
-      }
-    };
-
-    fetchUserRole();
-  }, []);
 
   return (
     <main className="sm:pt-32 p-6 bg-gradient-to-r from-green-300 via-green-200 to-green-300 min-h-screen flex flex-col items-center">
