@@ -209,6 +209,7 @@ const ProfilePage = () => {
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
         {offers.map((offer) => (
           <CustomCard
+            key={offer.id}
             offerId={offer.id}
             imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
             ownerId={offer.ownerId}

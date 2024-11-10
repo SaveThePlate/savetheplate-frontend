@@ -107,6 +107,7 @@ const ProfilePage = () => {
             {offers.map((offer) => (
               <CustomCard
                 key={offer.id}
+                offerId={offer.id}
                 imageSrc={offer.images.length > 0 ? `${BASE_IMAGE_URL}${offer.images[0].path}` : ''}
                 ownerId={offer.ownerId}
                 imageAlt={offer.title}
