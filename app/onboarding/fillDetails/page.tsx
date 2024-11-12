@@ -8,7 +8,6 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useIsClient } from "usehooks-ts";
-// import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 const FillDetails = () => {
   const isClient = useIsClient();
@@ -92,36 +91,47 @@ const FillDetails = () => {
     setLongitude(longitude);
     setLocation(locationName || "");
 
-    // Update coordinates state for the map center
     if (latitude && longitude) {
       setCoordinates({ latitude, longitude });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 via-green-300 to-green-200 p-6">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
+      style={{ backgroundColor: "#98cca8" }}
+    >
+      <div className="relative flex flex-col items-center justify-center text-center w-full max-w-md px-4 py-12 bg-white rounded-3xl shadow-lg">
         <ToastContainer />
         <div className="flex flex-col items-center text-center space-y-4 mb-6">
-          <h1 className="font-bold text-2xl text-green-900">
+          <h1
+            className="text-3xl font-extrabold mb-4"
+            style={{
+              color: "#ffbe98",
+              WebkitTextStroke: "0.6px #000000",
+              textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
+            }}
+          >
             Add Your Restaurant Details
           </h1>
-          <p className="font-light text-sm text-gray-600">
+          <p
+            className="text-base font-semibold mb-6"
+            style={{
+              color: "#333333",
+              textShadow: "1px 1px 3px rgba(0, 0, 0, 0.3)",
+            }}
+          >
             Help customers find your location and get in touch with you!
           </p>
         </div>
-
-
-
 
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleProfileUpdate();
           }}
-          className="space-y-4"
+          className="space-y-4 w-full"
         >
-    
           <Input
             id="phoneNumber"
             value={phoneNumber}
@@ -148,7 +158,7 @@ const FillDetails = () => {
           />
           <Button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
+            className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black shadow-lg transform transition-transform hover:scale-105 hover:bg-yellow-300"
           >
             Submit Details
           </Button>
