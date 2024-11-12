@@ -41,7 +41,7 @@ const OnboardingPage = () => {
   return (
     <div className={styles.background}>
       <div className={styles.container}>
-        <h1 className={styles.title}>Welcome to Save The Plate!</h1>
+        <h1 className={styles.title} >Welcome to Save The Plate!</h1>
         <p className={styles.subtitle}>You are a:</p>
         
         <div className={styles.roleSelection}>
