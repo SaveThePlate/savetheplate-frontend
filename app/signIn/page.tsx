@@ -106,7 +106,7 @@ export default function SignIn() {
             </Button>
           ) : (
             <Button
-              className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black hover:bg-[#ffbe98] transition duration-300 transform hover:scale-110"
+              className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black hover:bg-[#cfcd4fd3] "
               type="submit"
               id="sign-in-button"
             >
@@ -117,6 +117,9 @@ export default function SignIn() {
 
         {/* Separator */}
         <Separator orientation="horizontal" className="mt-6 bg-[#f0ece7]" />
+
+        {showAuthToast && AuthToast}
+        {showErrorToast && ErrorToast}
 
         {/* Footer Text */}
         <p className="mt-8 text-center font-light text-xs sm:text-sm text-gray-500">
