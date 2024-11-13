@@ -35,20 +35,20 @@ const SelectOfferTypePage = () => {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 via-green-300 to-green-200 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#cdeddf] p-6">
       <main className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center text-green-900">Select Offer Type</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-[#243B28]">Select Offer Type</h1>
         
         {/* Offer Buttons */}
         <div className="space-y-4">
           <button
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition transform hover:scale-105"
+            className="font-bold w-full bg-[#c2f0dc] text-[#243B28] py-3 rounded-full border border-black hover:bg-[#82f0c0] shadow-lg hover:shadow-xl transition transform hover:scale-105"
             onClick={() => router.push("./addOffer")}
           >
             Add Offer
           </button>
           <button
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition transform hover:scale-105"
+            className="font-bold w-full bg-[#1ec27b] text-white py-3 rounded-full border border-black hover:bg-[#147a4e] shadow-lg hover:shadow-xl transition transform hover:scale-105"
             onClick={() => router.push("./createMagicBox")}
           >
             Create Magic Box
@@ -56,11 +56,11 @@ const SelectOfferTypePage = () => {
         </div>
 
         {/* Magic Box Info Section */}
-        <section className="mt-8 p-6 bg-white border border-gray-200 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800">What is a Magic Box?</h2>
-          <p className="text-gray-600 mt-2">
-            A magic box is a bag filled with a selection of unsold items that can be offered to clients at a discounted price. 
-            It is a great way to reduce waste while providing value to customers.
+        <section className="mt-8 p-6 bg-[#fdfdead3] border border-[#243B28] rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold text-[#243B28]">What is a Magic Box?</h2>
+          <p className="text-[#243B28] mt-2">
+           A Magic box can contain a variety of different items or multiples of the same item, providing a surprise assortment. 
+           The contents are randomly selected, ensuring a unique experience with every purchase.
           </p>
         </section>
       </main>

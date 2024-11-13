@@ -32,11 +32,8 @@ const AddOfferPage = () => {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-400 via-green-300 to-green-200 p-6">
-      <main className="bg-white shadow-lg rounded-lg p-6 w-full max-w-2xl">
-        <h1 className="text-2xl font-bold mb-6 text-center text-green-900">Add a New Offer</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#cdeddf] p-6">
         <AddOffer />
-      </main>
     </div>
   );
 };

@@ -89,7 +89,7 @@ const CustomCard: FC<CustomCardProps> = ({
           <CardFooter className="flex justify-between items-center p-0 mt-2">
             <Credenza>
               <CredenzaTrigger asChild>
-                <button className="px-4 py-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
+                <button className="px-4 py-2 text-xs bg-[#fffc5ed3] text-black font-bold sm:text-lg border border-black rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
                   Details
                 </button>
               </CredenzaTrigger>
@@ -117,13 +117,13 @@ const CustomCard: FC<CustomCardProps> = ({
             {userRole === 'CLIENT' ? (
               <Link
                 href={reserveLink}
-                className="px-4 py-2 text-xs bg-gradient-to-r from-green-400 to-teal-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
+                className="px-4 py-2 text-xs bg-[#fffc5ed3] font-bold sm:text-lg border border-black bg-gradient-to-r from-green-400 to-teal-500  rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
                 Order
               </Link>
             ) : userRole === 'PROVIDER' ? (
               <Button
                 onClick={() => handleDeleteOffer(offerId)}  // Pass the offer ID here
-                className="px-4 py-2 text-xs bg-gradient-to-r from-orange-400 to-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
+                className="border border-black px-4 py-2 text-xs bg-[#fa6363d3] text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
                 Delete Offer
               </Button>
             ) : null}

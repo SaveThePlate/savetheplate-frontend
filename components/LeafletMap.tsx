@@ -175,6 +175,8 @@ const LeafletMap = ({ markers, center }: any) => {
           width: "100%",
           borderRadius: "10px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          marginBottom: "20px",
+          zIndex: 1
         }}
       >
         <TileLayer
@@ -215,7 +217,7 @@ const LeafletMap = ({ markers, center }: any) => {
                 </div>
 
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-24 h-24">
+                  {/* <div className="w-24 h-24">
                     <Image
                       className="w-full h-full object-cover rounded-md border border-gray-200"
                       src={getImage(offer.images[0]?.path || "/default-placeholder.png")}
@@ -223,12 +225,12 @@ const LeafletMap = ({ markers, center }: any) => {
                       width={96}
                       height={96}
                     />
-                  </div>
+                  </div> */}
 
-                  {userRole === "client" && ( 
+                  {userRole === "CLIENT" && ( 
                     <button
                       onClick={() => handleOrder(offer.id)}
-                      className={`py-2 px-6 rounded-md text-white w-full ${inCart ? "bg-green-600" : "bg-blue-600"}`}
+                      className={`py-2 px-6 rounded-md text-white w-full ${inCart ? "bg-green-600" : "bg-emerald-600"}`}
                     >
                       {inCart ? "Added to Cart" : "Add to Cart"}
                     </button>

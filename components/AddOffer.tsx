@@ -121,40 +121,45 @@ const AddOffer = () => {
 
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
+    <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg border border-gray-200">
       <ToastContainer />
-
-      <h1 className="text-xl font-semibold text-700">Publish your offer now!</h1>     
-      <br/>      
-      <form onSubmit={handleSubmit} className="space-y-4">
+  
+      <h1 className="text-3xl font-bold text-green-800 mb-6 text-center">
+        Publish your offer now!
+      </h1>
+  
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
             Title
           </label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            className="mt-1 block w-full border-2 border-gray-300 rounded-md px-4 py-3 text-lg focus:ring-2 focus:ring-green-500"
             placeholder="Enter title"
           />
         </div>
-
+  
+        {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
             Description
           </label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            className="mt-1 block w-full border-2 border-gray-300 rounded-md px-4 py-3 text-lg focus:ring-2 focus:ring-green-500"
             placeholder="Enter description"
           />
         </div>
-
+  
+        {/* Price */}
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
             Price in dinars
           </label>
           <Input
@@ -166,13 +171,14 @@ const AddOffer = () => {
                 setPrice(value);
               }
             }}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            className="mt-1 block w-full border-2 border-gray-300 rounded-md px-4 py-3 text-lg focus:ring-2 focus:ring-green-500"
             placeholder="Enter price"
           />
         </div>
-
+  
+        {/* Quantity */}
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
             Quantity
           </label>
           <Input
@@ -184,13 +190,14 @@ const AddOffer = () => {
                 setQuantity(value);
               }
             }}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            className="mt-1 block w-full border-2 border-gray-300 rounded-md px-4 py-3 text-lg focus:ring-2 focus:ring-green-500"
             placeholder="Enter quantity"
           />
         </div>
-
+  
+        {/* Expiration Date */}
         <div>
-          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700 mb-2">
             Expiration Date
           </label>
           <Input
@@ -198,26 +205,25 @@ const AddOffer = () => {
             type="datetime-local"
             value={expirationDate}
             onChange={(e) => setExpirationDate(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+            className="mt-1 block w-full border-2 border-gray-300 rounded-md px-4 py-3 text-lg focus:ring-2 focus:ring-green-500"
           />
         </div>
-
-       
-
+  
+        {/* Images */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
           <FileUploader value={files} onValueChange={handleImageUpload} dropzoneOptions={dropzone}>
             <FileInput>
-              <div className="flex items-center justify-center h-32 w-full border border-dashed border-gray-300 bg-gray-50 rounded-md">
-                <p className="text-gray-400">Drop files here or click to upload</p>
+              <div className="flex items-center justify-center h-32 w-full border-2 border-dashed border-gray-300 bg-gray-50 rounded-md transition hover:bg-green-100">
+                <p className="text-gray-500">Drop files here or click to upload</p>
               </div>
             </FileInput>
-            <FileUploaderContent className="flex items-center flex-row gap-2 mt-2">
+            <FileUploaderContent className="flex items-center gap-3 mt-3 flex-wrap">
               {files?.map((file, i) => (
                 <FileUploaderItem
                   key={i}
                   index={i}
-                  className="size-20 p-0 rounded-md overflow-hidden"
+                  className="rounded-md shadow-md overflow-hidden"
                   aria-roledescription={`File ${i + 1} containing ${file.name}`}
                 >
                   <Image
@@ -225,20 +231,26 @@ const AddOffer = () => {
                     alt={file.name}
                     height={80}
                     width={80}
-                    className="size-20 p-0"
+                    className="object-cover rounded-md"
                   />
                 </FileUploaderItem>
               ))}
             </FileUploaderContent>
           </FileUploader>
         </div>
-
-        <Button type="submit" className="w-full bg-green-600 text-white hover:bg-green-700 transition duration-200">
+  
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full text-white rounded-full border border-black px-4 py-3 text-lg bg-green-800 hover:bg-green-700 transition duration-200"
+        >
           Post Offer
         </Button>
+
       </form>
     </div>
   );
+  
 };
 
 export default AddOffer;

@@ -46,10 +46,19 @@ const Orders = () => {
 
 
   return (
-    <main className="pt-16 sm:pt-32 p-6 min-h-screen items-center">
+    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
 
       <div className="w-full flex justify-center mb-6 pt-6">
-        <Button className="text-lg font-bold">My Orders</Button>
+      <h1
+            className="text-3xl font-extrabold mb-4"
+            style={{
+              color: "beige",
+              WebkitTextStroke: "1px #000000",
+              textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
+            }}
+          >
+            My Orders
+          </h1>
       </div>
 
       <div className="items-container">

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -22,7 +22,6 @@ const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 const Offers = () => {
   const router = useRouter();
   const params = useParams();
-
   const { id } = params;
 
   const [offer, setOffer] = useState<Offer | null>(null);
@@ -34,7 +33,6 @@ const Offers = () => {
   useEffect(() => {
     const fetchOffer = async () => {
       const token = localStorage.getItem("accessToken");
-
       if (!token) {
         setError("No access token found, please log in again.");
         return router.push("/signIn");
@@ -46,7 +44,8 @@ const Offers = () => {
         })
         .then((response) => {
           if (response.data) setOffer(response.data);
-        });
+        })
+        .catch(() => setError("Failed to fetch offer"));
     };
 
     fetchOffer();
@@ -87,22 +86,20 @@ const Offers = () => {
             quantity: quantity,
           },
           {
-            headers: { Authorization: `Bearer ${token}` }, 
-
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         setInCart(true);
         toast.success('Your order is successful');
       } catch (error: unknown) {
-        if (axios.isAxiosError(error)) { 
+        if (axios.isAxiosError(error)) {
           if (error.response && error.response.data.message === 'Requested quantity exceeds available stock') {
             toast.error('The requested quantity exceeds available stock.');
-          } 
-          toast.error('Error in placing order');
+          } else {
+            toast.error('Error in placing order');
+          }
         }
-        
-
       }
     }
   };
@@ -112,64 +109,72 @@ const Offers = () => {
   }
 
   return (
-    <div className="container  mx-auto p-4 mt-16">
+    <div className="container mx-auto p-4 mt-8">
       <ToastContainer />
-      <div className="image flex justify-center mb-8">
-        {offer.images.length > 0 ? (
-          <Image
-            src={`${BASE_IMAGE_URL}${offer.images[0].path}`}
-            alt={offer.title}
-            width={300}
-            height={200}
-            className="rounded-md"
-          />
-        ) : (
-          <div className="bg-gray-200 w-80 h-52 flex items-center justify-center rounded-md">
-            <p className="text-gray-500">No Image Available</p>
-          </div>
-        )}
+      
+      {/* Offer Image Section */}
+      <div className="image-container flex justify-center mb-8">
+        <Image
+          src={"/logo.png"}
+
+// src={offer.images.length > 0 ? `${BASE_IMAGE_URL}${offer.images[0].path}` : "/logo.png"}
+          alt={offer.title}
+          width={150}
+          height={150}
+          className="rounded-lg shadow-lg object-cover"
+        />
       </div>
 
+      {/* Offer Title & Description */}
       <div className="item-details text-center mb-6">
-        <h1 className="text-2xl font-bold">{offer.title}</h1>
-        <p className="text-xl text-green-500 font-semibold">
-          {offer.description}
-        </p>
+        <h1 className="text-3xl font-bold text-gray-800">{offer.title}</h1>
+        <p className="text-lg text-green-600 font-medium mt-2">{offer.description}</p>
       </div>
 
-      <div className="cart flex justify-center items-center mb-8">
-        <div className="quantity flex items-center">
-          <button className="bg-gray-300 p-2 rounded-l-lg" onClick={decreaseQuantity}>
+      {/* Quantity and Cart Button */}
+      <div className="cart flex justify-center items-center mb-8 space-x-4">
+        <div className="quantity flex items-center space-x-2 border border-gray-300 rounded-lg overflow-hidden">
+          <button
+            className="bg-gray-300 px-4 py-2"
+            onClick={decreaseQuantity}
+          >
             -
           </button>
           <p className="mx-4 text-lg">{quantity}</p>
-          <button className="bg-gray-300 p-2 rounded-r-lg" onClick={increaseQuantity}>
+          <button
+            className="bg-gray-300 px-4 py-2"
+            onClick={increaseQuantity}
+          >
             +
           </button>
         </div>
       </div>
 
-      <div className="additional-details mb-6">
-        <h2 className="text-lg font-bold text-center mb-4">Offer Details</h2>
-        <p className="text-center mb-2">
-          <span className="font-bold">Owner:</span> {offer.owner}
+      {/* Offer Additional Details */}
+      <div className="additional-details mb-6 space-y-2">
+        <h2 className="text-lg font-semibold text-center text-gray-800">Offer Details</h2>
+        {/* <p className="text-center text-gray-700">
+          <span className="font-semibold">Owner:</span> {offer.owner}
+        </p> */}
+        <p className="text-center text-gray-700">
+          <span className="font-semibold">Pickup Location:</span> {offer.pickupLocation}
         </p>
-        <p className="text-center mb-2">
-          <span className="font-bold">Pickup Location:</span> {offer.pickupLocation}
-        </p>
-        <p className="text-center mb-2">
-          <span className="font-bold">Expiration Date:</span> {new Date(offer.expirationDate).toLocaleDateString()}
+        <p className="text-center text-gray-700">
+          <span className="font-semibold">Expiration Date:</span> {new Date(offer.expirationDate).toLocaleDateString()}
         </p>
       </div>
 
+      {/* Add to Cart Button */}
       <div className="text-center mb-8">
         <button
           onClick={handleOrder}
-          className={`py-2 px-6 rounded-md text-white ${inCart ? "bg-green-600" : "bg-blue-600"}`}
+          className={`py-2 px-6 rounded-full text-black font-bold sm:text-lg border border-black transition-all duration-300 ease-in-out 
+            ${inCart ? "bg-green-300 hover:bg-green-500" : "bg-[#fffc5ed3] hover:bg-[#fffc8ad1]"}`}
         >
           {inCart ? "Added to Cart" : "Add to Cart"}
         </button>
       </div>
+
     </div>
   );
 };

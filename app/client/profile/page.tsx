@@ -140,7 +140,7 @@ const ProfilePage = () => {
 
 
   return (
-    <main className="sm:pt-32 p-6 bg-gradient-to-r from-green-300 via-green-200 to-green-300 min-h-screen flex flex-col items-center">
+    <main className="sm:pt-32 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
       <ToastContainer />
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-6 mb-8 transition-all hover:scale-105">
         <div className="flex items-center mb-6">
@@ -172,7 +172,7 @@ const ProfilePage = () => {
         </div>
         <div className="flex justify-center mt-4">
           <Button
-            className="bg-orange-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-orange-600"
+            className="text-black bg-[#fffc5ed3] sm:text-lg border border-black font-bold py-3 px-6 rounded-full shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:bg-yellow-600"
             onClick={() => setIsEditModalOpen(true)}
           >
             Edit Profile

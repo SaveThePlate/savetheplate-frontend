@@ -21,8 +21,8 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               <Button disabled>Loading...</Button>
             ) : userRole === 'PROVIDER' ? (
               <Link href="/provider/publish">
-                <Button className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl">
-                  Publish an Offer
+                <Button className="text-black sm:text-lg border border-black bg-white  py-3 px-6 rounded-full shadow-md transition-all duration-200 ease-in-out transform hover:scale-110  hover:shadow-xl">
+                Publish an Offer
                 </Button>
               </Link>
             ) : null}
@@ -30,7 +30,8 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
         </nav>
       </header>
 
-      <main>{children}</main>
+      <main className="pt-16 ">
+      {children}</main>
       
       <footer className="w-full sticky bottom-0 bg-white shadow-inner border-t border-gray-200 h-16">
       <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full'>
