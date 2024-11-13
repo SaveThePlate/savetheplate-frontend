@@ -59,7 +59,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     }
 
     try {
-      await axios.patch(
+      await axios.post(
         process.env.NEXT_PUBLIC_BACKEND_URL + `/orders/${order.id}/cancel`,
         {},
         {
