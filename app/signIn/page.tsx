@@ -48,20 +48,40 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-600 to-green-400 p-6">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md sm:max-w-lg md:max-w-md lg:max-w-xs">
-        <div className="flex flex-col items-center space-y-4 mb-6 text-center">
-          <h1 className="font-bold text-2xl sm:text-3xl text-green-900">
-            {isNewUser
-              ? "Welcome to SaveThePlate! 🥳"
-              : "Welcome back! We've missed you! 🥰"}
-          </h1>
-          <p className="font-light text-sm sm:text-base text-gray-600">
-            {isNewUser
-              ? "Join us in reducing food waste and saving the planet, one meal at a time."
-              : "Thank you for continuing your journey with us!"}
-          </p>
-        </div>
+<div
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
+      style={{
+        backgroundColor: '#98cca8', 
+      }}
+    >
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center text-center w-full max-w-md px-4 sm:px-8 py-12 bg-white rounded-3xl shadow-lg">
+
+        {/* Header */}
+        <h1
+          className="text-3xl sm:text-4xl lg:text-5xl font-extrabold animate-fadeInDown mb-4 sm:mb-6"
+          style={{
+            color: '#ffbe98', 
+            WebkitTextStroke: '0.5px #000000', 
+            textShadow: '4px 4px 6px rgba(0, 0, 0, 0.15)', 
+          }}
+        >
+          {!isNewUser
+            ? "Welcome to SaveThePlate! 🥳"
+            : "Welcome back! We've missed you! 🥰"}
+        </h1>
+        
+        {/* Description Text */}
+        <p
+          className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 font-semibold animate-fadeInUp"
+          style={{
+            color: '#333333', 
+          }}
+        >
+          {!isNewUser
+            ? "Join us in reducing food waste and saving the planet, one meal at a time."
+            : "Thank you for continuing your journey with us!"}
+        </p>
 
         {/* Form */}
         <form
@@ -70,22 +90,23 @@ export default function SignIn() {
         >
           <Input
             placeholder="name@example.com"
-            className="w-full px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600"
+            className="w-full px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-600"
             type="email"
             required
             onChange={(e) => setEmail(e.target.value)}
           />
+
           {loading ? (
             <Button
               disabled
-              className="w-full bg-green-800 text-white font-medium py-2 rounded-lg flex justify-center items-center"
+              className="w-full bg-teal-700 text-white font-bold py-2 rounded-lg flex justify-center items-center border border-black"
             >
               <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
               Loading...
             </Button>
           ) : (
             <Button
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg"
+              className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black hover:bg-[#ffbe98] transition duration-300 transform hover:scale-110"
               type="submit"
               id="sign-in-button"
             >
@@ -94,18 +115,17 @@ export default function SignIn() {
           )}
         </form>
 
-        <Separator orientation="horizontal" className="mt-6 bg-gray-300" />
+        {/* Separator */}
+        <Separator orientation="horizontal" className="mt-6 bg-[#f0ece7]" />
 
-        {/* Conditionally render toasts */}
-        {showAuthToast && AuthToast}
-        {showErrorToast && ErrorToast}
-
+        {/* Footer Text */}
         <p className="mt-8 text-center font-light text-xs sm:text-sm text-gray-500">
-          {isNewUser
+          {!isNewUser
             ? "Check your inbox to complete your registration and start rescuing meals!"
             : "Check your email for the magic link and keep saving meals!"}
         </p>
       </div>
     </div>
+  
   );
 }

@@ -98,9 +98,7 @@ const FillDetails = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
-      style={{ backgroundColor: "#98cca8" }}
-    >
+      className="bg-[#98cca8] min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8">
       <div className="relative flex flex-col items-center justify-center text-center w-full max-w-md px-4 py-12 bg-white rounded-3xl shadow-lg">
         <ToastContainer />
         <div className="flex flex-col items-center text-center space-y-4 mb-6">
