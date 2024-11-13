@@ -62,13 +62,16 @@ const Orders = () => {
       </div>
 
       <div className="items-container">
-      {orders.length > 0 ? (
+      {/* {orders.length > 0 ? (
           orders.map((order) => (
             <CartOrder key={order.id} order={order} />
           ))
         ) : (
           <p>No orders yet.</p>
-        )}
+        )} */}
+        {orders.map((order) => (
+            <CartOrder key={order.id} order={order} />
+          ))}
       </div>
     </main>
   );

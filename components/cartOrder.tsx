@@ -99,14 +99,14 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     fetchOffer();
   }, [order.offerId, router]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>{error}</p>;
 
   return (
     <div className="item-container bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg shadow-lg mb-6 flex items-center justify-between space-x-4 w-full sm:w-auto">
       <ToastContainer />
       <div className="item-image mr-4">
-        {/* {offer?.images && offer.images.length > 0 ? (
+        {offer?.images && offer.images.length > 0 ? (
           <Image
             src={`${BASE_IMAGE_URL}${offer.images[0].path}`}
             alt={offer.title}
@@ -116,8 +116,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           />
         ) : (
           <Image src="/logo.png" alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" />
-        )} */}
-          <Image src="/logo.png"  width={100} height={100} alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" />
+        )}
+          {/* <Image src="/logo.png"  width={100} height={100} alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" /> */}
 
       </div>
 
