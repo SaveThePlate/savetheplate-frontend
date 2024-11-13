@@ -28,8 +28,8 @@ const OffersPage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
   const [userRole, setUserRole] = useState(null);
+
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken'); 
@@ -71,6 +71,10 @@ const OffersPage = () => {
     fetchOffers();
   }, []);
 
+  const handleDelete = (offerId: number) => {
+    setOffers((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
+  };
+
 
   if (loading) return <div>Loading... </div>;
   if (error) return <div>{error} </div>;
@@ -94,6 +98,7 @@ const OffersPage = () => {
           pickupLocation={offer.pickupLocation}
           reserveLink={`/client/offers/${offer.id}`}
           userRole={userRole}
+          onDelete={handleDelete}
         />
       ))}
 

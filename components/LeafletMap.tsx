@@ -200,44 +200,52 @@ const LeafletMap = ({ markers, center }: any) => {
             position={[offer.latitude, offer.longitude]}
             icon={emojiIcon}
           >
-            <Popup>
-              <div className="flex items-center p-4 bg-white rounded-lg shadow-md text-sm space-x-4">
-                <div className="flex-1">
-                  <strong className="block mb-2 text-lg text-gray-800 font-semibold">
-                    {offer.title}
-                  </strong>
-                  <div className="text-gray-600">
-                    <div className="mb-1">
-                      <strong className="text-gray-700">Pickup Location:</strong> {offer.pickupLocation}
-                    </div>
-                    <div className="mb-1">
-                      <strong className="text-gray-700">Expires:</strong> {formatDate(new Date(offer.expirationDate))} at {formatTime(new Date(offer.expirationDate))}
-                    </div>
+          <Popup>
+            <div className="flex items-start p-5 bg-white rounded-lg shadow-lg space-x-5 text-sm">
+              
+              {/* Content Section */}
+              <div className="flex-1">
+                <strong className="block mb-3 text-lg text-gray-800 font-semibold">
+                  {offer.title}
+                </strong>
+                <div className="text-gray-600 space-y-2">
+                  <div>
+                    <strong className="text-gray-700">Pickup Location:</strong> {offer.pickupLocation}
+                  </div>
+                  <div>
+                    <strong className="text-gray-700">Expires:</strong> {formatDate(new Date(offer.expirationDate))} at {formatTime(new Date(offer.expirationDate))}
                   </div>
                 </div>
-
-                <div className="flex flex-col items-center space-y-2">
-                  {/* <div className="w-24 h-24">
-                    <Image
-                      className="w-full h-full object-cover rounded-md border border-gray-200"
-                      src={getImage(offer.images[0]?.path || "/default-placeholder.png")}
-                      alt={offer.title}
-                      width={96}
-                      height={96}
-                    />
-                  </div> */}
-
-                  {userRole === "CLIENT" && ( 
-                    <button
-                      onClick={() => handleOrder(offer.id)}
-                      className={`py-2 px-6 rounded-md text-white w-full ${inCart ? "bg-green-600" : "bg-emerald-600"}`}
-                    >
-                      {inCart ? "Added to Cart" : "Add to Cart"}
-                    </button>
-                  )}
-                </div>
               </div>
-            </Popup>
+
+              {/* Image and Button Section */}
+              <div className="flex flex-col items-center space-y-3">
+                {/* Image Display */}
+                <div className="w-24 h-24 overflow-hidden rounded-md border border-gray-200">
+                  <Image
+                    className="w-full h-full object-cover"
+                    src={getImage(offer.images[0]?.path || "/default-placeholder.png")}
+                    alt={offer.title}
+                    width={96}
+                    height={96}
+                  />
+                </div>
+
+                {/* Button */}
+                {userRole === "CLIENT" && (
+                  <button
+                    onClick={() => handleOrder(offer.id)}
+                    className={`py-2 px-6 rounded-full font-medium text-white transition-colors duration-300 ${
+                      inCart ? "bg-green-600 hover:bg-green-700" : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
+                  >
+                    {inCart ? "Added to Cart" : "Add to Cart"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </Popup>
+
           </Marker>
         ))}
       </MapContainer>

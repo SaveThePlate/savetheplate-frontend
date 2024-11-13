@@ -73,6 +73,10 @@ const ProfilePage = () => {
     }
   };
 
+  const handleDelete = (offerId: number) => {
+    setOffers((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
+  };
+
   const handleImageUpload = async (newFiles: File[] | null) => {
     if (newFiles && newFiles.length > 0) {
       const token = localStorage.getItem('accessToken');
@@ -232,13 +236,14 @@ const ProfilePage = () => {
             pickupLocation={offer.pickupLocation}
             reserveLink={`/reserve/${offer.id}`}
             userRole={userRole}
+            onDelete={handleDelete}
           />
         ))}
       </div>
 
       {isEditModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 transition-opacity duration-300">
-    <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg transform transition-transform duration-300 scale-105">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg transform transition-transform duration-300 scale-105">
       <h2 className="text-xl font-semibold mb-6 text-center text-gray-800">Edit Profile</h2>
       <form>
         <div className="mb-6">
@@ -265,12 +270,12 @@ const ProfilePage = () => {
             type="text"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none "
           />
         </div>
         <div className="flex justify-between items-center mt-8">
           <Button
-            className="bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+            className="py-2 px-6 text-xs bg-[#10712dd3] font-bold sm:text-lg border border-black  rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300"
             onClick={() => {
               setIsEditModalOpen(false);
               handleProfileUpdate();
@@ -279,7 +284,7 @@ const ProfilePage = () => {
             Save
           </Button>
           <Button
-            className="bg-gray-400 text-white py-2 px-6 rounded-lg shadow-md hover:bg-gray-500 transition duration-300"
+            className="bg-gray-400 text-white py-2 px-6 border border-black  rounded-full shadow-lg hover:shadow-xl   hover:bg-gray-500 transition duration-300"
             onClick={() => setIsEditModalOpen(false)}
           >
             Cancel

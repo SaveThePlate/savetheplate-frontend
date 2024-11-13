@@ -115,9 +115,8 @@ const Offers = () => {
       {/* Offer Image Section */}
       <div className="image-container flex justify-center mb-8">
         <Image
-          src={"/logo.png"}
-
-// src={offer.images.length > 0 ? `${BASE_IMAGE_URL}${offer.images[0].path}` : "/logo.png"}
+          // src={"/logo.png"}
+          src={offer.images.length > 0 ? `${BASE_IMAGE_URL}${offer.images[0].path}` : "/logo.png"}
           alt={offer.title}
           width={150}
           height={150}

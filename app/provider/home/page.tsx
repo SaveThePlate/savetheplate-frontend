@@ -16,6 +16,22 @@ const Home = () => {
   });
 
   useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoordinates({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error obtaining location: ", error);
+        }
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+
     const fetchOffers = async () => {
       try {
         const response = await axios.get(
@@ -29,6 +45,7 @@ const Home = () => {
 
     fetchOffers();
   }, []);
+
 
   return (
   

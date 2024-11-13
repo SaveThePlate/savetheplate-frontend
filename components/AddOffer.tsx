@@ -14,6 +14,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
+import { useRouter } from "next/navigation";
 
 const AddOffer = () => {
   const [title, setTitle] = useState("");
@@ -23,6 +24,9 @@ const AddOffer = () => {
   const [expirationDate, setExpirationDate] = useState("");
   const [files, setFiles] = useState<File[] | null>([]);
   const [offers, setOffers] = useState<{ price: number; title: string }[]>([]);
+
+  const router = useRouter();
+
 
   const handleImage = async (files: File[] | null) => {
     if (!files || files.length === 0) {
@@ -112,6 +116,7 @@ const AddOffer = () => {
 
       toast.success("Offer submitted successfully!");
       setOffers([...offers, { price: priceToFloat, title }]);
+      router.push("/provider/home");
 
     } catch (error) {
       console.error("Error submitting offer:", error);
