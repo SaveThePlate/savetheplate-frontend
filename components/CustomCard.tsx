@@ -83,7 +83,7 @@ const CustomCard: FC<CustomCardProps> = ({
           <span className="text-teal-600 font-semibold">{price} dt</span>
         </div>
       </CardTitle>
-      <CardDescription className="mt-3 flex items-center gap-2">
+      <CardDescription className="mt-3  items-center gap-2">
         <span
           className={`text-lg font-bold ${
             quantity > 0 ? "text-gray-800" : "text-red-500"
@@ -91,14 +91,14 @@ const CustomCard: FC<CustomCardProps> = ({
         >
           {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
         </span>
-        {quantity > 0 && (
+        <br/>
           <Link
             href={`./profile/${ownerId}`}
-            className="text-sm hover:underline text-teal-500"
+            className="text-base hover:underline text-teal-500"
           >
             {pickupLocation}
           </Link>
-        )}
+        
       </CardDescription>
     </CardHeader>
 
