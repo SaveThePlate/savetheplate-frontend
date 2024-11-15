@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Offers from "@/components/Offers";
-import { Button } from "@/components/ui/button";
 import MapComponent from "@/components/MapComponent";
 import axios from "axios";
 const Home = () => {
@@ -49,7 +48,7 @@ const Home = () => {
   return (
   
       <main className="sm:pt-32 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
-        <div className="w-full flex justify-center mb-6 pt-6 space-x-4">
+        {/* <div className="w-full flex justify-center mb-6 pt-6 space-x-4">
           <Button
             onClick={() => setShowMap(false)}
             className={`${
@@ -71,7 +70,7 @@ const Home = () => {
           >
             View Map 📍
           </Button>
-        </div>
+        </div> */}
 
         <div className="w-full flex-grow">
           {showMap ? (

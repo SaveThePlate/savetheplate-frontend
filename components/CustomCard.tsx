@@ -46,70 +46,62 @@ const CustomCard: FC<CustomCardProps> = ({
 
   const router = useRouter();
 
-  const handleDeleteOffer = async (offerId: number) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("No token found");
-  
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      toast.success("Offer deleted successfully!");
-      onDelete(offerId);  
-    } catch (err) {
-      toast.success("Failed to delete offer");
-    }
-  };
+ 
 
   return (
-<Card className="w-full sm:w-full md:w-96 lg:w-full shadow-lg border border-gray-200 rounded-lg hover:shadow-2xl transition-transform transform hover:scale-105 m-3 bg-white overflow-hidden">
-  <div className="flex items-start pr-6">
-    
+<div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 max-w-xs">
+  {/* <Card className="flex flex-col md:flex-row w-full sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4 shadow-lg border border-gray-200 rounded-lg hover:shadow-2xl transition-transform transform hover:scale-105 m-3 bg-white overflow-hidden"> */}
+  <Card className="flex flex-col shadow-lg border border-gray-200 rounded-lg hover:shadow-2xl transition-transform transform hover:scale-105 m-3 bg-white overflow-hidden">
+ 
     {/* Image Section */}
-    <div className="w-1/3 h-32 md:h-40 lg:h-48 rounded-l-lg overflow-hidden relative pt-6">
-      {/* <Image
-        src={imageSrc}
-        alt={imageAlt}
-        width={300}
-        height={300}
-        className="object-cover w-full h-full"
-      /> */}
-          {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            className="object-cover w-full h-full"
-            width={300}
-            height={300}
-          />
-        ) : (
-          <Image src="/logo.png" alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" />
-        )}
-    
-
+    <div className="w-full md:w-1/3 h-48 md:h-auto rounded-l-lg overflow-hidden relative">
+      {imageSrc ? (
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          className="object-cover w-full h-full"
+          width={300}
+          height={300}
+        />
+      ) : (
+        <Image
+          src="/logo.png"
+          alt="Default Item Image"
+          className="object-cover w-20 h-20 mx-auto mt-6"
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
     </div>
 
     {/* Content Section */}
-    <div className="flex flex-col justify-between p-5 w-2/3 bg-white rounded-r-lg">
-      <CardHeader className="p-0">
-        <CardTitle className="flex justify-between items-center text-lg font-semibold text-gray-800">
-          <span>{title}</span>
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            <span className="text-gray-400 line-through">{price * 2} dt</span>
-            <span className="text-teal-600 font-semibold">{price} dt</span>
-          </div>
-        </CardTitle>
-        <CardTitle className="text-sm font-semibold text-gray-500 mt-1">
-          {quantity} pieces left
-        </CardTitle>
-        <CardDescription className="text-xs text-gray-700 mt-1">
-          <Link href={`./profile/${ownerId}`} className="hover:underline text-teal-500">
+    <div className="flex flex-col justify-between p-5 w-full md:w-2/3 bg-white">
+    <CardHeader className="p-0">
+      <CardTitle className="text-lg font-semibold text-gray-800">
+        {title}
+        <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+          <span className="text-gray-400 line-through">{price * 2} dt</span>
+          <span className="text-teal-600 font-semibold">{price} dt</span>
+        </div>
+      </CardTitle>
+      <CardDescription className="mt-3 flex items-center gap-2">
+        <span
+          className={`text-lg font-bold ${
+            quantity > 0 ? "text-gray-800" : "text-red-500"
+          }`}
+        >
+          {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
+        </span>
+        {quantity > 0 && (
+          <Link
+            href={`./profile/${ownerId}`}
+            className="text-sm hover:underline text-teal-500"
+          >
             {pickupLocation}
           </Link>
-        </CardDescription>
-      </CardHeader>
+        )}
+      </CardDescription>
+    </CardHeader>
+
 
       <CardFooter className="flex justify-between items-center p-0 mt-4 space-x-2">
         <Credenza>
@@ -138,24 +130,28 @@ const CustomCard: FC<CustomCardProps> = ({
           </CredenzaContent>
         </Credenza>
 
-        {/* Conditional Rendering for Buttons */}
-        {userRole === 'CLIENT' ? (
+        {quantity > 0 ? (
           <Link
             href={reserveLink}
-            className="px-4 py-2 text-xs bg-[#fffc5ed3] font-bold sm:text-lg border border-black bg-gradient-to-r from-green-400 to-teal-500 text-black rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300">
+            className="px-4 py-2 text-xs bg-[#fffc5ed3] font-bold sm:text-lg border border-black bg-gradient-to-r from-green-400 to-teal-500 text-black rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
+          >
             Order
           </Link>
-        ) : userRole === 'PROVIDER' ? (
-          <Button
-            onClick={() => handleDeleteOffer(offerId)}
-            className="px-4 py-2 text-xs bg-[#fa6363d3] text-white rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300">
-            Delete Offer
-          </Button>
-        ) : null}
+        ) : (
+          <button
+            disabled
+            className="px-4 py-2 text-xs bg-gray-300 font-bold sm:text-lg border border-gray-400 text-gray-600 rounded-full shadow-md cursor-not-allowed"
+          >
+            Order
+          </button>
+        )}
+
+       
       </CardFooter>
     </div>
-  </div>
-</Card>
+  </Card>
+</div>
+
 
   );
 };

@@ -81,7 +81,7 @@ const OffersPage = () => {
 
   return (
     
-    <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
+    <div className="flex flex-wrap justify-center gap-6">
       
       {offers.map((offer) => (
         <CustomCard

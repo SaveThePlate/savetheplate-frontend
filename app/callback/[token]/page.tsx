@@ -52,7 +52,6 @@ function AuthCallback() {
       });
   }, [token, clientApi, router]);
 
-  // return <div>Loading...</div>;
 }
 
 export default AuthCallback;

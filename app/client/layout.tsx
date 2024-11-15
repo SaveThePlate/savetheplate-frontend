@@ -1,12 +1,10 @@
 "use client";
-import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const { userRole, loading, error } = useUser();
   const [userId, setUserId] = useState<string | null>(null);
 
   return (
@@ -19,17 +17,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <Image src="/logoOnly.png" alt="Logo" width={150} height={150} className="object-contain block lg:hidden md:hidden h-full" />
           </Link>
           <div className="flex items-center gap-3 h-full">
-            {/* {loading ? ( */}
-              <Button disabled>Loading...</Button>
-            {/* // ) : userRole === 'CLIENT' ? ( */}
+     
               <Link href="/client/home">
                 <Button className="text-black sm:text-lg border border-black bg-white  py-3 px-6 rounded-full shadow-md transition-all duration-200 ease-in-out transform hover:scale-110  hover:shadow-xl">
-                  Browse Offers
+                  Browse Offers 
                 </Button>
               </Link>
-            {/* // ) : (
-            //   <p>{error}</p>
-            // )} */}
+      
           </div>
         </nav>
       </header>
@@ -49,7 +43,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             </button>
           </Link>
 
-          {/* {userRole === 'CLIENT' ? ( */}
             <Link href={`/client/orders/${userId}`} className="h-full flex items-center">
               <button className="hover:bg-gray-200 text-gray-800 font-bold h-full px-4 rounded flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
@@ -57,8 +50,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </svg>
               </button>
             </Link>
-          {/* ) : null} */}
-
+        
           <Link href="/client/profile" className="h-full flex items-center">
             <button className="hover:bg-gray-200 text-gray-800 font-bold h-full px-4 rounded flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
