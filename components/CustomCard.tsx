@@ -1,10 +1,8 @@
 import { FC } from "react";
-import axios from "axios";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
 import { Credenza, CredenzaBody, CredenzaClose, CredenzaContent, CredenzaDescription, CredenzaFooter, CredenzaHeader, CredenzaTitle, CredenzaTrigger } from "./ui/credenza";
-import { Button } from "./ui/button";
 import { useRouter} from "next/navigation";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -20,6 +18,7 @@ interface CustomCardProps {
   quantity: number;
   expirationDate: string;
   pickupLocation: string;
+  mapsLink: string;
   reserveLink: string;
   userRole: 'CLIENT' | 'PROVIDER' | null;
   onDelete: (offerId: number) => void;
@@ -36,6 +35,7 @@ const CustomCard: FC<CustomCardProps> = ({
   quantity,
   expirationDate,
   pickupLocation,
+  mapsLink,
   reserveLink,
   userRole,
   onDelete,
@@ -50,9 +50,7 @@ const CustomCard: FC<CustomCardProps> = ({
 
   return (
 <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 max-w-xs">
-  {/* <Card className="flex flex-col md:flex-row w-full sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4 shadow-lg border border-gray-200 rounded-lg hover:shadow-2xl transition-transform transform hover:scale-105 m-3 bg-white overflow-hidden"> */}
   <Card className="flex flex-col shadow-lg border border-gray-200 rounded-lg hover:shadow-2xl transition-transform transform hover:scale-105 m-3 bg-white overflow-hidden">
- 
     {/* Image Section */}
     <div className="w-full md:w-1/3 h-48 md:h-auto rounded-l-lg overflow-hidden relative">
       {imageSrc ? (
@@ -66,6 +64,8 @@ const CustomCard: FC<CustomCardProps> = ({
       ) : (
         <Image
           src="/logo.png"
+          width={100}
+          height={100}
           alt="Default Item Image"
           className="object-cover w-20 h-20 mx-auto mt-6"
         />
@@ -75,33 +75,46 @@ const CustomCard: FC<CustomCardProps> = ({
 
     {/* Content Section */}
     <div className="flex flex-col justify-between p-5 w-full md:w-2/3 bg-white">
-    <CardHeader className="p-0">
-      <CardTitle className="text-lg font-semibold text-gray-800">
-        {title}
-        <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
-          <span className="text-gray-400 line-through">{price * 2} dt</span>
-          <span className="text-teal-600 font-semibold">{price} dt</span>
-        </div>
-      </CardTitle>
-      <CardDescription className="mt-3  items-center gap-2">
-        <span
-          className={`text-lg font-bold ${
-            quantity > 0 ? "text-gray-800" : "text-red-500"
-          }`}
-        >
-          {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
-        </span>
-        <br/>
-          <Link
+      <CardHeader className="p-0">
+        <CardTitle className="text-lg font-semibold text-gray-800">
+          {title}
+          <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+            <span className="text-gray-400 line-through">{price * 2} dt</span>
+            <span className="text-teal-600 font-semibold">{price} dt</span>
+          </div>
+        </CardTitle>
+        <CardDescription className="mt-3 flex flex-col items-start gap-4">
+          <span
+            className={`text-lg font-bold ${
+              quantity > 0 ? "text-gray-800" : "text-red-500"
+            }`}
+          >
+            {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
+          </span>
+
+          {/* <Link
             href={`./profile/${ownerId}`}
             className="text-base hover:underline text-teal-500"
           >
             {pickupLocation}
-          </Link>
-        
-      </CardDescription>
-    </CardHeader>
+          </Link> */}
 
+          <p className="text-base hover:underline text-teal-500">{pickupLocation}</p>
+
+          {mapsLink && (
+            <a
+              href={mapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" text-center px-4 py-2 text-sm bg-teal-500 text-white font-bold rounded-full shadow-md hover:bg-teal-600 transition-colors duration-300 transform hover:scale-105"
+            >
+              View on Google Maps
+            </a>
+          )}
+
+        </CardDescription>
+
+      </CardHeader>
 
       <CardFooter className="flex justify-between items-center p-0 mt-4 space-x-2">
         <Credenza>
@@ -111,23 +124,59 @@ const CustomCard: FC<CustomCardProps> = ({
             </button>
           </CredenzaTrigger>
 
-          <CredenzaContent className="bg-white rounded-lg shadow-lg p-4">
-            <CredenzaHeader>
-              <CredenzaTitle className="text-xl font-semibold text-gray-800 mb-2">{title}</CredenzaTitle>
-              <CredenzaDescription className="text-gray-600">{description}</CredenzaDescription>
-            </CredenzaHeader>
-            <CredenzaBody>
-              <p className="text-sm text-gray-700"><strong>Expires:</strong> {formattedDate} at {formattedTime}</p>
-              <p className="text-sm text-gray-700"><strong>Location:</strong> {pickupLocation}</p>
-            </CredenzaBody>
-            <CredenzaFooter className="flex justify-end mt-4">
-              <CredenzaClose asChild>
-                <button className="px-4 py-2 bg-gradient-to-r from-red-400 to-red-600 text-white rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300">
-                  Close
-                </button>
-              </CredenzaClose>
-            </CredenzaFooter>
-          </CredenzaContent>
+          <CredenzaContent className="bg-white rounded-lg shadow-lg p-6 max-w-lg mx-auto">
+  {/* Modal Header */}
+  <CredenzaHeader className="mb-4">
+    <CredenzaTitle className="text-2xl font-bold text-gray-800 mb-3">
+      {title}
+    </CredenzaTitle>
+    <CredenzaDescription className="text-gray-600 text-sm">
+      {description}
+    </CredenzaDescription>
+  </CredenzaHeader>
+
+  {/* Modal Body */}
+  <CredenzaBody className="space-y-4">
+    {/* Pickup Time */}
+    <p className="text-base text-gray-700">
+      <strong>Heure de collecte :</strong>  {formattedDate} à {formattedTime}
+    </p>
+
+    {/* Location Information */}
+    <p className="text-base text-gray-700">
+      <strong>Lieu :</strong> {pickupLocation}
+    </p>
+
+    {/* Maps Link */}
+    {mapsLink && (
+      <div className="mt-4">
+        <a
+          href={mapsLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block px-4 py-2 text-white bg-teal-500 hover:bg-teal-600 font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105"
+        >
+          Voir sur Google Maps
+        </a>
+      </div>
+    )}
+
+    <p className="text-base text-blue-700 mt-4 font-medium">
+      Ne manquez pas cette occasion ! Assurez-vous de récupérer votre commande à l'heure indiquée pour en profiter.
+    </p>
+    
+  </CredenzaBody>
+
+  {/* Modal Footer */}
+  <CredenzaFooter className="flex justify-end mt-6">
+    <CredenzaClose asChild>
+      <button className="px-4 py-2 bg-gradient-to-r from-red-400 to-red-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
+        Fermer
+      </button>
+    </CredenzaClose>
+  </CredenzaFooter>
+</CredenzaContent>
+
         </Credenza>
 
         {quantity > 0 ? (
@@ -145,12 +194,11 @@ const CustomCard: FC<CustomCardProps> = ({
             Order
           </button>
         )}
-
-       
       </CardFooter>
     </div>
   </Card>
 </div>
+
 
 
   );

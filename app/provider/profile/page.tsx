@@ -17,6 +17,7 @@ interface Offer {
   description: string;
   expirationDate: string;
   pickupLocation: string;
+  mapsLink: string;
 }
 
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
@@ -167,7 +168,7 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <main className="sm:pt-32 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
       <ToastContainer />
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-6 mb-8 transition-all hover:scale-105">
         <div className="flex items-center mb-6">
@@ -234,6 +235,7 @@ const ProfilePage = () => {
             description={offer.description}
             expirationDate={offer.expirationDate}
             pickupLocation={offer.pickupLocation}
+            mapsLink={offer.mapsLink}
             reserveLink={`/reserve/${offer.id}`}
             userRole={userRole}
             onDelete={handleDelete}

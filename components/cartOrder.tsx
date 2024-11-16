@@ -115,7 +115,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             height={80}
           />
         ) : (
-          <Image src="/logo.png" alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" />
+          <Image src="/logo.png"   width={100} height={100} alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" />
         )}
           {/* <Image src="/logo.png"  width={100} height={100} alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" /> */}
 

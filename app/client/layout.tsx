@@ -28,7 +28,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </nav>
       </header>
 
-      <main className="pt-16 pb-16">
+      <main className="pt-6 pb-16">
         {children}
       </main>
 

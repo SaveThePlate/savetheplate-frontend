@@ -21,7 +21,7 @@ const Map = () => {
   }, []);
 
   return (
-    <main className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-6 bg-white min-h-screen w-full">
+    <main className="pt-24 sm:pt-16 pb-16 sm:pb-24 px-6 bg-white min-h-screen w-full">
 
         <MapComponent
           markers={offers.filter(offer => offer.latitude !== null && offer.longitude !== null)}

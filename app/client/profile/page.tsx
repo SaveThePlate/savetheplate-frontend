@@ -140,7 +140,7 @@ const ProfilePage = () => {
 
 
   return (
-    <main className="sm:pt-32 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
       <ToastContainer />
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-6 mb-8 transition-all hover:scale-105">
         <div className="flex items-center mb-6">

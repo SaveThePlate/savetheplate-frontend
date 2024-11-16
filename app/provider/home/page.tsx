@@ -49,7 +49,7 @@ const Home = () => {
 
   return (
   
-      <main className="sm:pt-32 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+      <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
         <div className="w-full flex justify-center mb-6 pt-6 space-x-4">
           <Button
             onClick={() => setShowMap(false)}

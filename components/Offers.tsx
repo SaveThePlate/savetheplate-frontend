@@ -13,6 +13,7 @@ interface Offer {
   quantity: number;
   expirationDate: string;
   pickupLocation: string;
+  mapsLink: string;
   user: {
     username: string;
   };
@@ -76,14 +77,13 @@ const OffersPage = () => {
   };
 
 
-  if (loading) return <div>Loading... </div>;
-  if (error) return <div>{error} </div>;
-
   return (
     
     <div className="flex flex-wrap justify-center gap-6">
       
-      {offers.map((offer) => (
+      {offers
+        .sort((a, b) => (a.quantity === 0 ? 1 : b.quantity === 0 ? -1 : 0)) // Sort sold-out offers to the end
+        .map((offer) => (
         <CustomCard
           key={offer.id}
           offerId={offer.id}
@@ -96,6 +96,7 @@ const OffersPage = () => {
           quantity={offer.quantity}
           expirationDate={offer.expirationDate}
           pickupLocation={offer.pickupLocation}
+          mapsLink={offer.mapsLink}
           reserveLink={`/client/offers/${offer.id}`}
           userRole={userRole}
           onDelete={handleDelete}

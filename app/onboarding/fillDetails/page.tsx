@@ -47,6 +47,7 @@ const FillDetails = () => {
       phoneNumber: +phoneNumber,
       latitude,
       longitude,
+      googleMapsLink
     };
 
     try {
@@ -151,7 +152,7 @@ const FillDetails = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Restaurant Name (scraped from Google Maps)"
+            placeholder="Restaurant Name will be scraped from Google Maps"
             disabled
           />
           <Button
