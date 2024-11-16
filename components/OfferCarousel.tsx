@@ -74,7 +74,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
     };
 
     fetchOffers();
-  }, [ownerId]);
+  }, [ownerId, offers]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {

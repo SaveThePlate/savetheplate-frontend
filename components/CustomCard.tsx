@@ -162,7 +162,7 @@ const CustomCard: FC<CustomCardProps> = ({
     )}
 
     <p className="text-base text-blue-700 mt-4 font-medium">
-      Ne manquez pas cette occasion ! Assurez-vous de récupérer votre commande à l'heure indiquée pour en profiter.
+      Ne manquez pas cette occasion ! Assurez-vous de récupérer votre commande à l&apos;heure indiquée pour en profiter.
     </p>
     
   </CredenzaBody>
