@@ -128,33 +128,39 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
     <Slider {...carouselSettings}>
       {ownerOffers.map((offer) => (
         <div key={offer.id} className="p-3"> {/* Reduced padding */}
-          <h3 className="text-lg font-semibold mb-3">Offers by {offer.pickupLocation}</h3> {/* Smaller title size */}
+          <h3 className="text-lg font-semibold mb-6">Offers by {offer.pickupLocation}</h3> {/* Smaller title size */}
 
-          <div className="bg-white shadow rounded-lg p-3"> {/* Reduced padding */}
-            <Image
-              width={80} 
-              height={80} 
-              src={offer.images[0]?.path ? `/${offer.images[0].path}` : DEFAULT_PROFILE_IMAGE}
-              alt={offer.title}
-              className="w-full h-16 object-cover rounded-md" 
-            />
-            <h4 className="text-md font-semibold mt-2">{offer.title}</h4> {/* Smaller title size */}
-            {/* <p className="text-sm text-gray-600">{offer.description}</p> */}
+          <div className="bg-white shadow rounded-lg p-3 flex flex-col sm:flex-row gap-3">
+            <div className="flex-shrink-0">
+                <Image
+                width={80} 
+                height={80} 
+                src={offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_PROFILE_IMAGE}
+                alt={offer.title}
+                className="h-16 rounded-md"
+                />
+            </div>
 
-            <p className="text-xs text-gray-500"> {/* Smaller text size */}
-              Pickup time: {new Date(offer.expirationDate).toLocaleDateString()}
-            </p>
+            <div className="flex-grow">
+                <h4 className="text-md font-semibold mt-2">{offer.title}</h4> {/* Title under image */}
+                <div className="flex justify-between items-center">
+                <p className="text-xs text-gray-500"> {/* Pickup time */}
+                    Pickup time: {new Date(offer.expirationDate).toLocaleDateString()}
+                </p>
 
-            {/* Button */}
-            {userRole === "CLIENT" && (
-              <Link
-                href={`/client/offers/${offer.id}`}
-                className="px-3 py-1 text-xs bg-[#fffc5ed3] font-bold sm:text-sm border border-black rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
-              >
-                Order
-              </Link>
-            )}
-          </div>
+                {/* Button */}
+                {userRole === "CLIENT" && (
+                    <Link
+                    href={`/client/offers/${offer.id}`}
+                    className="px-3 py-1 text-xs bg-[#fffc5ed3] font-bold sm:text-sm border border-black rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
+                    >
+                    Order
+                    </Link>
+                )}
+                </div>
+            </div>
+            </div>
+
         </div>
       ))}
     </Slider>
