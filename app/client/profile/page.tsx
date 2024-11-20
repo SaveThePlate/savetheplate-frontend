@@ -31,7 +31,7 @@ const ProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [username, setUsername] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
+  // const [location, setLocation] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
 
@@ -46,9 +46,9 @@ const ProfilePage = () => {
       const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const { username, location, phoneNumber, profileImage } = response.data;
+      const { username, phoneNumber, profileImage } = response.data;
       setUsername(username);
-      setLocation(location);
+      // setLocation(location);
       setPhoneNumber(phoneNumber);
       setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
     } catch (err) {
@@ -80,35 +80,36 @@ const ProfilePage = () => {
       const token = localStorage.getItem('accessToken');
       const formData = new FormData();
       formData.append('profileImage', newFiles[0]);
-
+  
       try {
-        const response = await axios.post(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/upload-profile-image', formData, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
+        const response = await axios.post(
+          process.env.NEXT_PUBLIC_BACKEND_URL + '/users/upload-profile-image',
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+  
         if (response.status === 200) {
           toast.success('Image uploaded successfully!');
-          const updatedProfileImage = response.data.profileImage || DEFAULT_PROFILE_IMAGE;
-          setProfileImage(updatedProfileImage);
+          setProfileImage(response.data.profileImage || DEFAULT_PROFILE_IMAGE);
         } else {
           toast.error('Error uploading image. Please try again.');
         }
-
       } catch (error) {
         toast.error('Error uploading image');
         console.error('Image upload error:', error);
       }
     }
   };
-
+  
   const handleProfileUpdate = async () => {
     const token = localStorage.getItem('accessToken');
     const data = {
       username,
-      location,
       phoneNumber,
       profileImage: JSON.stringify(profileImage),
     };
@@ -165,7 +166,6 @@ const ProfilePage = () => {
             />
           </div>
           <div className="flex-grow">
-            <h1 className="text-2xl font-bold text-gray-800">{location || "Location"}</h1>
             <h1 className="text-gray-600">{username || "Username"}</h1>
             <p className="text-gray-600">{phoneNumber || "Phone number"}</p>
           </div>
@@ -179,6 +179,58 @@ const ProfilePage = () => {
           </Button>
         </div>
       </div>     
+
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+            {/* Profile Edit Form */}
+            <form onSubmit={(e) => { e.preventDefault(); handleProfileUpdate(); }}>
+              <div className="mb-4">
+                <label className="block text-gray-700">Profile Image</label>
+                <input type="file" className="mt-1 block w-full border rounded-md p-2" />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Username</label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full border rounded-md p-2"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Phone Number</label>
+                <input
+                  type="tel"
+                  className="mt-1 block w-full border rounded-md p-2"
+                  placeholder="Enter your phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="mr-4 py-2 px-4 bg-gray-300 text-gray-700 rounded-md"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
 
     </main>
   );

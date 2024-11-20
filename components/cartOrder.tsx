@@ -124,9 +124,13 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
       <div className="item-description flex-grow">
         <div className="item-details space-y-2">
           <div className="item-name font-semibold text-lg text-[#159d96]">{offer ? `${offer.title} x ${order.quantity}` : "Loading..."}</div>
-          <div className="item-location text-[#98cca8]">{offer ? offer.pickupLocation : "N/A"}</div>
+          
+          {/* <div className="item-location text-[#98cca8]">{offer ? offer.pickupLocation : "N/A"}</div> */}
+          <p className="text-base hover:underline text-teal-500">{offer ? offer.pickupLocation : "N/A"}</p>
+
           <div className="item-date text-[#c88ea1]">
-            {order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}
+            {/* {order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"} */}
+            { offer ? new Date(offer.expirationDate).toLocaleString() : "N/A" }
           </div>
         </div>
       </div>
