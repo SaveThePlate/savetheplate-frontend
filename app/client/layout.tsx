@@ -3,9 +3,13 @@ import Link from "next/link";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import React from "react";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+
+  console.log("showMap : ", showMap);
 
   return (
     <section>
@@ -17,19 +21,41 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <Image src="/logoOnly.png" alt="Logo" width={150} height={150} className="object-contain block lg:hidden md:hidden h-full" />
           </Link>
           <div className="flex items-center gap-3 h-full">
-     
+            <div className="w-full flex justify-center mb-6 pt-6 space-x-4">
               <Link href="/client/home">
-                <Button className="text-black sm:text-lg border border-black bg-white  py-3 px-6 rounded-full shadow-md transition-all duration-200 ease-in-out transform hover:scale-110  hover:shadow-xl">
-                  Browse Offers 
+                <Button
+                  className={`${
+                    !showMap
+                      ? "bg-gradient-to-r from-emerald-500 to-emerald-300 text-white"
+                      : "bg-gray-200 text-gray-600"
+                  } font-bold py-4 px-8 rounded-full shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-110`}
+                >
+                  View Offers 🛍️
                 </Button>
               </Link>
+    
+              <Link href="/client/map">
+                <Button
+                  className={`${
+                    showMap
+                      ? "bg-gradient-to-r  from-emerald-300 to-emerald-500 text-white"
+                      : "bg-gray-200 text-gray-600"
+                  } font-bold py-4 px-8 rounded-full shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-110`}
+                >
+                  View Map 📍
+                </Button>
+              </Link>
+              
+            </div>
+            
       
           </div>
         </nav>
       </header>
 
       <main className="pt-6 pb-16">
-        {children}
+        { /* {children} */}
+        {React.cloneElement(children as React.ReactElement, { showMap })}
       </main>
 
       {/* Footer */}

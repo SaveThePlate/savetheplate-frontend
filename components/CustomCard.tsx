@@ -84,13 +84,13 @@ const CustomCard: FC<CustomCardProps> = ({
           </div>
         </CardTitle>
         <CardDescription className="mt-3 flex flex-col items-start gap-4">
-          <span
-            className={`text-lg font-bold ${
-              quantity > 0 ? "text-gray-800" : "text-red-500"
-            }`}
-          >
-            {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
-          </span>
+        <span
+          className={`text-lg font-bold ${
+            quantity > 0 ? "text-gray-800" : "text-red-500"
+          }`}
+        >
+          {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
+        </span>
 
           {/* <Link
             href={`./profile/${ownerId}`}
@@ -98,8 +98,6 @@ const CustomCard: FC<CustomCardProps> = ({
           >
             {pickupLocation}
           </Link> */}
-
-          <p className="text-base hover:underline text-teal-500">{pickupLocation}</p>
 
           {mapsLink && (
             <a
@@ -113,6 +111,7 @@ const CustomCard: FC<CustomCardProps> = ({
           )}
 
         </CardDescription>
+        <p className="text-base hover:underline text-teal-500">{pickupLocation}</p>
 
       </CardHeader>
 
