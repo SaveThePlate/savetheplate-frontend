@@ -62,12 +62,9 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
           process.env.NEXT_PUBLIC_BACKEND_URL + "/offers",{
             headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('API Response:', response.data);
         setOffers(response.data);
-        console.log(offers);
         setLoading(false); // Set loading to false after data is fetched
       } catch (error) {
-        console.error('Error fetching offers:', error);
         setError("Failed to load offers.");
         setLoading(false);
       }
@@ -121,7 +118,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
 
 
   return (
-    <>
+    <div className="w-full">
     <ToastContainer/>
     {Object.entries(offersByOwner).map(([ownerId, ownerOffers]) => (
   <div key={ownerId} className="mb-3"> {/* Reduced margin-bottom */}
@@ -167,7 +164,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
   </div>
 ))}
 
-    </>
+    </div>
   );
 };
 

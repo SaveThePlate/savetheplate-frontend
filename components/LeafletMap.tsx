@@ -14,7 +14,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import OfferCarousel from "./OfferCarousel";
+import styles from "./design.module.css"; // Assuming you're using this for additional styling
 
+// Custom Leaflet icons
 const emojiIcon = new L.DivIcon({
   html: '<div style="font-size: 30px;">🥡</div>',
   className: "",
@@ -29,7 +31,7 @@ const userLocationIcon = new L.DivIcon({
   iconAnchor: [15, 30],
 });
 
-
+// Main Map Component
 const LeafletMap = ({ markers, center }: any) => {
   const { id } = useParams();
   const [radius, setRadius] = useState(1000);
@@ -73,13 +75,14 @@ const LeafletMap = ({ markers, center }: any) => {
             position={[shop.latitude, shop.longitude]}
             icon={emojiIcon}
           >
-
-          <Popup className="">
-          <div className="w-full">
-              <OfferCarousel ownerId={shop.id} />
-            </div>
-          </Popup>
-
+            <Popup
+              maxWidth={400}
+              className="popupCustom" // Custom CSS class
+            >
+              <div className="popupCustomContent">
+                <OfferCarousel ownerId={shop.id} />
+              </div>
+            </Popup>
           </Marker>
         ))}
       </MapContainer>

@@ -1,0 +1,25 @@
+/* Custom Popup Styling */
+.popupCustom .leaflet-popup-tip,
+.popupCustom .leaflet-popup-content-wrapper {
+  background: #e0e0e0; /* Light gray background */
+  color: #234c5e; /* Dark text color */
+}
+
+.popupCustom .leaflet-popup-content-wrapper {
+  width: auto !important; /* Adjust width based on content */
+  max-width: none !important; /* Remove default max-width */
+  white-space: normal; /* Allow text wrapping */
+  overflow: visible; /* Ensure no clipping */
+  padding: 10px; /* Add padding for better readability */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}
+
+.popupCustom .leaflet-popup-content {
+  text-align: center; /* Center-align content */
+  overflow: visible;
+}
+
+.popupCustom .leaflet-popup-tip {
+  background: #e0e0e0; /* Match background color */
+}

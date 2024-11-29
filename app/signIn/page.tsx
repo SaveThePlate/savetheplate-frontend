@@ -24,26 +24,26 @@ export default function SignIn() {
   const router = useRouter();
 
   // Redirect to home page if access token is present
-  useEffect(() => {
+  // useEffect(() => {
 
-    try {
-      const token = localStorage.getItem("accessToken");
-      axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/set-role`, 
-        { role },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  //   try {
+  //     const token = localStorage.getItem("accessToken");
+  //     axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/set-role`, 
+  //       { role },
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
 
-      if (role === 'PROVIDER') {
-        router.push('/onboarding/fillDetails');
-      } else {
-        router.push('/client/home');
-      }
+  //     if (role === 'PROVIDER') {
+  //       router.push('/onboarding/fillDetails');
+  //     } else {
+  //       router.push('/client/home');
+  //     }
 
-    } catch (error) {
-      console.log('Error:', error);
-    } 
+  //   } catch (error) {
+  //     console.log('Error:', error);
+  //   } 
 
-  }, [router]);
+  // }, [router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

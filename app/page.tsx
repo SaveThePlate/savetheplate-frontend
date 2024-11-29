@@ -1,8 +1,58 @@
-import React from 'react';
+"use client"
+import React, { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const WelcomePage = () => {
+  const router = useRouter();
+  const [useRole, setRole] = useState(null);
+
+
+  const handleGetStarted = async () => {
+    const token = localStorage.getItem("accessToken");
   
+    if (!token) {
+      console.warn("No access token found. Redirecting to onboarding.");
+      router.push('/onboarding'); 
+      return;
+    }
+  
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const role = response?.data?.role;
+      if (role) {
+        setRole(role);
+
+        if (role === 'PROVIDER') {
+          router.push('/provider/home');
+        } else if (role === 'CLIENT') {
+          router.push('/client/home');
+        
+        } else {
+          console.error('Unknown role:', role);
+          router.push('/onboarding'); 
+        }
+      } else {
+        console.error('Role not found in response');
+        router.push('/onboarding'); 
+      }
+    } catch (error) {
+      console.error('Error fetching role:', error);
+      router.push('/onboarding'); 
+    } 
+  }; 
+  
+  
+
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
@@ -44,12 +94,12 @@ const WelcomePage = () => {
         >
           Discover, save, and savor your next meal!
         </p>
-        <a
-          href="/onboarding"
+        <button
+          onClick={handleGetStarted}
           className="px-6 py-3 sm:px-8 sm:py-4 bg-[#fffc5ed3] text-black font-bold text-sm sm:text-lg border border-black rounded-full shadow-lg transition duration-300 transform hover:scale-110 hover:bg-yellow-300 cursor-pointer"
         >
           Get Started
-        </a>
+        </button>
       </div>
     </div>
   );

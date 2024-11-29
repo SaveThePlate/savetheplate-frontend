@@ -12,21 +12,21 @@ const Map = () => {
   const [offers, setOffers] = useState<{ id: number; title: string; latitude: number; longitude: number }[]>([]);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoordinates({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error obtaining location: ", error);
-        }
-      );
-    } else {
-      console.log("Geolocation is not supported by this browser.");
-    }
+    // if (navigator.geolocation) {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (position) => {
+    //       setCoordinates({
+    //         lat: position.coords.latitude,
+    //         lng: position.coords.longitude,
+    //       });
+    //     },
+    //     (error) => {
+    //       console.error("Error obtaining location: ", error);
+    //     }
+    //   );
+    // } else {
+    //   console.log("Geolocation is not supported by this browser.");
+    // }
 
     const fetchOffers = async () => {
       try {
