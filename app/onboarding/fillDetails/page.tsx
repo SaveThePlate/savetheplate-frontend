@@ -10,14 +10,17 @@ import "react-toastify/dist/ReactToastify.css";
 import { useIsClient } from "usehooks-ts";
 
 const FillDetails = () => {
-  const isClient = useIsClient();
+  // const isClient = useIsClient();
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [googleMapsLink, setGoogleMapsLink] = useState("");
+  const [mapsLink, setGoogleMapsLink] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [coordinates, setCoordinates] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [zoom] = useState(13);
 
   const extractLocationData = (googleMapsUrl: string) => {
@@ -35,41 +38,45 @@ const FillDetails = () => {
   };
 
   const handleProfileUpdate = async () => {
-    const { latitude, longitude, locationName } =
-      extractLocationData(googleMapsLink);
-    if (!latitude || !longitude || !locationName) {
-      toast.error("Invalid Google Maps link!");
-      return;
-    }
-
-    const data = {
-      location: locationName,
-      phoneNumber: +phoneNumber,
-      latitude,
-      longitude,
-      googleMapsLink
-    };
-
     try {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        toast.error("No access token found.");
+      // Extract data from Google Maps link
+      const { latitude, longitude, locationName } = extractLocationData(mapsLink);
+  
+      if (!latitude || !longitude || !locationName) {
+        toast.error("Invalid Google Maps link! Please provide a valid link.");
         return;
       }
-
-      const response = await axios.put(
-        process.env.NEXT_PUBLIC_BACKEND_URL + "/users/update-details",
+  
+      // Validate phoneNumber
+      const parsedPhoneNumber = parseInt(phoneNumber.trim(), 10);
+      if (isNaN(parsedPhoneNumber)) {
+        toast.error("Please enter a valid phone number.");
+        return;
+      }
+  
+      // Prepare data payload
+      const data = {
+        location: locationName,
+        phoneNumber: parsedPhoneNumber,
+        latitude,
+        longitude,
+        mapsLink,
+      };
+  
+      // Check for access token
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        toast.error("No access token found. Please log in again.");
+        return;
+      }
+  
+      // API call to update details
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/update-details`,
         data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+  
       if (response.status === 200) {
         toast.success("Restaurant details added successfully!");
         router.push("/provider/home");
@@ -98,8 +105,7 @@ const FillDetails = () => {
   };
 
   return (
-    <div
-      className="bg-[#98cca8] min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8">
+    <div className="bg-[#98cca8] min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8">
       <div className="relative flex flex-col items-center justify-center text-center w-full max-w-md px-4 py-12 bg-white rounded-3xl shadow-lg">
         <ToastContainer />
         <div className="flex flex-col items-center text-center space-y-4 mb-6">
@@ -141,7 +147,7 @@ const FillDetails = () => {
           />
           <Input
             id="googleMapsLink"
-            value={googleMapsLink}
+            value={mapsLink}
             onChange={handleGoogleMapsLinkChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             placeholder="Google Maps Link"

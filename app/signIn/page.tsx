@@ -23,28 +23,6 @@ export default function SignIn() {
   const clientApi = useOpenApiFetch();
   const router = useRouter();
 
-  // Redirect to home page if access token is present
-  // useEffect(() => {
-
-  //   try {
-  //     const token = localStorage.getItem("accessToken");
-  //     axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/set-role`, 
-  //       { role },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     if (role === 'PROVIDER') {
-  //       router.push('/onboarding/fillDetails');
-  //     } else {
-  //       router.push('/client/home');
-  //     }
-
-  //   } catch (error) {
-  //     console.log('Error:', error);
-  //   } 
-
-  // }, [router]);
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);

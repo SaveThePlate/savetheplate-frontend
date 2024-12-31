@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import CustomCard from '@/components/CustomCard';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -55,24 +54,24 @@ const ProfilePage = () => {
     }
   };
 
-  const fetchOffers = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('No token found');
+  // const fetchOffers = async () => {
+  //   try {
+  //     const token = localStorage.getItem('accessToken');
+  //     if (!token) throw new Error('No token found');
 
-      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-      const id = tokenPayload.id;
+  //     const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+  //     const id = tokenPayload.id;
 
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOffers(response.data);
-    } catch (err) {
-      setError("Failed to fetch offers: " + (err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     setOffers(response.data);
+  //   } catch (err) {
+  //     setError("Failed to fetch offers: " + (err as Error).message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleDelete = (offerId: number) => {
     setOffers((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
@@ -138,34 +137,34 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchProfileData();
-    fetchOffers();
+    // fetchOffers();
   }, []);
 
-  const [userRole, setUserRole] = useState(null);
+  // const [userRole, setUserRole] = useState(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const fetchUserRole = async () => {
-      try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+  // useEffect(() => {
+  //   const token = localStorage.getItem('accessToken');
+  //   const fetchUserRole = async () => {
+  //     try {
+  //       const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
 
-        if (response.status === 200) {
-          setUserRole(response.data.role);
-        } else {
-          console.error('Failed to fetch user role:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching user role:');
-      }
-    };
+  //       if (response.status === 200) {
+  //         setUserRole(response.data.role);
+  //       } else {
+  //         console.error('Failed to fetch user role:', response.data.message);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching user role:');
+  //     }
+  //   };
 
-    fetchUserRole();
-  }, []);
+  //   fetchUserRole();
+  // }, []);
 
   return (
     <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
@@ -210,92 +209,7 @@ const ProfilePage = () => {
 
       <hr className="border-gray-300 mb-8" />
 
-      <h1
-            className="text-3xl font-extrabold mb-4"
-            style={{
-              color: "beige",
-              WebkitTextStroke: "1px #000000",
-              textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            My Offers
-      </h1>
-
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 gap-4">
-        {offers.map((offer) => (
-          <CustomCard
-            key={offer.id}
-            offerId={offer.id}
-            imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''}
-            ownerId={offer.ownerId}
-            imageAlt={offer.title}
-            title={offer.title}
-            price={offer.price}
-            quantity={offer.price}
-            description={offer.description}
-            expirationDate={offer.expirationDate}
-            pickupLocation={offer.pickupLocation}
-            mapsLink={offer.mapsLink}
-            reserveLink={`/reserve/${offer.id}`}
-            userRole={userRole}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
-
-      {isEditModalOpen && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg transform transition-transform duration-300 scale-105">
-      <h2 className="text-xl font-semibold mb-6 text-center text-gray-800">Edit Profile</h2>
-      <form>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Location</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
-          <input
-            type="text"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className="border rounded-lg w-full py-3 px-4 text-gray-700 focus:outline-none "
-          />
-        </div>
-        <div className="flex justify-between items-center mt-8">
-          <Button
-            className="py-2 px-6 text-xs bg-[#10712dd3] font-bold sm:text-lg border border-black  rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300"
-            onClick={() => {
-              setIsEditModalOpen(false);
-              handleProfileUpdate();
-            }}
-          >
-            Save
-          </Button>
-          <Button
-            className="bg-gray-400 text-white py-2 px-6 border border-black  rounded-full shadow-lg hover:shadow-xl   hover:bg-gray-500 transition duration-300"
-            onClick={() => setIsEditModalOpen(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+  
 
 
     </main>

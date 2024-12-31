@@ -98,8 +98,8 @@ const OffersPage = () => {
           pickupLocation={offer.pickupLocation}
           mapsLink={offer.mapsLink}
           reserveLink={`/client/offers/${offer.id}`}
-          userRole={userRole}
-          onDelete={handleDelete}
+          // userRole={userRole}
+          // onDelete={handleDelete}
         />
       ))}
 

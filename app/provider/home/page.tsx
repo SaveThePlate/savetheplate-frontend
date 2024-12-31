@@ -1,93 +1,99 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import Offers from "@/components/Offers";
 import { Button } from "@/components/ui/button";
-import MapComponent from "@/components/MapComponent";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import CustomCard from "@/components/CustomCard";
+
+interface Offer {
+  price: number;
+  id: number;
+  owner: string;
+  ownerId: number;
+  images: { path: string }[];
+  title: string;
+  description: string;
+  expirationDate: string;
+  pickupLocation: string;
+  mapsLink: string;
+}
+
+const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
+const DEFAULT_PROFILE_IMAGE = "/logo.png";
+
 const Home = () => {
-  const [showMap, setShowMap] = useState(false);
-  const [offers, setOffers] = useState<
-    { id: number; title: string; latitude: number; longitude: number }[]
-  >([]);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
-    lat: 36.806389,
-    lng: 10.181667,
-  });
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const getImage = (filename: string | null): string => {
+    return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
+  };
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoordinates({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error obtaining location: ", error);
-        }
-      );
-    } else {
-      console.log("Geolocation is not supported by this browser.");
-    }
-
     const fetchOffers = async () => {
       try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) throw new Error("No token found");
+
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        const id = tokenPayload.id;
+
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`
+          process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setOffers(response.data);
-      } catch (fetchError) {
-        console.error("Failed to fetch offers:", fetchError);
+      } catch (err) {
+        setError("Failed to fetch offers: " + (err as Error).message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOffers();
   }, []);
 
-
   return (
-  
-      <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
-        <div className="w-full flex justify-center mb-6 pt-6 space-x-4">
-          <Button
-            onClick={() => setShowMap(false)}
-            className={`${
-              !showMap
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-300 text-white"
-                : "bg-gray-200 text-gray-600"
-            } font-bold py-4 px-8 rounded-full shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-110`}
-          >
-            View Offers 🛍️
-          </Button>
+    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+      <ToastContainer />
+      <h1
+        className="text-3xl font-extrabold mb-4"
+        style={{
+          color: "beige",
+          WebkitTextStroke: "1px #000000",
+          textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
+        }}
+      >
+        My Offers
+      </h1>
 
-          <Button
-            onClick={() => setShowMap(true)}
-            className={`${
-              showMap
-                ? "bg-gradient-to-r  from-emerald-300 to-emerald-500 text-white"
-                : "bg-gray-200 text-gray-600"
-            } font-bold py-4 px-8 rounded-full shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-110`}
-          >
-            View Map 📍
-          </Button>
-        </div>
-
-        <div className="w-full flex-grow">
-          {showMap ? (
-            <MapComponent
-              markers={offers.filter(
-                (offer) => offer.latitude !== null && offer.longitude !== null
-              )}
-              center={coordinates}
-            />
-          ) : (
-            <Offers />
-          )}
-        </div>
-      </main>
-
+      <div className="w-full flex-grow flex flex-wrap justify-center gap-6">
+        {offers.map((offer) => (
+          <CustomCard
+            key={offer.id}
+            offerId={offer.id}
+            imageSrc={
+              offer.images.length > 0 ? getImage(offer.images[0].path) : ""
+            }
+            ownerId={offer.ownerId}
+            imageAlt={offer.title}
+            title={offer.title}
+            price={offer.price}
+            quantity={offer.price}
+            description={offer.description}
+            expirationDate={offer.expirationDate}
+            pickupLocation={offer.pickupLocation}
+            mapsLink={offer.mapsLink}
+            reserveLink={`/reserve/${offer.id}`}
+            // onDelete={handleDelete}
+          />
+        ))}
+      </div>
+    </main>
   );
 };
 
