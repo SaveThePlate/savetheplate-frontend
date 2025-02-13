@@ -1,91 +1,74 @@
 "use client";
 import Link from "next/link";
-import Image from 'next/image';
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { useState } from "react";
 import React from "react";
+import { X, Menu } from "lucide-react"; // Import icons for the menu
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [userId, setUserId] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
-
-  console.log("showMap : ", showMap);
+  const [menuOpen, setMenuOpen] = useState(false); // State for the menu
 
   return (
     <section>
       {/* Header */}
-      <header className='w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16'>
-        <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full'>
-          <Link href="/client/home" className='flex items-center h-full'>
-            <Image src="/fullname1.png" alt="Logo" width={250} height={100} className="object-contain lg:block md:block hidden h-full" />
-            <Image src="/logoOnly.png" alt="Logo" width={150} height={150} className="object-contain block lg:hidden md:hidden h-full" />
+      <header className="w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16">
+        <nav className="max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full">
+          {/* Logo */}
+          <Link href="/client/home" className="flex items-center h-full">
+            <Image
+              src="/fullname1.png"
+              alt="Logo"
+              width={250}
+              height={100}
+              className="object-contain lg:block md:block hidden h-full"
+            />
+            <Image
+              src="/logoOnly.png"
+              alt="Logo"
+              width={150}
+              height={150}
+              className="object-contain block lg:hidden md:hidden h-full"
+            />
           </Link>
-          <div className="flex items-center gap-3 h-full">
-            <div className="w-full flex justify-center mb-6 pt-6 space-x-4">
-              <Link href="/client/home">
-                <Button
-                  className={`${
-                    !showMap
-                      ? "bg-gradient-to-r from-emerald-500 to-emerald-300 text-white"
-                      : "bg-gray-200 text-gray-600"
-                  } font-bold py-4 px-8 rounded-full shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-110`}
-                >
-                  View Offers 🛍️
-                </Button>
-              </Link>
-    
-              <Link href="/client/map">
-                <Button
-                  className={`${
-                    showMap
-                      ? "bg-gradient-to-r  from-emerald-300 to-emerald-500 text-white"
-                      : "bg-gray-200 text-gray-600"
-                  } font-bold py-4 px-8 rounded-full shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-110`}
-                >
-                  View Map 📍
-                </Button>
-              </Link>
-              
-            </div>
-            
-      
-          </div>
+
+          {/* Burger Menu Button */}
+          <button className="lg:hidden block" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </nav>
       </header>
 
-      <main className="pt-6 pb-16">
-        { /* {children} */}
-        {React.cloneElement(children as React.ReactElement, { showMap })}
-      </main>
-
-      {/* Footer */}
-      <footer className="w-full fixed bottom-0 bg-white shadow-inner border-t border-gray-200 h-16">
-        <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full'>
-          <Link href="/client/home" className="h-full flex items-center">
-            <button className="hover:bg-gray-200 text-gray-800 font-bold h-full px-4 rounded flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
-                <path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"></path>
-              </svg>
-            </button>
+      {/* Side Menu */}
+      <div
+        className={`fixed top-0 right-0 h-full bg-white shadow-lg transform ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        } transition-transform w-64 z-20 p-6`}
+      >
+        <button className="absolute top-4 right-4" onClick={() => setMenuOpen(false)}>
+          <X size={28} />
+        </button>
+        <nav className="mt-12 flex flex-col space-y-4">
+          <Link href="/client/home" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+            Home
           </Link>
-
-            <Link href={`/client/orders/${userId}`} className="h-full flex items-center">
-              <button className="hover:bg-gray-200 text-gray-800 font-bold h-full px-4 rounded flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
-                  <path d="M230.14,58.87A8,8,0,0,0,224,56H62.68L56.6,22.57A8,8,0,0,0,48.73,16H24a8,8,0,0,0,0,16h18L67.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,160,204a28,28,0,1,0,28-28H91.17a8,8,0,0,1-7.87-6.57L80.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,230.14,58.87ZM104,204a12,12,0,1,1-12-12A12,12,0,0,1,104,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,200,204Zm4-74.57A8,8,0,0,1,196.1,136H77.22L65.59,72H214.41Z"></path>
-                </svg>
-              </button>
-            </Link>
-        
-          <Link href="/client/profile" className="h-full flex items-center">
-            <button className="hover:bg-gray-200 text-gray-800 font-bold h-full px-4 rounded flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
-                <path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path>
-              </svg>
-            </button>
+          <Link href="/client/offers" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+            My purchases
+          </Link>
+          <Link href="/client/profile" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+            Profile
+          </Link>
+          <Link href="/client/settings" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+            Settings
+          </Link>
+          <Link href="/client/logout" className="text-lg font-medium text-red-500" onClick={() => setMenuOpen(false)}>
+            Logout
           </Link>
         </nav>
-      </footer>
+      </div>
+
+      {/* Main Content */}
+      <main className="pt-6 pb-16">{React.cloneElement(children as React.ReactElement, { showMap })}</main>
     </section>
   );
 }
