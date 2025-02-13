@@ -39,22 +39,20 @@ const FillDetails = () => {
 
   const handleProfileUpdate = async () => {
     try {
-      // Extract data from Google Maps link
-      const { latitude, longitude, locationName } = extractLocationData(mapsLink);
-  
+      const { latitude, longitude, locationName } =
+        extractLocationData(mapsLink);
+
       if (!latitude || !longitude || !locationName) {
         toast.error("Invalid Google Maps link! Please provide a valid link.");
         return;
       }
-  
-      // Validate phoneNumber
+
       const parsedPhoneNumber = parseInt(phoneNumber.trim(), 10);
       if (isNaN(parsedPhoneNumber)) {
         toast.error("Please enter a valid phone number.");
         return;
       }
-  
-      // Prepare data payload
+
       const data = {
         location: locationName,
         phoneNumber: parsedPhoneNumber,
@@ -62,27 +60,28 @@ const FillDetails = () => {
         longitude,
         mapsLink,
       };
-  
-      // Check for access token
+
       const token = localStorage.getItem("accessToken");
       if (!token) {
         toast.error("No access token found. Please log in again.");
         return;
       }
-  
-      // API call to update details
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/update-details`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      if (response.status === 200) {
-        toast.success("Restaurant details added successfully!");
-        router.push("/provider/home");
-      } else {
-        toast.error("Failed to add restaurant details. Please try again.");
-      }
+
+      toast.success("Restaurant details added successfully!");
+      router.push("/provider/home");
+
+      // if (response.status === 200) {
+      //   toast.success("Restaurant details added successfully!");
+      //   router.push("/provider/home");
+      // } else {
+      //   toast.error("Failed to add restaurant details. Please try again.");
+      // }
     } catch (error) {
       console.error("Error adding restaurant details:", error);
       toast.error("An error occurred while adding the restaurant.");

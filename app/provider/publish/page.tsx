@@ -14,24 +14,24 @@ const SelectOfferTypePage = () => {
       return;
     }
 
-    const verifyToken = async () => {
-      try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/auth/get-user-by-token', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    // const verifyToken = async () => {
+    //   try {
+    //     const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/auth/get-user-by-token', {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     });
 
-        console.log('Token verification successful:', response.data);
+    //     console.log('Token verification successful:', response.data);
 
-        if (response.status !== 200) {
-          throw new Error('Invalid response from server');
-        }
-      } catch (error) {
-        console.error('Token verification failed:', error);
-        router.push("/signIn");
-      }
-    };
+    //     if (response.status !== 200) {
+    //       throw new Error('Invalid response from server');
+    //     }
+    //   } catch (error) {
+    //     console.error('Token verification failed:', error);
+    //     router.push("/signIn");
+    //   }
+    // };
 
-    verifyToken();
+    // verifyToken();
   }, [router]);
 
   return (

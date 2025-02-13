@@ -55,7 +55,7 @@ const WelcomePage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
+      className=" min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
       style={{
         backgroundColor: '#98cca8', 
       }}

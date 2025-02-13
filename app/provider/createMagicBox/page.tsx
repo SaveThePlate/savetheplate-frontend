@@ -70,6 +70,7 @@ const CreateMagicBoxPage = () => {
       toast.success("Offer submitted successfully!");
     } catch (error) {
       console.error("Error creating magic box:", error);
+      console.log()
       toast.error("Error submitting offer!");
       setError("Failed to create magic box.");
     } finally {

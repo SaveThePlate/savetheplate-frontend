@@ -14,8 +14,9 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
   return (
     <section>
       {/* Header */}
-      <header className="w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16">
-        <nav className="max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full">
+      <header className=" mb-20 w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16">
+        <nav className="max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full ">
+
           {/* Logo */}
           <Link href="/provider/home" className="flex items-center h-full">
             <Image
@@ -54,6 +55,10 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
           <Link href="/provider/profile" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Profile
           </Link>
+          <Link href="/provider/publish" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+            Publish an Offer
+          </Link>
+
           <Link href="/provider/home" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Published Offers
           </Link>
@@ -73,7 +78,8 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
       </div>
 
       {/* Main Content */}
-      <main className="pt-6 pb-16">{React.cloneElement(children as React.ReactElement, { showMap })}</main>
+      <main className=" ">{React.cloneElement(children as React.ReactElement, { showMap })}</main>
+
     </section>
   );
 }

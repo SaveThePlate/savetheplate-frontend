@@ -95,7 +95,7 @@ const CustomCard: FC<CustomCardProps> = ({
                 {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
               </span>
 
-              {mapsLink && (
+              {/* {mapsLink && (
                 <a
                   href={mapsLink}
                   target="_blank"
@@ -104,11 +104,12 @@ const CustomCard: FC<CustomCardProps> = ({
                 >
                   View on Google Maps
                 </a>
-              )}
+              )} */}
+
             </CardDescription>
-            <p className="text-base hover:underline text-teal-500">
-              {pickupLocation}
-            </p>
+            <button  className="text-base hover:underline text-teal-500">
+              Pickup Location: {mapsLink}
+            </button>
           </CardHeader>
 
           <CardFooter className="flex justify-between items-center p-0 mt-4 space-x-2">
@@ -174,7 +175,7 @@ const CustomCard: FC<CustomCardProps> = ({
               </CredenzaContent>
             </Credenza>
 
-            {quantity > 0 ? (
+            {/* {quantity > 0 ? (
               <Link
                 href={reserveLink}
                 className="px-4 py-2 text-xs bg-[#fffc5ed3] font-bold sm:text-lg border border-black bg-gradient-to-r from-green-400 to-teal-500 text-black rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
@@ -188,7 +189,8 @@ const CustomCard: FC<CustomCardProps> = ({
               >
                 Order
               </button>
-            )}
+            )} */}
+
           </CardFooter>
         </div>
       </Card>

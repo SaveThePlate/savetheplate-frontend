@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CustomCard from "@/components/CustomCard";
+import { useRouter } from "next/navigation";
 
 interface Offer {
   price: number;
@@ -23,6 +23,8 @@ const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
 const Home = () => {
+  const router = useRouter();
+
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,18 +60,14 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="mt-12 sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
       <ToastContainer />
-      <h1
-        className="text-3xl font-extrabold mb-4"
-        style={{
-          color: "beige",
-          WebkitTextStroke: "1px #000000",
-          textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
-        }}
+      <button 
+      className=" w-full px-4 py-2 text-xs bg-blue-200 font-bold sm:text-lg border border-gray-400 text-black-600 rounded-md shadow-md "
+      onClick={() => router.push("./publish")} 
       >
-        My Offers
-      </h1>
+        Publish a new offer
+      </button>
 
       <div className="w-full flex-grow flex flex-wrap justify-center gap-6">
         {offers.map((offer) => (

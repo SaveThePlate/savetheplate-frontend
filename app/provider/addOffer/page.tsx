@@ -32,7 +32,8 @@ const AddOfferPage = () => {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#cdeddf] p-6">
+    <div className="pt-20 flex items-center justify-center bg-[#cdeddf] p-6">
+         
         <AddOffer />
     </div>
   );
