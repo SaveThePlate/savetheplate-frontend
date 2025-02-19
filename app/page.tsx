@@ -96,7 +96,7 @@ const WelcomePage = () => {
         </p>
         <button
           onClick={handleGetStarted}
-          className="px-6 py-3 sm:px-8 sm:py-4 bg-[#fffc5ed3] text-black font-bold text-sm sm:text-lg border border-black rounded-full shadow-lg transition duration-300 transform hover:scale-110 hover:bg-yellow-300 cursor-pointer"
+          className="px-6 py-3 sm:px-8 sm:py-4 bg-[#fffc5ed3] text-gray-200 font-bold text-sm sm:text-lg rounded-full shadow-lg transition duration-300 transform hover:scale-110 hover:bg-yellow-300 cursor-pointer"
         >
           Get Started
         </button>

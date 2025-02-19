@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -20,6 +20,7 @@ import {
   CredenzaTrigger,
 } from "./ui/credenza";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface CustomCardProps {
   offerId: number;
@@ -34,12 +35,9 @@ interface CustomCardProps {
   pickupLocation: string;
   mapsLink: string;
   reserveLink: string;
-  // userRole: 'CLIENT' | 'PROVIDER' | null;
-  // onDelete: (offerId: number) => void;
 }
 
 const CustomCard: FC<CustomCardProps> = ({
-  offerId,
   imageSrc,
   imageAlt,
   title,
@@ -51,8 +49,6 @@ const CustomCard: FC<CustomCardProps> = ({
   pickupLocation,
   mapsLink,
   reserveLink,
-  // userRole,
-  // onDelete,
 }) => {
   const formattedDate = new Date(expirationDate).toLocaleDateString();
   const formattedTime = new Date(expirationDate).toLocaleTimeString([], {
@@ -61,32 +57,62 @@ const CustomCard: FC<CustomCardProps> = ({
   });
 
   const router = useRouter();
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        console.warn("No access token found. Redirecting to onboarding.");
+        router.push("/onboarding");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const userRole = response?.data?.role;
+        setRole(userRole);
+      } catch (error) {
+        console.error("Error fetching role:", error);
+        router.push("/onboarding");
+      }
+    };
+
+    fetchUserRole();
+  }, [router]);
 
   return (
     <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 max-w-xs">
-      <Card className="flex flex-col shadow-lg border border-gray-200 rounded-lg hover:shadow-2xl transition-transform transform hover:scale-105 m-3 bg-white overflow-hidden">
-        <div className="">
+      <Card className="flex flex-col shadow-xl border border-gray-300 rounded-lg m-4 bg-white overflow-hidden">
+        <div className="w-full h-64 overflow-hidden">
           <Image
             src={imageSrc ? imageSrc : "/logo.png"}
             alt={imageAlt}
-            className=" w-full h-full"
+            className="w-full h-full object-cover"
             width={300}
             height={300}
           />
         </div>
 
-        <div className="flex flex-col justify-between p-5 w-full md:w-2/3 bg-white">
+        <div className="flex flex-col justify-between p-5">
           <CardHeader className="p-0">
-            <CardTitle className="text-lg font-semibold text-gray-800">
+            <CardTitle className="text-xl font-semibold text-gray-800">
               {title}
-              <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+              <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                 <span className="text-gray-400 line-through">
                   {price * 2} dt
                 </span>
                 <span className="text-teal-600 font-semibold">{price} dt</span>
               </div>
             </CardTitle>
-            <CardDescription className="mt-3 flex flex-col items-start gap-4">
+
+            <CardDescription className="mt-3 flex flex-col items-start gap-2">
               <span
                 className={`text-lg font-bold ${
                   quantity > 0 ? "text-gray-800" : "text-red-500"
@@ -94,34 +120,33 @@ const CustomCard: FC<CustomCardProps> = ({
               >
                 {quantity > 0 ? `${quantity} pieces left` : "Sold Out"}
               </span>
+            </CardDescription>
 
-              {/* {mapsLink && (
+            <div className="flex space-x-2 mt-3">
+              {mapsLink && (
                 <a
                   href={mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className=" text-center px-4 py-2 text-sm bg-teal-500 text-white font-bold rounded-full shadow-md hover:bg-teal-600 transition-colors duration-300 transform hover:scale-105"
+                  className="px-3 py-3  text-white bg-teal-500 hover:bg-teal-600 font-bold text-center rounded-lg shadow-md transition-transform transform hover:scale-105"
                 >
-                  View on Google Maps
+                  📍 Pickup Location
                 </a>
-              )} */}
+              )}
 
-            </CardDescription>
-            <button  className="text-base hover:underline text-teal-500">
-              Pickup Location: {mapsLink}
-            </button>
+              <Credenza>
+                <CredenzaTrigger asChild>
+                  <button className="px-4 py-2 text-sm bg-teal-200 font-bold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300">
+                    Details
+                  </button>
+                </CredenzaTrigger>
+              </Credenza>
+            </div>
           </CardHeader>
 
-          <CardFooter className="flex justify-between items-center p-0 mt-4 space-x-2">
+          <CardFooter className="flex justify-center items-center mt-4 space-x-2">
             <Credenza>
-              <CredenzaTrigger asChild>
-                <button className="px-4 py-2 text-xs bg-[#fffc5ed3] text-black font-bold sm:text-lg border border-gray-300 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300">
-                  Details
-                </button>
-              </CredenzaTrigger>
-
               <CredenzaContent className="bg-white rounded-lg shadow-lg p-6 max-w-lg mx-auto">
-                {/* Modal Header */}
                 <CredenzaHeader className="mb-4">
                   <CredenzaTitle className="text-2xl font-bold text-gray-800 mb-3">
                     {title}
@@ -131,20 +156,15 @@ const CustomCard: FC<CustomCardProps> = ({
                   </CredenzaDescription>
                 </CredenzaHeader>
 
-                {/* Modal Body */}
                 <CredenzaBody className="space-y-4">
-                  {/* Pickup Time */}
                   <p className="text-base text-gray-700">
                     <strong>Heure de collecte :</strong> {formattedDate} à{" "}
                     {formattedTime}
                   </p>
-
-                  {/* Location Information */}
                   <p className="text-base text-gray-700">
                     <strong>Lieu :</strong> {pickupLocation}
                   </p>
 
-                  {/* Maps Link */}
                   {mapsLink && (
                     <div className="mt-4">
                       <a
@@ -157,17 +177,11 @@ const CustomCard: FC<CustomCardProps> = ({
                       </a>
                     </div>
                   )}
-
-                  <p className="text-base text-blue-700 mt-4 font-medium">
-                    Ne manquez pas cette occasion ! Assurez-vous de récupérer
-                    votre commande à l&apos;heure indiquée pour en profiter.
-                  </p>
                 </CredenzaBody>
 
-                {/* Modal Footer */}
                 <CredenzaFooter className="flex justify-end mt-6">
                   <CredenzaClose asChild>
-                    <button className="px-4 py-2 bg-gradient-to-r from-red-400 to-red-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
+                    <button className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
                       Fermer
                     </button>
                   </CredenzaClose>
@@ -175,22 +189,22 @@ const CustomCard: FC<CustomCardProps> = ({
               </CredenzaContent>
             </Credenza>
 
-            {/* {quantity > 0 ? (
-              <Link
-                href={reserveLink}
-                className="px-4 py-2 text-xs bg-[#fffc5ed3] font-bold sm:text-lg border border-black bg-gradient-to-r from-green-400 to-teal-500 text-black rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
-              >
-                Order
-              </Link>
-            ) : (
-              <button
-                disabled
-                className="px-4 py-2 text-xs bg-gray-300 font-bold sm:text-lg border border-gray-400 text-gray-600 rounded-full shadow-md cursor-not-allowed"
-              >
-                Order
-              </button>
-            )} */}
-
+            {role === "CLIENT" &&
+              (quantity > 0 ? (
+                <Link
+                  href={reserveLink}
+                  className="px-4 py-2 text-sm bg-green-500 font-bold text-white rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
+                >
+                  Order
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="px-4 py-2 text-sm bg-gray-300 font-bold text-gray-600 rounded-lg shadow-md cursor-not-allowed"
+                >
+                  Order
+                </button>
+              ))}
           </CardFooter>
         </div>
       </Card>

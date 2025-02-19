@@ -6,6 +6,7 @@ import { X, Menu } from "lucide-react";
 import { useState } from "react";
 import React from "react";
 
+
 export default function ProviderLayout({ children }: { children: React.ReactNode }) {
   // const { userRole, loading } = useUser();
     const [showMap, setShowMap] = useState(false);
@@ -16,7 +17,6 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
       {/* Header */}
       <header className=" mb-20 w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16">
         <nav className="max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full ">
-
           {/* Logo */}
           <Link href="/provider/home" className="flex items-center h-full">
             <Image
@@ -35,6 +35,10 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             />
           </Link>
 
+          {/* Burger Menu Button */}
+          <button className="lg:hidden block" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
           {/* Burger Menu Button */}
           <button className="lg:hidden block" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -58,7 +62,6 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
           <Link href="/provider/publish" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Publish an Offer
           </Link>
-
           <Link href="/provider/home" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Published Offers
           </Link>
@@ -79,10 +82,12 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
 
       {/* Main Content */}
       <main className=" ">{React.cloneElement(children as React.ReactElement, { showMap })}</main>
-
     </section>
   );
 }
+
+
+
 
 
 

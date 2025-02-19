@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CustomCard from "@/components/CustomCard";
 import { useRouter } from "next/navigation";
-
+import { PlusCircle } from "lucide-react";
 interface Offer {
   price: number;
   id: number;
@@ -60,12 +60,13 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="mt-12 sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="border-lg border-black mt-12 sm:pt-16 p-8 bg-[#cdeddf] min-h-screen flex flex-col items-center">
       <ToastContainer />
-      <button 
-      className=" w-full px-4 py-2 text-xs bg-blue-200 font-bold sm:text-lg border border-gray-400 text-black-600 rounded-md shadow-md "
-      onClick={() => router.push("./publish")} 
+      <button
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-lg bg-white font-bold  rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
+        onClick={() => router.push("./publish")}
       >
+        <PlusCircle size={20} />
         Publish a new offer
       </button>
 
