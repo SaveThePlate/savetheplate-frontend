@@ -39,10 +39,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
           <button className="lg:hidden block" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
-          {/* Burger Menu Button */}
-          <button className="lg:hidden block" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+
         </nav>
       </header>
 
