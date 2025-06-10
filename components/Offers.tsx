@@ -31,9 +31,13 @@ const OffersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState(null);
 
-
   useEffect(() => {
     const token = localStorage.getItem('accessToken'); 
+    if (!token) {
+      setError("No access token found. Please log in again.");
+      setLoading(false);
+      return;
+    }
 
     const fetchUserRole = async () => {
       try {
@@ -45,64 +49,87 @@ const OffersPage = () => {
         });
 
         if (response.status === 200) {
-          setUserRole(response.data.role); // Set the user role in state
+          setUserRole(response.data.role);
         } else {
           console.error('Failed to fetch user role:', response.data.message);
+          setError('Failed to fetch user role: ' + response.data.message);
         }
       } catch (error) {
-        console.error('Error fetching user role:');
+        console.error('Error fetching user role:', error);
+        setError('Error fetching user role. Please try again.');
       }
     };
 
-    fetchUserRole();
-  }, []);
-
-  useEffect(() => {
     const fetchOffers = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers");
+        const response = await axios.get(
+          process.env.NEXT_PUBLIC_BACKEND_URL + "/offers",
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
         setOffers(response.data);
       } catch (err) {
-        setError("Failed to fetch offers.");
+        console.error("Failed to fetch offers:", err);
+        setError("Failed to fetch offers. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOffers();
+    // Fetch both user role and offers
+    Promise.all([fetchUserRole(), fetchOffers()]).catch((err) => {
+      console.error("Error during data fetching:", err);
+      setError("Something went wrong. Please try again later.");
+      setLoading(false);
+    });
   }, []);
 
-  const handleDelete = (offerId: number) => {
-    setOffers((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl text-gray-600">Loading offers...</div>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (offers.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-xl text-gray-600">No offers available at the moment.</div>
+      </div>
+    );
+  }
 
   return (
-    
     <div className="flex flex-wrap justify-center gap-6">
-      
       {offers
-        .sort((a, b) => (a.quantity === 0 ? 1 : b.quantity === 0 ? -1 : 0)) // Sort sold-out offers to the end
+        .sort((a, b) => (a.quantity === 0 ? 1 : b.quantity === 0 ? -1 : 0))
         .map((offer) => (
-        <CustomCard
-          key={offer.id}
-          offerId={offer.id}
-          imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
-          imageAlt={offer.title}
-          title={offer.title}
-          ownerId={offer.ownerId}
-          description={offer.description}
-          price={offer.price}
-          quantity={offer.quantity}
-          expirationDate={offer.expirationDate}
-          pickupLocation={offer.pickupLocation}
-          mapsLink={offer.mapsLink}
-          reserveLink={`/client/offers/${offer.id}`}
-          // userRole={userRole}
-          // onDelete={handleDelete}
-        />
-      ))}
-
+          <CustomCard
+            key={offer.id}
+            offerId={offer.id}
+            imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
+            imageAlt={offer.title}
+            title={offer.title}
+            ownerId={offer.ownerId}
+            description={offer.description}
+            price={offer.price}
+            quantity={offer.quantity}
+            expirationDate={offer.expirationDate}
+            pickupLocation={offer.pickupLocation}
+            mapsLink={offer.mapsLink}
+            reserveLink={`/client/offers/${offer.id}`}
+          />
+        ))}
     </div>
   );
 };
