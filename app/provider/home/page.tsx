@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import CustomCard from "@/components/CustomCard";
 import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
+
 interface Offer {
   price: number;
   id: number;
@@ -24,7 +25,6 @@ const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
 const Home = () => {
   const router = useRouter();
-
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,37 +60,55 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="border-lg border-black mt-12 sm:pt-16 p-8 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="bg-[#cdeddf] min-h-screen pt-20 pb-16 flex flex-col items-center">
       <ToastContainer />
-      <button
-        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-lg bg-white font-bold  rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300"
-        onClick={() => router.push("./publish")}
-      >
-        <PlusCircle size={20} />
-        Publish a new offer
-      </button>
 
-      <div className="w-full flex-grow flex flex-wrap justify-center gap-6">
-        {offers.map((offer) => (
-          <CustomCard
-            key={offer.id}
-            offerId={offer.id}
-            imageSrc={
-              offer.images.length > 0 ? getImage(offer.images[0].path) : ""
-            }
-            ownerId={offer.ownerId}
-            imageAlt={offer.title}
-            title={offer.title}
-            price={offer.price}
-            quantity={offer.price}
-            description={offer.description}
-            expirationDate={offer.expirationDate}
-            pickupLocation={offer.pickupLocation}
-            mapsLink={offer.mapsLink}
-            reserveLink={`/reserve/${offer.id}`}
-            // onDelete={handleDelete}
-          />
-        ))}
+      {/* Content Container */}
+      <div className="w-full max-w-5xl mx-auto px-6 flex flex-col items-center ">
+        {/* Header Section */}
+        <div className="flex justify-between items-center w-full">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Your Published Offers
+          </h1>
+          <button
+            onClick={() => router.push("./publish")}
+            className="flex items-center gap-2 px-5 py-2 bg-white text-[#16a34a] border border-[#16a34a] font-semibold rounded-lg shadow-sm hover:bg-[#16a34a] hover:text-white transition duration-300"
+          >
+            <PlusCircle size={20} />
+            Publish Offer
+          </button>
+        </div>
+
+        {/* Offers Grid */}
+        {loading ? (
+          <p className="text-gray-600 mt-10">Loading your offers...</p>
+        ) : error ? (
+          <p className="text-red-600 mt-10">{error}</p>
+        ) : offers.length === 0 ? (
+          <p className="text-gray-600 mt-10">You have no published offers yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+            {offers.map((offer) => (
+              <CustomCard
+                key={offer.id}
+                offerId={offer.id}
+                imageSrc={
+                  offer.images.length > 0 ? getImage(offer.images[0].path) : ""
+                }
+                ownerId={offer.ownerId}
+                imageAlt={offer.title}
+                title={offer.title}
+                price={offer.price}
+                quantity={offer.price}
+                description={offer.description}
+                expirationDate={offer.expirationDate}
+                pickupLocation={offer.pickupLocation}
+                mapsLink={offer.mapsLink}
+                reserveLink={`/reserve/${offer.id}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
