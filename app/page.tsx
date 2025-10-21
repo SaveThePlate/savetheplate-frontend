@@ -13,8 +13,8 @@ const WelcomePage = () => {
     const token = localStorage.getItem("accessToken");
   
     if (!token) {
-      console.warn("No access token found. Redirecting to onboarding.");
-      router.push('/onboarding'); 
+      console.warn("No access token found. Redirecting to sign in.");
+      router.push('/signIn'); 
       return;
     }
   
