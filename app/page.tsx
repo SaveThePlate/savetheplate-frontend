@@ -81,6 +81,7 @@ const WelcomePage = () => {
             color: '#ffbe98',
             WebkitTextStroke: '0.5px #000000',
             textShadow: '4px 4px 6px rgba(0, 0, 0, 0.15)',
+            fontFamily: 'Arial, sans-serif',
           }}
         >
           Welcome to Save The Plate!
@@ -88,18 +89,21 @@ const WelcomePage = () => {
         <p
           className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 font-semibold animate-fadeInUp"
           style={{
-            color: '#333333',
-            textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
+            color: '#153100ff',
+            textShadow: '1px 1px 3px rgba(96, 96, 96, 0.3)',
+            fontFamily: 'Arial, sans-serif',
+
           }}
         >
           Discover, save, and savor your next meal!
         </p>
         <button
           onClick={handleGetStarted}
-          className="px-6 py-3 sm:px-8 sm:py-4 bg-[#fffc5ed3] text-gray-200 font-bold text-sm sm:text-lg rounded-full shadow-lg transition duration-300 transform hover:scale-110 hover:bg-yellow-300 cursor-pointer"
+              className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black hover:bg-[#cfcd4fd3] "
         >
           Get Started
         </button>
+        
       </div>
     </div>
   );

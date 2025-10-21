@@ -69,6 +69,8 @@ export default function SignIn() {
             color: '#ffbe98', 
             WebkitTextStroke: '0.5px #000000', 
             textShadow: '4px 4px 6px rgba(0, 0, 0, 0.15)', 
+            fontFamily: 'Arial, sans-serif',
+
           }}
         >
           {!isNewUser
