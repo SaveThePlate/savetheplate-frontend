@@ -26,6 +26,7 @@ type Offer = {
   description: string;
   expirationDate: string;
   pickupLocation: string;
+  quantity: number;
 };
 
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
@@ -39,45 +40,36 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   const statusColor = () => {
     switch (order.status) {
-      case 'pending':
-        return 'bg-[#fffc5e]'; // Yellow from your palette
-      case 'confirmed':
-        return 'bg-[#159d96]'; // Teal Green
-      case 'cancelled':
-        return 'bg-[#c88ea1]'; // Dusty Rose
+      case "pending":
+        return "bg-yellow-200 text-yellow-800";
+      case "confirmed":
+        return "bg-teal-600 text-white";
+      case "cancelled":
+        return "bg-red-300 text-red-800";
       default:
-        return 'bg-[#f0ece7]'; // Light Beige for unknown status
+        return "bg-gray-200 text-gray-700";
     }
   };
 
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("accessToken");
-
-    if (!token) {
-      setError("No access token found, please log in again.");
-      return;
-    }
+    if (!token) return toast.error("You need to log in.");
 
     try {
       await axios.post(
-        process.env.NEXT_PUBLIC_BACKEND_URL + `/orders/${order.id}/cancel`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/${order.id}/cancel`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success('Your order is cancelled');
+      toast.success("Your order has been cancelled");
     } catch (err) {
-      console.error("Error cancelling order:", error);
-      toast.error('Failed to cancel order');
+      console.error("Error cancelling order:", err);
+      toast.error("Failed to cancel order");
     }
   };
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
     if (!token) {
       setError("No access token found, please log in again.");
       return router.push("/signIn");
@@ -85,11 +77,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
     const fetchOffer = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/${order.offerId}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data) setOffer(response.data);
-      } catch (err) {
+      } catch {
         setError("Failed to fetch offer data");
       } finally {
         setLoading(false);
@@ -99,54 +91,42 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     fetchOffer();
   }, [order.offerId, router]);
 
-  // if (loading) return <p>Loading...</p>;
-  // if (error) return <p>{error}</p>;
-
   return (
-    <div className="item-container bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg shadow-lg mb-6 flex items-center justify-between space-x-4 w-full sm:w-auto">
+    <div className="w-full bg-white rounded-xl shadow-md flex flex-col sm:flex-row items-center p-4 sm:p-6 mb-6 gap-4">
       <ToastContainer />
-      <div className="item-image mr-4">
-        {offer?.images && offer.images.length > 0 ? (
-          <Image
-            src={`${BASE_IMAGE_URL}${offer.images[0].path}`}
-            alt={offer.title}
-            className="w-20 h-20 object-cover rounded-md"
-            width={80}
-            height={80}
-          />
-        ) : (
-          <Image src="/logo.png"   width={100} height={100} alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" />
-        )}
-          {/* <Image src="/logo.png"  width={100} height={100} alt="Default Item Image" className="w-20 h-20 object-cover rounded-md" /> */}
 
+      {/* Image */}
+      <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 relative rounded-lg overflow-hidden shadow">
+        <Image
+          src={offer?.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images[0].path}` : "/logo.png"}
+          alt={offer?.title || "Offer Image"}
+          fill
+          className="object-cover"
+        />
       </div>
 
-      <div className="item-description flex-grow">
-        <div className="item-details space-y-2">
-          <div className="item-name font-semibold text-lg text-[#159d96]">{offer ? `${offer.title} x ${order.quantity}` : "Loading..."}</div>
-          
-          {/* <div className="item-location text-[#98cca8]">{offer ? offer.pickupLocation : "N/A"}</div> */}
-          <p className="text-base hover:underline text-teal-500">{offer ? offer.pickupLocation : "N/A"}</p>
-
-          <div className="item-date text-[#c88ea1]">
-            {/* {order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"} */}
-            { offer ? new Date(offer.expirationDate).toLocaleString() : "N/A" }
-          </div>
-        </div>
+      {/* Details */}
+      <div className="flex-1 flex flex-col justify-between min-w-0">
+        <h2 className="text-lg sm:text-xl font-semibold text-teal-600 truncate">
+          {offer ? offer.title : "Loading..."} x {order.quantity}
+        </h2>
+        <p className="text-sm sm:text-base text-gray-600 mt-1 truncate">
+          Pickup: {offer?.pickupLocation || "N/A"}
+        </p>
+        <p className="text-sm sm:text-base text-gray-500 mt-1">
+          Expires: {offer ? new Date(offer.expirationDate).toLocaleString() : "N/A"}
+        </p>
       </div>
 
-      <div className="status-container flex items-center space-x-4">
-        <div
-          className={`border border-black status-button ${statusColor()} text-[#27090d] font-bold px-4 py-2 text-sm rounded-full`}
-          style={{ minWidth: "90px", textAlign: "center" }}
-        >
-          {order.status}
-        </div>
-
-        {order.status !== 'cancelled' && (
+      {/* Status & Actions */}
+      <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
+        <span className={`px-4 py-1 rounded-full font-bold text-center ${statusColor()}`}>
+          {order.status.toUpperCase()}
+        </span>
+        {order.status !== "cancelled" && (
           <button
-            className="border border-black cancel-button bg-[#f78484] text-white font-bold px-4 py-2 text-sm rounded-full hover:bg-[#ffbe98]"
             onClick={handleCancelOrder}
+            className="px-4 py-1 rounded-full bg-red-400 text-white font-semibold hover:bg-red-500 transition-colors"
           >
             Cancel
           </button>

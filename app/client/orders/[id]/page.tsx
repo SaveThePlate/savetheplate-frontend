@@ -59,16 +59,9 @@ const Orders = () => {
     <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
 
       <div className="w-full flex justify-center mb-6 pt-6">
-      <h1
-            className="text-3xl font-extrabold mb-4"
-            style={{
-              color: "beige",
-              WebkitTextStroke: "1px #000000",
-              textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            My Orders
-          </h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
+        My Orders
+      </h1>
       </div>
 
       <div className="items-container">
