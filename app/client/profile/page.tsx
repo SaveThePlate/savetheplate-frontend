@@ -7,130 +7,61 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 interface Offer {
-  images: { path: string }[];
-  price: number;
   id: number;
-  owner: string;
-  ownerId: number;
   title: string;
-  description: string;
+  images: { path: string }[];
   expirationDate: string;
   pickupLocation: string;
+  quantity: number;
 }
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
-const getImage = (filename: string | null): string => {
-  return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
-};
+const getImage = (filename: string | null) =>
+  filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
 
 const ProfilePage = () => {
+  const [username, setUsername] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
   const [offers, setOffers] = useState<Offer[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [username, setUsername] = useState<string>('');
-  // const [location, setLocation] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [profileImage, setProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-
-
-
+  // Fetch user profile
   const fetchProfileData = async () => {
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) throw new Error('Token not found');
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/users/me", {
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const { username, phoneNumber, profileImage } = response.data;
-      setUsername(username);
-      // setLocation(location);
-      setPhoneNumber(phoneNumber);
+      setUsername(username || '');
+      setPhoneNumber(phoneNumber || '');
       setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
-    } catch (err) {
-      setError("Failed to fetch profile: " + (err as Error).message);
+    } catch {
+      toast.error('Failed to fetch profile');
     }
   };
 
+  // Fetch user offers
   const fetchOffers = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('No token found');
+      if (!token) throw new Error('Token not found');
+      const id = JSON.parse(atob(token.split('.')[1])).id;
 
-      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-      const id = tokenPayload.id;
-
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOffers(response.data);
-    } catch (err) {
-      setError("Failed to fetch offers: " + (err as Error).message);
+    } catch {
+      toast.error('Failed to fetch offers');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleImageUpload = async (newFiles: File[] | null) => {
-    if (newFiles && newFiles.length > 0) {
-      const token = localStorage.getItem('accessToken');
-      const formData = new FormData();
-      formData.append('profileImage', newFiles[0]);
-  
-      try {
-        const response = await axios.post(
-          process.env.NEXT_PUBLIC_BACKEND_URL + '/users/upload-profile-image',
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data',
-            },
-          }
-        );
-  
-        if (response.status === 200) {
-          toast.success('Image uploaded successfully!');
-          setProfileImage(response.data.profileImage || DEFAULT_PROFILE_IMAGE);
-        } else {
-          toast.error('Error uploading image. Please try again.');
-        }
-      } catch (error) {
-        toast.error('Error uploading image');
-        console.error('Image upload error:', error);
-      }
-    }
-  };
-  
-  const handleProfileUpdate = async () => {
-    const token = localStorage.getItem('accessToken');
-    const data = {
-      username,
-      phoneNumber,
-      profileImage: JSON.stringify(profileImage),
-    };
-
-    try {
-      const response = await axios.put(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/me', data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status === 200) {
-        await fetchProfileData();
-        toast.success('Profile updated successfully!');
-      } else {
-        toast.error('Failed to update profile. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('An error occurred while updating the profile.');
     }
   };
 
@@ -139,99 +70,84 @@ const ProfilePage = () => {
     fetchOffers();
   }, []);
 
+  // Stats
+  const totalOffers = offers.length;
+  const totalQuantity = offers.reduce((sum, o) => sum + o.quantity, 0);
 
   return (
-    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="min-h-screen bg-[#cdeddf] p-4 sm:p-6 flex flex-col items-center">
       <ToastContainer />
-      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-6 mb-8 transition-all hover:scale-105">
-        <div className="flex items-center mb-6">
-          <div className="w-32 h-50 rounded-full overflow-hidden mr-6 border-4 border-gray-100 shadow-md">
-            <Image
-              src={profileImage}
-              alt="Profile"
-              className="object-cover w-full h-full cursor-pointer"
-              width={128}
-              height={128}
-              onClick={() => document.getElementById('fileInput')?.click()}
-            />
-            <input
-              type="file"
-              id="fileInput"
-              className="hidden"
-              accept="image/*"
-              onChange={(event) => {
-                const files = event.target.files ? Array.from(event.target.files) : null;
-                handleImageUpload(files);
-              }}
-            />
+
+      {/* Profile Card */}
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-6 mb-8 flex flex-col items-center">
+        <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-200 mb-4">
+          <Image
+            src={profileImage}
+            alt="Profile Image"
+            width={128}
+            height={128}
+            className="object-cover w-full h-full"
+          />
+        </div>
+        <h1 className="text-xl font-semibold text-gray-800">{username || 'Username'}</h1>
+        <p className="text-gray-600 mb-4">{phoneNumber || 'Phone number'}</p>
+
+        {/* Stats */}
+        <div className="flex justify-between w-full px-6 mb-4 text-center">
+          <div>
+            <p className="text-lg font-bold text-gray-800">{totalOffers}</p>
+            <p className="text-sm text-gray-500">Offers</p>
           </div>
-          <div className="flex-grow">
-            <h1 className="text-gray-600">{username || "Username"}</h1>
-            <p className="text-gray-600">{phoneNumber || "Phone number"}</p>
+          <div>
+            <p className="text-lg font-bold text-gray-800">{totalQuantity}</p>
+            <p className="text-sm text-gray-500">Items</p>
           </div>
         </div>
-        <div className="flex justify-center mt-4">
-          <Button
-            className="text-black bg-[#fffc5ed3] sm:text-lg border border-black font-bold py-3 px-6 rounded-full shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:bg-yellow-600"
-            onClick={() => setIsEditModalOpen(true)}
-          >
+
+        {/* Quick Actions */}
+        <div className="flex gap-4 mt-2">
+          <Button className="bg-yellow-200 text-gray-900 hover:bg-yellow-300 px-6 py-2 rounded-full font-semibold">
+            Add Offer
+          </Button>
+          <Button className="bg-blue-200 text-gray-900 hover:bg-blue-300 px-6 py-2 rounded-full font-semibold">
             Edit Profile
           </Button>
         </div>
-      </div>     
+      </div>
 
-      {/* Edit Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-            {/* Profile Edit Form */}
-            <form onSubmit={(e) => { e.preventDefault(); handleProfileUpdate(); }}>
-              <div className="mb-4">
-                <label className="block text-gray-700">Profile Image</label>
-                <input type="file" className="mt-1 block w-full border rounded-md p-2" />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Username</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border rounded-md p-2"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+      {/* Offers Section */}
+      <div className="w-full max-w-4xl flex flex-col gap-4">
+        {loading ? (
+          <p className="text-gray-600 text-center">Loading offers...</p>
+        ) : offers.length === 0 ? (
+          <p className="text-gray-600 text-center">No offers yet.</p>
+        ) : (
+          offers.map((offer) => (
+            <div
+              key={offer.id}
+              className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 flex-wrap sm:flex-nowrap"
+            >
+              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                <Image
+                  src={offer.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images[0].path}` : DEFAULT_PROFILE_IMAGE}
+                  alt={offer.title}
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  className="mt-1 block w-full border rounded-md p-2"
-                  placeholder="Enter your phone number"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                />
+              <div className="flex flex-col flex-grow min-w-[150px]">
+                <h2 className="font-semibold text-gray-800">{offer.title}</h2>
+                <p className="text-sm text-gray-500">Pickup: {offer.pickupLocation}</p>
+                <p className="text-sm text-gray-500">
+                  Expires: {new Date(offer.expirationDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                </p>
               </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="mr-4 py-2 px-4 bg-gray-300 text-gray-700 rounded-md"
-                  onClick={() => setIsEditModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-
+              <div className="text-gray-700 font-bold flex-shrink-0">{offer.quantity} left</div>
+            </div>
+          ))
+        )}
+      </div>
     </main>
   );
 };

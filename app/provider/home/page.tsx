@@ -9,6 +9,7 @@ import { PlusCircle } from "lucide-react";
 
 interface Offer {
   price: number;
+  quantity: number;
   id: number;
   owner: string;
   ownerId: number;
@@ -113,7 +114,7 @@ const Home = () => {
                 imageAlt={offer.title}
                 title={offer.title}
                 price={offer.price}
-                quantity={offer.price}
+                quantity={offer.quantity}
                 description={offer.description}
                 expirationDate={offer.expirationDate}
                 pickupLocation={offer.pickupLocation}

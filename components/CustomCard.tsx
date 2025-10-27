@@ -110,8 +110,11 @@ const CustomCard: FC<CustomCardProps> = ({
   <div className="flex flex-col p-5 flex-1">
     <CardHeader className="p-0">
       <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
-        {title}
+        {title}         
       </CardTitle>
+      <CardDescription className="mt-2 text-sm text-gray-600">
+        {description} Find it at <strong>{pickupLocation}</strong>
+      </CardDescription>
 
       {/* Actions */}
       <div className="mt-4 flex gap-3 flex-wrap">

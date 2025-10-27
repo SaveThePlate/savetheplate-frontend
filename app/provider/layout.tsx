@@ -36,9 +36,9 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
           <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
             <Link href="/provider/profile">Profile</Link>
             <Link href="/provider/publish">Publish an Offer</Link>
-            <Link href="/provider/home">Published Offers</Link>
+            {/* <Link href="/provider/home">Published Offers</Link> */}
             <Link href="/provider/orders">Orders</Link>
-            <Link href="/provider/history">History</Link>
+            {/* <Link href="/provider/history">History</Link> */}
             <Link href="/provider/scan">Scan QR Code</Link>
             <Link href="/provider/logout" className="text-red-500">
               Logout
@@ -60,9 +60,9 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             <nav className="flex flex-col p-5 space-y-3 text-gray-700 text-[15px]">
               <Link href="/provider/profile" onClick={() => setMenuOpen(false)}>Profile</Link>
               <Link href="/provider/publish" onClick={() => setMenuOpen(false)}>Publish an Offer</Link>
-              <Link href="/provider/home" onClick={() => setMenuOpen(false)}>Published Offers</Link>
+              {/* <Link href="/provider/home" onClick={() => setMenuOpen(false)}>Published Offers</Link> */}
               <Link href="/provider/orders" onClick={() => setMenuOpen(false)}>Orders</Link>
-              <Link href="/provider/history" onClick={() => setMenuOpen(false)}>History</Link>
+              {/* <Link href="/provider/history" onClick={() => setMenuOpen(false)}>History</Link> */}
               <Link href="/provider/scan" onClick={() => setMenuOpen(false)}>Scan QR Code</Link>
               <Link
                 href="/provider/logout"
