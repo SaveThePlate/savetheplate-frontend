@@ -22,9 +22,12 @@ export default function ProfilePage() {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) return;
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const { username, location, phoneNumber } = response.data || {};
         setFormData({
           username: username || "Username",
@@ -32,7 +35,7 @@ export default function ProfilePage() {
           phoneNumber: phoneNumber || "Phone number",
         });
       } catch (err) {
-        // non-fatal: keep defaults
+        // Ignore fetch errors, use defaults
       }
     })();
   }, []);
@@ -62,71 +65,87 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-[#cdeddf] flex items-center justify-center p-6 sm:pt-16">
       <ToastContainer />
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
-        <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-100 shadow-md">
-            <Image
-              src={DEFAULT_PROFILE_IMAGE}
-              alt="Profile"
-              width={96}
-              height={96}
-              className="object-cover w-full h-full"
-            />
-          </div>
-
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">{formData.username}</h1>
-            <h2 className="text-gray-600 text-sm">{formData.location}</h2>
-            <p className="text-gray-600 text-sm">{formData.phoneNumber}</p>
-          </div>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 flex flex-col items-center text-center transition-all">
+        {/* Profile Image */}
+        <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4">
+          <Image
+            src={DEFAULT_PROFILE_IMAGE}
+            alt="Profile"
+            width={112}
+            height={112}
+            className="object-cover w-full h-full"
+          />
         </div>
 
-        <div className="w-full h-40 bg-yellow-300 rounded-lg mt-4 flex items-center justify-center">
+        {/* User Info */}
+        <h1 className="text-2xl font-semibold text-gray-800">
+          {formData.username}
+        </h1>
+        <p className="text-gray-600 mt-1">{formData.location}</p>
+        <p className="text-gray-500 text-sm mt-1">{formData.phoneNumber}</p>
+
+        {/* Map placeholder (commented out) */}
+        {/*
+        <div className="w-full h-40 bg-yellow-300 rounded-lg mt-6 flex items-center justify-center">
           <span className="text-gray-700">Map Placeholder</span>
         </div>
+        */}
 
+        {/* Edit Button */}
         <Button
-          className="mt-6 text-black bg-[#fffc5ed3] sm:text-lg border border-black font-bold py-2 px-6 rounded-full shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:bg-yellow-600"
+          className="mt-8 bg-[#fffc5ed3] hover:bg-yellow-400 text-black text-sm sm:text-base border border-black font-semibold py-2 px-6 rounded-full shadow-sm hover:shadow-md transition-transform transform hover:scale-105"
           onClick={() => setIsEditModalOpen(true)}
         >
           Edit Profile
         </Button>
 
+        {/* Edit Modal */}
         {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                className="w-full p-2 mb-2 border rounded"
-                placeholder="Username"
-              />
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                className="w-full p-2 mb-2 border rounded"
-                placeholder="Location"
-              />
-              <input
-                type="text"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                className="w-full p-2 mb-4 border rounded"
-                placeholder="Phone Number"
-              />
-              <div className="flex justify-end gap-2">
-                <Button className="bg-gray-300 px-4 py-2 rounded" onClick={() => setIsEditModalOpen(false)}>
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+            <div className="bg-white rounded-2xl shadow-lg w-80 sm:w-96 p-6">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">
+                Edit Profile
+              </h2>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                  placeholder="Username"
+                />
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                  placeholder="Location"
+                />
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                  placeholder="Phone Number"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
                   Cancel
                 </Button>
-                <Button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSave}>
+                <Button
+                  className="bg-yellow-400 text-black px-4 py-2 rounded-md font-semibold hover:bg-yellow-500 transition"
+                  onClick={handleSave}
+                >
                   Save
                 </Button>
               </div>
