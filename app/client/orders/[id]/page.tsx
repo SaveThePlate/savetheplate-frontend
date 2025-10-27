@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CartOrder from "@/components/cartOrder"; 
-import { useParams, useRouter } from "next/navigation";
-import { Button } from '@/components/ui/button';
-
+import { useRouter } from "next/navigation";
 
 type Order = {
   id: number;
@@ -21,13 +19,10 @@ const Orders = () => {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
-  const params = useParams();
-  // `params.id` may be present in the route but we want the currently authenticated user's orders.
 
   useEffect(() => {
     const fetchOrders = async () => {
       const token = localStorage.getItem("accessToken");
-
       if (!token) {
         setError("No access token found, please log in again.");
         router.push("/signIn");
@@ -51,30 +46,60 @@ const Orders = () => {
     };
 
     fetchOrders();
-    // only run on mount (and when router changes)
   }, [router]);
 
+  // Group orders by status
+  const confirmedOrders = orders.filter(o => o.status === "confirmed");
+  const pendingOrders = orders.filter(o => o.status === "pending");
+  const cancelledOrders = orders.filter(o => o.status === "cancelled");
+
+  const hasOrders = orders.length > 0;
 
   return (
     <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
-
       <div className="w-full flex justify-center mb-6 pt-6">
-      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-        My Orders
-      </h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
+          My Orders
+        </h1>
       </div>
 
-      <div className="items-container">
-      {/* {orders.length > 0 ? (
-          orders.map((order) => (
-            <CartOrder key={order.id} order={order} />
-          ))
-        ) : (
-          <p>No orders yet.</p>
-        )} */}
-        {orders.map((order) => (
-            <CartOrder key={order.id} order={order} />
-          ))}
+      <div className="w-full max-w-3xl flex flex-col gap-6 px-4">
+        {!hasOrders && (
+          <p className="text-gray-600 text-center">You have not placed any orders yet.</p>
+        )}
+
+        {confirmedOrders.length > 0 && (
+          <section>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Confirmed Orders</h2>
+            <div className="flex flex-col gap-4">
+              {confirmedOrders.map(order => (
+                <CartOrder key={order.id} order={order} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {pendingOrders.length > 0 && (
+          <section>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Pending Orders</h2>
+            <div className="flex flex-col gap-4">
+              {pendingOrders.map(order => (
+                <CartOrder key={order.id} order={order} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {cancelledOrders.length > 0 && (
+          <section>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Cancelled Orders</h2>
+            <div className="flex flex-col gap-4">
+              {cancelledOrders.map(order => (
+                <CartOrder key={order.id} order={order} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
