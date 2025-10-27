@@ -110,7 +110,8 @@ const OffersPage = () => {
   }
 
   return (
-    <div className="flex flex-wrap justify-center gap-6">
+    <div className="w-full">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
       {offers
         .sort((a, b) => (a.quantity === 0 ? 1 : b.quantity === 0 ? -1 : 0))
         .map((offer) => (
@@ -130,6 +131,7 @@ const OffersPage = () => {
             reserveLink={`/client/offers/${offer.id}`}
           />
         ))}
+      </div>
     </div>
   );
 };

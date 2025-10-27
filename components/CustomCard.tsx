@@ -1,3 +1,4 @@
+"use client";
 import { FC, useEffect, useState } from "react";
 import {
   Card,
@@ -57,7 +58,7 @@ const CustomCard: FC<CustomCardProps> = ({
   });
 
   const router = useRouter();
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -76,8 +77,7 @@ const CustomCard: FC<CustomCardProps> = ({
           }
         );
 
-        const userRole = response?.data?.role;
-        setRole(userRole);
+        setRole(response?.data?.role);
       } catch (error) {
         console.error("Error fetching role:", error);
         router.push("/onboarding");
@@ -88,26 +88,26 @@ const CustomCard: FC<CustomCardProps> = ({
   }, [router]);
 
   return (
-    <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 max-w-xs">
-      <Card className="flex flex-col shadow-xl border border-gray-300 rounded-lg m-4 bg-white overflow-hidden">
-        <div className="w-full h-64 overflow-hidden">
+    <div>
+      <Card className="flex flex-col shadow-xl border border-gray-300 rounded-lg bg-white overflow-hidden h-full">
+        {/* Image */}
+        <div className="w-full h-48 sm:h-56 md:h-48 lg:h-56 relative overflow-hidden">
           <Image
-            src={imageSrc ? imageSrc : "/logo.png"}
+            src={imageSrc || "/logo.png"}
             alt={imageAlt}
-            className="w-full h-full object-cover"
-            width={300}
-            height={300}
+            className="object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         </div>
 
-        <div className="flex flex-col justify-between p-5">
+        {/* Card Content */}
+        <div className="flex flex-col justify-between p-5 flex-1">
           <CardHeader className="p-0">
             <CardTitle className="text-xl font-semibold text-gray-800">
               {title}
               <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                <span className="text-gray-400 line-through">
-                  {price * 2} dt
-                </span>
+                <span className="text-gray-400 line-through">{price * 2} dt</span>
                 <span className="text-teal-600 font-semibold">{price} dt</span>
               </div>
             </CardTitle>
@@ -122,73 +122,73 @@ const CustomCard: FC<CustomCardProps> = ({
               </span>
             </CardDescription>
 
+            {/* Location + Details Button */}
             <div className="flex space-x-2 mt-3">
               {mapsLink && (
                 <a
                   href={mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-3  text-white bg-teal-500 hover:bg-teal-600 font-bold text-center rounded-lg shadow-md transition-transform transform hover:scale-105"
+                  className="px-3 py-3 text-white bg-teal-500 hover:bg-teal-600 font-bold text-center rounded-lg shadow-md transition-transform transform hover:scale-105"
                 >
                   📍 Pickup Location
                 </a>
               )}
 
+              {/* ✅ FIXED: Credenza Trigger + Content are in SAME wrapper */}
               <Credenza>
                 <CredenzaTrigger asChild>
                   <button className="px-4 py-2 text-sm bg-teal-200 font-bold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300">
                     Details
                   </button>
                 </CredenzaTrigger>
+
+                <CredenzaContent className="bg-white rounded-lg shadow-lg p-6 max-w-lg mx-auto">
+                  <CredenzaHeader className="mb-4">
+                    <CredenzaTitle className="text-2xl font-bold text-gray-800 mb-3">
+                      {title}
+                    </CredenzaTitle>
+                    <CredenzaDescription className="text-gray-600 text-sm">
+                      {description}
+                    </CredenzaDescription>
+                  </CredenzaHeader>
+
+                  <CredenzaBody className="space-y-4">
+                    <p className="text-base text-gray-700">
+                      <strong>Pickup Time:</strong> {formattedDate} at {formattedTime}
+                    </p>
+                    <p className="text-base text-gray-700">
+                      <strong>Location:</strong> {pickupLocation}
+                    </p>
+
+                    {mapsLink && (
+                      <div className="mt-4">
+                        <a
+                          href={mapsLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block px-4 py-2 text-white bg-teal-500 hover:bg-teal-600 font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105"
+                        >
+                          View on Google Maps
+                        </a>
+                      </div>
+                    )}
+                  </CredenzaBody>
+
+                  <CredenzaFooter className="flex justify-end mt-6">
+                    <CredenzaClose asChild>
+                      <button className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
+                        Close
+                      </button>
+                    </CredenzaClose>
+                  </CredenzaFooter>
+                </CredenzaContent>
               </Credenza>
             </div>
           </CardHeader>
 
+          {/* Footer Section */}
           <CardFooter className="flex justify-center items-center mt-4 space-x-2">
-            <Credenza>
-              <CredenzaContent className="bg-white rounded-lg shadow-lg p-6 max-w-lg mx-auto">
-                <CredenzaHeader className="mb-4">
-                  <CredenzaTitle className="text-2xl font-bold text-gray-800 mb-3">
-                    {title}
-                  </CredenzaTitle>
-                  <CredenzaDescription className="text-gray-600 text-sm">
-                    {description}
-                  </CredenzaDescription>
-                </CredenzaHeader>
-
-                <CredenzaBody className="space-y-4">
-                  <p className="text-base text-gray-700">
-                    <strong>Heure de collecte :</strong> {formattedDate} à{" "}
-                    {formattedTime}
-                  </p>
-                  <p className="text-base text-gray-700">
-                    <strong>Lieu :</strong> {pickupLocation}
-                  </p>
-
-                  {mapsLink && (
-                    <div className="mt-4">
-                      <a
-                        href={mapsLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 text-white bg-teal-500 hover:bg-teal-600 font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105"
-                      >
-                        Voir sur Google Maps
-                      </a>
-                    </div>
-                  )}
-                </CredenzaBody>
-
-                <CredenzaFooter className="flex justify-end mt-6">
-                  <CredenzaClose asChild>
-                    <button className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
-                      Fermer
-                    </button>
-                  </CredenzaClose>
-                </CredenzaFooter>
-              </CredenzaContent>
-            </Credenza>
-
             {role === "CLIENT" &&
               (quantity > 0 ? (
                 <Link

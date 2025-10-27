@@ -60,14 +60,13 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="bg-[#cdeddf] min-h-screen pt-20 pb-16 flex flex-col items-center">
+    <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
       <ToastContainer />
 
-      {/* Content Container */}
-      <div className="w-full max-w-5xl mx-auto px-6 flex flex-col items-center ">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 flex flex-col space-y-10">
         {/* Header Section */}
-        <div className="flex justify-between items-center w-full">
-          <h1 className="text-2xl font-semibold text-gray-800">
+        <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-4">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
             Your Published Offers
           </h1>
           <button
@@ -79,15 +78,30 @@ const Home = () => {
           </button>
         </div>
 
-        {/* Offers Grid */}
+        {/* Offers Display */}
         {loading ? (
-          <p className="text-gray-600 mt-10">Loading your offers...</p>
+          <p className="text-gray-600 text-lg text-center mt-10">
+            Loading your offers...
+          </p>
         ) : error ? (
-          <p className="text-red-600 mt-10">{error}</p>
+          <p className="text-red-600 text-center mt-10">{error}</p>
         ) : offers.length === 0 ? (
-          <p className="text-gray-600 mt-10">You have no published offers yet.</p>
+          <p className="text-gray-600 text-lg text-center mt-10">
+            You have no published offers yet.
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+          <div
+            className="
+              grid 
+              grid-cols-1 
+              sm:grid-cols-2 
+              lg:grid-cols-3 
+              xl:grid-cols-4 
+              gap-8 
+              place-items-center 
+              w-full
+            "
+          >
             {offers.map((offer) => (
               <CustomCard
                 key={offer.id}
