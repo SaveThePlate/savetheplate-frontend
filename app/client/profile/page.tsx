@@ -1,10 +1,18 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+"use client";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+
+interface Order {
+  id: number;
+  quantity: number;
+  offerId: number;
+  status: string;
+  createdAt: string;
+}
 
 interface Offer {
   id: number;
@@ -22,50 +30,82 @@ const getImage = (filename: string | null) =>
   filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
 
 const ProfilePage = () => {
-  const [username, setUsername] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
-    phoneNumber: '',
+    username: "",
+    phoneNumber: "",
     profileImage: DEFAULT_PROFILE_IMAGE,
   });
-  const [offers, setOffers] = useState<Offer[]>([]);
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [offersDetails, setOffersDetails] = useState<Record<number, Offer>>({});
   const [loading, setLoading] = useState(true);
 
+  // Fetch profile data
   const fetchProfileData = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('Token not found');
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Token not found");
 
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const { username, phoneNumber, profileImage } = response.data;
-      setUsername(username || '');
-      setPhoneNumber(phoneNumber || '');
+      setUsername(username || "");
+      setPhoneNumber(phoneNumber || "");
       setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
       setFormData({
-        username: username || '',
-        phoneNumber: phoneNumber || '',
+        username: username || "",
+        phoneNumber: phoneNumber || "",
         profileImage: profileImage || DEFAULT_PROFILE_IMAGE,
       });
+    } catch {
+      toast.error("Failed to fetch profile");
+    }
+  };
+
+  // Fetch user's orders
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Token not found");
+      const userId = JSON.parse(atob(token.split(".")[1])).id;
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setOrders(response.data || []);
+      // Fetch corresponding offers for each order
+      for (const order of response.data) {
+        const offerRes = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setOffersDetails((prev) => ({ ...prev, [order.offerId]: offerRes.data }));
+      }
     } catch (err) {
-      toast.error('Failed to fetch profile');
+      console.error(err);
+      toast.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('Token not found');
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Token not found");
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
         {
@@ -74,37 +114,19 @@ const ProfilePage = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // reflect changes locally
+
       setUsername(formData.username);
       setPhoneNumber(formData.phoneNumber);
       setIsEditModalOpen(false);
-      toast.success('Profile updated successfully');
-    } catch (err: any) {
-      console.error(err.response?.data || err.message);
-      toast.error('Failed to update profile');
-    }
-  };
-
-  const fetchOffers = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('Token not found');
-      const id = JSON.parse(atob(token.split('.')[1])).id;
-
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOffers(response.data);
+      toast.success("Profile updated successfully");
     } catch {
-      toast.error('Failed to fetch offers');
-    } finally {
-      setLoading(false);
+      toast.error("Failed to update profile");
     }
   };
 
   useEffect(() => {
     fetchProfileData();
-    fetchOffers();
+    fetchOrders();
   }, []);
 
   return (
@@ -131,7 +153,6 @@ const ProfilePage = () => {
                 className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800"
                 placeholder="Phone number"
               />
-              {/* Profile image upload intentionally omitted to avoid backend filename issues; keep default image for now */}
             </div>
             <div className="flex justify-end gap-3 mt-6 flex-wrap">
               <Button
@@ -163,21 +184,38 @@ const ProfilePage = () => {
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800">{username || 'Username'}</h1>
-        <p className="text-gray-600 mt-1">{phoneNumber || 'Phone number'}</p>
+        <h1 className="text-2xl font-bold text-gray-800">{username || "Username"}</h1>
+        <p className="text-gray-600 mt-1">{phoneNumber || "Phone number"}</p>
 
-        <div className="mt-6 bg-[#F9FAF8] rounded-2xl shadow-inner px-6 py-4 w-full flex justify-around">
-          <div>
-            <p className="text-xl font-bold text-gray-900">{offers.length}</p>
-            <p className="text-sm text-gray-500">Orders</p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900">
-              {offers.reduce((sum, o) => sum + o.quantity, 0)}
-            </p>
-            <p className="text-sm text-gray-500">Items Saved</p>
-          </div>
-        </div>
+<div className="mt-6 bg-[#F9FAF8] rounded-2xl shadow-inner px-2 py-4 w-full flex justify-around text-center">
+  <div>
+    <p className="text-xl font-bold text-gray-900">{orders.length}</p>
+    <p className="text-sm text-gray-500">Total Orders</p>
+  </div>
+
+  <div>
+    <p className="text-xl font-bold text-emerald-600">
+      {orders.filter((o) => o.status === 'confirmed').length}
+    </p>
+    <p className="text-sm text-gray-500">Confirmed</p>
+  </div>
+
+  <div>
+    <p className="text-xl font-bold text-red-500">
+      {orders.filter((o) => o.status === 'cancelled').length}
+    </p>
+    <p className="text-sm text-gray-500">Cancelled</p>
+  </div>
+
+  <div>
+    <p className="text-xl font-bold text-gray-900">
+      {orders.reduce((sum, o) => sum + (o.quantity || 0), 0)}
+    </p>
+    <p className="text-sm text-gray-500">Items Ordered</p>
+  </div>
+</div>
+
+
         <div className="mt-4">
           <Button
             className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-full font-semibold shadow-sm hover:shadow-md"
@@ -188,15 +226,15 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Offers Section */}
+      {/* Orders Section */}
       <section className="w-full max-w-6xl px-4">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          Your Past Orders
+          My Past Orders
         </h2>
 
         {loading ? (
-          <p className="text-gray-600 text-center">Loading offers...</p>
-        ) : offers.length === 0 ? (
+          <p className="text-gray-600 text-center">Loading orders...</p>
+        ) : orders.length === 0 ? (
           <div className="text-center text-gray-600">
             <p className="text-lg mb-4">You haven’t placed any orders yet.</p>
             <Button className="bg-gradient-to-r from-emerald-400 to-green-300 text-gray-900 px-6 py-2 rounded-full font-semibold shadow hover:shadow-lg transform transition-all hover:-translate-y-0.5">
@@ -204,53 +242,75 @@ const ProfilePage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {offers.map((offer) => (
+          
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 w-full">
+          {orders.map((order) => {
+            const offer = offersDetails[order.offerId];
+
+            return (
               <div
-                key={offer.id}
-                className="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 overflow-hidden"
+                key={order.id}
+                className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 overflow-hidden border border-gray-100"
               >
-                <div className="w-full h-48 relative">
+                {/* Image */}
+                <div className="relative w-full h-48 bg-gray-100">
                   <Image
                     src={
-                      offer.images?.[0]?.path
+                      offer?.images?.[0]?.path
                         ? `${BASE_IMAGE_URL}${offer.images[0].path}`
                         : DEFAULT_PROFILE_IMAGE
                     }
-                    alt={offer.title}
+                    alt={offer?.title || "Order Image"}
                     fill
-                    className="object-cover w-full h-full"
+                    className="object-cover"
                   />
                 </div>
 
-                <div className="p-4 flex flex-col gap-1">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {offer.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 truncate">
-                    Pickup: {offer.pickupLocation}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Expired on{' '}
-                    {new Date(offer.expirationDate).toLocaleDateString([], {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
+                {/* Details */}
+                <div className="p-5 flex flex-col justify-between h-[180px]">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 truncate mb-1">
+                      {offer?.title || "Offer"}
+                    </h3>
+                    <p className="text-sm text-gray-600 truncate">
+                      Pickup: <span className="font-medium text-gray-800">{offer?.pickupLocation || "N/A"}</span>
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Ordered on{" "}
+                      <span className="font-medium text-gray-700">
+                        {new Date(order.createdAt).toLocaleDateString([], {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </p>
+                  </div>
 
-                <div className="p-4 flex justify-between items-center">
-                  <span className="bg-[#DFF6E5] text-green-700 text-sm font-semibold px-3 py-1 rounded-full">
-                    {offer.quantity} items
-                  </span>
-                  <Button className="bg-white border border-gray-300 text-gray-700 px-4 py-1 rounded-full font-medium hover:bg-gray-50 transition">
-                    View
-                  </Button>
+                  {/* Status Tag */}
+                  <div className="mt-3 flex justify-between items-center">
+                    <span
+                      className={`px-3 py-1 text-xs font-semibold rounded-full tracking-wide ${
+                        order.status === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : order.status === "confirmed"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </span>
+
+                    <span className="bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-1 rounded-full">
+                      {order.quantity} {order.quantity > 1 ? "items" : "item"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
+
         )}
       </section>
     </main>
