@@ -114,7 +114,9 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           Pickup: {offer?.pickupLocation || "N/A"}
         </p>
         <p className="text-sm sm:text-base text-gray-500 mt-1">
-          Expires: {offer ? new Date(offer.expirationDate).toLocaleString() : "N/A"}
+          Expires: {offer 
+            ? `${new Date(offer.expirationDate).toLocaleDateString()} at ${new Date(offer.expirationDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+            : "N/A"}
         </p>
       </div>
 

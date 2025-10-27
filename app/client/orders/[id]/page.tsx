@@ -56,7 +56,7 @@ const Orders = () => {
 
 
   return (
-    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
 
       <div className="w-full flex justify-center mb-6 pt-6">
       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
