@@ -32,7 +32,7 @@ const OffersPage = () => {
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken'); 
+    const token = localStorage.getItem("accessToken");
     if (!token) {
       setError("No access token found. Please log in again.");
       setLoading(false);
@@ -41,33 +41,30 @@ const OffersPage = () => {
 
     const fetchUserRole = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/users/get-role", {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         if (response.status === 200) {
           setUserRole(response.data.role);
         } else {
-          console.error('Failed to fetch user role:', response.data.message);
-          setError('Failed to fetch user role: ' + response.data.message);
+          console.error("Failed to fetch user role:", response.data.message);
+          setError("Failed to fetch user role: " + response.data.message);
         }
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-        setError('Error fetching user role. Please try again.');
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+        setError("Error fetching user role. Please try again.");
       }
     };
 
     const fetchOffers = async () => {
       try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/offers",
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setOffers(response.data);
       } catch (err) {
         console.error("Failed to fetch offers:", err);
@@ -109,16 +106,25 @@ const OffersPage = () => {
     );
   }
 
+  // push expired offers to the end and keep sold-out after in ordering
+  const now = new Date().getTime();
+  const sorted = [...offers].sort((a, b) => {
+    const aExpired = new Date(a.expirationDate).getTime() <= now;
+    const bExpired = new Date(b.expirationDate).getTime() <= now;
+    if (aExpired !== bExpired) return aExpired ? 1 : -1; // expired last
+    if (a.quantity === 0 && b.quantity !== 0) return 1;
+    if (b.quantity === 0 && a.quantity !== 0) return -1;
+    return 0;
+  });
+
   return (
     <div className="">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-stretch ">
-      {offers
-        .sort((a, b) => (a.quantity === 0 ? 1 : b.quantity === 0 ? -1 : 0))
-        .map((offer) => (
+        {sorted.map((offer) => (
           <CustomCard
             key={offer.id}
             offerId={offer.id}
-            imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ''} 
+            imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ""}
             imageAlt={offer.title}
             title={offer.title}
             ownerId={offer.ownerId}

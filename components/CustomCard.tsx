@@ -58,6 +58,8 @@ const CustomCard: FC<CustomCardProps> = ({
     minute: "2-digit",
   });
 
+  const isExpired = new Date(expirationDate).getTime() <= new Date().getTime();
+
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
 
@@ -104,6 +106,13 @@ const CustomCard: FC<CustomCardProps> = ({
   >
     {quantity > 0 ? `${quantity} left` : "Sold Out"}
   </div>
+
+  {/* Expired badge */}
+  {isExpired && (
+    <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-md">
+      Expired
+    </div>
+  )}
 </div>
 
   {/* Content */}
@@ -172,8 +181,15 @@ const CustomCard: FC<CustomCardProps> = ({
     </CardHeader>
 
     <CardFooter className="mt-5 flex justify-center">
-      {role === "CLIENT" &&
-        (quantity > 0 ? (
+      {role === "CLIENT" && (
+        isExpired ? (
+          <button
+            disabled
+            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-400 rounded-xl cursor-not-allowed"
+          >
+            ⌛ Expired
+          </button>
+        ) : quantity > 0 ? (
           <Link
             href={reserveLink}
             className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl shadow-md hover:bg-teal-700 transition-colors duration-200"
@@ -187,7 +203,8 @@ const CustomCard: FC<CustomCardProps> = ({
           >
             🛒 Sold Out
           </button>
-        ))}
+        )
+      )}
     </CardFooter>
   </div>
   

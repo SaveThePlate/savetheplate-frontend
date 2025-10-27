@@ -62,6 +62,10 @@ const Offers = () => {
     if (!offer) return;
     const token = localStorage.getItem("accessToken");
     if (!token) return toast.error("You need to log in");
+    // Prevent ordering if offer is expired
+    if (new Date(offer.expirationDate).getTime() <= new Date().getTime()) {
+      return toast.error("This offer has expired and cannot be ordered.");
+    }
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`,
