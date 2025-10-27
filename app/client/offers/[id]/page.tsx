@@ -15,53 +15,41 @@ interface Offer {
   description: string;
   expirationDate: string;
   pickupLocation: string;
-  quantity: number; // Make sure backend returns this
+  quantity: number;
 }
 
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
-
-const getImage = (path?: string | null) => {
-  if (!path) return "/logo.png";
-  const trimmed = String(path).replace(/^"|"$/g, "").trim();
-  if (trimmed.startsWith("http")) return trimmed;
-  return `${BASE_IMAGE_URL}${trimmed}`;
-};
+const getImage = (path?: string | null) =>
+  path ? `${BASE_IMAGE_URL}${path}` : "/logo.png";
 
 const Offers = () => {
   const router = useRouter();
-  const params = useParams();
-  const { id } = params;
-
+  const { id } = useParams();
   const [offer, setOffer] = useState<Offer | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [inCart, setInCart] = useState<boolean>(false);
+  const [quantity, setQuantity] = useState(1);
+  const [inCart, setInCart] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch offer
   useEffect(() => {
     const fetchOffer = async () => {
       const token = localStorage.getItem("accessToken");
       if (!token) return router.push("/signIn");
-
       try {
-        const response = await axios.get(
+        const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setOffer(response.data);
-        setQuantity(response.data.quantity > 0 ? 1 : 0); // start at 1 if available
+        setOffer(res.data);
       } catch {
-        toast.error("Failed to fetch offer");
+        toast.error("Failed to load offer");
       }
     };
     fetchOffer();
   }, [id, router]);
 
-  // Fetch user ID
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return router.push("/signIn");
-
+    if (!token) return;
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/get-user-by-token`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -70,113 +58,103 @@ const Offers = () => {
       .catch(() => router.push("/signIn"));
   }, [router]);
 
-  const increaseQuantity = () => {
-    if (!offer) return;
-    setQuantity((prev) => Math.min(prev + 1, offer.quantity));
-  };
-
-  const decreaseQuantity = () => {
-    setQuantity((prev) => Math.max(prev - 1, 1));
-  };
-
   const handleOrder = async () => {
-    if (!offer || quantity <= 0) return;
+    if (!offer) return;
+    const token = localStorage.getItem("accessToken");
+    if (!token) return toast.error("You need to log in");
     try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return toast.error("You need to log in");
-
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`,
         { userId, offerId: offer.id, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setInCart(true);
-      toast.success("Your order was successful!");
-    } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Error placing order");
-      }
+      toast.success("Order placed successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to order");
     }
   };
 
   if (!offer) return <div className="text-center py-20">Loading...</div>;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#e6f7f2] to-[#fefefe] flex flex-col items-center p-4 pt-24 pb-12">
-      <ToastContainer />
-
-      {/* Image Card */}
-      <div className="relative w-full max-w-md sm:max-w-lg h-72 sm:h-96 rounded-3xl overflow-hidden shadow-xl mb-6">
+return (
+  <div className="bg-[#cdeddf] min-h-screen flex justify-center items-center px-4">
+    <ToastContainer />
+    <div className="w-full max-w-lg bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
+      {/* Image */}
+      <div className="relative w-full h-60">
         <Image
           src={getImage(offer.images?.[0]?.path)}
           alt={offer.title}
           fill
           className="object-cover"
         />
-        <div className="absolute top-3 right-3 bg-teal-600 text-white px-3 py-1 rounded-full text-sm shadow-lg font-bold">
+        <div className="absolute top-3 right-3 bg-emerald-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">
           {offer.quantity} left
         </div>
       </div>
 
-      {/* Title & Description */}
-      <div className="max-w-md text-center mb-6 px-4 sm:px-0">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">{offer.title}</h1>
-        <p className="text-gray-700 text-lg sm:text-xl mt-2">{offer.description}</p>
-      </div>
+      {/* Content */}
+      <div className="p-5">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+          {offer.title}
+        </h1>
+        <p className="text-gray-700 text-sm mb-3 leading-relaxed">
+          {offer.description}
+        </p>
 
-      {/* Quantity Selector */}
-      <div className="flex flex-col sm:flex-row justify-center items-center mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+        <div className="text-sm text-gray-600 space-y-1 mb-4">
+          <p>
+            <span className="font-semibold">Pickup:</span> {offer.pickupLocation}
+          </p>
+          <p>
+            <span className="font-semibold">Expires:</span>{" "}
+            {new Date(offer.expirationDate).toLocaleDateString()}
+          </p>
+        </div>
+
+        {/* Quantity Selector */}
+        <div className="flex justify-center items-center gap-3 mb-5">
           <button
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition-colors text-lg sm:text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={decreaseQuantity}
+            onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
+            className="px-3 py-1.5 bg-gray-100 rounded-full hover:bg-gray-200 text-lg font-medium"
             disabled={quantity <= 1}
           >
-            -
+            −
           </button>
-          <span className="px-6 text-lg sm:text-xl font-medium">
-            {quantity} / {offer.quantity}
-          </span>
+          <span className="text-lg font-semibold text-gray-800">{quantity}</span>
           <button
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition-colors text-lg sm:text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={increaseQuantity}
+            onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
+            className="px-3 py-1.5 bg-gray-100 rounded-full hover:bg-gray-200 text-lg font-medium"
             disabled={quantity >= offer.quantity}
           >
             +
           </button>
         </div>
-      </div>
 
-      {/* Details Card */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
-        <p className="text-gray-700 mb-2">
-          <span className="font-semibold">Pickup Location:</span> {offer.pickupLocation}
-        </p>
-        <p className="text-gray-700">
-          <span className="font-semibold">Expiration Date:</span>{" "}
-          {new Date(offer.expirationDate).toLocaleDateString()}
-        </p>
-      </div>
-
-      {/* Add to Cart Button */}
-      <div className="w-full max-w-md px-4 sm:px-0">
+        {/* Order Button */}
         <button
           onClick={handleOrder}
           disabled={offer.quantity === 0}
-          className={`w-full py-3 rounded-full font-bold transition-all duration-300 text-lg sm:text-xl
-            ${offer.quantity === 0
+          className={`w-full py-3 rounded-full font-semibold text-lg transition-all ${
+            offer.quantity === 0
               ? "bg-gray-200 text-gray-500 cursor-not-allowed"
               : inCart
-              ? "bg-green-400 text-white hover:bg-green-500"
+              ? "bg-emerald-400 text-white hover:bg-emerald-500"
               : "bg-yellow-200 text-gray-900 hover:bg-yellow-300"
-            }`}
+          }`}
         >
-          {offer.quantity === 0 ? "Out of Stock" : inCart ? "Added to Cart" : "Add to Cart"}
+          {offer.quantity === 0
+            ? "Out of Stock"
+            : inCart
+            ? "Added to Cart"
+            : "Add to Cart"}
         </button>
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Offers;

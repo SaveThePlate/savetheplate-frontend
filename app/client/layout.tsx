@@ -47,6 +47,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
+                      <Link href="/client/home" className="text-gray-600 hover:text-gray-900" onClick={() => setMenuOpen(false)}>
+            Home
+          </Link>
             <Link href={userId ? `/client/orders/${userId}` : "/client/orders"} className="text-gray-600 hover:text-gray-900">
               My Purchases
             </Link>
