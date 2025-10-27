@@ -34,6 +34,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
+            <Link href="/provider/home">Home</Link>
             <Link href="/provider/profile">Profile</Link>
             <Link href="/provider/publish">Publish an Offer</Link>
             {/* <Link href="/provider/home">Published Offers</Link> */}
@@ -58,6 +59,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
         {menuOpen && (
           <div className="lg:hidden w-full bg-white border-t border-gray-200 shadow-md absolute top-16 left-0 z-40">
             <nav className="flex flex-col p-5 space-y-3 text-gray-700 text-[15px]">
+              <Link href="/provider/home" onClick={() => setMenuOpen(false)}>Home</Link>
               <Link href="/provider/profile" onClick={() => setMenuOpen(false)}>Profile</Link>
               <Link href="/provider/publish" onClick={() => setMenuOpen(false)}>Publish an Offer</Link>
               {/* <Link href="/provider/home" onClick={() => setMenuOpen(false)}>Published Offers</Link> */}
