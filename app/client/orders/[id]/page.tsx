@@ -21,28 +21,38 @@ const Orders = () => {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
-  const params = useParams();  
-  const { id } = params;
+  const params = useParams();
+  // `params.id` may be present in the route but we want the currently authenticated user's orders.
 
-  useEffect(() => { 
-    const token = localStorage.getItem("accessToken");
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const token = localStorage.getItem("accessToken");
 
-    if (!token) {
-      setError("No access token found, please log in again.");
-      return router.push("/signIn");
-    }
+      if (!token) {
+        setError("No access token found, please log in again.");
+        router.push("/signIn");
+        return;
+      }
 
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        const userId = tokenPayload.id;
 
-    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-    const id = tokenPayload.id;
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-    axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + `/orders/user/${id}`, { 
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then(response => {
-      if (response.data) setOrders(response.data);
-    })
-  }, [id, router, orders]);
+        if (response.data) setOrders(response.data);
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+        setError("Failed to fetch orders. Please try again later.");
+      }
+    };
+
+    fetchOrders();
+    // only run on mount (and when router changes)
+  }, [router]);
 
 
   return (

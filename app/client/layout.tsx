@@ -8,6 +8,19 @@ import { X, Menu, LogOut } from "lucide-react"; // Import icons for the menu
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [showMap, setShowMap] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // State for the menu
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // derive userId from stored JWT so we can link to the dynamic orders route
+  React.useEffect(() => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      if (!token) return;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload?.id) setUserId(String(payload.id));
+    } catch (e) {
+      // ignore malformed token
+    }
+  }, []);
 
   return (
     <section>
@@ -34,7 +47,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
-            <Link href="/client/offers" className="text-gray-600 hover:text-gray-900">
+            <Link href={userId ? `/client/orders/${userId}` : "/client/orders"} className="text-gray-600 hover:text-gray-900">
               My Purchases
             </Link>
             <Link href="/client/profile" className="text-gray-600 hover:text-gray-900">
@@ -69,7 +82,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <Link href="/client/home" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
-          <Link href="/client/orders" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+          <Link href={userId ? `/client/orders/${userId}` : "/client/orders"} className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             My purchases
           </Link>
           <Link href="/client/profile" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
@@ -85,7 +98,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </div>
 
       {/* Main Content */}
-      <main className="pt-16 pb-16">{React.cloneElement(children as React.ReactElement, { showMap })}</main>
+      <main className="">{React.cloneElement(children as React.ReactElement, { showMap })}</main>
     </section>
   );
 }

@@ -42,19 +42,10 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
-      <div className="w-full flex-grow">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="text-xl text-gray-600">Loading offers...</div>
-          </div>
-        ) : error ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="text-xl text-red-600">{error}</div>
-          </div>
-        ) : (
-          <Offers />
-        )}
+    <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 flex flex-col space-y-10">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">Available Offers</h1>
+        <Offers />
       </div>
     </main>
   );
