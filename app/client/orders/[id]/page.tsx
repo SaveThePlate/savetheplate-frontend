@@ -68,22 +68,22 @@ const Orders = () => {
           <p className="text-gray-600 text-center">You have not placed any orders yet.</p>
         )}
 
-        {confirmedOrders.length > 0 && (
+        {pendingOrders.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Confirmed Orders</h2>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Pending Orders</h2>
             <div className="flex flex-col gap-4">
-              {confirmedOrders.map(order => (
+              {pendingOrders.map(order => (
                 <CartOrder key={order.id} order={order} />
               ))}
             </div>
           </section>
         )}
 
-        {pendingOrders.length > 0 && (
+        {confirmedOrders.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Pending Orders</h2>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Confirmed Orders</h2>
             <div className="flex flex-col gap-4">
-              {pendingOrders.map(order => (
+              {confirmedOrders.map(order => (
                 <CartOrder key={order.id} order={order} />
               ))}
             </div>

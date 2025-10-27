@@ -129,6 +129,16 @@ const ProfilePage = () => {
     fetchOrders();
   }, []);
 
+  const pendingCount = orders.filter((o) => o.status === 'pending').length;
+
+  const priority: Record<string, number> = { pending: 0, confirmed: 1, cancelled: 2 };
+  const sortedOrders = [...orders].sort((a, b) => {
+    const pa = priority[a.status] ?? 99;
+    const pb = priority[b.status] ?? 99;
+    if (pa !== pb) return pa - pb;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
   return (
     <main className="bg-[#E6F4EC] min-h-screen pt-24 pb-20 flex flex-col items-center">
       <ToastContainer />
@@ -174,6 +184,11 @@ const ProfilePage = () => {
 
       {/* Profile Card */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-md p-8 mb-10 flex flex-col items-center text-center">
+        {pendingCount > 0 && (
+          <div className="w-full mb-4 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800">
+            You have {pendingCount} pending order{pendingCount > 1 ? 's' : ''}. Please collect and confirm pickup in the <strong>My Purchases</strong> section.
+          </div>
+        )}
         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#CFE8D5] shadow-md mb-4">
           <Image
             src={profileImage}
@@ -244,7 +259,7 @@ const ProfilePage = () => {
         ) : (
           
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4 w-full">
-          {orders.map((order) => {
+          {sortedOrders.map((order) => {
             const offer = offersDetails[order.offerId];
 
             return (
