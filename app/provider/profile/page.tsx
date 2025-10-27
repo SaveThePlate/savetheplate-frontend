@@ -154,82 +154,110 @@ export default function ProfilePage() {
     <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
       <ToastContainer />
 
-      {/* Offer Edit Modal */}
-      {isOfferEditModalOpen && selectedOffer && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4 overflow-auto">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Offer</h2>
-            <div className="space-y-4">
-              <input
-                name="title"
-                value={offerForm.title}
-                onChange={handleOfferFormChange}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
-                placeholder="Title"
-              />
-              <textarea
-                name="description"
-                value={offerForm.description}
-                onChange={handleOfferFormChange}
-                rows={4}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
-                placeholder="Description"
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  value={offerForm.price}
-                  onChange={handleOfferFormChange}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
-                  placeholder="Price"
-                />
-                <input
-                  name="quantity"
-                  type="number"
-                  value={offerForm.quantity}
-                  onChange={handleOfferFormChange}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
-                  placeholder="Quantity"
-                />
-              </div>
-              <input
-                name="expirationDate"
-                type="datetime-local"
-                value={offerForm.expirationDate}
-                onChange={handleOfferFormChange}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
-              />
-            </div>
-            <div className="flex justify-end gap-3 mt-6 flex-wrap">
-              <Button
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-xl hover:bg-gray-300 transition"
-                onClick={() => setIsOfferEditModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-semibold hover:bg-yellow-500 transition"
-                onClick={async () => {
-                  // basic validation
-                  if (!offerForm.title || offerForm.title.trim() === "") {
-                    toast.error("Title is required");
-                    return;
-                  }
-                  if (offerForm.price && isNaN(Number(offerForm.price))) {
-                    toast.error("Price must be a number");
-                    return;
-                  }
-                  await handleOfferSave();
-                }}
-              >
-                Save
-              </Button>
-            </div>
+{/* Offer Edit Modal */}
+{isOfferEditModalOpen && selectedOffer && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4 overflow-auto">
+    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Edit Offer</h2>
+
+      <div className="space-y-4">
+        {/* Title */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">Title</label>
+          <input
+            name="title"
+            value={offerForm.title}
+            onChange={handleOfferFormChange}
+            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
+            placeholder="Title"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            name="description"
+            value={offerForm.description}
+            onChange={handleOfferFormChange}
+            rows={4}
+            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
+            placeholder="Description"
+          />
+        </div>
+
+        {/* Price & Quantity */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">Price</label>
+            <input
+              name="price"
+              type="number"
+              step="0.01"
+              value={offerForm.price}
+              onChange={handleOfferFormChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
+              placeholder="Price"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">Quantity</label>
+            <input
+              name="quantity"
+              type="number"
+              value={offerForm.quantity}
+              onChange={handleOfferFormChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
+              placeholder="Quantity"
+            />
           </div>
         </div>
-      )}
+
+        {/* Expiration Date */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
+          <input
+            name="expirationDate"
+            type="datetime-local"
+            value={offerForm.expirationDate}
+            onChange={handleOfferFormChange}
+            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6 flex-wrap">
+        <Button
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-xl hover:bg-gray-300 transition"
+          onClick={() => setIsOfferEditModalOpen(false)}
+        >
+          Cancel
+        </Button>
+        <Button
+          className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-semibold hover:bg-yellow-500 transition"
+          onClick={async () => {
+            if (!offerForm.title.trim()) {
+              toast.error("Title is required");
+              return;
+            }
+            if (offerForm.price && isNaN(Number(offerForm.price))) {
+              toast.error("Price must be a number");
+              return;
+            }
+            if (offerForm.quantity && isNaN(Number(offerForm.quantity))) {
+              toast.error("Quantity must be a number");
+              return;
+            }
+            await handleOfferSave();
+          }}
+        >
+          Save
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Profile Card */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 mb-10 flex flex-col items-center">
