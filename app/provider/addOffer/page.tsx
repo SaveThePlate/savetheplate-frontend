@@ -1,8 +1,12 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import axios from "axios";
 import AddOffer from "@/components/AddOffer";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const AddOfferPage = () => {
   const router = useRouter();
@@ -18,13 +22,10 @@ const AddOfferPage = () => {
       try {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/get-user-by-token`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        if (response.status !== 200) throw new Error("Invalid response from server");
-      } catch (error) {
+        if (response.status !== 200) throw new Error("Invalid response");
+      } catch {
         router.push("/signIn");
       }
     };
@@ -33,21 +34,40 @@ const AddOfferPage = () => {
   }, [router]);
 
   return (
-    <div className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
-      <main className="w-full max-w-3xl bg-white shadow-xl rounded-3xl p-6 sm:p-10 relative">
+    <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
+      <main className="relative w-full max-w-lg bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-8 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
         {/* Back Button */}
-        <button
+        <Button
+          variant="ghost"
           onClick={() => router.back()}
-          className="absolute top-4 left-4 text-gray-500 hover:text-gray-800 font-semibold"
+          className="absolute top-4 left-4 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base"
         >
-          &larr; Back
-        </button>
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">Back</span>
+        </Button>
 
-        <h1 className="text-3xl font-bold text-center text-green-900 mb-6">
-          Add New Offer
-        </h1>
+        {/* Header */}
+        <div className="flex flex-col items-center mt-6 mb-6">
 
-        <AddOffer />
+          <h1 className="text-2xl sm:text-3xl font-bold text-green-900 text-center">
+            Add a New Offer
+          </h1>
+          <p className="text-gray-500 text-center text-sm sm:text-base mt-1 max-w-sm">
+            Share your surplus and make someone’s day 🌍
+          </p>
+        </div>
+
+        {/* Add Offer Form */}
+        <section className="space-y-5">
+          <AddOffer />
+        </section>
+
+        {/* Footer Message */}
+        <footer className="mt-8 text-center border-t pt-4">
+          <p className="text-xs sm:text-sm text-gray-400">
+            Every offer helps reduce food waste 🍃
+          </p>
+        </footer>
       </main>
     </div>
   );
