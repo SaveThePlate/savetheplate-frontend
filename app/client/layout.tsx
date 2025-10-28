@@ -91,9 +91,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <Link href="/client/profile" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Profile
           </Link>
-          <Link href="/client/settings" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
+          {/* <Link href="/client/settings" className="text-lg font-medium" onClick={() => setMenuOpen(false)}>
             Settings
-          </Link>
+          </Link> */}
           <Link href="/client/logout" className="text-lg font-medium text-red-500" onClick={() => setMenuOpen(false)}>
             Logout
           </Link>
