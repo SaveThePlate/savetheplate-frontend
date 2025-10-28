@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,17 +8,13 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
 import { AuthToast, ErrorToast } from "@/components/Toasts";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
-
   const [showAuthToast, setShowAuthToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
-
-  const [role, setRole] = useState(null);
 
   const clientApi = useOpenApiFetch();
   const router = useRouter();
@@ -29,75 +25,50 @@ export default function SignIn() {
 
     clientApi
       .POST("/auth/send-magic-mail", {
-        body: { email: email },
+        body: { email },
       })
       .then((resp) => {
         if (resp.response.status === 201) {
-          console.info("Magic link sent to your email");
           setShowAuthToast(true);
           setShowErrorToast(false);
         } else {
-          console.error("Failed to send magic link to your email");
           setShowErrorToast(true);
           setShowAuthToast(false);
         }
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to send magic link to your email");
+        console.error("Failed to send magic link:", err);
         setShowErrorToast(true);
         setShowAuthToast(false);
-        console.error(err);
         setLoading(false);
       });
   }
 
   return (
-<div
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8"
-      style={{
-        backgroundColor: '#98cca8', 
-      }}
-    >
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center text-center w-full max-w-md px-4 sm:px-8 py-12 bg-white rounded-3xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
+      <main className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg px-8 py-12 border border-[#f5eae0] text-center">
+        {/* Decorative soft blobs */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD6C9] rounded-full blur-2xl opacity-50 translate-x-8 -translate-y-8" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-50 -translate-x-8 translate-y-8" />
+        <div className="absolute bottom-10 right-10 w-20 h-20 bg-[#FAF1E2] rounded-full blur-xl opacity-60" />
 
         {/* Header */}
-        <h1
-          className="text-3xl sm:text-4xl lg:text-5xl font-extrabold animate-fadeInDown mb-4 sm:mb-6"
-          style={{
-            color: '#ffbe98', 
-            WebkitTextStroke: '0.5px #000000', 
-            textShadow: '4px 4px 6px rgba(0, 0, 0, 0.15)', 
-            fontFamily: 'Arial, sans-serif',
-
-          }}
-        >
-          {!isNewUser
-            ? "Welcome to SaveThePlate! 🥳"
-            : "Welcome back! We've missed you! 🥰"}
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#344e41] mb-4 animate-fadeInDown">
+          {!isNewUser ? "Welcome to SaveThePlate! 🥳" : "Welcome back! 🥰"}
         </h1>
-        
-        {/* Description Text */}
-        <p
-          className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 font-semibold animate-fadeInUp"
-          style={{
-            color: '#333333', 
-          }}
-        >
+
+        <p className="text-gray-700 text-base sm:text-lg mb-8 font-medium animate-fadeInUp">
           {!isNewUser
-            ? "Join us in reducing food waste and saving the planet, one meal at a time."
-            : "Thank you for continuing your journey with us!"}
+            ? "Join us in reducing food waste and saving the planet, one meal at a time 🌍"
+            : "We’re happy to have you back! Keep rescuing meals 🌿"}
         </p>
 
         {/* Form */}
-        <form
-          className="flex flex-col items-center w-full space-y-4"
-          onSubmit={handleSubmit}
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col items-center w-full space-y-4 relative z-10">
           <Input
             placeholder="name@example.com"
-            className="w-full px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-600"
+            className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#A8DADC] focus:border-transparent"
             type="email"
             required
             onChange={(e) => setEmail(e.target.value)}
@@ -106,14 +77,14 @@ export default function SignIn() {
           {loading ? (
             <Button
               disabled
-              className="w-full bg-teal-700 text-white font-bold py-2 rounded-lg flex justify-center items-center border border-black"
+              className="w-full bg-[#A8DADC] text-white font-semibold py-3 rounded-xl flex justify-center items-center"
             >
               <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-              Loading...
+              Sending...
             </Button>
           ) : (
             <Button
-              className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black hover:bg-[#cfcd4fd3] "
+              className="w-full bg-[#FFAE8A] hover:bg-[#ff9966] text-white font-semibold py-3 rounded-xl shadow-md transition-all duration-300"
               type="submit"
               id="sign-in-button"
             >
@@ -123,19 +94,47 @@ export default function SignIn() {
         </form>
 
         {/* Separator */}
-        <Separator orientation="horizontal" className="mt-6 bg-[#f0ece7]" />
+        <Separator orientation="horizontal" className="mt-8 mb-4 bg-[#f0ece7]" />
 
         {showAuthToast && AuthToast}
         {showErrorToast && ErrorToast}
 
-        {/* Footer Text */}
-        <p className="mt-8 text-center font-light text-xs sm:text-sm text-gray-500">
+        {/* Footer */}
+        <p className="mt-6 text-center font-light text-xs sm:text-sm text-gray-500">
           {!isNewUser
-            ? "Check your inbox to complete your registration and start rescuing meals!"
-            : "Check your email for the magic link and keep saving meals!"}
+            ? "Check your inbox to complete your registration 💌"
+            : "We’ve sent your magic link — check your email ✉️"}
         </p>
-      </div>
+      </main>
+
+      <style jsx>{`
+        @keyframes fadeInDown {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes fadeInUp {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeInDown {
+          animation: fadeInDown 0.8s ease-in-out;
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 0.8s ease-in-out;
+        }
+      `}</style>
     </div>
-  
   );
 }
