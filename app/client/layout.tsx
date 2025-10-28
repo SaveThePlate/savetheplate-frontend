@@ -21,15 +21,66 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <section className="min-h-screen flex flex-col bg-[#f9fbf9] overflow-x-hidden">
+    <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
       {/* 🌿 Header */}
-      <header className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm z-40">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
-          {/* Left spacer to center logo properly on mobile */}
-          <div className="w-8 sm:hidden" />
+      <header className="w-full fixed top-0 left-0 z-30 bg-white shadow-sm border-b border-gray-200">
+        <nav className="max-w-[1440px] mx-auto flex items-center justify-between px-4 sm:px-8 lg:px-16 h-16">
+          {/* Logo */}
+          <Link href="/client/home" className="flex items-center h-full">
+            <Image
+              src="/fullname1.png"
+              alt="Logo"
+              width={200}
+              height={80}
+              className="object-contain hidden md:block h-full"
+            />
+            <Image
+              src="/logoOnly.png"
+              alt="Logo"
+              width={120}
+              height={120}
+              className="object-contain block md:hidden h-full"
+            />
+          </Link>
 
-          {/* Centered logo */}
-          <Link href="/client/home" className="flex items-center justify-center flex-1 sm:flex-none">
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
+            <Link href="/client/home" className="hover:text-green-600 transition-colors">
+              Home
+            </Link>
+            <Link
+              href={userId ? `/client/orders/${userId}` : "/client/orders"}
+              className="hover:text-green-600 transition-colors"
+            >
+              My Purchases
+            </Link>
+            <Link href="/client/profile" className="hover:text-green-600 transition-colors">
+              Profile
+            </Link>
+            <Link
+              href="/client/logout"
+              className="flex items-center gap-2 text-red-500 hover:text-red-600 transition-colors"
+            >
+              <LogOut size={18} /> Logout
+            </Link>
+          </div>
+
+          {/* Burger Menu Button */}
+          <button
+            className="lg:hidden block text-gray-700"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <X size={26} /> : <Menu size={26} />}
+          </button>
+        </nav>
+
+        {/* Mobile Drawer */}
+        <div
+          className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
+            menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
             <Image
               src="/logoOnly.png"
               alt="Logo"
@@ -37,95 +88,77 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               height={40}
               className="object-contain"
             />
-            <span className="ml-2 font-bold text-lg sm:text-xl text-[#44624a] hidden sm:inline">
-              SaveThePlate
-            </span>
-          </Link>
+            <button onClick={() => setMenuOpen(false)}>
+              <X size={24} className="text-gray-700" />
+            </button>
+          </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/client/home" className="text-gray-700 hover:text-[#44624a] font-medium">
+          <nav className="flex flex-col p-6 space-y-4 text-gray-700 font-medium">
+            <Link
+              href="/client/home"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-green-600"
+            >
               Home
             </Link>
             <Link
               href={userId ? `/client/orders/${userId}` : "/client/orders"}
-              className="text-gray-700 hover:text-[#44624a] font-medium"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-green-600"
             >
               My Purchases
             </Link>
-            <Link href="/client/profile" className="text-gray-700 hover:text-[#44624a] font-medium">
+            <Link
+              href="/client/profile"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-green-600"
+            >
               Profile
             </Link>
             <Link
               href="/client/logout"
-              className="flex items-center text-red-500 hover:text-red-600 font-medium"
+              onClick={() => setMenuOpen(false)}
+              className="text-red-500 flex items-center gap-2 hover:text-red-600"
             >
-              <LogOut size={18} className="mr-1" /> Logout
+              <LogOut size={18} /> Logout
             </Link>
           </nav>
-
-          {/* Mobile menu button */}
-          <button
-            className="sm:hidden text-gray-700 ml-2"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? <X size={26} /> : <Menu size={26} />}
-          </button>
         </div>
+
+        {/* Overlay for Drawer */}
+        {menuOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-30 z-30"
+            onClick={() => setMenuOpen(false)}
+          ></div>
+        )}
       </header>
 
-      {/* 🌸 Slide-in mobile menu */}
-      <div
-        className={`fixed top-0 right-0 w-3/4 sm:w-64 h-full bg-white shadow-xl transform ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 ease-in-out z-50`}
-      >
-        <button
-          className="absolute top-4 right-4 text-gray-700"
-          onClick={() => setMenuOpen(false)}
-        >
-          <X size={26} />
-        </button>
-
-        <nav className="mt-20 flex flex-col space-y-6 px-6">
-          <Link href="/client/home" onClick={() => setMenuOpen(false)} className="text-lg font-medium text-gray-700 hover:text-[#44624a]">
-            Home
-          </Link>
-          <Link
-            href={userId ? `/client/orders/${userId}` : "/client/orders"}
-            onClick={() => setMenuOpen(false)}
-            className="text-lg font-medium text-gray-700 hover:text-[#44624a]"
-          >
-            My Purchases
-          </Link>
-          <Link href="/client/profile" onClick={() => setMenuOpen(false)} className="text-lg font-medium text-gray-700 hover:text-[#44624a]">
-            Profile
-          </Link>
-          <Link href="/client/logout" onClick={() => setMenuOpen(false)} className="text-lg font-medium text-red-500 hover:text-red-600">
-            Logout
-          </Link>
-        </nav>
-      </div>
-
-      {/* 🌼 Main Content */}
-      <main className="flex-1 mt-16 mb-20 md:mb-0 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full overflow-x-hidden">
-        {children}
+      {/* 🌸 Main Content */}
+      <main className="pt-20 pb-24 px-4 sm:px-6 md:px-8 lg:px-16 w-full max-w-[1440px] mx-auto">
+        {React.cloneElement(children as React.ReactElement)}
       </main>
 
       {/* 📱 Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 w-full md:hidden bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 z-40">
-        <Link href="/client/home" className="flex flex-col items-center text-gray-700 hover:text-[#44624a]">
+      <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 z-40 lg:hidden">
+        <Link
+          href="/client/home"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
+        >
           <Home size={22} />
           <span className="text-xs mt-1">Home</span>
         </Link>
         <Link
           href={userId ? `/client/orders/${userId}` : "/client/orders"}
-          className="flex flex-col items-center text-gray-700 hover:text-[#44624a]"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
         >
           <ShoppingBag size={22} />
           <span className="text-xs mt-1">Orders</span>
         </Link>
-        <Link href="/client/profile" className="flex flex-col items-center text-gray-700 hover:text-[#44624a]">
+        <Link
+          href="/client/profile"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
+        >
           <User size={22} />
           <span className="text-xs mt-1">Profile</span>
         </Link>

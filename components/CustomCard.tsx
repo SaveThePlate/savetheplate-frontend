@@ -3,6 +3,7 @@
 import { FC, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -168,6 +169,35 @@ const CustomCard: FC<CustomCardProps> = ({
         </CardHeader>
 
         {/* Footer Actions */}
+
+        {/* CLIENT Buttons */}
+        {role === "CLIENT" && (
+          <CardFooter className="mt-5 flex flex-col gap-3 w-full">
+            {isExpired ? (
+              <button
+                disabled
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-400 rounded-xl font-medium cursor-not-allowed"
+              >
+                ⌛ Expired
+              </button>
+            ) : localData.quantity > 0 ? (
+              <Link
+                href={reserveLink}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl shadow-sm hover:bg-teal-700 transition duration-200"
+              >
+                🛒 Order
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-400 rounded-xl font-medium cursor-not-allowed"
+              >
+                🛒 Sold Out
+              </button>
+            )}
+          </CardFooter>
+        )}
+
         {role === "PROVIDER" && (
           <CardFooter className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-3 w-full">
 
