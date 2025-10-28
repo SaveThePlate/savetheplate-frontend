@@ -69,99 +69,104 @@ const CustomCard: FC<CustomCardProps> = ({
     fetchUserRole();
   }, [router]);
 
-  return (
-    <Card className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      {/* Image */}
-      <div className="relative w-full h-56 sm:h-64 rounded-t-3xl overflow-hidden">
-        <Image
-          src={imageSrc || "/logo.png"}
-          alt={imageAlt}
-          fill
-          className="object-cover"
-        />
+return (
+  <Card className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+    {/* Image */}
+    <div className="relative w-full h-56 sm:h-64">
+      <Image
+        src={imageSrc || "/logo.png"}
+        alt={imageAlt}
+        fill
+        className={`object-cover transition-all duration-300 ${
+          isExpired ? "opacity-70" : "opacity-100"
+        }`}
+      />
 
-        {/* Expired badge */}
-        {isExpired && (
-          <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
-            Expired
-          </div>
-        )}
-
-        {/* Price badge */}
-        <div className="absolute top-3 right-3 bg-teal-600 text-white font-bold px-3 py-1 rounded-full text-sm shadow-md">
-          {price} dt
+      {/* Expired badge */}
+      {isExpired && (
+        <div className="absolute top-3 left-3 bg-red-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+          Expired
         </div>
+      )}
 
-        {/* Quantity badge */}
-        <div
-          className={`absolute bottom-3 left-3 px-3 py-1 text-sm font-medium rounded-full shadow-md ${
-            quantity > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-600"
-          }`}
-        >
-          {quantity > 0 ? `${quantity} left` : "Sold Out"}
-        </div>
+      {/* Price badge */}
+      <div className="absolute top-3 right-3 bg-teal-600 text-white font-semibold px-3 py-1 rounded-full text-sm shadow-md">
+        {price} dt
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col p-5 flex-1">
-        <CardHeader className="p-0">
-          <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
-            {title}
-          </CardTitle>
-          <CardDescription className="mt-2 text-sm text-gray-700 line-clamp-3">
-            {description} <strong>Pickup:</strong> {pickupLocation}
-          </CardDescription>
-        </CardHeader>
+      {/* Quantity badge */}
+      <div
+        className={`absolute bottom-3 left-3 px-3 py-1 text-sm font-medium rounded-full shadow-md ${
+          quantity > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-600"
+        }`}
+      >
+        {quantity > 0 ? `${quantity} left` : "Sold Out"}
+      </div>
+    </div>
 
-        <CardFooter className="mt-4 flex flex-col gap-3">
-          {/* CLIENT Buttons */}
-          {role === "CLIENT" && (
-            isExpired ? (
+    {/* Content */}
+    <div className="flex flex-col flex-1">
+      <CardHeader className="p-2">
+        <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+          {title}
+        </CardTitle>
+        <CardDescription className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-3">
+          {description} <br />
+          <span className="text-gray-800 font-medium">📍 {pickupLocation}</span>
+        </CardDescription>
+      </CardHeader>
+
+      <CardFooter className="mt-5 flex flex-col gap-3">
+        {/* CLIENT Buttons */}
+        {role === "CLIENT" && (
+          <>
+            {isExpired ? (
               <button
                 disabled
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 text-gray-400 rounded-xl cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-400 rounded-xl font-medium cursor-not-allowed"
               >
                 ⌛ Expired
               </button>
             ) : quantity > 0 ? (
               <Link
                 href={reserveLink}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl shadow-md hover:bg-teal-700 transition-colors duration-200"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-xl shadow-sm hover:bg-teal-700 transition duration-200"
               >
                 🛒 Order
               </Link>
             ) : (
               <button
                 disabled
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 text-gray-400 rounded-xl cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-400 rounded-xl font-medium cursor-not-allowed"
               >
                 🛒 Sold Out
               </button>
-            )
-          )}
+            )}
+          </>
+        )}
 
-          {/* PROVIDER Buttons */}
-          {role === "PROVIDER" && (
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <button
-            onClick={() => onEdit && onEdit(offerId)}
-            className="flex-1 px-5 py-3 bg-yellow-200 text-black rounded-xl font-semibold shadow-sm hover:bg-yellow-300 transition duration-200"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete && onDelete(offerId)}
-            className="flex-1 px-5 py-3 bg-red-200 text-red-700 rounded-xl font-semibold shadow-sm hover:bg-red-300 transition duration-200"
-          >
-            Delete
-          </button>
-        </div>
+        {/* PROVIDER Buttons */}
+        {role === "PROVIDER" && (
+          <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <button
+              onClick={() => onEdit && onEdit(offerId)}
+              className="flex-1 px-5 py-3 bg-amber-100 text-amber-800 rounded-xl font-medium shadow-sm hover:bg-amber-200 transition duration-200"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onClick={() => onDelete && onDelete(offerId)}
+              className="flex-1 px-5 py-3 bg-red-100 text-red-700 rounded-xl font-medium shadow-sm hover:bg-red-200 transition duration-200"
+            >
+              🗑️ Delete
+            </button>
+          </div>
+        )}
+      </CardFooter>
+    </div>
+  </Card>
+);
 
-          )}
-        </CardFooter>
-      </div>
-    </Card>
-  );
 };
 
 export default CustomCard;
