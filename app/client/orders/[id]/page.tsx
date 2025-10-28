@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import CartOrder from "@/components/cartOrder"; 
+import CartOrder from "@/components/cartOrder";
 import { useRouter } from "next/navigation";
 
 type Order = {
@@ -11,13 +11,13 @@ type Order = {
   userId: number;
   offerId: number;
   createdAt: string;
-  status: string; 
+  status: string;
 };
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const router = useRouter();
 
   useEffect(() => {
@@ -42,64 +42,92 @@ const Orders = () => {
       } catch (err) {
         console.error("Failed to fetch orders:", err);
         setError("Failed to fetch orders. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOrders();
   }, [router]);
 
-  // Group orders by status
-  const confirmedOrders = orders.filter(o => o.status === "confirmed");
-  const pendingOrders = orders.filter(o => o.status === "pending");
-  const cancelledOrders = orders.filter(o => o.status === "cancelled");
+  const pendingOrders = orders.filter((o) => o.status === "pending");
+  const confirmedOrders = orders.filter((o) => o.status === "confirmed");
+  const cancelledOrders = orders.filter((o) => o.status === "cancelled");
 
   const hasOrders = orders.length > 0;
 
   return (
-    <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
-      <div className="w-full flex justify-center mb-6 pt-6">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-          My Orders
-        </h1>
-      </div>
+    <main className="min-h-screen flex flex-col items-center pt-24 pb-16 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 lg:px-16">
+      <div className="w-full max-w-4xl flex flex-col gap-8">
+        {/* Header */}
+        <div className="text-center sm:text-left space-y-1">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#344e41] tracking-tight">
+            My Orders
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base font-medium">
+            Review your meals and track your orders 🍃
+          </p>
+        </div>
 
-      <div className="w-full max-w-3xl flex flex-col gap-6 px-4">
-        {!hasOrders && (
-          <p className="text-gray-600 text-center">You have not placed any orders yet.</p>
-        )}
+        {/* Orders List */}
+        <section className="space-y-6">
+          {loading ? (
+            <p className="text-center text-gray-500 py-20">Loading orders...</p>
+          ) : error ? (
+            <p className="text-center text-red-600 py-20">{error}</p>
+          ) : !hasOrders ? (
+            <p className="text-center text-gray-500 py-20">
+              You have no orders yet. Start rescuing meals 🌿
+            </p>
+          ) : (
+            <>
+              {pendingOrders.length > 0 && (
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-[#C79B32] mb-4 flex items-center gap-2">
+                    Pending Orders
+                  </h2>
+                  <div className="flex flex-col gap-4">
+                    {pendingOrders.map((order) => (
+                      <div key={order.id} className="bg-white rounded-xl p-4 border border-[#FFE7A0]">
+                        <CartOrder order={order} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-        {pendingOrders.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Pending Orders</h2>
-            <div className="flex flex-col gap-4">
-              {pendingOrders.map(order => (
-                <CartOrder key={order.id} order={order} />
-              ))}
-            </div>
-          </section>
-        )}
+              {confirmedOrders.length > 0 && (
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-[#4B944F] mb-4 flex items-center gap-2">
+                    Confirmed Orders
+                  </h2>
+                  <div className="flex flex-col gap-4">
+                    {confirmedOrders.map((order) => (
+                      <div key={order.id} className="bg-white rounded-xl p-4 border border-[#A4D8A4]">
+                        <CartOrder order={order} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-        {confirmedOrders.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Confirmed Orders</h2>
-            <div className="flex flex-col gap-4">
-              {confirmedOrders.map(order => (
-                <CartOrder key={order.id} order={order} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {cancelledOrders.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Cancelled Orders</h2>
-            <div className="flex flex-col gap-4">
-              {cancelledOrders.map(order => (
-                <CartOrder key={order.id} order={order} />
-              ))}
-            </div>
-          </section>
-        )}
+              {cancelledOrders.length > 0 && (
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-[#D9534F] mb-4 flex items-center gap-2">
+                    Cancelled Orders
+                  </h2>
+                  <div className="flex flex-col gap-4">
+                    {cancelledOrders.map((order) => (
+                      <div key={order.id} className="bg-white rounded-xl p-4 border border-[#F5B5B5]">
+                        <CartOrder order={order} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </section>
       </div>
     </main>
   );
