@@ -6,6 +6,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import {
+  Credenza,
+  CredenzaTrigger,
+  CredenzaContent,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaBody,
+  CredenzaFooter,
+  CredenzaClose,
+  CredenzaDescription,
+} from "@/components/ui/credenza";
 
 interface CustomCardProps {
   offerId: number;
@@ -114,6 +125,61 @@ return (
           {description} <br />
           <span className="text-gray-800 font-medium">📍 {pickupLocation}</span>
         </CardDescription>
+        {/* Actions (Details via Credenza) */}
+        <div className="mt-4 flex gap-3">
+          {mapsLink && (
+            <a
+              href={mapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm px-4 py-2 bg-teal-50 text-teal-700 rounded-full hover:bg-teal-100 transition-colors duration-200"
+            >
+              📍 Pickup
+            </a>
+          )}
+
+          <Credenza>
+            <CredenzaTrigger asChild>
+              <button className="text-sm px-4 py-2 bg-gray-50 text-gray-900 rounded-xl shadow-sm hover:bg-gray-100 transition-colors duration-200">
+                Details
+              </button>
+            </CredenzaTrigger>
+            <CredenzaContent className="bg-white rounded-2xl shadow-lg p-5 max-w-sm mx-auto border border-gray-100">
+              <CredenzaHeader className="mb-3">
+                <CredenzaTitle className="text-xl font-bold text-gray-800">{title}</CredenzaTitle>
+                <CredenzaDescription className="text-gray-600 text-sm">{description}</CredenzaDescription>
+              </CredenzaHeader>
+              <CredenzaBody className="space-y-2 text-gray-700 text-sm">
+                <p>
+                  <strong>Pickup Time:</strong> {formattedDate} at {formattedTime}
+                </p>
+                <p>
+                  <strong>Location:</strong> {pickupLocation}
+                </p>
+                {mapsLink && (
+                  <a
+                    href={mapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-xl shadow-sm hover:bg-teal-100 transition-colors duration-200"
+                  >
+                    View on Google Maps
+                  </a>
+                )}
+              </CredenzaBody>
+              <CredenzaFooter className="flex justify-end mt-4">
+                <Link href={`/offers/${offerId}`} className="px-4 py-2 bg-teal-600 text-white rounded-xl shadow-sm hover:bg-teal-700 transition-colors duration-200 mr-3">
+                  View full offer
+                </Link>
+                <CredenzaClose asChild>
+                  <button className="px-4 py-2 bg-red-50 text-red-600 rounded-xl shadow-sm hover:bg-red-100 transition-colors duration-200">
+                    Close
+                  </button>
+                </CredenzaClose>
+              </CredenzaFooter>
+            </CredenzaContent>
+          </Credenza>
+        </div>
       </CardHeader>
 
       <CardFooter className="mt-5 flex flex-col gap-3">
