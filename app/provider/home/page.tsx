@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -24,13 +25,13 @@ interface Offer {
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
-const Home = () => {
+const ProviderHome = () => {
   const router = useRouter();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getImage = (filename: string | null): string => {
+  const getImage = (filename: string | null) => {
     return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
   };
 
@@ -44,10 +45,8 @@ const Home = () => {
         const id = tokenPayload.id;
 
         const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + `/offers/owner/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setOffers(response.data);
       } catch (err) {
@@ -61,25 +60,29 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="bg-[#cdeddf] min-h-screen pt-24 pb-20 flex flex-col items-center">
+    <main className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
       <ToastContainer />
-
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 flex flex-col space-y-10">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-4">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-            Your Published Offers
-          </h1>
+      <div className="w-full max-w-6xl px-4 sm:px-8 flex flex-col space-y-12">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col gap-1 text-center sm:text-left">
+            <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
+              Your Published Offers
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base">
+              Manage your offers and reach more customers 🌍
+            </p>
+          </div>
           <button
             onClick={() => router.push("./publish")}
-            className="flex items-center gap-2 px-5 py-2 bg-white text-[#16a34a] border border-[#16a34a] font-semibold rounded-lg shadow-sm hover:bg-[#16a34a] hover:text-white transition duration-300"
+            className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-800 font-semibold rounded-xl shadow-md hover:bg-green-600 hover:text-white transition duration-300 transform hover:scale-[1.02]"
           >
-            <PlusCircle size={20} />
+            <PlusCircle size={22} />
             Publish Offer
           </button>
         </div>
 
-        {/* Offers Display */}
+        {/* Offers Grid */}
         {loading ? (
           <p className="text-gray-600 text-lg text-center mt-10">
             Loading your offers...
@@ -88,21 +91,10 @@ const Home = () => {
           <p className="text-red-600 text-center mt-10">{error}</p>
         ) : offers.length === 0 ? (
           <p className="text-gray-600 text-lg text-center mt-10">
-            You have no published offers yet.
+            You have no published offers yet. Start by creating one!
           </p>
         ) : (
-          <div
-            className="
-              grid 
-              grid-cols-1 
-              sm:grid-cols-2 
-              lg:grid-cols-3 
-              xl:grid-cols-4 
-              gap-8 
-              items-stretch 
-              w-full
-            "
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {offers.map((offer) => (
               <CustomCard
                 key={offer.id}
@@ -129,4 +121,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default ProviderHome;
