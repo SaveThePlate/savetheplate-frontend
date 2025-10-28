@@ -40,7 +40,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             {/* <Link href="/provider/home">Published Offers</Link> */}
             <Link href="/provider/orders">Orders</Link>
             {/* <Link href="/provider/history">History</Link> */}
-            <Link href="/provider/scan">Scan QR Code</Link>
+            {/* <Link href="/provider/scan">Scan QR Code</Link> */}
             <Link href="/provider/logout" className="text-red-500">
               Logout
             </Link>
@@ -65,7 +65,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               {/* <Link href="/provider/home" onClick={() => setMenuOpen(false)}>Published Offers</Link> */}
               <Link href="/provider/orders" onClick={() => setMenuOpen(false)}>Orders</Link>
               {/* <Link href="/provider/history" onClick={() => setMenuOpen(false)}>History</Link> */}
-              <Link href="/provider/scan" onClick={() => setMenuOpen(false)}>Scan QR Code</Link>
+              {/* <Link href="/provider/scan" onClick={() => setMenuOpen(false)}>Scan QR Code</Link> */}
               <Link
                 href="/provider/logout"
                 className="text-red-500"
