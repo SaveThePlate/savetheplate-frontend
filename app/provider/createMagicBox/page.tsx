@@ -1,11 +1,13 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft, Gift } from "lucide-react";
 
 type MagicBoxSize = "small" | "medium" | "big";
 
@@ -45,7 +47,6 @@ const CreateMagicBoxPage = () => {
     }
 
     const quantityToFloat = parseFloat(quantity);
-
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
@@ -63,7 +64,7 @@ const CreateMagicBoxPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Magic box created successfully!");
+      toast.success("Magic Box created successfully!");
     } catch (error) {
       console.error(error);
       toast.error("Error submitting offer!");
@@ -74,75 +75,102 @@ const CreateMagicBoxPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#cdeddf] to-[#e6f7f2] p-6">
+    <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
       <ToastContainer />
-      <main className="bg-white shadow-xl rounded-3xl p-8 w-full max-w-3xl space-y-6">
-        <button onClick={() => router.back()} className="text-gray-500 font-medium mb-4">
-          &lt; Back
-        </button>
+      <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="absolute top-5 left-5 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base"
+        >
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">Back</span>
+        </Button>
 
-        <h1 className="text-3xl font-bold text-center text-green-900 mb-6">
-          Create Magic Box
-        </h1>
+        {/* Header */}
+        <div className="flex flex-col items-center mb-10 mt-10 text-center">
+          <div className="w-20 h-20 rounded-full bg-[#EAF7ED] flex items-center justify-center mb-5">
+            <Gift className="w-10 h-10 text-green-800" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-green-900 leading-tight">
+            Create Magic Box
+          </h1>
+          <p className="text-gray-600 text-base mt-2 max-w-sm">
+            Surprise your customers and help reduce waste 💚
+          </p>
+        </div>
 
         {/* Magic Box Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
           {Object.entries(magicBoxOptions).map(([size, { price, description }]) => (
             <div
               key={size}
               onClick={() => setSelectedSize(size as MagicBoxSize)}
-              className={`cursor-pointer border p-4 rounded-2xl transition-all duration-200 shadow-md hover:shadow-lg ${
+              className={`cursor-pointer rounded-2xl p-5 text-center transition-all duration-200 shadow-sm hover:shadow-md border ${
                 selectedSize === size
-                  ? "bg-green-100 border-green-500 scale-105"
-                  : "bg-gray-100 border-gray-300"
+                  ? "bg-[#EAF7ED] border-green-600 scale-[1.03]"
+                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
               }`}
             >
-              <h2 className="text-lg font-semibold mb-1">
-                {size.charAt(0).toUpperCase() + size.slice(1)}
+              <h2 className="text-lg font-semibold text-green-900 capitalize">
+                {size}
               </h2>
-              <p className="text-sm mb-2">{description}</p>
-              <p className="font-bold text-green-800">Price: {price} dt</p>
+              <p className="text-gray-600 text-sm mt-1 mb-2 leading-snug">
+                {description}
+              </p>
+              <p className="font-bold text-green-800">{price} dt</p>
             </div>
           ))}
         </div>
 
-        {/* Quantity Input */}
-        <div className="space-y-2">
-          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">Quantity</label>
-          <Input
-            id="quantity"
-            value={quantity}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^\d*\.?\d*$/.test(value)) setQuantity(value);
-            }}
-            className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
-            placeholder="Enter quantity"
-          />
-        </div>
+        {/* Inputs */}
+        <div className="space-y-5">
+          <div>
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+              Quantity
+            </label>
+            <Input
+              id="quantity"
+              value={quantity}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*\.?\d*$/.test(value)) setQuantity(value);
+              }}
+              placeholder="Enter quantity"
+              className="border-gray-300 focus:ring-green-500 focus:border-green-500 rounded-xl py-2.5"
+            />
+          </div>
 
-        {/* Expiration Date Input */}
-        <div className="space-y-2">
-          <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">Expiration Date</label>
-          <Input
-            id="expirationDate"
-            type="datetime-local"
-            value={expirationDate}
-            onChange={(e) => setExpirationDate(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2"
-          />
+          <div>
+            <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700 mb-1">
+              Expiration Date
+            </label>
+            <Input
+              id="expirationDate"
+              type="datetime-local"
+              value={expirationDate}
+              onChange={(e) => setExpirationDate(e.target.value)}
+              className="border-gray-300 focus:ring-green-500 focus:border-green-500 rounded-xl py-2.5"
+            />
+          </div>
         </div>
 
         {/* Submit Button */}
         <Button
           onClick={handleCreateMagicBox}
           disabled={loading}
-          className="w-full bg-yellow-300 text-black font-bold py-3 rounded-full shadow-md transition transform hover:scale-105 hover:bg-yellow-400"
+          className="mt-10 w-full bg-[#FFD84D] text-[#243B28] font-bold py-3.5 rounded-full shadow-md transition-transform hover:scale-[1.03] hover:bg-[#FFE169]"
         >
           {loading ? "Creating..." : "Create Magic Box"}
         </Button>
 
-        {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+        {error && <p className="text-red-500 text-center text-sm mt-4">{error}</p>}
+
+        {/* Footer */}
+        <p className="mt-8 text-center text-sm text-gray-500">
+          Every box you create makes a difference 🌍
+        </p>
       </main>
     </div>
   );
