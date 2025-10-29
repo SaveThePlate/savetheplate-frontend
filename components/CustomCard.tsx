@@ -266,12 +266,6 @@ return (
             </CredenzaBody>
 
             <CredenzaFooter className="flex justify-end gap-3 mt-5">
-              <Link
-                href={`/offers/${offerId}`}
-                className="px-4 py-2 bg-teal-600 text-white rounded-xl shadow-sm hover:bg-teal-700 transition"
-              >
-                View Full Offer
-              </Link>
               <CredenzaClose asChild>
                 <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition">
                   Close
