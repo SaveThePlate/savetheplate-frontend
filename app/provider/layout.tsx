@@ -129,7 +129,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
       </header>
 
       {/* Main Content */}
-      <main className="pt-20 pb-10 px-4 sm:px-6 md:px-8 lg:px-16 w-full overflow-x-hidden">
+      <main className="w-full mx-auto">
         {React.cloneElement(children as React.ReactElement)}
       </main>
     </section>
