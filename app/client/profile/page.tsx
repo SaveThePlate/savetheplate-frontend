@@ -17,6 +17,8 @@ interface Order {
   offerId: number;
   status: string;
   createdAt: string;
+  mapsLink?: string;
+
 }
 
 interface Offer {
@@ -25,6 +27,8 @@ interface Offer {
   images: { path: string }[];
   pickupLocation: string;
   quantity: number;
+  mapsLink?: string;
+
 }
 
 const ProfilePage = () => {
@@ -238,6 +242,17 @@ const ProfilePage = () => {
                       <p className="text-sm text-gray-600 mt-1">
                         Pickup: <span className="font-medium text-gray-800">{offer?.pickupLocation || "N/A"}</span>
                       </p>
+                      {offer?.mapsLink && (
+                        <a
+                          href={offer.mapsLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-teal-700 font-medium underline hover:text-teal-800 mt-1"
+                        >
+                          📍 Show Map
+                        </a>
+                      )}
+
                       <p className="text-sm text-gray-500 mt-1">
                         Ordered on <span className="font-medium text-gray-700">{new Date(order.createdAt).toLocaleDateString()}</span>
                       </p>

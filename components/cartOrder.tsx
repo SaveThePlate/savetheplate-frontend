@@ -15,6 +15,7 @@ interface CartOrderProps {
     offerId: number;
     createdAt: string;
     status: string;
+    mapsLink?: string;
   };
 }
 
@@ -27,6 +28,7 @@ type Offer = {
   expirationDate: string;
   pickupLocation: string;
   quantity: number;
+  mapsLink?: string;
 };
 
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
@@ -158,6 +160,17 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         <p className="text-sm sm:text-base text-gray-600 mt-1 truncate">
           Pickup: {offer?.pickupLocation || "N/A"}
         </p>
+        {offer?.mapsLink && (
+          <a
+            href={offer.mapsLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-teal-700 font-medium underline hover:text-teal-800 mt-1"
+          >
+            📍 Show Map
+          </a>
+        )}
+
         <p className="text-sm sm:text-base text-gray-500 mt-1 flex items-center gap-2">
           <span>
             Expires: {offer
