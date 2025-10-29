@@ -156,7 +156,12 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
           Quantity: <span className="font-medium">{order.quantity}</span>
         </p>
         <p className="text-sm text-gray-500">
-          Ordered on: <span className="font-medium">{new Date(order.createdAt).toLocaleDateString()}</span>
+          Ordered on:{" "}
+        <span className="font-medium">
+          {new Date(order.createdAt).toLocaleDateString()}{" "}
+          at {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
+
         </p>
       </div>
 
