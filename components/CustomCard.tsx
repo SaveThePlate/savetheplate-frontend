@@ -295,7 +295,7 @@ return (
 
 
       {role === "PROVIDER" && (
-        <CardFooter className="flex gap-2 mt-4 justify">
+        <CardFooter className="mt-4 flex flex-row gap-3 w-full items-center justify-between">
           {/* ✏️ Edit Modal */}
           <Credenza open={isEditing} onOpenChange={setIsEditing}>
             <CredenzaTrigger asChild>
