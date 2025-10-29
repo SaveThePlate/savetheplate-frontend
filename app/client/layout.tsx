@@ -4,21 +4,26 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Home, ShoppingBag, User, LogOut, Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) return;
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
       const payload = JSON.parse(atob(token.split(".")[1]));
       if (payload?.id) setUserId(String(payload.id));
     } catch {
       console.warn("Invalid token");
     }
-  }, []);
+  }, [router]);
 
   return (
     <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">

@@ -63,7 +63,7 @@ const FillDetails = () => {
 
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        toast.error("No access token found. Please log in again.");
+        router.push("/signIn");
         return;
       }
 

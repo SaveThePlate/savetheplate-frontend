@@ -41,10 +41,9 @@ const CreateMagicBoxPage = () => {
     setLoading(true);
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      setError("You need to be logged in to create a magic box.");
-      setLoading(false);
-      return;
-    }
+        router.push("/signIn");
+        return;
+      }
 
     const quantityToFloat = parseFloat(quantity);
     try {

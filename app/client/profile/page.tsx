@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
@@ -27,6 +28,7 @@ interface Offer {
 }
 
 const ProfilePage = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState<number | null>(null);
   const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
@@ -41,8 +43,10 @@ const ProfilePage = () => {
   const fetchProfileData = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token not found");
-
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -60,7 +64,10 @@ const ProfilePage = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token not found");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
       const userId = JSON.parse(atob(token.split(".")[1])).id;
 
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, {
@@ -94,7 +101,10 @@ const ProfilePage = () => {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token not found");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
 
       setIsSaving(true);
 

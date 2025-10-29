@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 
 interface Offer {
   id: number;
@@ -23,6 +24,8 @@ const DEFAULT_PROFILE_IMAGE = "/logo.png";
 const BASE_IMAGE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "") + "/storage/";
 
 export default function ProviderProfile() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     username: "",
     location: "",
@@ -46,37 +49,43 @@ export default function ProviderProfile() {
     expirationDate: "",
   });
 
-  useEffect(() => {
-    const fetchProfileAndOffers = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) throw new Error("Token missing");
-
-        const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const { username, location, phoneNumber, profileImage } = profileRes.data || {};
-        setFormData({
-          username: username || "Username",
-          location: location || "Location",
-          phoneNumber: phoneNumber || "Phone number",
-          profileImage: profileImage || DEFAULT_PROFILE_IMAGE,
-        });
-
-        const id = JSON.parse(atob(token.split(".")[1])).id;
-        const offersRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOffers(offersRes.data);
-      } catch (err: any) {
-        console.error(err.response?.data || err.message);
-        toast.error("Failed to fetch profile or offers");
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchProfileAndOffers = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        router.push("/signIn");
+        return;
       }
-    };
-    fetchProfileAndOffers();
-  }, []);
+
+      const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const { username, location, phoneNumber, profileImage } = profileRes.data || {};
+      setFormData({
+        username: username || "Username",
+        location: location || "Location",
+        phoneNumber: phoneNumber || "Phone number",
+        profileImage: profileImage || DEFAULT_PROFILE_IMAGE,
+      });
+
+      const id = JSON.parse(atob(token.split(".")[1])).id;
+      const offersRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOffers(offersRes.data);
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
+      toast.error("Failed to fetch profile or offers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProfileAndOffers();
+}, [router]);
+
 
   const totalOffers = offers.length;
   const totalQuantity = offers.reduce((sum, o) => sum + (o.quantity ?? 0), 0);
@@ -124,7 +133,10 @@ export default function ProviderProfile() {
 
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token missing");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
 
       const payload = {
         title: offerForm.title.trim(),
@@ -156,7 +168,10 @@ export default function ProviderProfile() {
 
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token missing");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
 
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -173,7 +188,10 @@ export default function ProviderProfile() {
   const handleSaveProfile = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Token missing");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
 
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,

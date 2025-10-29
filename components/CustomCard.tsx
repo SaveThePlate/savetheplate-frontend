@@ -81,7 +81,10 @@ const CustomCard: FC<CustomCardProps> = ({
   useEffect(() => {
     const fetchUserRole = async () => {
       const token = localStorage.getItem("accessToken");
-      if (!token) return router.push("/onboarding");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
       try {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,

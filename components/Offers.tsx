@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CustomCard from "./CustomCard";
-
+import { useRouter } from "next/navigation";
 interface Offer {
   id: number;
   images: { path: string }[];
@@ -30,14 +30,14 @@ const OffersPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState(null);
-
+  const router = useRouter();
+  
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      setError("No access token found. Please log in again.");
-      setLoading(false);
-      return;
-    }
+        router.push("/signIn");
+        return;
+      }
 
     const fetchUserRole = async () => {
       try {

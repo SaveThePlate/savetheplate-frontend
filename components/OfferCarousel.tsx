@@ -56,7 +56,10 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
     const fetchOffers = async () => {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('Token not found');
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
       try {
         const response = await axios.get(
           process.env.NEXT_PUBLIC_BACKEND_URL + "/offers",{
@@ -78,7 +81,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
       const token = localStorage.getItem("accessToken");
 
       if (!token) {
-        setError("No access token found, please log in again.");
+        router.push("/signIn");
         return;
       }
 

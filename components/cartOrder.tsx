@@ -55,7 +55,10 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return toast.error("You need to log in.");
+    if (!token) {
+        router.push("/signIn");
+        return;
+      }
     if (canceling) return;
     // only allow cancelling when order is pending
     if (order.status !== "pending") {
@@ -82,7 +85,10 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   const handleConfirmOrder = async () => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return toast.error("You need to log in.");
+    if (!token) {
+        router.push("/signIn");
+        return;
+      }
     if (confirming) return; // prevent double clicks
     setConfirming(true);
     try {
@@ -106,9 +112,9 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      setError("No access token found, please log in again.");
-      return router.push("/signIn");
-    }
+        router.push("/signIn");
+        return;
+      }
 
     const fetchOffer = async () => {
       try {

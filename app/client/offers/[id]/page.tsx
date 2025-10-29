@@ -48,7 +48,10 @@ const Offers = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return;
+    if (!token) {
+        router.push("/signIn");
+        return;
+      }
     axios
       .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/get-user-by-token`, {
         headers: { Authorization: `Bearer ${token}` },

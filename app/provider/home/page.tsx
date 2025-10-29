@@ -36,11 +36,14 @@ const ProviderHome = () => {
   };
 
   useEffect(() => {
+    
     const fetchOffers = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        if (!token) throw new Error("No token found");
-
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
         const id = tokenPayload.id;
 
@@ -57,7 +60,7 @@ const ProviderHome = () => {
     };
 
     fetchOffers();
-  }, []);
+  }, [router]);
 
   return (
     <main className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">

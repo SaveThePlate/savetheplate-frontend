@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { useRouter } from 'next/navigation';
 interface UserContextType {
   userRole: string | null;
   loading: boolean;
@@ -15,13 +15,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const router = useRouter();
+  
   const fetchUserRole = async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
-      setLoading(false);
-      return; // Handle case when no token is available
-    }
+        router.push("/signIn");
+        return;
+      }
 
     try {
       const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {

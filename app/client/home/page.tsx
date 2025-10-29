@@ -21,10 +21,9 @@ const Home = () => {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) {
-          setError("No access token found");
-          return;
+        router.push("/signIn");
+        return;
         }
-
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
           { headers: { Authorization: `Bearer ${token}` } }

@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: number;
@@ -33,14 +34,17 @@ const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 const DEFAULT_IMAGE = "/logo.png";
 
 const ProviderOrders = () => {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) return (window.location.href = "/signIn");
-
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
         headers: { Authorization: `Bearer ${token}` },
       });
