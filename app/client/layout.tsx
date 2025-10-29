@@ -40,7 +40,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               className="object-contain hidden md:block h-full"
             />
             <Image
-              src="/logoOnly.png"
+              src="/fullname1.png"
               alt="Logo"
               width={120}
               height={120}
