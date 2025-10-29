@@ -156,6 +156,10 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
           Ordered by:{" "}
           <span className="font-medium text-gray-800">{user?.username || `User ${order.userId}`}</span>
         </p>
+        <p className="text-sm text-gray-600">
+          Client phone number:{" "}
+          <span className="font-medium text-gray-800">{user?.phoneNumber || `User ${order.userId}`}</span>
+        </p>
         <p className="text-sm text-gray-500">
           Quantity: <span className="font-medium">{order.quantity}</span>
         </p>
