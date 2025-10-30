@@ -4,52 +4,60 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const FillDetails = () => {
   const router = useRouter();
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(""); // extracted restaurant name
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [mapsLink, setGoogleMapsLink] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
+  const [mapsLink, setMapsLink] = useState("");
 
-  const extractLocationData = (googleMapsUrl: string) => {
-    const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-    const match = googleMapsUrl.match(regex);
-    const latitude = match ? parseFloat(match[1]) : null;
-    const longitude = match ? parseFloat(match[2]) : null;
-    const nameRegex = /maps\/place\/([^/@]+)/;
-    const nameMatch = googleMapsUrl.match(nameRegex);
-    const locationName = nameMatch
-      ? decodeURIComponent(nameMatch[1]).replace(/\+/g, " ")
-      : "";
-    return { latitude, longitude, locationName };
+  // --- Extract location name for preview
+  const fetchLocationName = async (url: string) => {
+    if (!url.trim()) {
+      setLocation("");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+        { mapsLink: url },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { locationName } = response.data;
+      setLocation(locationName || "");
+    } catch (error) {
+      console.error("Error extracting location name:", error);
+      setLocation("");
+    }
+  };
+
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setMapsLink(url);
+    fetchLocationName(url);
   };
 
   const handleProfileUpdate = async () => {
     try {
-      const { latitude, longitude, locationName } = extractLocationData(mapsLink);
-
-      if (!latitude || !longitude || !locationName) {
-        toast.error("Invalid Google Maps link! Please provide a valid link.");
+      if (!mapsLink.trim()) {
+        toast.error("Please provide a Google Maps link.");
         return;
       }
 
-      const parsedPhoneNumber = parseInt(phoneNumber.trim(), 10);
-      if (isNaN(parsedPhoneNumber)) {
+      if (!phoneNumber.trim() || isNaN(parseInt(phoneNumber.trim()))) {
         toast.error("Please enter a valid phone number.");
         return;
       }
 
       const data = {
-        location: locationName,
-        phoneNumber: parsedPhoneNumber,
-        latitude,
-        longitude,
-        mapsLink,
+        phoneNumber: phoneNumber.trim(),
+        mapsLink: mapsLink.trim(),
       };
 
       const token = localStorage.getItem("accessToken");
@@ -72,23 +80,10 @@ const FillDetails = () => {
     }
   };
 
-  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setGoogleMapsLink(url);
-    const { latitude, longitude, locationName } = extractLocationData(url);
-    setLatitude(latitude);
-    setLongitude(longitude);
-    setLocation(locationName || "");
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-6">
       <div className="relative z-10 w-full max-w-md text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-md px-8 py-10 border border-[#f5eae0]">
         <ToastContainer />
-
-        {/* Decorative pastel blobs */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD6C9] rounded-full blur-2xl opacity-50 translate-x-10 -translate-y-10" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-50 -translate-x-10 translate-y-10" />
 
         <h1 className="text-3xl font-extrabold text-[#344E41] mb-2">
           Add Your <span className="text-[#FFAE8A]">Restaurant Details</span>
