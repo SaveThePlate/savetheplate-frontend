@@ -7,21 +7,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useIsClient } from "usehooks-ts";
 
 const FillDetails = () => {
-  // const isClient = useIsClient();
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [mapsLink, setGoogleMapsLink] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [coordinates, setCoordinates] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [zoom] = useState(13);
 
   const extractLocationData = (googleMapsUrl: string) => {
     const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
@@ -33,14 +26,12 @@ const FillDetails = () => {
     const locationName = nameMatch
       ? decodeURIComponent(nameMatch[1]).replace(/\+/g, " ")
       : "";
-
     return { latitude, longitude, locationName };
   };
 
   const handleProfileUpdate = async () => {
     try {
-      const { latitude, longitude, locationName } =
-        extractLocationData(mapsLink);
+      const { latitude, longitude, locationName } = extractLocationData(mapsLink);
 
       if (!latitude || !longitude || !locationName) {
         toast.error("Invalid Google Maps link! Please provide a valid link.");
@@ -67,7 +58,7 @@ const FillDetails = () => {
         return;
       }
 
-      const response = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/update-details`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -75,94 +66,75 @@ const FillDetails = () => {
 
       toast.success("Restaurant details added successfully!");
       router.push("/provider/home");
-
-      // if (response.status === 200) {
-      //   toast.success("Restaurant details added successfully!");
-      //   router.push("/provider/home");
-      // } else {
-      //   toast.error("Failed to add restaurant details. Please try again.");
-      // }
     } catch (error) {
       console.error("Error adding restaurant details:", error);
       toast.error("An error occurred while adding the restaurant.");
     }
   };
 
-  const handleGoogleMapsLinkChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setGoogleMapsLink(url);
     const { latitude, longitude, locationName } = extractLocationData(url);
     setLatitude(latitude);
     setLongitude(longitude);
     setLocation(locationName || "");
-
-    if (latitude && longitude) {
-      setCoordinates({ latitude, longitude });
-    }
   };
 
   return (
-    <div className="bg-[#98cca8] min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8">
-      <div className="relative flex flex-col items-center justify-center text-center w-full max-w-md px-4 py-12 bg-white rounded-3xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-6">
+      <div className="relative z-10 w-full max-w-md text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-md px-8 py-10 border border-[#f5eae0]">
         <ToastContainer />
-        <div className="flex flex-col items-center text-center space-y-4 mb-6">
-          <h1
-            className="text-3xl font-extrabold mb-4"
-            style={{
-              color: "#ffbe98",
-              WebkitTextStroke: "0.6px #000000",
-              textShadow: "4px 4px 6px rgba(0, 0, 0, 0.15)",
-            }}
-          >
-            Add Your Restaurant Details
-          </h1>
-          <p
-            className="text-base font-semibold mb-6"
-            style={{
-              color: "#333333",
-              textShadow: "1px 1px 3px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            Help customers find your location and get in touch with you!
-          </p>
-        </div>
+
+        {/* Decorative pastel blobs */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD6C9] rounded-full blur-2xl opacity-50 translate-x-10 -translate-y-10" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-50 -translate-x-10 translate-y-10" />
+
+        <h1 className="text-3xl font-extrabold text-[#344E41] mb-2">
+          Add Your <span className="text-[#FFAE8A]">Restaurant Details</span>
+        </h1>
+
+        <p className="text-gray-700 text-base font-medium mb-8">
+          Help customers find your location and contact you easily 🌿
+        </p>
 
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleProfileUpdate();
           }}
-          className="space-y-4 w-full"
+          className="space-y-4 text-left"
         >
           <Input
             id="phoneNumber"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#A8DADC] focus:border-[#A8DADC]"
             placeholder="Phone Number"
             required
           />
+
           <Input
             id="googleMapsLink"
             value={mapsLink}
             onChange={handleGoogleMapsLinkChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#FFAE8A] focus:border-[#FFAE8A]"
             placeholder="Google Maps Link"
             required
           />
+
           <Input
             id="location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Restaurant Name will be scraped from Google Maps"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+            placeholder="Restaurant name will be auto-filled"
             disabled
           />
+
           <Button
             type="submit"
-            className="w-full bg-[#fffc5ed3] text-black font-bold py-2 rounded-full border border-black shadow-lg transform transition-transform hover:scale-105 hover:bg-yellow-300"
+            className="w-full bg-[#A8DADC] hover:bg-[#92C7C9] text-[#1D3557] font-semibold py-3 rounded-full transition-all duration-300 shadow-sm"
           >
             Submit Details
           </Button>
