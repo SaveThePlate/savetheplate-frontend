@@ -218,7 +218,8 @@ const ProfilePage = () => {
         ) : orders.length === 0 ? (
           <div className="text-center text-gray-600">
             <p className="text-lg mb-4">You haven’t placed any orders yet.</p>
-            <Button className="bg-[#FFAE8A] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#ff9966] transition">
+            <Button className="bg-[#FFAE8A] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#ff9966] transition"
+              onClick={() => router.push("./home")}>
               Explore Offers
             </Button>
           </div>
