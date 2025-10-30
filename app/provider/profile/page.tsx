@@ -275,6 +275,7 @@ useEffect(() => {
                     src={offer.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images[0].path}` : DEFAULT_PROFILE_IMAGE}
                     alt={offer.title}
                     fill
+                    sizes="100vw"
                     className="object-cover"
                   />
                   {expired && (

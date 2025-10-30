@@ -42,6 +42,7 @@ const Nav = () => {
             width={250} 
             height={100} 
             className="object-contain lg:block md:block hidden h-full"
+            style={{ width: 'auto' }}
           />
           <Image
             src="/logoOnly.png"

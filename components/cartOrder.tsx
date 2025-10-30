@@ -148,6 +148,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           src={offer?.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images[0].path}` : "/logo.png"}
           alt={offer?.title || "Offer Image"}
           fill
+          sizes="(max-width: 640px) 96px, 128px"
           className="object-cover"
         />
       </div>

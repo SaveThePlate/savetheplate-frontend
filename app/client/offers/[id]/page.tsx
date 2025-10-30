@@ -92,6 +92,7 @@ const Offers = () => {
             src={getImage(offer.images?.[0]?.path)}
             alt={offer.title}
             fill
+            sizes="100vw"
             className="object-cover"
           />
           <div className="absolute top-3 right-3 bg-emerald-100 text-emerald-800 text-sm font-semibold px-3 py-1 rounded-full">

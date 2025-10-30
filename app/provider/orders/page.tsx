@@ -146,6 +146,7 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
           src={offer?.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images![0].path}` : DEFAULT_IMAGE}
           alt={offer?.title || "Offer image"}
           fill
+          sizes="80px"
           className="object-cover"
         />
       </div>

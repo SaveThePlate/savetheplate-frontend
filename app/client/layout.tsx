@@ -38,6 +38,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               width={200}
               height={80}
               className="object-contain hidden md:block h-full"
+              style={{ width: 'auto' }}
             />
             <Image
               src="/fullname1.png"
@@ -45,6 +46,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               width={120}
               height={120}
               className="object-contain block md:hidden h-full"
+              style={{ width: 'auto' }}
             />
           </Link>
 

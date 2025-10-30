@@ -54,7 +54,7 @@ const Home = () => {
     };
 
     fetchOffers();
-  }, []);
+  }, [router]);
 
   return (
     <main className="min-h-screen flex flex-col items-center pt-24 pb-20 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
