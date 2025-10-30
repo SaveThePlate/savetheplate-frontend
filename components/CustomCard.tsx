@@ -135,24 +135,29 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    setLoading(true);
-    const token = localStorage.getItem("accessToken");
-    if (!token) return router.push("/signIn");
+const handleDeleteConfirm = async () => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    toast.error("Please sign in again");
+    return router.push("/signIn");
+  }
 
-    try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Offer deleted successfully");
-      onDelete?.(offerId);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to delete offer");
-    } finally {
-      setLoading(false);
-      setShowDeleteConfirm(false);
-    }
-  };
+  // Instantly hide the modal and optimistically remove from UI.
+  setShowDeleteConfirm(false);
+  onDelete?.(offerId); // this should immediately make the parent stop rendering this card.
+
+  try {
+    await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success("Offer deleted successfully");
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || "Failed to delete offer");
+    // rollback UI in case of failure
+    router.refresh();
+  }
+};
+
 
   const handleImageError = (e: any) => {
     e.target.src = "/logo.png";
