@@ -37,6 +37,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               alt="Logo"
               width={200}
               height={80}
+              priority
               className="object-contain hidden md:block h-full"
               style={{ width: 'auto' }}
             />

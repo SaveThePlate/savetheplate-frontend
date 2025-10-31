@@ -41,6 +41,7 @@ const Nav = () => {
             alt="Logo"
             width={250} 
             height={100} 
+            priority
             className="object-contain lg:block md:block hidden h-full"
             style={{ width: 'auto' }}
           />

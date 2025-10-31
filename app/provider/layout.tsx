@@ -20,6 +20,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               alt="Logo"
               width={220}
               height={80}
+              priority
               className="object-contain hidden md:block h-full"
               style={{ width: 'auto' }}
             />
