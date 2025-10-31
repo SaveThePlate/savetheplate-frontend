@@ -12,7 +12,6 @@ interface Offer {
   price: number;
   quantity: number;
   id: number;
-  owner: string;
   ownerId: number;
   images: { path: string }[];
   title: string;
@@ -31,19 +30,14 @@ const ProviderHome = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getImage = (filename: string | null) => {
-    return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
-  };
+  const getImage = (filename: string | null) => filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
 
   useEffect(() => {
-    
     const fetchOffers = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
+        if (!token) return router.push("/signIn");
+
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
         const id = tokenPayload.id;
 
@@ -51,6 +45,7 @@ const ProviderHome = () => {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
         setOffers(response.data);
       } catch (err) {
         setError("Failed to fetch offers: " + (err as Error).message);
@@ -61,6 +56,31 @@ const ProviderHome = () => {
 
     fetchOffers();
   }, [router]);
+
+  const handleDeleteOffer = async (id: number) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return router.push("/signIn");
+
+    // Optimistic removal
+    setOffers(prev => prev.filter(o => o.id !== id));
+
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Offer deleted successfully");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to delete offer");
+      // refetch if failed
+      setLoading(true);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${JSON.parse(atob(token.split(".")[1])).id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setOffers(response.data);
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
@@ -87,9 +107,7 @@ const ProviderHome = () => {
 
         {/* Offers Grid */}
         {loading ? (
-          <p className="text-gray-600 text-lg text-center mt-10">
-            Loading your offers...
-          </p>
+          <p className="text-gray-600 text-lg text-center mt-10">Loading your offers...</p>
         ) : error ? (
           <p className="text-red-600 text-center mt-10">{error}</p>
         ) : offers.length === 0 ? (
@@ -102,9 +120,7 @@ const ProviderHome = () => {
               <CustomCard
                 key={offer.id}
                 offerId={offer.id}
-                imageSrc={
-                  offer.images.length > 0 ? getImage(offer.images[0].path) : ""
-                }
+                imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ""}
                 ownerId={offer.ownerId}
                 imageAlt={offer.title}
                 title={offer.title}
@@ -115,6 +131,7 @@ const ProviderHome = () => {
                 pickupLocation={offer.pickupLocation}
                 mapsLink={offer.mapsLink}
                 reserveLink={`/reserve/${offer.id}`}
+                onDelete={handleDeleteOffer}
               />
             ))}
           </div>

@@ -66,6 +66,7 @@ const CustomCard: FC<CustomCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [localData, setLocalData] = useState({
     title,
@@ -73,6 +74,14 @@ const CustomCard: FC<CustomCardProps> = ({
     price,
     quantity,
   });
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false); // close modal first
+    setIsDeleting(true); // trigger fade-out animation
+    setTimeout(() => {
+      onDelete?.(offerId);
+    }, 250);
+  };
 
   const { date: formattedDate, time: formattedTime } = formatDateTime(expirationDate);
   const isExpired =
@@ -135,28 +144,11 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
-const handleDeleteConfirm = async () => {
-  const token = localStorage.getItem("accessToken");
-  if (!token) {
-    toast.error("Please sign in again");
-    return router.push("/signIn");
-  }
-
-  // Instantly hide the modal and optimistically remove from UI.
+const handleDeleteConfirm = () => {
   setShowDeleteConfirm(false);
-  onDelete?.(offerId); // this should immediately make the parent stop rendering this card.
-
-  try {
-    await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success("Offer deleted successfully");
-  } catch (err: any) {
-    toast.error(err?.response?.data?.message || "Failed to delete offer");
-    // rollback UI in case of failure
-    router.refresh();
-  }
+  onDelete?.(offerId); // parent handles removal & toast
 };
+
 
 
   const handleImageError = (e: any) => {
@@ -400,47 +392,38 @@ return (
     </CredenzaContent>
   </Credenza>
 
-          {/* 🗑️ Delete Modal */}
-          <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-            <CredenzaTrigger asChild>
-              <button
-                disabled={loading}
-                className="bg-red-500 text-white px-3 py-1 rounded-lg font-medium hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </CredenzaTrigger>
-
-            <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-sm mx-auto border border-gray-100">
-              <CredenzaHeader>
-                <CredenzaTitle className="text-lg font-semibold text-gray-900">
-                  Confirm Deletion
-                </CredenzaTitle>
-              </CredenzaHeader>
-
-              <CredenzaBody className="text-gray-700 text-sm mt-2">
-                Are you sure you want to delete this offer? This action cannot be undone.
-              </CredenzaBody>
-
-              <CredenzaFooter className="flex justify-end gap-3 mt-4">
-                <CredenzaClose asChild>
-                  <button
-                    className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                </CredenzaClose>
-                <button
-                  onClick={handleDeleteConfirm}
-                  disabled={loading}
-                  className="px-4 py-2 bg-rose-500 text-white rounded-xl hover:opacity-90 transition"
-                >
-                  {loading ? "Deleting..." : "Delete"}
+            {/* Delete Modal */}
+            <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+              <CredenzaTrigger asChild>
+                <button className="bg-red-500 text-white px-3 py-1 rounded-lg font-medium hover:bg-red-600">
+                  Delete
                 </button>
-              </CredenzaFooter>
-            </CredenzaContent>
-          </Credenza>
+              </CredenzaTrigger>
+
+              <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-sm mx-auto border border-gray-100">
+                <CredenzaHeader>
+                  <CredenzaTitle className="text-lg font-semibold text-gray-900">Confirm Deletion</CredenzaTitle>
+                </CredenzaHeader>
+
+                <CredenzaBody className="text-gray-700 text-sm mt-2">
+                  Are you sure you want to delete this offer? This action cannot be undone.
+                </CredenzaBody>
+
+                <CredenzaFooter className="flex justify-end gap-3 mt-4">
+                  <CredenzaClose asChild>
+                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200">
+                      Cancel
+                    </button>
+                  </CredenzaClose>
+                  <button
+                    onClick={handleDelete}
+                    className="px-4 py-2 bg-rose-500 text-white rounded-xl hover:opacity-90 transition"
+                  >
+                    Delete
+                  </button>
+                </CredenzaFooter>
+              </CredenzaContent>
+            </Credenza>
         </CardFooter>
       )}
     </div>
