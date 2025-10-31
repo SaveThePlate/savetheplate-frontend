@@ -144,12 +144,6 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
-const handleDeleteConfirm = () => {
-  setShowDeleteConfirm(false);
-  onDelete?.(offerId); // parent handles removal & toast
-};
-
-
 
   const handleImageError = (e: any) => {
     e.target.src = "/logo.png";
