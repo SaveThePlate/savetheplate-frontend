@@ -213,7 +213,20 @@ useEffect(() => {
 
   return (
     <main className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
-      <ToastContainer />
+  
+  <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
 
       {/* Profile Card */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-8 mb-12 flex flex-col items-center text-center">

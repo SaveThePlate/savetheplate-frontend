@@ -122,7 +122,19 @@ const AddOffer = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <ToastContainer />
+        <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
 
       <h1 className="text-xl font-semibold text-700">Publish your offer now!</h1>     
       <br/>      

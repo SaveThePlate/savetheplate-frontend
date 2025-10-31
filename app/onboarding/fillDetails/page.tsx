@@ -83,7 +83,19 @@ const FillDetails = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-6">
       <div className="relative z-10 w-full max-w-md text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-md px-8 py-10 border border-[#f5eae0]">
-        <ToastContainer />
+          <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
 
         <h1 className="text-3xl font-extrabold text-[#344E41] mb-2">
           Add Your <span className="text-[#FFAE8A]">Restaurant Details</span>

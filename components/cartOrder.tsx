@@ -140,7 +140,19 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     <div className={`w-full bg-white rounded-xl shadow-md flex flex-col sm:flex-row items-center p-4 sm:p-6 mb-6 gap-4 ${
       isExpired ? "opacity-90 ring-1 ring-red-100 bg-red-50" : ""
     }`}>
-      <ToastContainer />
+        <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
 
       {/* Image */}
       <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 relative rounded-lg overflow-hidden shadow">

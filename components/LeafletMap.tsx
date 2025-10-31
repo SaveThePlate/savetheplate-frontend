@@ -43,7 +43,19 @@ const LeafletMap = ({ markers, center }: any) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
-      <ToastContainer />
+        <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
       <h1 className="text-xl font-semibold text-gray-700">
         View all the available offers around you!
       </h1>

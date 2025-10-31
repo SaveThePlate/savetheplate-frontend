@@ -84,7 +84,19 @@ const Offers = () => {
 
   return (
     <div className="bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] min-h-screen flex justify-center items-center px-4 py-10">
-      <ToastContainer />
+        <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
       <div className="w-full max-w-md bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
         {/* Image */}
         <div className="relative w-full h-60 bg-gray-100">

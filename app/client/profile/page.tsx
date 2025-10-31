@@ -144,7 +144,19 @@ const ProfilePage = () => {
 
   return (
     <main className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 lg:px-16">
-      <ToastContainer />
+        <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
 
       <div className="w-full max-w-md bg-white rounded-3xl p-8 mb-10 flex flex-col items-center text-center border border-gray-100">
         {pendingCount > 0 && (

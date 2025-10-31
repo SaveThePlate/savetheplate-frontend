@@ -75,7 +75,19 @@ const CreateMagicBoxPage = () => {
 
   return (
     <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
-      <ToastContainer />
+        <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnFocusLoss
+  draggable
+  limit={3}
+  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+  bodyClassName="text-sm font-medium"
+  progressClassName="bg-white/80"
+/>
       <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
         {/* Back Button */}
         <Button
