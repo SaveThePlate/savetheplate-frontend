@@ -154,7 +154,7 @@ const ProfilePage = () => {
         )}
 
         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#CFE8D5] mb-4">
-          <Image src={profileImage} alt="Profile" width={128} height={128} className="object-cover w-full h-full" />
+          <Image src={profileImage} alt="Profile" width={128} height={128} priority className="object-cover w-full h-full" />
         </div>
 
         {isEditing ? (

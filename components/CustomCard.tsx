@@ -161,6 +161,7 @@ return (
         fill
         sizes="100vw"
         onError={handleImageError}
+        priority
         className="object-cover transition-transform duration-300 hover:scale-[1.02]"
       />
 
