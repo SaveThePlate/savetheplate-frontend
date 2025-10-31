@@ -11,6 +11,7 @@ import {
   Credenza,
   CredenzaTrigger,
   CredenzaContent,
+  CredenzaDescription,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaBody,
@@ -256,6 +257,10 @@ return (
           </CredenzaTitle>
         </CredenzaHeader>
 
+        <CredenzaDescription className="text-sm text-gray-600 mb-3">
+          Details about this offer: {localData.title}
+        </CredenzaDescription>
+
         <CredenzaBody className="space-y-3 text-gray-700 text-sm">
           <p>{localData.description}</p>
           <p>
@@ -306,6 +311,10 @@ return (
           Edit Offer
         </CredenzaTitle>
       </CredenzaHeader>
+
+      <CredenzaDescription className="text-sm text-gray-600">
+        Edit the fields below to update this offer. Changes will be saved when you click Save.
+      </CredenzaDescription>
 
       <CredenzaBody className="flex flex-col gap-4 mt-3">
         <div className="flex flex-col w-full">
@@ -399,6 +408,10 @@ return (
                 <CredenzaHeader>
                   <CredenzaTitle className="text-lg font-semibold text-gray-900">Confirm Deletion</CredenzaTitle>
                 </CredenzaHeader>
+
+                <CredenzaDescription className="text-sm text-gray-600 mt-2">
+                  Are you sure you want to delete this offer? This action cannot be undone.
+                </CredenzaDescription>
 
                 <CredenzaBody className="text-gray-700 text-sm mt-2">
                   Are you sure you want to delete this offer? This action cannot be undone.

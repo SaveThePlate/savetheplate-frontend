@@ -41,43 +41,64 @@ interface CredenzaProps extends BaseProps {
 
 const desktop = "(min-width: 768px)"
 
-const Credenza = ({ children, ...props }: RootCredenzaProps) => {
+// Root wrapper: uses Dialog on desktop and Drawer on mobile
+const Credenza = ({ children, open, onOpenChange, ...props }: RootCredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const Credenza = isDesktop ? Dialog : Drawer
+  const Component = isDesktop ? Dialog : Drawer
 
-  return <Credenza {...props}>{children}</Credenza>
+  // When opening the mobile Drawer, blur the previously focused element
+  // so it won't remain focused inside an aria-hidden region. This prevents
+  // the "aria-hidden on a focused element" accessibility warning.
+  React.useEffect(() => {
+    if (!isDesktop && open) {
+      try {
+        const active = document.activeElement as HTMLElement | null
+        if (active && (active.tagName === "BUTTON" || active.tabIndex >= 0)) {
+          active.blur()
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [isDesktop, open])
+
+  return (
+    <Component open={open} onOpenChange={onOpenChange} {...(props as any)}>
+      {children}
+    </Component>
+  )
 }
 
 const CredenzaTrigger = ({ className, children, ...props }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaTrigger = isDesktop ? DialogTrigger : DrawerTrigger
+  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger
 
   return (
-    <CredenzaTrigger className={className} {...props}>
+    <Trigger className={className} {...props}>
       {children}
-    </CredenzaTrigger>
+    </Trigger>
   )
 }
 
 const CredenzaClose = ({ className, children, ...props }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaClose = isDesktop ? DialogClose : DrawerClose
+  const Close = isDesktop ? DialogClose : DrawerClose
 
   return (
-    <CredenzaClose className={className} {...props}>
+    <Close className={className} {...props}>
       {children}
-    </CredenzaClose>
+    </Close>
   )
 }
 
 const CredenzaContent = ({ className, children, ...props }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaContent = isDesktop ? DialogContent : DrawerContent
+  const Content = isDesktop ? DialogContent : DrawerContent
 
   return (
-    <CredenzaContent className={className} {...props}>
+    <Content className={className} {...props}>
       {children}
-    </CredenzaContent>
+    </Content>
   )
 }
 
@@ -87,34 +108,34 @@ const CredenzaDescription = ({
   ...props
 }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaDescription = isDesktop ? DialogDescription : DrawerDescription
+  const Description = isDesktop ? DialogDescription : DrawerDescription
 
   return (
-    <CredenzaDescription className={className} {...props}>
+    <Description className={className} {...props}>
       {children}
-    </CredenzaDescription>
+    </Description>
   )
 }
 
 const CredenzaHeader = ({ className, children, ...props }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaHeader = isDesktop ? DialogHeader : DrawerHeader
+  const Header = isDesktop ? DialogHeader : DrawerHeader
 
   return (
-    <CredenzaHeader className={className} {...props}>
+    <Header className={className} {...props}>
       {children}
-    </CredenzaHeader>
+    </Header>
   )
 }
 
 const CredenzaTitle = ({ className, children, ...props }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaTitle = isDesktop ? DialogTitle : DrawerTitle
+  const Title = isDesktop ? DialogTitle : DrawerTitle
 
   return (
-    <CredenzaTitle className={className} {...props}>
+    <Title className={className} {...props}>
       {children}
-    </CredenzaTitle>
+    </Title>
   )
 }
 
@@ -128,12 +149,12 @@ const CredenzaBody = ({ className, children, ...props }: CredenzaProps) => {
 
 const CredenzaFooter = ({ className, children, ...props }: CredenzaProps) => {
   const isDesktop = useMediaQuery(desktop)
-  const CredenzaFooter = isDesktop ? DialogFooter : DrawerFooter
+  const Footer = isDesktop ? DialogFooter : DrawerFooter
 
   return (
-    <CredenzaFooter className={className} {...props}>
+    <Footer className={className} {...props}>
       {children}
-    </CredenzaFooter>
+    </Footer>
   )
 }
 
