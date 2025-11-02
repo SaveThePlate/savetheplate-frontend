@@ -47,7 +47,7 @@ interface CustomCardProps {
 }
 
 const CustomCard: FC<CustomCardProps> = ({
-  imageSrc = "/logo.png",
+  imageSrc,
   imageAlt = "Offer image",
   offerId,
   title,
@@ -146,8 +146,35 @@ const CustomCard: FC<CustomCardProps> = ({
   };
 
 
+  const DEFAULT_LOGO = "/logo.png";
+
+  const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
+  const [triedBackend, setTriedBackend] = useState(false);
+
+  useEffect(() => {
+    setCurrentImage(imageSrc);
+    setTriedBackend(false);
+  }, [imageSrc]);
+
   const handleImageError = (e: any) => {
-    e.target.src = "/logo.png";
+    const failedSrc = e?.target?.src || currentImage;
+    console.error("Image failed to load:", failedSrc);
+
+    // Try backend storage variant once if we haven't yet
+    const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    if (!triedBackend && backendOrigin) {
+      const parts = (failedSrc || "").split("/");
+      const filename = parts[parts.length - 1];
+      if (filename) {
+        const backendUrl = `${backendOrigin}/storage/${filename}`;
+        setTriedBackend(true);
+        setCurrentImage(backendUrl);
+        return;
+      }
+    }
+
+    // final fallback to default logo
+    setCurrentImage(DEFAULT_LOGO);
   };
 
 return (
@@ -156,15 +183,21 @@ return (
   >
     {/* 🖼️ Image */}
     <div className="relative w-full h-56 sm:h-64">
-      <Image
-        src={imageSrc}
-        alt={imageAlt}
-        fill
-        sizes="100vw"
-        onError={handleImageError}
-        priority
-        className="object-cover transition-transform duration-300 hover:scale-[1.02]"
-      />
+      {currentImage ? (
+        <Image
+          src={currentImage}
+          alt={imageAlt}
+          fill
+          sizes="100vw"
+          onError={handleImageError}
+          priority
+          className="object-cover transition-transform duration-300 hover:scale-[1.02]"
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <span className="text-gray-400">No image</span>
+        </div>
+      )}
 
       {/* 💰 Price */}
       <div className="absolute top-3 right-3 bg-teal-600 text-white font-semibold px-3 py-1 rounded-full text-sm shadow-md">

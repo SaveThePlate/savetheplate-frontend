@@ -13,7 +13,9 @@ interface Offer {
   quantity: number;
   id: number;
   ownerId: number;
-  images: { path: string }[];
+  // backend may return images as array of objects (with filename or path), or attach imageFileName directly
+  images?: any;
+  imageFileName?: string;
   title: string;
   description: string;
   expirationDate: string;
@@ -21,7 +23,7 @@ interface Offer {
   mapsLink: string;
 }
 
-const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
+const BASE_IMAGE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "") + "/storage/";
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
 const ProviderHome = () => {
@@ -30,7 +32,26 @@ const ProviderHome = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getImage = (filename: string | null) => filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
+  const getImage = (filename: string | null | undefined): string | undefined => {
+    if (!filename) return undefined;
+
+    // full URL from API
+    if (/^https?:\/\//i.test(filename)) return filename;
+
+    // path starting with /storage/ should be served from backend storage
+    if (filename.startsWith("/storage/")) {
+      const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      return origin + filename;
+    }
+
+    // leading slash -> public asset in the frontend's /public
+    if (filename.startsWith("/")) return filename;
+
+    // Bare filename (e.g. "smallsurprisebag.png") — prefer using the public asset
+    // located in the frontend `public/` folder: "/smallsurprisebag.png".
+    // If that fails to load, CustomCard will try a backend /storage/ variant once.
+    return `/${filename}`;
+  };
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -128,24 +149,36 @@ const ProviderHome = () => {
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {offers.map((offer) => (
-              <CustomCard
-                key={offer.id}
-                offerId={offer.id}
-                imageSrc={offer.images.length > 0 ? getImage(offer.images[0].path) : ""}
-                ownerId={offer.ownerId}
-                imageAlt={offer.title}
-                title={offer.title}
-                price={offer.price}
-                quantity={offer.quantity}
-                description={offer.description}
-                expirationDate={offer.expirationDate}
-                pickupLocation={offer.pickupLocation}
-                mapsLink={offer.mapsLink}
-                reserveLink={`/reserve/${offer.id}`}
-                onDelete={handleDeleteOffer}
-              />
-            ))}
+            {offers.map((offer) => {
+              // determine filename: prefer imageFileName (server-side helper), then images[0].filename, then images[0].path
+              let filename: string | undefined;
+              if (offer.imageFileName) filename = offer.imageFileName;
+              else if (Array.isArray(offer.images) && offer.images.length > 0) {
+                const first = offer.images[0];
+                filename = first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
+              }
+
+              const imageSrc = getImage(filename);
+
+              return (
+                <CustomCard
+                  key={offer.id}
+                  offerId={offer.id}
+                  imageSrc={imageSrc}
+                  ownerId={offer.ownerId}
+                  imageAlt={offer.title}
+                  title={offer.title}
+                  price={offer.price}
+                  quantity={offer.quantity}
+                  description={offer.description}
+                  expirationDate={offer.expirationDate}
+                  pickupLocation={offer.pickupLocation}
+                  mapsLink={offer.mapsLink}
+                  reserveLink={`/reserve/${offer.id}`}
+                  onDelete={handleDeleteOffer}
+                />
+              );
+            })}
           </div>
         )}
       </div>

@@ -61,7 +61,14 @@ const CreateMagicBoxPage = () => {
           pickupLocation: "Default Location",
           latitude: 0,
           longitude: 0,
-          images: JSON.stringify([magicBoxOptions[selectedSize].images || DEFAULT_IMAGE]),
+            // send images as a JSON-stringified array of objects matching backend expectation
+            // backend expects: [{ filename: "1761665967189.jpeg", alt: "..." }, ...]
+            images: JSON.stringify([
+              {
+                filename: (magicBoxOptions[selectedSize].images || DEFAULT_IMAGE).replace(/^\//, ""),
+                alt: `${selectedSize} magic box image`,
+              },
+            ]),
           quantity: quantityToFloat,
         },
         { headers: { Authorization: `Bearer ${token}` } }
