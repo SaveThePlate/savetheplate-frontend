@@ -329,7 +329,8 @@ useEffect(() => {
                     // determine filename/path
                     const first = offer.images?.[0];
                     const f = first as any;
-                    const filename = f?.filename ?? f?.path ?? (typeof first === "string" ? first : undefined);
+                    // prefer full url returned by storage controller, then filename/path
+                    const filename = f?.url ?? f?.filename ?? f?.path ?? (typeof first === "string" ? first : undefined);
                     const imageSrc = resolveImage(filename) ?? undefined;
                     return imageSrc ? (
                       <Image

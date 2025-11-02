@@ -154,8 +154,9 @@ const ProviderHome = () => {
               let filename: string | undefined;
               if (offer.imageFileName) filename = offer.imageFileName;
               else if (Array.isArray(offer.images) && offer.images.length > 0) {
-                const first = offer.images[0];
-                filename = first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
+                const first = offer.images[0] as any;
+                // prefer full url provided by storage controller, then filename/path
+                filename = first?.url ?? first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
               }
 
               const imageSrc = getImage(filename);
