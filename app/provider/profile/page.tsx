@@ -41,9 +41,11 @@ export default function ProviderProfile() {
     username: "",
     location: "",
     phoneNumber: "",
-    profileImage: undefined as string | undefined,
+    profileImage: undefined,
+
   });
-  const [currentProfileImage, setCurrentProfileImage] = useState<string | undefined>(undefined);
+  // keep a string in state so next/image never receives `undefined`
+  const [currentProfileImage, setCurrentProfileImage] = useState<string>(DEFAULT_PROFILE_IMAGE);
   const [triedBackendForProfile, setTriedBackendForProfile] = useState(false);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,9 +82,10 @@ useEffect(() => {
         username: username || "Username",
         location: location || "Location",
         phoneNumber: phoneNumber || "Phone number",
-        profileImage: profileImage || undefined,
+        profileImage: profileImage ?? undefined,
       });
-      setCurrentProfileImage(resolveImage(profileImage));
+      // show resolved profile image when available, otherwise default logo
+      setCurrentProfileImage(resolveImage(profileImage) ?? DEFAULT_PROFILE_IMAGE);
 
       const id = JSON.parse(atob(token.split(".")[1])).id;
       const offersRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`, {
@@ -101,7 +104,7 @@ useEffect(() => {
 }, [router]);
 
   useEffect(() => {
-    setCurrentProfileImage(resolveImage(formData.profileImage));
+    setCurrentProfileImage(resolveImage(formData.profileImage) ?? DEFAULT_PROFILE_IMAGE);
     setTriedBackendForProfile(false);
   }, [formData.profileImage]);
 
@@ -250,35 +253,29 @@ useEffect(() => {
       {/* Profile Card */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-8 mb-12 flex flex-col items-center text-center">
         <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#E5F3E9] mb-4 shadow-md">
-          {currentProfileImage ? (
-            <Image
-              src={currentProfileImage}
-              alt="Profile"
-              width={112}
-              height={112}
-              className="object-cover w-full h-full"
-              onError={(e) => {
-                const img = (e.currentTarget || e.target) as HTMLImageElement;
-                // try backend storage variant once
-                if (!triedBackendForProfile) {
-                  setTriedBackendForProfile(true);
-                  const parts = (currentProfileImage || "").split("/");
-                  const filename = parts[parts.length - 1];
-                  if (filename) {
-                    setCurrentProfileImage(`${BASE_IMAGE_URL}${filename}`);
-                    return;
-                  }
+          <Image
+            src={currentProfileImage}
+            alt="Profile"
+            width={112}
+            height={112}
+            className="object-cover w-full h-full"
+            onError={(e) => {
+              const img = (e.currentTarget || e.target) as HTMLImageElement;
+              // try backend storage variant once
+              if (!triedBackendForProfile) {
+                setTriedBackendForProfile(true);
+                const parts = (currentProfileImage || "").split("/");
+                const filename = parts[parts.length - 1];
+                if (filename) {
+                  setCurrentProfileImage(`${BASE_IMAGE_URL}${filename}`);
+                  return;
                 }
-                setCurrentProfileImage(DEFAULT_PROFILE_IMAGE);
-                // ensure the actual IMG element shows fallback
-                try { img.src = DEFAULT_PROFILE_IMAGE; } catch {}
-              }}
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-400">No image</span>
-            </div>
-          )}
+              }
+              setCurrentProfileImage(DEFAULT_PROFILE_IMAGE);
+              // ensure the actual IMG element shows fallback
+              try { img.src = DEFAULT_PROFILE_IMAGE; } catch {}
+            }}
+          />
         </div>
         <h1 className="text-2xl font-bold text-[#1B4332]">{formData.username}</h1>
         <p className="text-gray-600">{formData.phoneNumber}</p>
