@@ -185,7 +185,7 @@ return (
       {/* 🕒 Expired Badge */}
       {isExpired && (
         <div className="absolute top-3 left-3 bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
-          ⌛ Expired
+          Expired
         </div>
       )}
     </div>
@@ -229,7 +229,7 @@ return (
     {/* Order / Expired indicator */}
     {isExpired ? (
       <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
-        ⌛ Expired
+        Expired
       </div>
     ) : localData.quantity > 0 ? (
       <Link

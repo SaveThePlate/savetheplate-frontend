@@ -14,9 +14,13 @@ type MagicBoxSize = "small" | "medium" | "big";
 interface MagicBoxOption {
   price: number;
   description: string;
+  images?: string;
 }
 
 const DEFAULT_IMAGE = "/logo.png";
+const largeSurpriseBag = "/largesurprisebag.png"
+const mediumSurpriseBag = "/mediumsurprisebag.png"
+const smallSurpriseBag = "/smallsurprisebag.png"
 
 const CreateMagicBoxPage = () => {
   const router = useRouter();
@@ -27,9 +31,9 @@ const CreateMagicBoxPage = () => {
   const [quantity, setQuantity] = useState("");
 
   const magicBoxOptions: Record<MagicBoxSize, MagicBoxOption> = {
-    small: { price: 5, description: "A small box with a selection of items." },
-    medium: { price: 7, description: "A medium box with more items." },
-    big: { price: 10, description: "A big box with a wide variety of items." },
+    small: { price: 5, description: "A small box with a selection of items.", images: smallSurpriseBag },
+    medium: { price: 7, description: "A medium box with more items.", images: mediumSurpriseBag },
+    big: { price: 10, description: "A big box with a wide variety of items.", images: largeSurpriseBag },
   };
 
   useEffect(() => {
@@ -57,7 +61,7 @@ const CreateMagicBoxPage = () => {
           pickupLocation: "Default Location",
           latitude: 0,
           longitude: 0,
-          images: JSON.stringify([DEFAULT_IMAGE]),
+          images: JSON.stringify([magicBoxOptions[selectedSize].images || DEFAULT_IMAGE]),
           quantity: quantityToFloat,
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -76,19 +80,20 @@ const CreateMagicBoxPage = () => {
   return (
     <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
         <ToastContainer
-  position="top-right"
-  autoClose={1000}
-  hideProgressBar={false}
-  newestOnTop
-  closeOnClick
-  pauseOnFocusLoss
-  draggable
-  limit={3}
-  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-  bodyClassName="text-sm font-medium"
-  progressClassName="bg-white/80"
-/>
-      <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
+          position="top-right"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          limit={3}
+          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+          bodyClassName="text-sm font-medium"
+          progressClassName="bg-white/80"
+        />
+
+       <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
         {/* Back Button */}
         <Button
           variant="ghost"
