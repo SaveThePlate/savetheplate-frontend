@@ -21,7 +21,18 @@ interface Offer {
 }
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
-const BASE_IMAGE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "") + "/storage/";
+const BASE_IMAGE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "").replace(/\/$/, "") + "/storage/";
+
+const resolveImage = (filename: string | null | undefined): string | undefined => {
+  if (!filename) return undefined;
+  if (/^https?:\/\//i.test(filename)) return filename;
+  if (filename.startsWith("/storage/")) {
+    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    return origin + filename;
+  }
+  if (filename.startsWith("/")) return filename; // public asset
+  return `/${filename}`; // bare filename -> assume public asset
+};
 
 export default function ProviderProfile() {
   const router = useRouter();
@@ -30,8 +41,10 @@ export default function ProviderProfile() {
     username: "",
     location: "",
     phoneNumber: "",
-    profileImage: DEFAULT_PROFILE_IMAGE,
+    profileImage: undefined as string | undefined,
   });
+  const [currentProfileImage, setCurrentProfileImage] = useState<string | undefined>(undefined);
+  const [triedBackendForProfile, setTriedBackendForProfile] = useState(false);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,8 +80,9 @@ useEffect(() => {
         username: username || "Username",
         location: location || "Location",
         phoneNumber: phoneNumber || "Phone number",
-        profileImage: profileImage || DEFAULT_PROFILE_IMAGE,
+        profileImage: profileImage || undefined,
       });
+      setCurrentProfileImage(resolveImage(profileImage));
 
       const id = JSON.parse(atob(token.split(".")[1])).id;
       const offersRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`, {
@@ -85,6 +99,11 @@ useEffect(() => {
 
   fetchProfileAndOffers();
 }, [router]);
+
+  useEffect(() => {
+    setCurrentProfileImage(resolveImage(formData.profileImage));
+    setTriedBackendForProfile(false);
+  }, [formData.profileImage]);
 
 
   const totalOffers = offers.length;
@@ -231,13 +250,35 @@ useEffect(() => {
       {/* Profile Card */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-8 mb-12 flex flex-col items-center text-center">
         <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#E5F3E9] mb-4 shadow-md">
-          <Image
-            src={formData.profileImage}
-            alt="Profile"
-            width={112}
-            height={112}
-            className="object-cover w-full h-full"
-          />
+          {currentProfileImage ? (
+            <Image
+              src={currentProfileImage}
+              alt="Profile"
+              width={112}
+              height={112}
+              className="object-cover w-full h-full"
+              onError={(e) => {
+                const img = (e.currentTarget || e.target) as HTMLImageElement;
+                // try backend storage variant once
+                if (!triedBackendForProfile) {
+                  setTriedBackendForProfile(true);
+                  const parts = (currentProfileImage || "").split("/");
+                  const filename = parts[parts.length - 1];
+                  if (filename) {
+                    setCurrentProfileImage(`${BASE_IMAGE_URL}${filename}`);
+                    return;
+                  }
+                }
+                setCurrentProfileImage(DEFAULT_PROFILE_IMAGE);
+                // ensure the actual IMG element shows fallback
+                try { img.src = DEFAULT_PROFILE_IMAGE; } catch {}
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <span className="text-gray-400">No image</span>
+            </div>
+          )}
         </div>
         <h1 className="text-2xl font-bold text-[#1B4332]">{formData.username}</h1>
         <p className="text-gray-600">{formData.phoneNumber}</p>
@@ -284,13 +325,38 @@ useEffect(() => {
                 className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden hover:shadow-lg transition"
               >
                 <div className="w-full h-40 relative">
-                  <Image
-                    src={offer.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images[0].path}` : DEFAULT_PROFILE_IMAGE}
-                    alt={offer.title}
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                  />
+                  {(() => {
+                    // determine filename/path
+                    const first = offer.images?.[0];
+                    const f = first as any;
+                    const filename = f?.filename ?? f?.path ?? (typeof first === "string" ? first : undefined);
+                    const imageSrc = resolveImage(filename) ?? undefined;
+                    return imageSrc ? (
+                      <Image
+                        src={imageSrc}
+                        alt={offer.title}
+                        fill
+                        sizes="100vw"
+                        className="object-cover"
+                        onError={(e) => {
+                          const img = (e.currentTarget || e.target) as HTMLImageElement;
+                          // try backend storage variant if not already tried
+                          if (!img.dataset.triedBackend) {
+                            img.dataset.triedBackend = "1";
+                            const parts = (img.src || "").split("/");
+                            const filename = parts[parts.length - 1];
+                            if (filename) img.src = `${BASE_IMAGE_URL}${filename}`;
+                            return;
+                          }
+                          img.src = DEFAULT_PROFILE_IMAGE;
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400">No image</span>
+                      </div>
+                    );
+                  })()}
                   {expired && (
                     <Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow">
                       Expired
