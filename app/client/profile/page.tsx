@@ -24,12 +24,32 @@ interface Order {
 interface Offer {
   id: number;
   title: string;
-  images: { path: string }[];
+  images?: { filename: string; alt?: string; url?: string }[];
   pickupLocation: string;
   quantity: number;
   mapsLink?: string;
 
 }
+
+const DEFAULT_IMAGE = "/logo.png";
+const getImage = (filename?: string | null): string => {
+  if (!filename) return DEFAULT_IMAGE;
+
+  // full URL from API
+  if (/^https?:\/\//i.test(filename)) return filename;
+
+  // path starting with /storage/ should be served from backend storage
+  if (filename.startsWith("/storage/")) {
+    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    return origin + filename;
+  }
+
+  // leading slash -> public asset in frontend's /public
+  if (filename.startsWith("/")) return filename;
+
+  // bare filename, fallback to public folder
+  return `/${filename}`;
+};
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -39,7 +59,7 @@ const ProfilePage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [offersDetails, setOffersDetails] = useState<Record<number, Offer>>({});
   const [loading, setLoading] = useState(true);
-
+  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<{ username: string; phoneNumber: number | null }>({ username: "", phoneNumber: null });
   const [isSaving, setIsSaving] = useState(false);
@@ -73,17 +93,18 @@ const ProfilePage = () => {
         return;
       }
       const userId = JSON.parse(atob(token.split(".")[1])).id;
-
       const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setOrders(response.data || []);
       for (const order of response.data) {
-        const offerRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
+      const offerRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOffersDetails((prev) => ({ ...prev, [order.offerId]: offerRes.data }));
+        const firstImage = offerRes.data.images?.[0];
+        const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+        setImageSrc(imageSrc);
       }
     } catch {
       toast.error("Failed to fetch orders");
@@ -145,18 +166,18 @@ const ProfilePage = () => {
   return (
     <main className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 lg:px-16">
         <ToastContainer
-  position="top-right"
-  autoClose={1000}
-  hideProgressBar={false}
-  newestOnTop
-  closeOnClick
-  pauseOnFocusLoss
-  draggable
-  limit={3}
-  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-  bodyClassName="text-sm font-medium"
-  progressClassName="bg-white/80"
-/>
+          position="top-right"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          limit={3}
+          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+          bodyClassName="text-sm font-medium"
+          progressClassName="bg-white/80"
+        />
 
       <div className="w-full max-w-md bg-white rounded-3xl p-8 mb-10 flex flex-col items-center text-center border border-gray-100">
         {pendingCount > 0 && (
@@ -243,7 +264,7 @@ const ProfilePage = () => {
                 <div key={order.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col transition hover:shadow-md">
                   <div className="relative w-full h-40 bg-gray-100">
                     <Image
-                      src={offer?.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images[0].path}` : DEFAULT_PROFILE_IMAGE}
+                      src={imageSrc}
                       alt={offer?.title || "Order Image"}
                       fill
                       sizes="100vw"
