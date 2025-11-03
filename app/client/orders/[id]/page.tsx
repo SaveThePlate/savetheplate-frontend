@@ -12,6 +12,7 @@ type Order = {
   offerId: number;
   createdAt: string;
   status: string;
+  mapsLink?: string;
 };
 
 const Orders = () => {
@@ -38,7 +39,7 @@ const Orders = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (response.data) setOrders(response.data);
+        setOrders(response.data);
       } catch (err) {
         console.error("Failed to fetch orders:", err);
         setError("Failed to fetch orders. Please try again later.");

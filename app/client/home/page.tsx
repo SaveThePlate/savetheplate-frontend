@@ -10,9 +10,7 @@ import { Loader2 } from "lucide-react";
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [offers, setOffers] = useState<
-    { id: number; title: string; latitude: number; longitude: number }[]
-  >([]);
+  const [offers, setOffers] = useState<{ id: number; title: string; latitude: number; longitude: number }[]>([]);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const router = useRouter();
 
