@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 interface Offer {
   id: number;
   owner: string;
-  images: { path: string }[];
+  images?: { filename: string; alt?: string; url?: string }[];
   title: string;
   description: string;
   expirationDate: string;
@@ -18,9 +18,26 @@ interface Offer {
   quantity: number;
 }
 
+const DEFAULT_IMAGE = "/logo.png";
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
-const getImage = (path?: string | null) =>
-  path ? `${BASE_IMAGE_URL}${path}` : "/logo.png";
+const getImage = (filename?: string | null): string => {
+  if (!filename) return DEFAULT_IMAGE;
+
+  // full URL from API
+  if (/^https?:\/\//i.test(filename)) return filename;
+
+  // path starting with /storage/ should be served from backend storage
+  if (filename.startsWith("/storage/")) {
+    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    return origin + filename;
+  }
+
+  // leading slash -> public asset in frontend's /public
+  if (filename.startsWith("/")) return filename;
+
+  // bare filename, fallback to public folder
+  return `/${filename}`;
+};
 
 const Offers = () => {
   const router = useRouter();
@@ -29,6 +46,7 @@ const Offers = () => {
   const [quantity, setQuantity] = useState(1);
   const [inCart, setInCart] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
 
   useEffect(() => {
     const fetchOffer = async () => {
@@ -38,6 +56,9 @@ const Offers = () => {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        const firstImage = res.data.images?.[0];
+        const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+        setImageSrc(imageSrc);
         setOffer(res.data);
       } catch {
         toast.error("Failed to load offer");
@@ -85,23 +106,23 @@ const Offers = () => {
   return (
     <div className="bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] min-h-screen flex justify-center items-center px-4 py-10">
         <ToastContainer
-  position="top-right"
-  autoClose={1000}
-  hideProgressBar={false}
-  newestOnTop
-  closeOnClick
-  pauseOnFocusLoss
-  draggable
-  limit={3}
-  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-  bodyClassName="text-sm font-medium"
-  progressClassName="bg-white/80"
-/>
+          position="top-right"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          limit={3}
+          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+          bodyClassName="text-sm font-medium"
+          progressClassName="bg-white/80"
+        />
       <div className="w-full max-w-md bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
         {/* Image */}
         <div className="relative w-full h-60 bg-gray-100">
           <Image
-            src={getImage(offer.images?.[0]?.path)}
+            src={imageSrc}
             alt={offer.title}
             fill
             sizes="100vw"

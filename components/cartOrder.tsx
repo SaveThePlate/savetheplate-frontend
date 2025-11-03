@@ -32,8 +32,6 @@ type Offer = {
 };
 
 const DEFAULT_IMAGE = "/logo.png";
-const BASE_IMAGE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "") + "/storage/";
-
 const getImage = (filename?: string | null): string => {
   if (!filename) return DEFAULT_IMAGE;
 
