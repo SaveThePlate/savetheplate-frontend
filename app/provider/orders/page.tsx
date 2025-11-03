@@ -15,7 +15,7 @@ interface User {
 interface Offer {
   id: number;
   title?: string;
-  images?: { path: string }[];
+  images?: { filename: string; alt?: string; url?: string }[];
   pickupLocation?: string;
 }
 
@@ -30,13 +30,31 @@ interface Order {
   offer?: Offer;
 }
 
-const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 const DEFAULT_IMAGE = "/logo.png";
+const getImage = (filename?: string | null): string => {
+  if (!filename) return DEFAULT_IMAGE;
+
+  // full URL from API
+  if (/^https?:\/\//i.test(filename)) return filename;
+
+  // path starting with /storage/ should be served from backend storage
+  if (filename.startsWith("/storage/")) {
+    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    return origin + filename;
+  }
+
+  // leading slash -> public asset in frontend's /public
+  if (filename.startsWith("/")) return filename;
+
+  // bare filename, fallback to public folder
+  return `/${filename}`;
+};
 
 const ProviderOrders = () => {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
 
   const fetchOrders = async () => {
     try {
@@ -48,7 +66,9 @@ const ProviderOrders = () => {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      const firstImage = res.data.images?.[0];
+      const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+      setImageSrc(imageSrc);  
       setOrders(res.data || []);
     } catch (err) {
       console.error(err);
@@ -69,18 +89,18 @@ const ProviderOrders = () => {
   return (
     <main className="bg-[#e8f4ee] min-h-screen pt-24 pb-20 flex flex-col items-center">
         <ToastContainer
-  position="top-right"
-  autoClose={1000}
-  hideProgressBar={false}
-  newestOnTop
-  closeOnClick
-  pauseOnFocusLoss
-  draggable
-  limit={3}
-  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-  bodyClassName="text-sm font-medium"
-  progressClassName="bg-white/80"
-/>
+          position="top-right"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          limit={3}
+          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+          bodyClassName="text-sm font-medium"
+          progressClassName="bg-white/80"
+        />
 
       <div className="w-full max-w-6xl px-4">
         <div className="w-full flex items-center justify-between mb-6 pt-6">
@@ -155,7 +175,7 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
     <div className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 border border-gray-100 hover:shadow-lg transition">
       <div className="w-20 h-20 rounded-lg overflow-hidden relative flex-shrink-0">
         <Image
-          src={offer?.images?.[0]?.path ? `${BASE_IMAGE_URL}${offer.images![0].path}` : DEFAULT_IMAGE}
+          src={getImage(offer?.images?.[0]?.filename)}
           alt={offer?.title || "Offer image"}
           fill
           sizes="80px"
