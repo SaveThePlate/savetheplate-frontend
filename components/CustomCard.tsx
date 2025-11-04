@@ -68,7 +68,6 @@ const CustomCard: FC<CustomCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
   const [localData, setLocalData] = useState({
     title,
     description,
@@ -145,39 +144,51 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
+const DEFAULT_LOGO = "/logo.png";
+const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
+const [triedBackend, setTriedBackend] = useState(false);
 
-  const DEFAULT_LOGO = "/logo.png";
+useEffect(() => {
+  setCurrentImage(imageSrc);
+  setTriedBackend(false);
+}, [imageSrc]);
 
-  const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
-  const [triedBackend, setTriedBackend] = useState(false);
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const img = e.currentTarget;
+  const failedSrc = img?.src || currentImage;
+  console.debug("Image failed to load:", failedSrc);
 
-  useEffect(() => {
-    setCurrentImage(imageSrc);
-    setTriedBackend(false);
-  }, [imageSrc]);
+  // Prefer using an absolute URL returned by the backend (if your API includes absoluteUrl).
+  const backendOriginRaw = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+  const backendOrigin = backendOriginRaw.replace(/\/$/, "");
 
-  const handleImageError = (e: any) => {
-    const failedSrc = e?.target?.src || currentImage;
-    console.error("Image failed to load:", failedSrc);
+  if (!triedBackend && backendOrigin && failedSrc) {
+    try {
+      // Extract filename (safe): strip query/hash then last path segment
+      let filename = "";
+      try {
+        const url = new URL(failedSrc);
+        filename = url.pathname.split("/").filter(Boolean).pop() || "";
+      } catch {
+        // failedSrc could be relative; fallback to splitting
+        const withoutQuery = failedSrc.split(/[?#]/)[0];
+        filename = withoutQuery.split("/").filter(Boolean).pop() || "";
+      }
+        filename = filename.split("?")[0].split("#")[0];
 
-    // Try backend storage variant once if we haven't yet
-    const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    if (!triedBackend && backendOrigin) {
-      const parts = (failedSrc || "").split("/");
-      const filename = parts[parts.length - 1];
-      if (filename) {
-        const backendUrl = `${backendOrigin}/storage/${filename}`;
-        setTriedBackend(true);
-        setCurrentImage(backendUrl);
-        return;
+        if (filename) {
+          const backendUrl = `${backendOrigin}/storage/${encodeURIComponent(filename)}`;
+          setTriedBackend(true);
+          setCurrentImage(backendUrl);
+          return;
+        }
+      } catch (err) {
+        console.warn("Backend fallback build failed:", err);
       }
     }
-
-    // final fallback to default logo
     setCurrentImage(DEFAULT_LOGO);
   };
-
-return (
+  return (
   <Card
     className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300"
   >
