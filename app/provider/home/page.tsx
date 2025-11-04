@@ -150,36 +150,35 @@ const ProviderHome = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {offers.map((offer) => {
-              // determine filename: prefer imageFileName (server-side helper), then images[0].filename, then images[0].path
-              let filename: string | undefined;
-              if (offer.imageFileName) filename = offer.imageFileName;
-              else if (Array.isArray(offer.images) && offer.images.length > 0) {
-                const first = offer.images[0] as any;
-                // prefer full url provided by storage controller, then filename/path
-                filename = first?.url ?? first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
-              }
+  let filename: string | undefined;
+  if (offer.imageFileName) filename = offer.imageFileName;
+  else if (Array.isArray(offer.images) && offer.images.length > 0) {
+    const first = offer.images[0] as any;
+    filename = first?.url ?? first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
+  }
 
-              const imageSrc = getImage(filename);
+  const imageSrc = getImage(filename) || DEFAULT_PROFILE_IMAGE;
 
-              return (
-                <CustomCard
-                  key={offer.id}
-                  offerId={offer.id}
-                  imageSrc={imageSrc}
-                  ownerId={offer.ownerId}
-                  imageAlt={offer.title}
-                  title={offer.title}
-                  price={offer.price}
-                  quantity={offer.quantity}
-                  description={offer.description}
-                  expirationDate={offer.expirationDate}
-                  pickupLocation={offer.pickupLocation}
-                  mapsLink={offer.mapsLink}
-                  reserveLink={`/reserve/${offer.id}`}
-                  onDelete={handleDeleteOffer}
-                />
-              );
-            })}
+  return (
+    <CustomCard
+      key={offer.id}
+      offerId={offer.id}
+      imageSrc={imageSrc}
+      ownerId={offer.ownerId}
+      imageAlt={offer.title}
+      title={offer.title}
+      price={offer.price}
+      quantity={offer.quantity}
+      description={offer.description}
+      expirationDate={offer.expirationDate}
+      pickupLocation={offer.pickupLocation}
+      mapsLink={offer.mapsLink}
+      reserveLink={`/reserve/${offer.id}`}
+      onDelete={handleDeleteOffer}
+    />
+  );
+})}
+
           </div>
         )}
       </div>

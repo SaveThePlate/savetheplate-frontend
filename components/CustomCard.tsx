@@ -144,9 +144,9 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
-const DEFAULT_LOGO = "/logo.png";
-const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
-const [triedBackend, setTriedBackend] = useState(false);
+  const DEFAULT_LOGO = "/logo.png";
+  const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
+  const [triedBackend, setTriedBackend] = useState(false);
 
 useEffect(() => {
   setCurrentImage(imageSrc);
@@ -155,39 +155,67 @@ useEffect(() => {
 
 const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
   const img = e.currentTarget;
-  const failedSrc = img?.src || currentImage;
+  const failedSrc = img?.src || currentImage || "";
   console.debug("Image failed to load:", failedSrc);
 
-  // Prefer using an absolute URL returned by the backend (if your API includes absoluteUrl).
+  // Backend origin (prefer env var)
   const backendOriginRaw = process.env.NEXT_PUBLIC_BACKEND_URL || "";
   const backendOrigin = backendOriginRaw.replace(/\/$/, "");
 
-  if (!triedBackend && backendOrigin && failedSrc) {
-    try {
-      // Extract filename (safe): strip query/hash then last path segment
-      let filename = "";
-      try {
-        const url = new URL(failedSrc);
-        filename = url.pathname.split("/").filter(Boolean).pop() || "";
-      } catch {
-        // failedSrc could be relative; fallback to splitting
-        const withoutQuery = failedSrc.split(/[?#]/)[0];
-        filename = withoutQuery.split("/").filter(Boolean).pop() || "";
-      }
-        filename = filename.split("?")[0].split("#")[0];
-
-        if (filename) {
-          const backendUrl = `${backendOrigin}/storage/${encodeURIComponent(filename)}`;
-          setTriedBackend(true);
-          setCurrentImage(backendUrl);
-          return;
-        }
-      } catch (err) {
-        console.warn("Backend fallback build failed:", err);
-      }
-    }
+  // If we've already tried backend once, give up and show default
+  if (triedBackend) {
     setCurrentImage(DEFAULT_LOGO);
-  };
+    return;
+  }
+
+  // Skip fallback for data URLs, blobs or empty src
+  if (!failedSrc || /^data:|^blob:/i.test(failedSrc)) {
+    setCurrentImage(DEFAULT_LOGO);
+    return;
+  }
+
+  // Try to extract a filename from the failed src.
+  let filename = "";
+  try {
+    // Use window.location.origin as base to handle relative URLs
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const url = new URL(failedSrc, base); // supports both absolute and relative
+    const parts = url.pathname.split("/").filter(Boolean);
+    filename = parts.length ? parts.pop() || "" : "";
+  } catch (err) {
+    // Fallback: strip query/hash and take last path segment
+    try {
+      const withoutQuery = failedSrc.split(/[?#]/)[0];
+      const parts = withoutQuery.split("/").filter(Boolean);
+      filename = parts.length ? parts.pop() || "" : "";
+    } catch {
+      filename = "";
+    }
+  }
+
+  // sanitize filename (remove any accidental query/hash remnants)
+  filename = filename.split("?")[0].split("#")[0];
+
+  // Only attempt backend fallback if we have a filename and a backend origin
+  if (filename && backendOrigin) {
+    // simple heuristic: require an extension (e.g. '.jpg', '.png')
+    if (!/\.[a-zA-Z0-9]{2,6}$/.test(filename)) {
+      console.debug("Filename looks invalid for storage fallback:", filename);
+      setCurrentImage(DEFAULT_LOGO);
+      return;
+    }
+
+    const backendUrl = `${backendOrigin}/storage/${encodeURIComponent(filename)}`;
+    console.debug("Attempting backend fallback to:", backendUrl);
+    setTriedBackend(true);
+    setCurrentImage(backendUrl);
+    return;
+  }
+
+  // Nothing else to try
+  setCurrentImage(DEFAULT_LOGO);
+};
+
   return (
   <Card
     className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300"
@@ -196,7 +224,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     <div className="relative w-full h-56 sm:h-64">
       {currentImage ? (
         <Image
-          src={currentImage}
+          src={currentImage || DEFAULT_LOGO}
           alt={imageAlt}
           fill
           sizes="100vw"

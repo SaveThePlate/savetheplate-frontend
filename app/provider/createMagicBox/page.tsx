@@ -18,9 +18,9 @@ interface MagicBoxOption {
 }
 
 const DEFAULT_IMAGE = "/logo.png";
-const largeSurpriseBag = "/largesurprisebag.png"
-const mediumSurpriseBag = "/mediumsurprisebag.png"
-const smallSurpriseBag = "/smallsurprisebag.png"
+const largeSurpriseBag = "/largesurprisebag.png";
+const mediumSurpriseBag = "/mediumsurprisebag.png";
+const smallSurpriseBag = "/smallsurprisebag.png";
 
 const CreateMagicBoxPage = () => {
   const router = useRouter();
@@ -45,12 +45,34 @@ const CreateMagicBoxPage = () => {
     setLoading(true);
     const token = localStorage.getItem("accessToken");
     if (!token) {
-        router.push("/signIn");
-        return;
-      }
+      router.push("/signIn");
+      return;
+    }
 
     const quantityToFloat = parseFloat(quantity);
+
     try {
+      // Build the images payload with an absoluteUrl pointing to frontend-hosted asset
+      const imagePath = magicBoxOptions[selectedSize].images || DEFAULT_IMAGE;
+      // Prefer NEXT_PUBLIC_FRONTEND_URL (set in .env.local), otherwise use window.location.origin
+      const frontendOrigin =
+        (process.env.NEXT_PUBLIC_FRONTEND_URL as string) ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+      const absoluteUrl =
+        frontendOrigin.replace(/\/$/, "") +
+        (imagePath.startsWith("/") ? imagePath : `/${imagePath}`);
+
+      const imagesPayload = JSON.stringify([
+        {
+          // asset is frontend-hosted, so keep filename null (not uploaded to backend store)
+          filename: null,
+          // url keeps the local filename without leading slash to preserve backwards compatibility
+          url: imagePath.replace(/^\//, ""),
+          absoluteUrl,
+          alt: `${selectedSize} magic box image`,
+        },
+      ]);
+
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
         {
@@ -61,20 +83,15 @@ const CreateMagicBoxPage = () => {
           pickupLocation: "Default Location",
           latitude: 0,
           longitude: 0,
-            // send images as a JSON-stringified array of objects matching backend expectation
-            // backend expects: [{ filename: "1761665967189.jpeg", alt: "..." }, ...]
-            images: JSON.stringify([
-              {
-                filename: (magicBoxOptions[selectedSize].images || DEFAULT_IMAGE).replace(/^\//, ""),
-                alt: `${selectedSize} magic box image`,
-              },
-            ]),
+          images: imagesPayload,
           quantity: quantityToFloat,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("Magic Box created successfully!");
+      // optionally redirect after creation
+      // router.push('/offers') or similar
     } catch (error) {
       console.error(error);
       toast.error("Error submitting offer!");
@@ -86,21 +103,21 @@ const CreateMagicBoxPage = () => {
 
   return (
     <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
-        <ToastContainer
-          position="top-right"
-          autoClose={1000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnFocusLoss
-          draggable
-          limit={3}
-          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-          bodyClassName="text-sm font-medium"
-          progressClassName="bg-white/80"
-        />
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        limit={3}
+        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+        bodyClassName="text-sm font-medium"
+        progressClassName="bg-white/80"
+      />
 
-       <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
+      <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
         {/* Back Button */}
         <Button
           variant="ghost"
