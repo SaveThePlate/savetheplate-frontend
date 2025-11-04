@@ -148,10 +148,10 @@ const CustomCard: FC<CustomCardProps> = ({
   const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
   const [triedBackend, setTriedBackend] = useState(false);
 
-useEffect(() => {
-  setCurrentImage(imageSrc);
-  setTriedBackend(false);
-}, [imageSrc]);
+  useEffect(() => {
+    setCurrentImage(imageSrc);
+    setTriedBackend(false);
+  }, [imageSrc]);
 
 const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
   const img = e.currentTarget;
