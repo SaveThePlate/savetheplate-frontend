@@ -20,8 +20,10 @@ interface Offer {
 
 const DEFAULT_IMAGE = "/logo.png";
 
-const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_IMAGE;
+// Return a normalized image URL or undefined if none — let the card component
+// pick a suitable fallback (static bag image or logo).
+const getImage = (filename?: string | null): string | undefined => {
+  if (!filename) return undefined;
 
   // full URL from API
   if (/^https?:\/\//i.test(filename)) return filename;
@@ -35,7 +37,7 @@ const getImage = (filename?: string | null): string => {
   // leading slash -> public asset in frontend's /public
   if (filename.startsWith("/")) return filename;
 
-  // bare filename, fallback to public folder
+  // bare filename, return public asset path
   return `/${filename}`;
 };
 

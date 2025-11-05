@@ -29,6 +29,36 @@ const formatDateTime = (dateString: string | undefined) => {
   };
 };
 
+// Pick a reasonable public fallback bag image for offers that don't have a valid
+// image on the backend. Uses price, quantity or title heuristics to choose small/medium/large.
+const selectStaticBagImage = (
+  price?: number,
+  quantity?: number,
+  title?: string
+): string => {
+  // prefer semantic hints in the title
+  if (title && /large|big|family|box/i.test(title)) return "/largesurprisebag.png";
+  if (title && /medium|regular|std/i.test(title)) return "/mediumsurprisebag.png";
+  if (title && /small|mini|single/i.test(title)) return "/smallsurprisebag.png";
+
+  // price heuristic
+  if (typeof price === "number") {
+    if (price >= 50) return "/largesurprisebag.png";
+    if (price >= 20) return "/mediumsurprisebag.png";
+    return "/smallsurprisebag.png";
+  }
+
+  // quantity heuristic
+  if (typeof quantity === "number") {
+    if (quantity >= 10) return "/largesurprisebag.png";
+    if (quantity >= 5) return "/mediumsurprisebag.png";
+    return "/smallsurprisebag.png";
+  }
+
+  // default fallback
+  return "/smallsurprisebag.png";
+};
+
 interface CustomCardProps {
   offerId: number;
   imageSrc?: string;
@@ -147,11 +177,13 @@ const CustomCard: FC<CustomCardProps> = ({
   };
 
   const DEFAULT_LOGO = "/logo.png";
-  const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
+  const [currentImage, setCurrentImage] = useState<string | undefined>(
+    imageSrc ?? selectStaticBagImage(price, quantity, title)
+  );
   const [triedBackend, setTriedBackend] = useState(false);
 
   useEffect(() => {
-    setCurrentImage(imageSrc);
+    setCurrentImage(imageSrc ?? selectStaticBagImage(price, quantity, title));
     setTriedBackend(false);
   }, [imageSrc]);
 
@@ -166,13 +198,14 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
   // If we've already tried backend once, give up and show default
   if (triedBackend) {
-    setCurrentImage(DEFAULT_LOGO);
+    // try a local static bag image before falling back to the logo
+    setCurrentImage(selectStaticBagImage(price, quantity, title));
     return;
   }
 
   // Skip fallback for data URLs, blobs or empty src
   if (!failedSrc || /^data:|^blob:/i.test(failedSrc)) {
-    setCurrentImage(DEFAULT_LOGO);
+    setCurrentImage(selectStaticBagImage(price, quantity, title));
     return;
   }
 
@@ -203,7 +236,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     // simple heuristic: require an extension (e.g. '.jpg', '.png')
     if (!/\.[a-zA-Z0-9]{2,6}$/.test(filename)) {
       console.debug("Filename looks invalid for storage fallback:", filename);
-      setCurrentImage(DEFAULT_LOGO);
+      setCurrentImage(selectStaticBagImage(price, quantity, title));
       return;
     }
 
@@ -214,8 +247,8 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     return;
   }
 
-  // Nothing else to try
-  setCurrentImage(DEFAULT_LOGO);
+  // Nothing else to try — use a static bag image as the best fallback, then logo.
+  setCurrentImage(selectStaticBagImage(price, quantity, title) ?? DEFAULT_LOGO);
 };
 
   if (isClient) {
