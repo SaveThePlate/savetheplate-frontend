@@ -21,7 +21,7 @@ function AuthCallback() {
         },
       })
       .then((resp: any) => {
-        console.log(resp);
+        // console.log(resp);
 
 
         LocalStorage.setItem("refresh-token", resp.data.refreshToken);
