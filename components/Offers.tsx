@@ -18,11 +18,10 @@ interface Offer {
   user?: { username: string };
 }
 
-// Return a normalized image URL or undefined if none — let the card component
-// pick a suitable fallback (static bag image or logo).
-const getImage = (filename?: string | null): string | undefined => {
-  if (!filename) return undefined;
+const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
+const getImage = (filename?: string | null): string => {
+  if (!filename) return DEFAULT_BAG_IMAGE;
   // full URL from API
   if (/^https?:\/\//i.test(filename)) return filename;
 

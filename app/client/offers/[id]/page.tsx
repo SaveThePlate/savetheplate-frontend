@@ -18,9 +18,9 @@ interface Offer {
   quantity: number;
 }
 
-const DEFAULT_IMAGE = "/defaultBag.png";
+const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_IMAGE;
+  if (!filename) return DEFAULT_BAG_IMAGE;
 
   // full URL from API
   if (/^https?:\/\//i.test(filename)) return filename;
@@ -45,7 +45,7 @@ const Offers = () => {
   const [quantity, setQuantity] = useState(1);
   const [inCart, setInCart] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
+  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_BAG_IMAGE);
 
   useEffect(() => {
     const fetchOffer = async () => {
@@ -56,7 +56,7 @@ const Offers = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const firstImage = res.data.images?.[0];
-        const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+        const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_BAG_IMAGE;
         setImageSrc(imageSrc);
         setOffer(res.data);
       } catch {
