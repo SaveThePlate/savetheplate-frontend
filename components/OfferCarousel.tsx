@@ -9,11 +9,11 @@ import Link from "next/link";
 
 
 
-const DEFAULT_PROFILE_IMAGE = "/logo.png";
+const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 const getImage = (filename: string | null): string => {
-  return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_PROFILE_IMAGE;
+  return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_BAG_IMAGE;
 };
 
 interface Offer {
@@ -135,7 +135,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
                 <Image
                 width={80} 
                 height={80} 
-                src={offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_PROFILE_IMAGE}
+                src={offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE}
                 alt={offer.title}
                 className="h-16 rounded-md"
                 />

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
-const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 interface Order {
   id: number;

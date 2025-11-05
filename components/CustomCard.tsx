@@ -229,7 +229,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               src={currentImage || DEFAULT_LOGO}
               alt={localData.title}
               fill
-              sizes="100vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
               onError={handleImageError}
               priority
               className="object-cover transition-transform duration-300 hover:scale-[1.02]"
@@ -375,7 +375,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             src={currentImage || DEFAULT_LOGO}
             alt={localData.title}
             fill
-            sizes="100vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             onError={handleImageError}
             priority
             className="object-cover transition-transform duration-300 hover:scale-[1.02]"

@@ -24,7 +24,7 @@ interface Offer {
   mapsLink: string;
 }
 
-const DEFAULT_PROFILE_IMAGE = "/logo.png";
+const DEFAULT_PROFILE_IMAGE = "/defaultBag.png";
 
 const ProviderHome = () => {
   const router = useRouter();
