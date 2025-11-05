@@ -25,6 +25,8 @@ type UploadedImage = {
   height?: number;
 };
 
+const DEFAULT_BAG_IMAGE = "/defaultBag.png";
+
 const AddOffer: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -35,7 +37,6 @@ const AddOffer: React.FC = () => {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [offers, setOffers] = useState<{ price: number; title: string }[]>([]);
 
-  // ✅ Axios instance
   const axiosInstance = axios.create({
     baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
     headers: { "Content-Type": "application/json" },
@@ -297,7 +298,7 @@ const AddOffer: React.FC = () => {
                   aria-roledescription={`File ${i + 1} containing ${file.name}`}
                 >
                   <Image
-                    src={URL.createObjectURL(file)}
+                    src={URL.createObjectURL(file) || DEFAULT_BAG_IMAGE}
                     alt={file.name}
                     height={80}
                     width={80}

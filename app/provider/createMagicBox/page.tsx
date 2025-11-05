@@ -62,14 +62,12 @@ const CreateMagicBoxPage = () => {
         frontendOrigin.replace(/\/$/, "") +
         (imagePath.startsWith("/") ? imagePath : `/${imagePath}`);
 
+      // The backend expects an array of image objects. For frontend-hosted assets
+      // we store only the `url` pointing to the frontend public path (leading slash).
+      // Example: [{ "url": "/mediumsurprisebag.png" }]
       const imagesPayload = JSON.stringify([
         {
-          // asset is frontend-hosted, so keep filename null (not uploaded to backend store)
-          filename: null,
-          // url keeps the local filename without leading slash to preserve backwards compatibility
-          url: imagePath.replace(/^\//, ""),
-          absoluteUrl,
-          alt: `${selectedSize} magic box image`,
+          url: imagePath.startsWith("/") ? imagePath : `/${imagePath}`,
         },
       ]);
 
@@ -83,13 +81,8 @@ const CreateMagicBoxPage = () => {
           pickupLocation: "Default Location",
           latitude: 0,
           longitude: 0,
-          // images: imagesPayload,
-          images: JSON.stringify([
-              {
-                filename: (magicBoxOptions[selectedSize].images || DEFAULT_IMAGE).replace(/^\//, ""),
-                alt: `${selectedSize} magic box image`,
-              },
-            ]),
+          // send the richer images payload (contains url and absoluteUrl)
+          images: imagesPayload,
           quantity: quantityToFloat,
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -149,7 +142,7 @@ const CreateMagicBoxPage = () => {
 
         {/* Magic Box Options */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-          {Object.entries(magicBoxOptions).map(([size, { price, description }]) => (
+          {Object.entries(magicBoxOptions).map(([size, { price, description, images }]) => (
             <div
               key={size}
               onClick={() => setSelectedSize(size as MagicBoxSize)}
@@ -159,6 +152,13 @@ const CreateMagicBoxPage = () => {
                   : "bg-gray-50 border-gray-200 hover:bg-gray-100"
               }`}
             >
+              <div className="flex items-center justify-center mb-3">
+                <img
+                  src={images || DEFAULT_IMAGE}
+                  alt={`${size} magic box`}
+                  className="w-20 h-20 object-contain mx-auto"
+                />
+              </div>
               <h2 className="text-lg font-semibold text-green-900 capitalize">
                 {size}
               </h2>

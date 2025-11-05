@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 
 interface Offer {
   id: number;
-  images?: { filename: string; alt?: string; url?: string, absoluteUrl: string }[];
+  images?: {
+    filename: string;
+    alt?: string;
+    url?: string;
+    absoluteUrl: string;
+    original?: { url?: string };
+  }[];
   title: string;
   ownerId: number;
   description: string;
@@ -70,11 +76,21 @@ const OffersPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // normalize images array
-        const mappedOffers: Offer[] = response.data.map((o: any) => ({
-          ...o,
-          images: Array.isArray(o.images) ? o.images : [],
-        }));
+        // normalize images array and normalize absoluteUrl if backend storage path is provided
+        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        const mappedOffers: Offer[] = response.data.map((o: any) => {
+          const images = Array.isArray(o.images) ? o.images.map((img: any) => {
+            if (!img) return img;
+            // If backend stored the image under /storage/... make it absolute using the configured backend origin
+            if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+              return { ...img, absoluteUrl: backendOrigin + img.absoluteUrl };
+            }
+            // leave as-is otherwise
+            return img;
+          }) : [];
+
+          return { ...o, images };
+        });
 
         setOffers(mappedOffers);
       } catch (err) {
@@ -129,9 +145,11 @@ const OffersPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-stretch">
         {sorted.map((offer) => {
           const firstImage = offer.images?.[0];
-          const imageSrc = getImage(
-            firstImage?.absoluteUrl || firstImage?.url || firstImage?.filename
-          );
+          // Prefer the original url metadata when present (frontend public asset),
+          // then fall back to url/absoluteUrl/filename.
+          const candidate =
+            firstImage?.original?.url || firstImage?.url || firstImage?.absoluteUrl || firstImage?.filename;
+          const imageSrc = getImage(candidate);
           const imageAlt = firstImage?.alt ?? offer.title;
 
           return (
