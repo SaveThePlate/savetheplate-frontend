@@ -19,6 +19,15 @@ import {
   CredenzaClose,
 } from "@/components/ui/credenza";
 
+// Small utility to generate a tiny SVG blur placeholder data URL.
+const getBlurDataURL = (color = "#eaeaea") => {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><rect width='100%' height='100%' fill='${color}'/></svg>`;
+  if (typeof window === "undefined") {
+    return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+  }
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+};
+
 const formatDateTime = (dateString: string | undefined) => {
   if (!dateString) return { date: "N/A", time: "" };
   const date = new Date(dateString);
@@ -232,6 +241,8 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
               onError={handleImageError}
               priority
+              placeholder="blur"
+              blurDataURL={getBlurDataURL()}
               className="object-cover transition-transform duration-300 hover:scale-[1.02]"
             />
           ) : (
@@ -378,6 +389,8 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             onError={handleImageError}
             priority
+            placeholder="blur"
+            blurDataURL={getBlurDataURL()}
             className="object-cover transition-transform duration-300 hover:scale-[1.02]"
           />
         ) : (

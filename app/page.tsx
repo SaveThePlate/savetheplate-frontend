@@ -60,6 +60,12 @@ const WelcomePage = () => {
             height={160}
             alt="Save The Plate"
             className="mx-auto animate-float"
+            // ensure CSS animations or layout don't break the intrinsic aspect ratio
+            // when only one dimension is changed via CSS. Keep both dimensions auto.
+            style={{ width: "auto", height: "auto" }}
+            // This image is above the fold and acts as an LCP element on the landing page.
+            // Mark it as priority so Next.js preloads it to improve LCP metrics.
+            priority
           />
         </div>
 
