@@ -8,6 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Gift } from "lucide-react";
+import Image from "next/image";
 
 type MagicBoxSize = "small" | "medium" | "big";
 
@@ -153,7 +154,7 @@ const CreateMagicBoxPage = () => {
               }`}
             >
               <div className="flex items-center justify-center mb-3">
-                <img
+                <Image
                   src={images || DEFAULT_IMAGE}
                   alt={`${size} magic box`}
                   className="w-20 h-20 object-contain mx-auto"
