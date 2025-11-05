@@ -12,7 +12,13 @@ import { useRouter } from "next/navigation";
 interface Offer {
   id: number;
   title: string;
-  images: { path: string }[];
+  images?: {
+    path?: string;
+    url?: string;
+    filename?: string;
+    absoluteUrl?: string;
+    original?: { url?: string };
+  }[];
   expirationDate: string;
   pickupLocation: string;
   quantity: number;
@@ -322,39 +328,40 @@ useEffect(() => {
                 className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden hover:shadow-lg transition"
               >
                 <div className="w-full h-40 relative">
-                  {(() => {
-                    // determine filename/path
-                    const first = offer.images?.[0];
-                    const f = first as any;
-                    // prefer full url returned by storage controller, then filename/path
-                    const filename = f?.url ?? f?.filename ?? f?.path ?? (typeof first === "string" ? first : undefined);
-                    const imageSrc = resolveImage(filename) ?? DEFAULT_BAG_IMAGE;
-                    return imageSrc ? (
-                      <Image
-                        src={imageSrc}
-                        alt={offer.title}
-                        fill
-                        sizes="100vw"
-                        className="object-cover"
-                        onError={(e) => {
-                          const img = (e.currentTarget || e.target) as HTMLImageElement;
-                          // try backend storage variant if not already tried
-                          if (!img.dataset.triedBackend) {
-                            img.dataset.triedBackend = "1";
-                            const parts = (img.src || "").split("/");
-                            const filename = parts[parts.length - 1];
-                            if (filename) img.src = `${BASE_IMAGE_URL}${filename}`;
-                            return;
-                          }
-                          img.src = DEFAULT_PROFILE_IMAGE;
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400">No image</span>
-                      </div>
-                    );
-                  })()}
+                    {(() => {
+                      // determine filename/path
+                      const first = offer.images?.[0];
+                      const f = first as any;
+                      // Prefer original.url (frontend public asset) if present, then full url returned by storage controller, then filename/path
+                      const filename = f?.original?.url ?? f?.url ?? f?.filename ?? f?.path ?? (typeof first === "string" ? first : undefined);
+                      const imageSrc = resolveImage(filename) ?? DEFAULT_BAG_IMAGE;
+                      return imageSrc ? (
+                        <Image
+                          src={imageSrc}
+                          alt={offer.title}
+                          fill
+                          // grid layout: full width on small, 50% on medium, ~33% on large
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                          onError={(e) => {
+                            const img = (e.currentTarget || e.target) as HTMLImageElement;
+                            // try backend storage variant if not already tried
+                            if (!img.dataset.triedBackend) {
+                              img.dataset.triedBackend = "1";
+                              const parts = (img.src || "").split("/");
+                              const filename = parts[parts.length - 1];
+                              if (filename) img.src = `${BASE_IMAGE_URL}${filename}`;
+                              return;
+                            }
+                            img.src = DEFAULT_PROFILE_IMAGE;
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <span className="text-gray-400">No image</span>
+                        </div>
+                      );
+                    })()}
                   {expired && (
                     <Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow">
                       Expired

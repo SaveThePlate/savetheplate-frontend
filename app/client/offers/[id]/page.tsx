@@ -124,7 +124,11 @@ const Offers = () => {
             src={imageSrc}
             alt={offer.title}
             fill
-            sizes="100vw"
+            // card has max-w-md; use 100vw on small screens, otherwise limit to ~400px
+            sizes="(max-width: 640px) 100vw, 400px"
+            // This image is likely the Largest Contentful Paint (LCP) on the offer detail page.
+            // Mark it as priority so Next.js preloads it to improve LCP metrics.
+            priority
             className="object-cover"
           />
           <div className="absolute top-3 right-3 bg-emerald-100 text-emerald-800 text-sm font-semibold px-3 py-1 rounded-full">

@@ -261,7 +261,8 @@ const ProfilePage = () => {
                       src={imageSrc}
                       alt={offer?.title || "Order Image"}
                       fill
-                      sizes="100vw"
+                      // grid layout: full width on small, 50% on medium, ~33% on large
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover"
                     />
                   </div>
