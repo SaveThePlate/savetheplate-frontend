@@ -236,80 +236,118 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* Orders Section */}
-      <section className="w-full max-w-6xl px-4 space-y-8">
-        <h2 className="text-2xl font-semibold text-gray-800 text-center">My Past Orders</h2>
+{/* Orders Section */}
+<section className="w-full max-w-6xl mx-auto px-4 space-y-10">
+  <h2 className="text-3xl font-bold text-gray-900 text-center">My Past Orders</h2>
 
-        {loading ? (
-          <p className="text-gray-600 text-center">Loading orders...</p>
-        ) : orders.length === 0 ? (
-          <div className="text-center text-gray-600">
-            <p className="text-lg mb-4">You haven’t placed any orders yet.</p>
-            <Button className="bg-[#FFAE8A] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#ff9966] transition"
-              onClick={() => router.push("./home")}>
-              Explore Offers
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedOrders.map((order) => {
-              const offer = offersDetails[order.offerId];
-              return (
-                <div key={order.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col transition hover:shadow-md">
-                  <div className="relative w-full h-40 bg-gray-100">
-                    <Image
-                      src={imageSrc}
-                      alt={offer?.title || "Order Image"}
-                      fill
-                      // grid layout: full width on small, 50% on medium, ~33% on large
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-4 flex flex-col justify-between h-[160px]">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">{offer?.title || "Offer"}</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Pickup: <span className="font-medium text-gray-800">{offer?.pickupLocation || "N/A"}</span>
-                      </p>
-                      {offer?.mapsLink && (
-                        <a
-                          href={offer.mapsLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-teal-700 font-medium underline hover:text-teal-800 mt-1"
-                        >
-                          📍 Show Map
-                        </a>
-                      )}
+  {loading ? (
+    <p className="text-gray-600 text-center">Loading orders...</p>
+  ) : orders.length === 0 ? (
+    <div className="text-center text-gray-600">
+      <p className="text-lg mb-4">You haven’t placed any orders yet.</p>
+      <Button
+        className="bg-[#FFAE8A] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#ff9966] transition"
+        onClick={() => router.push("./home")}
+      >
+        Explore Offers
+      </Button>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {sortedOrders.map((order) => {
+        const offer = offersDetails[order.offerId];
+        return (
+          <div
+            key={order.id}
+            className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
+          >
+            {/* 🖼️ Image Header */}
+            <div className="relative h-48 w-full overflow-hidden">
+              <Image
+                src={imageSrc}
+                alt={offer?.title || "Order Image"}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                      <p className="text-sm text-gray-500 mt-1">
-                        Ordered on <span className="font-medium text-gray-700">{new Date(order.createdAt).toLocaleDateString()}</span>
-                      </p>
-                    </div>
-                    <div className="mt-2 flex justify-between items-center">
-                      <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full tracking-wide ${
-                          order.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : order.status === "confirmed"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-red-100 text-red-600"
-                        }`}
-                      >
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
-                      <span className="bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-1 rounded-full">
-                        {order.quantity} {order.quantity > 1 ? "items" : "item"}
-                      </span>
-                    </div>
-                  </div>
+              <div className="absolute bottom-3 left-3">
+                <h3 className="text-white text-lg font-semibold drop-shadow-sm">
+                  {offer?.title || "Offer"}
+                </h3>
+              </div>
+            </div>
+
+            {/* 🧾 Card Content */}
+            <div className="p-5 flex flex-col justify-between flex-1 space-y-3">
+              <div className="space-y-3">
+                {/* Unified Pickup Button */}
+                {offer?.pickupLocation && (
+                  <a
+                    href={offer?.mapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center w-full bg-[#FFAE8A]/10 hover:bg-[#FFAE8A]/20 text-[#FF7F50] font-semibold text-sm py-2 px-3 rounded-full transition-all"
+                  >
+                    📍 Pickup:{" "}
+                    <span className="ml-1 text-gray-800 truncate font-medium">
+                      {offer.pickupLocation}
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-4 h-4 ml-2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </a>
+                )}
+
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🗓️</span>
+                  <span>
+                    Ordered on{" "}
+                    <span className="font-medium text-gray-700">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </span>
+                  </span>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* 🏷️ Status + Quantity */}
+              <div className="flex items-center justify-between pt-2">
+                <span
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-full ${
+                    order.status === "pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : order.status === "confirmed"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+
+                <span className="bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-1.5 rounded-full">
+                  {order.quantity} {order.quantity > 1 ? "items" : "item"}
+                </span>
+              </div>
+            </div>
           </div>
-        )}
-      </section>
+        );
+      })}
+    </div>
+  )}
+</section>
+
     </main>
   );
 };
