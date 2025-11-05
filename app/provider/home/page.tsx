@@ -14,7 +14,8 @@ interface Offer {
   id: number;
   ownerId: number;
   // backend may return images as array of objects (with filename or path), or attach imageFileName directly
-  images?: any;
+  // images?: any;
+  images?: { filename: string; alt?: string; url?: string }[];
   imageFileName?: string;
   title: string;
   description: string;

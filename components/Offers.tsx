@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 interface Offer {
   id: number;
-  images?: { filename: string; alt?: string; url?: string }[];
+  images?: { filename: string; alt?: string; url?: string, absoluteUrl: string }[];
   title: string;
   ownerId: number;
   description: string;
@@ -130,7 +130,9 @@ const OffersPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-stretch">
         {sorted.map((offer) => {
           const firstImage = offer.images?.[0];
-          const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+          const imageSrc = getImage(
+            firstImage?.absoluteUrl || firstImage?.url || firstImage?.filename
+          );
           const imageAlt = firstImage?.alt ?? offer.title;
 
           return (
