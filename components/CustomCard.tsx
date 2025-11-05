@@ -146,7 +146,7 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
-  const DEFAULT_LOGO = "/logo.png";
+  const DEFAULT_LOGO = "/defaultBag.png";
   const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
   const [triedBackend, setTriedBackend] = useState(false);
 

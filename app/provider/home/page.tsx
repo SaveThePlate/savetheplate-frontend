@@ -24,7 +24,6 @@ interface Offer {
   mapsLink: string;
 }
 
-const BASE_IMAGE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "") + "/storage/";
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
 const ProviderHome = () => {

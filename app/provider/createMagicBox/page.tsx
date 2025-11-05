@@ -17,7 +17,7 @@ interface MagicBoxOption {
   images?: string;
 }
 
-const DEFAULT_IMAGE = "/logo.png";
+const DEFAULT_IMAGE = "/defaultBag.png";
 const largeSurpriseBag = "/largesurprisebag.png";
 const mediumSurpriseBag = "/mediumsurprisebag.png";
 const smallSurpriseBag = "/smallsurprisebag.png";

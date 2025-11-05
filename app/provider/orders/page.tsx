@@ -30,7 +30,7 @@ interface Order {
   offer?: Offer;
 }
 
-const DEFAULT_IMAGE = "/logo.png";
+const DEFAULT_IMAGE = "/defaultBag.png";
 const getImage = (filename?: string | null): string => {
   if (!filename) return DEFAULT_IMAGE;
 

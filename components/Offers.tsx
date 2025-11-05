@@ -18,8 +18,6 @@ interface Offer {
   user?: { username: string };
 }
 
-const DEFAULT_IMAGE = "/logo.png";
-
 // Return a normalized image URL or undefined if none — let the card component
 // pick a suitable fallback (static bag image or logo).
 const getImage = (filename?: string | null): string | undefined => {
