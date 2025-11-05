@@ -56,31 +56,33 @@ const ProviderOrders = () => {
   const [loading, setLoading] = useState(true);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
 
-  const fetchOrders = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const firstImage = res.data.images?.[0];
-      const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
-      setImageSrc(imageSrc);  
-      setOrders(res.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch provider orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch orders when component mounts. Keep the async function inside the effect
+  // so it doesn't change on every render and trigger the exhaustive-deps warning.
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    const run = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          router.push("/signIn");
+          return;
+        }
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const firstImage = res.data.images?.[0];
+        const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+        setImageSrc(image);
+        setOrders(res.data || []);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch provider orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    run();
+  }, [router]);
 
   const confirmed = orders.filter((o) => o.status === "confirmed");
   const pending = orders.filter((o) => o.status === "pending");

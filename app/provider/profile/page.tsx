@@ -279,7 +279,7 @@ useEffect(() => {
         </div>
         <h1 className="text-2xl font-bold text-[#1B4332]">{formData.location}</h1>
         <p className="text-gray-600">{formData.phoneNumber}</p>
-        <p className="text-gray-500 mb-4 italic">"Start posting and make an impact"</p>
+        <p className="text-gray-500 mb-4 italic">Start posting and make an impact</p>
 
         <div className="flex justify-around w-full bg-[#F3F7F0] rounded-2xl py-3 mb-6">
           <div>

@@ -60,31 +60,31 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [canceling, setCanceling] = useState(false);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
 
-  const fetchOffer = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return router.push("/signIn");
-
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOffer(res.data);
-
-      const firstImage = res.data.images?.[0];
-      const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
-      setImageSrc(imageSrc);
-    } catch (err) {
-      console.error("Failed to fetch offer:", err);
-      setError("Failed to load offer data");
-      setImageSrc(imageSrc);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchOffer();
-  }, [order.offerId]);
+    const run = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return router.push("/signIn");
+
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOffer(res.data);
+
+        const firstImage = res.data.images?.[0];
+        const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+        setImageSrc(image);
+      } catch (err) {
+        console.error("Failed to fetch offer:", err);
+        setError("Failed to load offer data");
+        // keep current imageSrc if set
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    run();
+  }, [order.offerId, router]);
 
   const isExpired = offer && new Date(offer.expirationDate).getTime() <= Date.now();
 

@@ -64,54 +64,7 @@ const ProfilePage = () => {
   const [formData, setFormData] = useState<{ username: string; phoneNumber: number | null }>({ username: "", phoneNumber: null });
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchProfileData = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const { username, phoneNumber, profileImage } = response.data;
-      setUsername(username || "");
-      setPhoneNumber(phoneNumber ?? null);
-      setFormData({ username: username || "", phoneNumber: phoneNumber ?? null });
-      setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
-    } catch {
-      toast.error("Failed to fetch profile");
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
-      const userId = JSON.parse(atob(token.split(".")[1])).id;
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOrders(response.data || []);
-      for (const order of response.data) {
-      const offerRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOffersDetails((prev) => ({ ...prev, [order.offerId]: offerRes.data }));
-        const firstImage = offerRes.data.images?.[0];
-        const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
-        setImageSrc(imageSrc);
-      }
-    } catch {
-      toast.error("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -149,10 +102,52 @@ const ProfilePage = () => {
     }
   };
 
+  // Consolidate async logic inside the effect to satisfy react-hooks/exhaustive-deps
   useEffect(() => {
-    fetchProfileData();
-    fetchOrders();
-  }, []);
+    const run = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          router.push("/signIn");
+          return;
+        }
+
+        // profile
+        const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const { username, phoneNumber, profileImage } = profileRes.data || {};
+        setUsername(username || "");
+        setPhoneNumber(phoneNumber ?? null);
+        setFormData({ username: username || "", phoneNumber: phoneNumber ?? null });
+        setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
+
+        // orders
+        const userId = JSON.parse(atob(token.split(".")[1])).id;
+        const ordersRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const ordersData = ordersRes.data || [];
+        setOrders(ordersData);
+
+        for (const order of ordersData) {
+          const offerRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setOffersDetails((prev) => ({ ...prev, [order.offerId]: offerRes.data }));
+          const firstImage = offerRes.data.images?.[0];
+          const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
+          setImageSrc(image);
+        }
+      } catch (err) {
+        toast.error("Failed to fetch profile or orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    run();
+  }, [router]);
 
   const pendingCount = orders.filter((o) => o.status === "pending").length;
   const priority: Record<string, number> = { pending: 0, confirmed: 1, cancelled: 2 };
