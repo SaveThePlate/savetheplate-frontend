@@ -277,9 +277,9 @@ useEffect(() => {
             }}
           />
         </div>
-        <h1 className="text-2xl font-bold text-[#1B4332]">{formData.username}</h1>
+        <h1 className="text-2xl font-bold text-[#1B4332]">{formData.location}</h1>
         <p className="text-gray-600">{formData.phoneNumber}</p>
-        <p className="text-gray-500 mb-4">{formData.location}</p>
+        <p className="text-gray-500 mb-4 italic">"Start posting and make an impact"</p>
 
         <div className="flex justify-around w-full bg-[#F3F7F0] rounded-2xl py-3 mb-6">
           <div>
@@ -416,19 +416,12 @@ useEffect(() => {
               <input
                 type="text"
                 name="username"
-                value={formData.username}
+                value={formData.location}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
                 placeholder="Username"
               />
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none text-gray-800"
-                placeholder="Location"
-              />
+      
               <input
                 type="text"
                 name="phoneNumber"
