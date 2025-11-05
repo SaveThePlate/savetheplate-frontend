@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import { UserProvider } from "@/context/UserContext"; 
@@ -17,6 +18,19 @@ export default function RootLayout({
     <UserProvider>
     <html lang="en">
       <body className="flex flex-col min-h-screen bg-white">
+        {/* Google Analytics - gtag.js */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);} 
+          gtag('js', new Date());
+
+          gtag('config', 'G-CVCP72DH21');`}
+        </Script>
+
         <main className=""> 
           {children}
         </main>
