@@ -14,8 +14,14 @@ interface Offer {
   id: number;
   ownerId: number;
   // backend may return images as array of objects (with filename or path), or attach imageFileName directly
-  // images?: any;
-  images?: { filename: string; alt?: string; url?: string }[];
+  images?: {
+    filename?: string;
+    alt?: string;
+    url?: string;
+    path?: string;
+    absoluteUrl?: string;
+    original?: { url?: string };
+  }[];
   imageFileName?: string;
   title: string;
   description: string;
@@ -154,30 +160,31 @@ const ProviderHome = () => {
   if (offer.imageFileName) filename = offer.imageFileName;
   else if (Array.isArray(offer.images) && offer.images.length > 0) {
     const first = offer.images[0] as any;
-    filename = first?.url ?? first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
+    // Prefer original.url when present (frontend public asset), then fall back to url/filename/path
+    filename = first?.original?.url ?? first?.url ?? first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
   }
 
   const imageSrc = getImage(filename) || DEFAULT_PROFILE_IMAGE;
 
   return (
-    <CustomCard
-      key={offer.id}
-      offerId={offer.id}
-      imageSrc={imageSrc}
-      ownerId={offer.ownerId}
-      imageAlt={offer.title}
-      title={offer.title}
-      price={offer.price}
-      quantity={offer.quantity}
-      description={offer.description}
-      expirationDate={offer.expirationDate}
-      pickupLocation={offer.pickupLocation}
-      mapsLink={offer.mapsLink}
-      reserveLink={`/reserve/${offer.id}`}
-      onDelete={handleDeleteOffer}
-    />
-  );
-})}
+      <CustomCard
+        key={offer.id}
+        offerId={offer.id}
+        imageSrc={imageSrc}
+        ownerId={offer.ownerId}
+        imageAlt={offer.title}
+        title={offer.title}
+        price={offer.price}
+        quantity={offer.quantity}
+        description={offer.description}
+        expirationDate={offer.expirationDate}
+        pickupLocation={offer.pickupLocation}
+        mapsLink={offer.mapsLink}
+        reserveLink={`/reserve/${offer.id}`}
+        onDelete={handleDeleteOffer}
+      />
+    );
+  })}
 
           </div>
         )}
