@@ -1,15 +1,46 @@
 {
-  "name": "Save the plate app",
+  "name": "Save The Plate",
   "short_name": "SavePlate",
-  "description": "Discover the best foods at the most affordable prices!",
+  "description": "Connect restaurants with consumers to reduce food waste",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0070f3",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/logoOnly.png",
+      "src": "/logo.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "384x384",
       "type": "image/png"
     },
     {
@@ -17,5 +48,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }
