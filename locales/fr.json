@@ -1,0 +1,11 @@
+{
+  "title": "Save The Plate",
+  "description": "Découvrez les meilleurs plats aux prix les plus abordables !",
+  "pickup": "Ramassage",
+  "expires": "Expire",
+  "show_map": "Afficher la carte",
+  "confirm_pickup": "Confirmer la collecte",
+  "cancel": "Annuler",
+  "order_confirmed": "Commande confirmée !",
+  "order_cancelled": "Commande annulée"
+}

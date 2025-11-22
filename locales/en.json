@@ -1,0 +1,11 @@
+{
+  "title": "Save the plate app",
+  "description": "Discover the best foods at the most affordable prices!",
+  "pickup": "Pickup",
+  "expires": "Expires",
+  "show_map": "Show Map",
+  "confirm_pickup": "Confirm pickup",
+  "cancel": "Cancel",
+  "order_confirmed": "Order confirmed!",
+  "order_cancelled": "Order cancelled"
+}
