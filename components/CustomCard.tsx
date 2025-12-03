@@ -532,7 +532,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                 </button>
               </CredenzaTrigger>
 
-              <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-full sm:max-w-md mx-auto border border-gray-100 overflow-y-auto">
+              <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-6 max-w-full sm:max-w-md mx-auto border border-gray-100">
                 <CredenzaHeader>
                   <CredenzaTitle className="text-lg font-semibold text-gray-900">
                     Edit Offer
