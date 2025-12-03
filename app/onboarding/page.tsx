@@ -34,49 +34,82 @@ const OnboardingPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4">
-      <div className="bg-white rounded-3xl shadow-md max-w-md w-full p-8 flex flex-col items-center text-center space-y-6">
-        <h1 className="text-3xl font-extrabold text-gray-800">
-          Perfect! Now, tell us
-        </h1>
-        <p className="text-gray-600 text-lg">Are you a:</p>
+      <div className="relative w-full max-w-2xl">
+        {/* Decorative shapes */}
+        <div className="pointer-events-none absolute -top-10 -left-10 w-32 h-32 rounded-full bg-[#FFD6C9] blur-3xl opacity-60" />
+        <div className="pointer-events-none absolute -bottom-16 -right-6 w-40 h-40 rounded-full bg-[#C8E3F8] blur-3xl opacity-60" />
 
-        {/* Role Selection */}
-        <div className="flex gap-6 w-full justify-center">
-          <div
-            onClick={() => handleRoleSelect("PROVIDER")}
-            className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl cursor-pointer border-2 transition-all duration-200 ${
-              role === "PROVIDER"
-                ? "border-emerald-400 bg-emerald-50 shadow-md"
-                : "border-gray-200 hover:border-emerald-200 hover:bg-emerald-50"
-            }`}
-          >
-            <span className="text-4xl">🍔</span>
-            <p className="text-gray-800 font-semibold">Restaurant</p>
+        <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-[#f5eae0] px-6 py-8 sm:px-10 sm:py-10">
+          {/* Header */}
+          <div className="text-center mb-8 space-y-2">
+            <p className="text-xs font-semibold tracking-[0.25em] uppercase text-emerald-600">
+              Step 1 of 2
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#344E41]">
+              Tell us who you are
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base max-w-md mx-auto">
+              Choose how you want to use Save The Plate.
+            </p>
           </div>
 
-          <div
-            onClick={() => handleRoleSelect("CLIENT")}
-            className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl cursor-pointer border-2 transition-all duration-200 ${
-              role === "CLIENT"
-                ? "border-yellow-400 bg-yellow-50 shadow-md"
-                : "border-gray-200 hover:border-yellow-300 hover:bg-yellow-50"
-            }`}
-          >
-            <span className="text-4xl">😁</span>
-            <p className="text-gray-800 font-semibold">Client</p>
-          </div>
-        </div>
+          {/* Role Selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+            <button
+              type="button"
+              onClick={() => handleRoleSelect("PROVIDER")}
+              className={`flex flex-col items-start justify-between gap-3 p-5 rounded-2xl border-2 text-left transition-all ${
+                role === "PROVIDER"
+                  ? "border-emerald-500 bg-emerald-50 shadow-md"
+                  : "border-gray-200 bg-gray-50 hover:border-emerald-200 hover:bg-emerald-50"
+              }`}
+            >
+              <span className="text-3xl" aria-hidden="true">
+                🍽️
+              </span>
+              <div className="space-y-1">
+                <p className="font-semibold text-gray-900">Food provider</p>
+                <p className="text-xs text-gray-600">
+                  List surprise bags and reduce food waste while earning extra revenue.
+                </p>
+              </div>
+            </button>
 
-        {/* Submit Button */}
-        {role && (
+            <button
+              type="button"
+              onClick={() => handleRoleSelect("CLIENT")}
+              className={`flex flex-col items-start justify-between gap-3 p-5 rounded-2xl border-2 text-left transition-all ${
+                role === "CLIENT"
+                  ? "border-yellow-400 bg-yellow-50 shadow-md"
+                  : "border-gray-200 bg-gray-50 hover:border-yellow-300 hover:bg-yellow-50"
+              }`}
+            >
+              <span className="text-3xl" aria-hidden="true">
+                😋
+              </span>
+              <div className="space-y-1">
+                <p className="font-semibold text-gray-900">Client</p>
+                <p className="text-xs text-gray-600">
+                  Discover delicious surprise bags around you at friendly prices.
+                </p>
+              </div>
+            </button>
+          </div>
+
+          {/* Helper text */}
+          <p className="text-xs text-gray-500 mb-4">
+            You&apos;ll be redirected to complete your information based on your choice.
+          </p>
+
+          {/* Submit Button */}
           <button
             onClick={handleSubmitRole}
-            disabled={isSubmitting}
-            className="mt-4 w-full py-3 rounded-full bg-emerald-400 text-white font-semibold text-lg transition-all hover:bg-emerald-500 disabled:bg-gray-200 disabled:text-gray-500"
+            disabled={!role || isSubmitting}
+            className="w-full py-3 rounded-full bg-emerald-500 text-white font-semibold text-base sm:text-lg transition-colors disabled:bg-gray-200 disabled:text-gray-500"
           >
-            {isSubmitting ? "Submitting..." : "Next step >"}
+            {isSubmitting ? "Saving your choice..." : role === "PROVIDER" ? "Continue as provider" : "Continue as client"}
           </button>
-        )}
+        </div>
       </div>
     </div>
   );
