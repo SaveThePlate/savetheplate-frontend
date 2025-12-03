@@ -157,7 +157,9 @@ const CreateMagicBoxPage = () => {
                 <Image
                   src={images || DEFAULT_IMAGE}
                   alt={`${size} magic box`}
-                  className="w-20 h-20 object-contain mx-auto"
+                  width={80}
+                  height={80}
+                  className="object-contain mx-auto"
                 />
               </div>
               <h2 className="text-lg font-semibold text-green-900 capitalize">

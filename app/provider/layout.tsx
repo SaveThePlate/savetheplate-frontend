@@ -1,7 +1,8 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { X, Menu, LogOut } from "lucide-react";
+import { X, Menu, LogOut, Home, ShoppingBag, User, Plus } from "lucide-react";
 import { useState } from "react";
 import React from "react";
 
@@ -22,7 +23,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               height={80}
               priority
               className="object-contain hidden md:block h-full"
-              style={{ width: 'auto' }}
+              style={{ width: "auto" }}
             />
             <Image
               src="/fullname1.png"
@@ -31,7 +32,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               height={120}
               priority
               className="object-contain block md:hidden h-full"
-              style={{ width: 'auto' }}
+              style={{ width: "auto" }}
             />
           </Link>
 
@@ -136,6 +137,38 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
       <main className="w-full mx-auto">
         {React.cloneElement(children as React.ReactElement)}
       </main>
+
+      {/* 📱 Bottom Navigation (mobile) */}
+      <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 z-40 lg:hidden">
+        <Link
+          href="/provider/home"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
+        >
+          <Home size={22} />
+          <span className="text-xs mt-1">Home</span>
+        </Link>
+        <Link
+          href="/provider/publish"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
+        >
+          <Plus size={22} />
+          <span className="text-xs mt-1">Publish</span>
+        </Link>
+        <Link
+          href="/provider/orders"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
+        >
+          <ShoppingBag size={22} />
+          <span className="text-xs mt-1">Orders</span>
+        </Link>
+        <Link
+          href="/provider/profile"
+          className="flex flex-col items-center text-gray-700 hover:text-green-600"
+        >
+          <User size={22} />
+          <span className="text-xs mt-1">Profile</span>
+        </Link>
+      </nav>
     </section>
   );
 }
