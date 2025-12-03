@@ -34,9 +34,10 @@ export default function RootLayout({
 
           <main className="flex-1">
             {children}
+           
           </main>
-
-          <Footer />
+              <Footer />
+          
 
           <Toaster position="top-right" reverseOrder={false} />
         </body>

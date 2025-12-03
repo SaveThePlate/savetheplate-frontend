@@ -44,32 +44,9 @@ const WelcomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 py-6 sm:py-10 flex flex-col">
-      {/* Top bar */}
-      <header className="w-full max-w-6xl mx-auto flex items-center justify-between mb-6 sm:mb-10">
-        <div className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="Save The Plate"
-            width={36}
-            height={36}
-            className="object-contain"
-            priority
-          />
-          <span className="text-sm sm:text-base font-semibold text-[#344e41]">
-            Save The Plate
-          </span>
-        </div>
-        <button
-          onClick={() => router.push("/signIn")}
-          className="text-xs sm:text-sm font-medium text-[#344e41] bg-white/70 border border-[#e2ddd5] rounded-full px-3 py-1.5 shadow-sm hover:bg-white"
-        >
-          Sign in
-        </button>
-      </header>
-
+    <div className="h-screen bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 py-6 sm:py-10 flex flex-col">
       {/* Main content */}
-      <main className="w-full max-w-6xl mx-auto flex-1 flex flex-col gap-10">
+      <main className="w-full max-w-6xl mx-auto flex-1 flex flex-col gap-10 justify-center items-center">
         {/* Hero */}
         <section className="flex flex-col-reverse lg:flex-row items-center gap-10">
           {/* Left: text + actions */}
@@ -96,30 +73,7 @@ const WelcomePage = () => {
               >
                 Get started in seconds
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  document
-                    .getElementById("how-it-works")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-                className="w-full sm:w-auto px-6 py-3 rounded-full bg-white/80 border border-[#e2ddd5] text-[#344e41] text-sm font-medium shadow-sm"
-              >
-                How it works
-              </button>
             </div>
-
-            <p className="text-xs text-gray-500">
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => router.push("/signIn")}
-                className="underline underline-offset-2"
-              >
-                Sign in here
-              </button>
-              .
-            </p>
           </div>
 
           {/* Right: illustration card */}
@@ -147,105 +101,6 @@ const WelcomePage = () => {
           </div>
         </section>
 
-        {/* How it works */}
-        <section id="how-it-works" className="w-full">
-        <div className="bg-white/80 backdrop-blur-sm border border-[#f5eae0] rounded-3xl shadow-sm px-6 py-5 sm:px-8 sm:py-6 max-w-4xl mx-auto">
-          <h2 className="text-center text-sm font-semibold text-[#344e41] tracking-[0.25em] uppercase mb-4">
-            How it works
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFE2D5] text-lg">
-                1
-              </div>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Discover surprise bags</p>
-                <p className="text-xs text-gray-600">
-                  Browse nearby offers from local food providers at the end of the day.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D9F3E5] text-lg">
-                2
-              </div>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Reserve your bag</p>
-                <p className="text-xs text-gray-600">
-                  Secure a surprise bag in a few taps and receive your confirmation.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E4ECFF] text-lg">
-                3
-              </div>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Pick up & save food</p>
-                <p className="text-xs text-gray-600">
-                  Collect your bag at the pickup time and help reduce food waste.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        </section>
-
-        {/* Benefits */}
-        <section className="w-full max-w-4xl mx-auto mt-4 mb-4">
-          <h2 className="text-center text-base sm:text-lg font-extrabold text-[#344e41] mb-4">
-            Why use Save The Plate?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-[#f5eae0] px-4 py-4 flex gap-3">
-              <span className="text-xl" aria-hidden="true">
-                💸
-              </span>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Save money</p>
-                <p className="text-xs text-gray-600">
-                  Enjoy quality food at reduced prices thanks to last-minute surprise bags.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-[#f5eae0] px-4 py-4 flex gap-3">
-              <span className="text-xl" aria-hidden="true">
-                🌍
-              </span>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Reduce waste</p>
-                <p className="text-xs text-gray-600">
-                  Help prevent perfectly good food from being thrown away.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-[#f5eae0] px-4 py-4 flex gap-3">
-              <span className="text-xl" aria-hidden="true">
-                🏪
-              </span>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Support local spots</p>
-                <p className="text-xs text-gray-600">
-                  Discover and support bakeries, restaurants, and shops in your area.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-[#f5eae0] px-4 py-4 flex gap-3">
-              <span className="text-xl" aria-hidden="true">
-                ⏱️
-              </span>
-              <div>
-                <p className="font-semibold text-[#344e41] text-sm">Simple pickup</p>
-                <p className="text-xs text-gray-600">
-                  Clear pickup windows and locations make the experience smooth and quick.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <style jsx>{`
