@@ -520,146 +520,150 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
         {/* 🧭 Provider Footer */}
         {role === "PROVIDER" && (
-          <CardFooter className="mt-4 flex flex-row gap-3 w-full items-center justify-between">
+          <CardFooter className="mt-4 flex w-full gap-3">
             {/* ✏️ Edit Modal */}
-            <Credenza open={isEditing} onOpenChange={setIsEditing}>
-              <CredenzaTrigger asChild>
-                <button
-                  disabled={loading}
-                  className="bg-white border border-gray-300 text-gray-800 px-3 py-1 rounded-lg font-medium"
-                >
-                  Edit
-                </button>
-              </CredenzaTrigger>
-
-              <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-6 max-w-full sm:max-w-md mx-auto border border-gray-100">
-                <CredenzaHeader>
-                  <CredenzaTitle className="text-lg font-semibold text-gray-900">
-                    Edit Offer
-                  </CredenzaTitle>
-                </CredenzaHeader>
-
-                <CredenzaDescription className="text-sm text-gray-600">
-                  Edit the fields below to update this offer. Changes will be saved when you click Save.
-                </CredenzaDescription>
-
-                <CredenzaBody className="flex flex-col gap-4 mt-3">
-                  <div className="flex flex-col w-full">
-                    <label htmlFor="title" className="text-sm font-medium text-gray-700">
-                      Title
-                    </label>
-                    <input
-                      id="title"
-                      name="title"
-                      value={localData.title}
-                      onChange={handleInputChange}
-                      className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="flex flex-col w-full">
-                    <label htmlFor="description" className="text-sm font-medium text-gray-700">
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={localData.description}
-                      onChange={handleInputChange}
-                      className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none resize-none"
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="flex gap-3 flex-wrap w-full">
-                    <div className="flex flex-col flex-1 min-w-[120px]">
-                      <label htmlFor="price" className="text-sm font-medium text-gray-700">
-                        Price
-                      </label>
-                      <input
-                        id="price"
-                        type="number"
-                        name="price"
-                        value={localData.price}
-                        onChange={handleInputChange}
-                        className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div className="flex flex-col flex-1 min-w-[120px]">
-                      <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
-                        Quantity
-                      </label>
-                      <input
-                        id="quantity"
-                        type="number"
-                        name="quantity"
-                        value={localData.quantity}
-                        onChange={handleInputChange}
-                        className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-                </CredenzaBody>
-
-                <CredenzaFooter className="flex flex-wrap justify-end gap-3 mt-4">
-                  <CredenzaClose asChild>
-                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition">
-                      Cancel
-                    </button>
-                  </CredenzaClose>
+            <div className="flex-1">
+              <Credenza open={isEditing} onOpenChange={setIsEditing}>
+                <CredenzaTrigger asChild>
                   <button
-                    onClick={handleEdit}
                     disabled={loading}
-                    className="px-4 py-2 bg-teal-500 text-white rounded-xl hover:opacity-90 transition"
+                    className="w-full bg-white border border-gray-300 text-gray-800 px-3 py-2 rounded-lg font-medium"
                   >
-                    {loading ? "Saving..." : "Save"}
+                    Edit
                   </button>
-                </CredenzaFooter>
-              </CredenzaContent>
-            </Credenza>
+                </CredenzaTrigger>
+
+                <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-6 max-w-full sm:max-w-md mx-auto border border-gray-100">
+                  <CredenzaHeader>
+                    <CredenzaTitle className="text-lg font-semibold text-gray-900">
+                      Edit Offer
+                    </CredenzaTitle>
+                  </CredenzaHeader>
+
+                  <CredenzaDescription className="text-sm text-gray-600">
+                    Edit the fields below to update this offer. Changes will be saved when you click Save.
+                  </CredenzaDescription>
+
+                  <CredenzaBody className="flex flex-col gap-4 mt-3">
+                    <div className="flex flex-col w-full">
+                      <label htmlFor="title" className="text-sm font-medium text-gray-700">
+                        Title
+                      </label>
+                      <input
+                        id="title"
+                        name="title"
+                        value={localData.title}
+                        onChange={handleInputChange}
+                        className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex flex-col w-full">
+                      <label htmlFor="description" className="text-sm font-medium text-gray-700">
+                        Description
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={localData.description}
+                        onChange={handleInputChange}
+                        className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none resize-none"
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex gap-3 flex-wrap w-full">
+                      <div className="flex flex-col flex-1 min-w-[120px]">
+                        <label htmlFor="price" className="text-sm font-medium text-gray-700">
+                          Price
+                        </label>
+                        <input
+                          id="price"
+                          type="number"
+                          name="price"
+                          value={localData.price}
+                          onChange={handleInputChange}
+                          className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
+                          disabled={loading}
+                        />
+                      </div>
+
+                      <div className="flex flex-col flex-1 min-w-[120px]">
+                        <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+                          Quantity
+                        </label>
+                        <input
+                          id="quantity"
+                          type="number"
+                          name="quantity"
+                          value={localData.quantity}
+                          onChange={handleInputChange}
+                          className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
+                          disabled={loading}
+                        />
+                      </div>
+                    </div>
+                  </CredenzaBody>
+
+                  <CredenzaFooter className="flex flex-wrap justify-end gap-3 mt-4">
+                    <CredenzaClose asChild>
+                      <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
+                        Cancel
+                      </button>
+                    </CredenzaClose>
+                    <button
+                      onClick={handleEdit}
+                      disabled={loading}
+                      className="px-4 py-2 bg-teal-500 text-white rounded-xl"
+                    >
+                      {loading ? "Saving..." : "Save"}
+                    </button>
+                  </CredenzaFooter>
+                </CredenzaContent>
+              </Credenza>
+            </div>
 
             {/* Delete Modal */}
-            <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-              <CredenzaTrigger asChild>
-                <button className="bg-red-500 text-white px-3 py-1 rounded-lg font-medium">
-                  Delete
-                </button>
-              </CredenzaTrigger>
-
-              <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-sm mx-auto border border-gray-100">
-                <CredenzaHeader>
-                  <CredenzaTitle className="text-lg font-semibold text-gray-900">
-                    Confirm Deletion
-                  </CredenzaTitle>
-                </CredenzaHeader>
-
-                <CredenzaDescription className="text-sm text-gray-600 mt-2">
-                  Are you sure you want to delete this offer? This action cannot be undone.
-                </CredenzaDescription>
-
-                <CredenzaBody className="text-gray-700 text-sm mt-2">
-                  This action cannot be undone.
-                </CredenzaBody>
-
-                <CredenzaFooter className="flex justify-end gap-3 mt-4">
-                  <CredenzaClose asChild>
-                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
-                      Cancel
-                    </button>
-                  </CredenzaClose>
-                  <button
-                    onClick={handleDelete}
-                    className="px-4 py-2 bg-rose-500 text-white rounded-xl"
-                  >
+            <div className="flex-1">
+              <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                <CredenzaTrigger asChild>
+                  <button className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium">
                     Delete
                   </button>
-                </CredenzaFooter>
-              </CredenzaContent>
-            </Credenza>
+                </CredenzaTrigger>
+
+                <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-sm mx-auto border border-gray-100">
+                  <CredenzaHeader>
+                    <CredenzaTitle className="text-lg font-semibold text-gray-900">
+                      Confirm Deletion
+                    </CredenzaTitle>
+                  </CredenzaHeader>
+
+                  <CredenzaDescription className="text-sm text-gray-600 mt-2">
+                    Are you sure you want to delete this offer? This action cannot be undone.
+                  </CredenzaDescription>
+
+                  <CredenzaBody className="text-gray-700 text-sm mt-2">
+                    This action cannot be undone.
+                  </CredenzaBody>
+
+                  <CredenzaFooter className="flex justify-end gap-3 mt-4">
+                    <CredenzaClose asChild>
+                      <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
+                        Cancel
+                      </button>
+                    </CredenzaClose>
+                    <button
+                      onClick={handleDelete}
+                      className="px-4 py-2 bg-rose-500 text-white rounded-xl"
+                    >
+                      Delete
+                    </button>
+                  </CredenzaFooter>
+                </CredenzaContent>
+              </Credenza>
+            </div>
           </CardFooter>
         )}
       </div>
