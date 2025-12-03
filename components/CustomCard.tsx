@@ -230,7 +230,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
   if (isClient) {
     // Client card: show image, title, pickup location, expiration date and action buttons (Order + Details).
     return (
-      <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
+      <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
         {/* Image (same as provider) */}
         <div className="relative w-full h-56 sm:h-64">
           {currentImage ? (
@@ -243,7 +243,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               priority
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
-              className="object-cover transition-transform duration-300 hover:scale-[1.02]"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -284,7 +284,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                   href={mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl hover:bg-teal-100 transition text-left"
+                  className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl text-left"
                 >
                   <span className="text-lg">📍</span>
                   <span className="truncate">{pickupLocation || "View on Map"}</span>
@@ -306,7 +306,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             ) : localData.quantity > 0 ? (
               <Link
                 href={reserveLink}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm hover:bg-teal-700 transition"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm"
               >
                 Order
               </Link>
@@ -316,7 +316,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
             <Credenza>
               <CredenzaTrigger asChild>
-                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 hover:shadow transition-all duration-150">
+                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm">
                   Details
                 </button>
               </CredenzaTrigger>
@@ -353,7 +353,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                       href={mapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 font-medium rounded-xl hover:bg-teal-100 transition"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 font-medium rounded-xl"
                     >
                       📍 Open in Maps
                     </a>
@@ -378,7 +378,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
   }
 
   return (
-    <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
+    <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
       {/* 🖼️ Image */}
       <div className="relative w-full h-56 sm:h-64">
         {currentImage ? (
@@ -391,7 +391,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             priority
             placeholder="blur"
             blurDataURL={getBlurDataURL()}
-            className="object-cover transition-transform duration-300 hover:scale-[1.02]"
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -440,7 +440,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                 href={mapsLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl hover:bg-teal-100 transition text-left"
+                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl text-left"
               >
                 <span className="text-lg">📍</span>
                 <span className="truncate">{pickupLocation || "View on Map"}</span>
@@ -463,7 +463,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             ) : localData.quantity > 0 ? (
               <Link
                 href={reserveLink}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm hover:bg-teal-700 transition"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm"
               >
                 Order
               </Link>
@@ -474,7 +474,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             {/* Details Modal */}
             <Credenza>
               <CredenzaTrigger asChild>
-                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 hover:shadow transition-all duration-150">
+                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm">
                   Details
                 </button>
               </CredenzaTrigger>
@@ -508,7 +508,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
                 <CredenzaFooter className="flex justify-end gap-3 mt-5">
                   <CredenzaClose asChild>
-                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition">
+                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
                       Close
                     </button>
                   </CredenzaClose>
@@ -526,7 +526,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               <CredenzaTrigger asChild>
                 <button
                   disabled={loading}
-                  className="bg-white border border-gray-300 text-gray-800 px-3 py-1 rounded-lg font-medium hover:bg-gray-50"
+                  className="bg-white border border-gray-300 text-gray-800 px-3 py-1 rounded-lg font-medium"
                 >
                   Edit
                 </button>
@@ -625,7 +625,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             {/* Delete Modal */}
             <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
               <CredenzaTrigger asChild>
-                <button className="bg-red-500 text-white px-3 py-1 rounded-lg font-medium hover:bg-red-600">
+                <button className="bg-red-500 text-white px-3 py-1 rounded-lg font-medium">
                   Delete
                 </button>
               </CredenzaTrigger>
@@ -647,13 +647,13 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
                 <CredenzaFooter className="flex justify-end gap-3 mt-4">
                   <CredenzaClose asChild>
-                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200">
+                    <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
                       Cancel
                     </button>
                   </CredenzaClose>
                   <button
                     onClick={handleDelete}
-                    className="px-4 py-2 bg-rose-500 text-white rounded-xl hover:opacity-90 transition"
+                    className="px-4 py-2 bg-rose-500 text-white rounded-xl"
                   >
                     Delete
                   </button>
