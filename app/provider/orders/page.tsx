@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/components/QRScanner";
 import { QrCode } from "lucide-react";
+import { resolveImageSource } from "@/utils/imageUtils";
 
 interface User {
   id: number;
@@ -17,7 +18,13 @@ interface User {
 interface Offer {
   id: number;
   title?: string;
-  images?: { filename: string; alt?: string; url?: string }[];
+  images?: {
+    filename?: string;
+    alt?: string;
+    url?: string;
+    absoluteUrl?: string;
+    original?: { url?: string };
+  }[];
   pickupLocation?: string;
 }
 
@@ -33,24 +40,6 @@ interface Order {
 }
 
 const DEFAULT_IMAGE = "/defaultBag.png";
-const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_IMAGE;
-
-  // full URL from API
-  if (/^https?:\/\//i.test(filename)) return filename;
-
-  // path starting with /storage/ should be served from backend storage
-  if (filename.startsWith("/storage/")) {
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    return origin + filename;
-  }
-
-  // leading slash -> public asset in frontend's /public
-  if (filename.startsWith("/")) return filename;
-
-  // bare filename, fallback to public folder
-  return `/${filename}`;
-};
 
 const ProviderOrders = () => {
   const router = useRouter();
@@ -232,7 +221,7 @@ const OrderCard: React.FC<{
     <div className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 border border-gray-100 hover:shadow-lg transition">
       <div className="w-20 h-20 rounded-lg overflow-hidden relative flex-shrink-0">
         <Image
-          src={getImage(offer?.images?.[0]?.filename)}
+          src={resolveImageSource(offer?.images?.[0])}
           alt={offer?.title || "Offer image"}
           fill
           sizes="80px"

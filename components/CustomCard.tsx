@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getImageFallbacks } from "@/utils/imageUtils";
 import {
   Credenza,
   CredenzaTrigger,
@@ -170,75 +171,34 @@ const CustomCard: FC<CustomCardProps> = ({
 
   const DEFAULT_LOGO = "/defaultBag.png";
   const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
-  const [triedBackend, setTriedBackend] = useState(false);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
+  const [fallbacks, setFallbacks] = useState<string[]>([]);
 
   useEffect(() => {
-    setCurrentImage(imageSrc);
-    setTriedBackend(false);
+    if (imageSrc) {
+      // Generate all possible fallback URLs
+      const imageFallbacks = getImageFallbacks(imageSrc);
+      setFallbacks(imageFallbacks);
+      setCurrentImage(imageFallbacks[0] || DEFAULT_LOGO);
+      setFallbackIndex(0);
+    } else {
+      setCurrentImage(DEFAULT_LOGO);
+      setFallbacks([DEFAULT_LOGO]);
+      setFallbackIndex(0);
+    }
   }, [imageSrc]);
 
-const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-  const img = e.currentTarget;
-  const failedSrc = img?.src || currentImage || "";
-  console.debug("Image failed to load:", failedSrc);
-
-  // Backend origin (prefer env var)
-  const backendOriginRaw = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-  const backendOrigin = backendOriginRaw.replace(/\/$/, "");
-
-  // If we've already tried backend once, give up and show default
-  if (triedBackend) {
-    setCurrentImage(DEFAULT_LOGO);
-    return;
-  }
-
-  // Skip fallback for data URLs, blobs or empty src
-  if (!failedSrc || /^data:|^blob:/i.test(failedSrc)) {
-    setCurrentImage(DEFAULT_LOGO);
-    return;
-  }
-
-  // Try to extract a filename from the failed src.
-  let filename = "";
-  try {
-    // Use window.location.origin as base to handle relative URLs
-    const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_BACKEND_URL;
-    const url = new URL(failedSrc, base); // supports both absolute and relative
-    const parts = url.pathname.split("/").filter(Boolean);
-    filename = parts.length ? parts.pop() || "" : "";
-  } catch (err) {
-    // Fallback: strip query/hash and take last path segment
-    try {
-      const withoutQuery = failedSrc.split(/[?#]/)[0];
-      const parts = withoutQuery.split("/").filter(Boolean);
-      filename = parts.length ? parts.pop() || "" : "";
-    } catch {
-      filename = "";
-    }
-  }
-
-  // sanitize filename (remove any accidental query/hash remnants)
-  filename = filename.split("?")[0].split("#")[0];
-
-  // Only attempt backend fallback if we have a filename and a backend origin
-  if (filename && backendOrigin) {
-    // simple heuristic: require an extension (e.g. '.jpg', '.png')
-    if (!/\.[a-zA-Z0-9]{2,6}$/.test(filename)) {
-      console.debug("Filename looks invalid for storage fallback:", filename);
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // Try next fallback in the list
+    const nextIndex = fallbackIndex + 1;
+    if (nextIndex < fallbacks.length) {
+      setFallbackIndex(nextIndex);
+      setCurrentImage(fallbacks[nextIndex]);
+    } else {
+      // All fallbacks exhausted, use default
       setCurrentImage(DEFAULT_LOGO);
-      return;
     }
-
-    const backendUrl = `${backendOrigin}/storage/${encodeURIComponent(filename)}`;
-    console.debug("Attempting backend fallback to:", backendUrl);
-    setTriedBackend(true);
-    setCurrentImage(backendUrl);
-    return;
-  }
-
-  // Nothing else to try
-  setCurrentImage(DEFAULT_LOGO);
-};
+  };
 
   if (isClient) {
     // Client card: show image, title, pickup location, expiration date and action buttons (Order + Details).

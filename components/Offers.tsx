@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import CustomCard from "./CustomCard";
 import { useRouter } from "next/navigation";
+import { resolveImageSource } from "@/utils/imageUtils";
 
 interface Offer {
   id: number;
@@ -26,24 +27,6 @@ interface Offer {
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
-
-const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_BAG_IMAGE;
-  // full URL from API
-  if (/^https?:\/\//i.test(filename)) return filename;
-
-  // path starting with /storage/ should be served from backend storage
-  if (filename.startsWith("/storage/")) {
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    return origin + filename;
-  }
-
-  // leading slash -> public asset in frontend's /public
-  if (filename.startsWith("/")) return filename;
-
-  // bare filename, return public asset path
-  return `/${filename}`;
-};
 
 const OffersPage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -146,11 +129,8 @@ const OffersPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-stretch">
         {sorted.map((offer) => {
           const firstImage = offer.images?.[0];
-          // Prefer the original url metadata when present (frontend public asset),
-          // then fall back to url/absoluteUrl/filename.
-          const candidate =
-            firstImage?.original?.url || firstImage?.url || firstImage?.absoluteUrl || firstImage?.filename;
-          const imageSrc = getImage(candidate);
+          // Use the unified image resolution utility
+          const imageSrc = resolveImageSource(firstImage);
           const imageAlt = firstImage?.alt ?? offer.title;
 
           return (

@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import CustomCard from "@/components/CustomCard";
 import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
+import { resolveImageSource } from "@/utils/imageUtils";
 
 interface Offer {
   price: number;
@@ -39,26 +40,6 @@ const ProviderHome = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getImage = (filename: string | null | undefined): string | undefined => {
-    if (!filename) return undefined;
-
-    // full URL from API
-    if (/^https?:\/\//i.test(filename)) return filename;
-
-    // path starting with /storage/ should be served from backend storage
-    if (filename.startsWith("/storage/")) {
-      const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-      return origin + filename;
-    }
-
-    // leading slash -> public asset in the frontend's /public
-    if (filename.startsWith("/")) return filename;
-
-    // Bare filename (e.g. "smallsurprisebag.png") — prefer using the public asset
-    // located in the frontend `public/` folder: "/smallsurprisebag.png".
-    // If that fails to load, CustomCard will try a backend /storage/ variant once.
-    return `/${filename}`;
-  };
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -74,7 +55,23 @@ const ProviderHome = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        setOffers(response.data);
+        // normalize images array and normalize absoluteUrl if backend storage path is provided
+        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        const mappedOffers: Offer[] = response.data.map((o: any) => {
+          const images = Array.isArray(o.images) ? o.images.map((img: any) => {
+            if (!img) return img;
+            // If backend stored the image under /storage/... make it absolute using the configured backend origin
+            if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+              return { ...img, absoluteUrl: backendOrigin + img.absoluteUrl };
+            }
+            // leave as-is otherwise
+            return img;
+          }) : [];
+
+          return { ...o, images };
+        });
+
+        setOffers(mappedOffers);
       } catch (err) {
         setError("Failed to fetch offers: " + (err as Error).message);
       } finally {
@@ -157,15 +154,9 @@ const ProviderHome = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {offers.map((offer) => {
-  let filename: string | undefined;
-  if (offer.imageFileName) filename = offer.imageFileName;
-  else if (Array.isArray(offer.images) && offer.images.length > 0) {
-    const first = offer.images[0] as any;
-    // Prefer original.url when present (frontend public asset), then fall back to url/filename/path
-    filename = first?.original?.url ?? first?.url ?? first?.filename ?? first?.path ?? (typeof first === "string" ? first : undefined);
-  }
-
-  const imageSrc = getImage(filename) || DEFAULT_PROFILE_IMAGE;
+  const firstImage = offer.images?.[0] || (offer.imageFileName ? { filename: offer.imageFileName } : null);
+  // Use unified image resolution
+  const imageSrc = resolveImageSource(firstImage);
 
   return (
       <CustomCard

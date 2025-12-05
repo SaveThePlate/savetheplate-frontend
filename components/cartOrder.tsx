@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OrderQRCode from "./OrderQRCode";
+import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
 
 interface CartOrderProps {
   order: {
@@ -34,24 +35,6 @@ type Offer = {
 };
 
 const DEFAULT_IMAGE = "/defaultBag.png";
-const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_IMAGE;
-
-  // full URL from API
-  if (/^https?:\/\//i.test(filename)) return filename;
-
-  // path starting with /storage/ should be served from backend storage
-  if (filename.startsWith("/storage/")) {
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    return origin + filename;
-  }
-
-  // leading slash -> public asset in frontend's /public
-  if (filename.startsWith("/")) return filename;
-
-  // bare filename, fallback to public folder
-  return `/${filename}`;
-};
 
 const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const router = useRouter();
@@ -60,6 +43,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [error, setError] = useState<string | null>(null);
   const [canceling, setCanceling] = useState(false);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
+  const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_IMAGE]);
 
   useEffect(() => {
     const run = async () => {
@@ -73,8 +58,12 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         setOffer(res.data);
 
         const firstImage = res.data.images?.[0];
-        const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
-        setImageSrc(image);
+        // Use unified image resolution
+        const resolved = resolveImageSource(firstImage);
+        const imageFallbacks = getImageFallbacks(firstImage);
+        setFallbacks(imageFallbacks);
+        setImageSrc(resolved);
+        setFallbackIndex(0);
       } catch (err) {
         console.error("Failed to fetch offer:", err);
         setError("Failed to load offer data");
@@ -153,6 +142,15 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           sizes="(max-width: 640px) 96px, 128px"
           className="object-cover"
           priority
+          onError={() => {
+            const nextIndex = fallbackIndex + 1;
+            if (nextIndex < fallbacks.length) {
+              setFallbackIndex(nextIndex);
+              setImageSrc(fallbacks[nextIndex]);
+            } else {
+              setImageSrc(DEFAULT_IMAGE);
+            }
+          }}
         />
       </div>
 

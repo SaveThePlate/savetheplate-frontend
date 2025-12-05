@@ -6,6 +6,7 @@ import Image from "next/image";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
 
 interface Offer {
   id: number;
@@ -19,24 +20,6 @@ interface Offer {
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
-const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_BAG_IMAGE;
-
-  // full URL from API
-  if (/^https?:\/\//i.test(filename)) return filename;
-
-  // path starting with /storage/ should be served from backend storage
-  if (filename.startsWith("/storage/")) {
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    return origin + filename;
-  }
-
-  // leading slash -> public asset in frontend's /public
-  if (filename.startsWith("/")) return filename;
-
-  // bare filename, fallback to public folder
-  return `/${filename}`;
-};
 
 const Offers = () => {
   const router = useRouter();
@@ -46,6 +29,8 @@ const Offers = () => {
   const [inCart, setInCart] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_BAG_IMAGE);
+  const [fallbackIndex, setFallbackIndex] = useState(0);
+  const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_BAG_IMAGE]);
 
   useEffect(() => {
     const fetchOffer = async () => {
@@ -56,8 +41,12 @@ const Offers = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const firstImage = res.data.images?.[0];
-        const imageSrc = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_BAG_IMAGE;
-        setImageSrc(imageSrc);
+        // Use unified image resolution
+        const resolved = resolveImageSource(firstImage);
+        const imageFallbacks = getImageFallbacks(firstImage);
+        setFallbacks(imageFallbacks);
+        setImageSrc(resolved);
+        setFallbackIndex(0);
         setOffer(res.data);
       } catch {
         toast.error("Failed to load offer");
@@ -130,6 +119,15 @@ const Offers = () => {
             // Mark it as priority so Next.js preloads it to improve LCP metrics.
             priority
             className="object-cover"
+            onError={() => {
+              const nextIndex = fallbackIndex + 1;
+              if (nextIndex < fallbacks.length) {
+                setFallbackIndex(nextIndex);
+                setImageSrc(fallbacks[nextIndex]);
+              } else {
+                setImageSrc(DEFAULT_BAG_IMAGE);
+              }
+            }}
           />
           <div className="absolute top-3 right-3 bg-emerald-100 text-emerald-800 text-sm font-semibold px-3 py-1 rounded-full">
             {offer.quantity} left

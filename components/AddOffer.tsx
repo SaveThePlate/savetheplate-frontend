@@ -37,6 +37,7 @@ const AddOffer: React.FC = () => {
   const [pickupLocation, setPickupLocation] = useState("");
   const [localFiles, setLocalFiles] = useState<File[] | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [offers, setOffers] = useState<{ price: number; title: string }[]>([]);
 
   const axiosInstance = axios.create({
@@ -54,7 +55,11 @@ const AddOffer: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!localFiles) setUploadedImages([]);
+    // Keep uploaded images even if localFiles is cleared (they're already uploaded)
+    // Only clear if localFiles is explicitly set to null
+    if (localFiles === null && uploadedImages.length > 0) {
+      setUploadedImages([]);
+    }
   }, [localFiles]);
 
   // ✅ Upload files
@@ -65,26 +70,45 @@ const AddOffer: React.FC = () => {
     files.forEach((f) => fd.append("files", f));
 
     try {
+      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       const res = await axiosInstance.post("/storage/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       const data = res.data as any[];
-      const mapped: UploadedImage[] = data.map((item) => ({
-        filename: item.filename,
-        url: item.url || `/storage/${item.filename}`,
-        absoluteUrl:
-          item.absoluteUrl ||
-          (item.url
-            ? `${axiosInstance.defaults.baseURL}${item.url}`
-            : `/storage/${item.filename}`),
-        blurhash: item.blurhash,
-        width: item.width,
-        height: item.height,
-      }));
+      const mapped: UploadedImage[] = data.map((item) => {
+        // Construct proper URLs
+        const filename = item.filename || item.path || "";
+        const url = item.url || `/storage/${filename}`;
+        
+        // Build absoluteUrl - if backend returns a full URL, use it; otherwise construct it
+        let absoluteUrl = item.absoluteUrl;
+        if (!absoluteUrl) {
+          if (url.startsWith("http://") || url.startsWith("https://")) {
+            absoluteUrl = url;
+          } else if (url.startsWith("/storage/") && backendUrl) {
+            absoluteUrl = `${backendUrl}${url}`;
+          } else if (backendUrl) {
+            absoluteUrl = `${backendUrl}/storage/${filename}`;
+          } else {
+            absoluteUrl = url;
+          }
+        }
+
+        return {
+          filename: filename,
+          url: url,
+          absoluteUrl: absoluteUrl,
+          blurhash: item.blurhash,
+          width: item.width,
+          height: item.height,
+        };
+      });
       return mapped;
     } catch (err: any) {
       console.error("Upload error", err?.response?.data || err.message || err);
+      const errorMessage = err?.response?.data?.message || err?.message || "Failed to upload images";
+      toast.error(errorMessage);
       throw err;
     }
   }
@@ -92,21 +116,30 @@ const AddOffer: React.FC = () => {
   // ✅ Handle image upload
   const handleImage = async (files: File[] | null) => {
     if (!files || files.length === 0) return;
+    setUploading(true);
     try {
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
       setLocalFiles(files);
-      toast.success(`${uploaded.length} image(s) uploaded.`);
-    } catch (error) {
-      toast.error("Error uploading files");
+      toast.success(`${uploaded.length} image(s) uploaded successfully!`);
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || error?.message || "Error uploading files";
+      toast.error(errorMessage);
+      // Clear files on error
+      setLocalFiles(null);
+      setUploadedImages([]);
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleImageUpload = async (newFiles: File[] | null) => {
     if (!newFiles || newFiles.length === 0) {
       setLocalFiles(null);
+      setUploadedImages([]);
       return;
     }
+    // Upload images immediately when selected
     await handleImage(newFiles);
   };
 
@@ -167,17 +200,28 @@ const AddOffer: React.FC = () => {
     }
 
     try {
-      // Upload pending files if needed
+      // Ensure images are uploaded before submitting
       if (localFiles && localFiles.length > 0 && uploadedImages.length === 0) {
+        toast.info("Uploading images before submitting...");
         const uploaded = await uploadFiles(localFiles);
         setUploadedImages(uploaded);
       }
 
-      const imagesPayload = uploadedImages.map((img) => ({
-        filename: img.filename,
-        url: img.url,
-        absoluteUrl: img.absoluteUrl,
-      }));
+      // Format images payload for backend
+      // Include all necessary fields for proper image resolution
+      const imagesPayload = uploadedImages.length > 0 
+        ? uploadedImages.map((img) => ({
+            filename: img.filename,
+            url: img.url,
+            absoluteUrl: img.absoluteUrl,
+            // Store the original URL structure for proper resolution
+            // If url is a backend storage path, we don't need original.url
+            // If url is a local public asset, store it in original.url
+            original: img.url.startsWith("/") && !img.url.startsWith("/storage/") 
+              ? { url: img.url }
+              : undefined,
+          }))
+        : [];
 
       const originalPriceToFloat = originalPrice ? parseFloat(originalPrice) : undefined;
 
@@ -417,33 +461,95 @@ const AddOffer: React.FC = () => {
             dropzoneOptions={dropzone}
           >
             <FileInput>
-              <div className="flex flex-col items-center justify-center h-40 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
-                <div className="text-4xl mb-2">📸</div>
-                <p className="text-gray-600 font-medium">Click or drag to upload photos</p>
-                <p className="text-xs text-gray-400 mt-1">Up to 5 images, max 5MB each</p>
+              <div className={`flex flex-col items-center justify-center h-40 w-full border-2 border-dashed rounded-xl transition-colors ${
+                uploading 
+                  ? "border-yellow-300 bg-yellow-50 cursor-wait" 
+                  : "border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+              }`}>
+                {uploading ? (
+                  <>
+                    <div className="animate-spin text-4xl mb-2">⏳</div>
+                    <p className="text-gray-600 font-medium">Uploading images...</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-4xl mb-2">📸</div>
+                    <p className="text-gray-600 font-medium">Click or drag to upload photos</p>
+                    <p className="text-xs text-gray-400 mt-1">Up to 5 images, max 5MB each</p>
+                  </>
+                )}
               </div>
             </FileInput>
 
             <FileUploaderContent className="flex items-center flex-row gap-3 mt-3 flex-wrap">
-              {localFiles?.map((file, i) => (
-                <FileUploaderItem
-                  key={i}
-                  index={i}
-                  className="size-24 p-0 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm"
-                  aria-roledescription={`File ${i + 1} containing ${file.name}`}
+              {/* Show uploaded images from backend if available */}
+              {uploadedImages.length > 0 && uploadedImages.map((img, i) => (
+                <div
+                  key={`uploaded-${i}`}
+                  className="relative size-24 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
                 >
                   <Image
-                    src={URL.createObjectURL(file) || DEFAULT_BAG_IMAGE}
-                    alt={file.name}
+                    src={img.absoluteUrl || img.url || DEFAULT_BAG_IMAGE}
+                    alt={img.filename}
                     height={96}
                     width={96}
                     className="size-24 object-cover rounded-xl"
+                    unoptimized
                   />
-                </FileUploaderItem>
+                  <div className="absolute top-1 right-1 bg-emerald-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    ✓
+                  </div>
+                </div>
               ))}
+              {/* Show local files that haven't been uploaded yet */}
+              {localFiles?.map((file, i) => {
+                // Check if this file corresponds to an uploaded image
+                const uploadedIndex = uploadedImages.findIndex(img => {
+                  // Try to match by filename or by index
+                  return img.filename === file.name || 
+                         (uploadedImages.length > i && uploadedImages[i]?.filename);
+                });
+                
+                // If uploaded, don't show as pending
+                if (uploadedIndex >= 0) return null;
+                
+                return (
+                  <FileUploaderItem
+                    key={i}
+                    index={i}
+                    className="size-24 p-0 rounded-xl overflow-hidden border-2 border-yellow-200 shadow-sm relative"
+                    aria-roledescription={`File ${i + 1} containing ${file.name}`}
+                  >
+                    <Image
+                      src={URL.createObjectURL(file) || DEFAULT_BAG_IMAGE}
+                      alt={file.name}
+                      height={96}
+                      width={96}
+                      className="size-24 object-cover rounded-xl"
+                    />
+                    <div className="absolute top-1 right-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                      ⏳
+                    </div>
+                  </FileUploaderItem>
+                );
+              })}
             </FileUploaderContent>
           </FileUploader>
-          <p className="text-xs text-gray-500 mt-2">Good photos help attract more customers!</p>
+          <div className="mt-2 flex items-center gap-2 text-xs">
+            {uploadedImages.length > 0 && (
+              <span className="text-emerald-600 font-medium">
+                ✓ {uploadedImages.length} image{uploadedImages.length > 1 ? "s" : ""} uploaded
+              </span>
+            )}
+            {localFiles && localFiles.length > uploadedImages.length && (
+              <span className="text-yellow-600 font-medium">
+                ⏳ {localFiles.length - uploadedImages.length} pending upload
+              </span>
+            )}
+            {uploadedImages.length === 0 && localFiles?.length === 0 && (
+              <span className="text-gray-500">Good photos help attract more customers!</span>
+            )}
+          </div>
         </div>
 
         {/* Submit */}

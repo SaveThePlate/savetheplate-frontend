@@ -17,7 +17,11 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'http', hostname: 'localhost', pathname: '/storage/**' },
       { protocol: 'https', hostname: 'leftover-be.ccdev.space', pathname: '/storage/**' },
+      // Allow images from any domain (for flexibility)
+      { protocol: 'http', hostname: '**', pathname: '/storage/**' },
+      { protocol: 'https', hostname: '**', pathname: '/storage/**' },
     ],
+    unoptimized: false, // Enable optimization for better performance
   },
 
   async headers() {
