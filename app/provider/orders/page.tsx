@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/components/QRScanner";
 import { QrCode } from "lucide-react";
-import { resolveImageSource } from "@/utils/imageUtils";
+import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
 
 interface User {
   id: number;
@@ -18,7 +18,7 @@ interface User {
 interface Offer {
   id: number;
   title?: string;
-  images?: {
+  images?: string | {
     filename?: string;
     alt?: string;
     url?: string;
@@ -45,7 +45,6 @@ const ProviderOrders = () => {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
   const [showScanner, setShowScanner] = useState(false);
   const [providerId, setProviderId] = useState<number | null>(null);
 
@@ -71,9 +70,6 @@ const ProviderOrders = () => {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const firstImage = res.data.images?.[0];
-        const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_IMAGE;
-        setImageSrc(image);
         setOrders(res.data || []);
       } catch (err) {
         console.error(err);
@@ -204,6 +200,52 @@ const OrderCard: React.FC<{
   const offer = order.offer;
   const user = order.user;
 
+  // Parse and get the first image from the offer, handling various formats
+  const getOfferImageSrc = React.useCallback(() => {
+    if (!offer?.images) {
+      return DEFAULT_IMAGE;
+    }
+
+    let imagesArray: any[] = [];
+
+    // Handle images as JSON string (from database)
+    if (typeof offer.images === "string") {
+      try {
+        imagesArray = JSON.parse(offer.images);
+      } catch {
+        // If parsing fails, try as single string
+        return resolveImageSource(offer.images);
+      }
+    } 
+    // Handle images as array
+    else if (Array.isArray(offer.images)) {
+      imagesArray = offer.images;
+    } else {
+      return DEFAULT_IMAGE;
+    }
+
+    if (imagesArray.length === 0) {
+      return DEFAULT_IMAGE;
+    }
+
+    const firstImage = imagesArray[0];
+    
+    // If first image is a string
+    if (typeof firstImage === "string") {
+      return resolveImageSource(firstImage);
+    }
+
+    // If first image is an object with image data
+    return resolveImageSource(firstImage);
+  }, [offer?.images]);
+
+  const [currentImageSrc, setCurrentImageSrc] = useState(() => getOfferImageSrc());
+
+  // Update image source when offer changes
+  React.useEffect(() => {
+    setCurrentImageSrc(getOfferImageSrc());
+  }, [getOfferImageSrc]);
+
   const statusClass = (s: string) => {
     switch (s) {
       case "pending":
@@ -219,13 +261,41 @@ const OrderCard: React.FC<{
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 border border-gray-100 hover:shadow-lg transition">
-      <div className="w-20 h-20 rounded-lg overflow-hidden relative flex-shrink-0">
+      <div className="w-20 h-20 rounded-lg overflow-hidden relative flex-shrink-0 bg-gray-100">
         <Image
-          src={resolveImageSource(offer?.images?.[0])}
+          src={currentImageSrc}
           alt={offer?.title || "Offer image"}
           fill
           sizes="80px"
           className="object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            // Try fallbacks
+            let imageSource: any = null;
+            
+            // Parse images if needed
+            if (offer?.images) {
+              if (typeof offer.images === "string") {
+                try {
+                  const parsed = JSON.parse(offer.images);
+                  imageSource = Array.isArray(parsed) ? parsed[0] : parsed;
+                } catch {
+                  imageSource = offer.images;
+                }
+              } else if (Array.isArray(offer.images) && offer.images.length > 0) {
+                imageSource = offer.images[0];
+              }
+            }
+            
+            const fallbacks = getImageFallbacks(imageSource);
+            const currentIndex = fallbacks.indexOf(currentImageSrc);
+            if (currentIndex < fallbacks.length - 1) {
+              setCurrentImageSrc(fallbacks[currentIndex + 1]);
+            } else {
+              target.src = DEFAULT_IMAGE;
+              setCurrentImageSrc(DEFAULT_IMAGE);
+            }
+          }}
         />
       </div>
 
