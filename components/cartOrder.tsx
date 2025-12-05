@@ -336,21 +336,6 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               </p>
             </div>
           </div>
-
-          {/* Order ID */}
-          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-              <Package className="w-5 h-5 text-purple-700" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                Order ID
-              </p>
-              <p className="text-sm font-mono font-semibold text-gray-900">
-                #{order.id}
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Actions Section */}
