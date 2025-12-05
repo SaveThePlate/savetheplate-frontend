@@ -174,7 +174,7 @@ const ProviderOrders = () => {
           <p className="text-center text-gray-600">No orders for your offers yet.</p>
         ) : (
           <div className="flex flex-col gap-6">
-            {["confirmed", "pending", "cancelled"].map((status) => {
+            {["pending", "confirmed", "cancelled"].map((status) => {
               const list = orders.filter((o) => o.status === status);
               if (!list.length) return null;
               return (

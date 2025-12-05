@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { X, Camera, CheckCircle, AlertCircle, Keyboard, QrCode } from "lucide-react";
 import axios from "axios";
@@ -25,58 +25,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
   const [manualCode, setManualCode] = useState("");
   const [useCamera, setUseCamera] = useState(true);
 
-  useEffect(() => {
-    if (!useCamera || showManualEntry) return;
-
-    const startScanning = async () => {
-      try {
-        const html5QrCode = new Html5Qrcode("qr-reader");
-        scannerRef.current = html5QrCode;
-
-        await html5QrCode.start(
-          { facingMode: "environment" }, // Use back camera
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-          },
-          (decodedText) => {
-            handleScanResult(decodedText);
-          },
-          (errorMessage) => {
-            // Ignore scanning errors (they're frequent during scanning)
-          }
-        );
-
-        setScanning(true);
-        setError(null);
-      } catch (err: any) {
-        console.error("Error starting scanner:", err);
-        setError(
-          err.message || "Failed to start camera. Please check permissions."
-        );
-        // If camera fails, suggest manual entry
-        setShowManualEntry(true);
-        setUseCamera(false);
-      }
-    };
-
-    startScanning();
-
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current
-          .stop()
-          .then(() => {
-            scannerRef.current = null;
-          })
-          .catch((err) => {
-            console.error("Error stopping scanner:", err);
-          });
-      }
-    };
-  }, [useCamera, showManualEntry]);
-
-  const handleScanResult = async (qrCodeToken: string) => {
+  const handleScanResult = useCallback(async (qrCodeToken: string) => {
     if (scanningOrder) return; // Prevent multiple scans
     setScanningOrder(true);
     setError(null);
@@ -131,7 +80,58 @@ const QRScanner: React.FC<QRScannerProps> = ({
       );
       setScanningOrder(false);
     }
-  };
+  }, [onScanSuccess, scanningOrder]);
+
+  useEffect(() => {
+    if (!useCamera || showManualEntry) return;
+
+    const startScanning = async () => {
+      try {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        scannerRef.current = html5QrCode;
+
+        await html5QrCode.start(
+          { facingMode: "environment" }, // Use back camera
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          (decodedText) => {
+            handleScanResult(decodedText);
+          },
+          (errorMessage) => {
+            // Ignore scanning errors (they're frequent during scanning)
+          }
+        );
+
+        setScanning(true);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error starting scanner:", err);
+        setError(
+          err.message || "Failed to start camera. Please check permissions."
+        );
+        // If camera fails, suggest manual entry
+        setShowManualEntry(true);
+        setUseCamera(false);
+      }
+    };
+
+    startScanning();
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current
+          .stop()
+          .then(() => {
+            scannerRef.current = null;
+          })
+          .catch((err) => {
+            console.error("Error stopping scanner:", err);
+          });
+      }
+    };
+  }, [useCamera, showManualEntry, handleScanResult]);
 
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,7 +263,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
               <Camera size={20} className="text-blue-600" />
               <p className="text-sm text-blue-800">
-                Point camera at customer's QR code
+                Point camera at customer&apos;s QR code
               </p>
             </div>
           )}

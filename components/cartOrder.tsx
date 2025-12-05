@@ -58,7 +58,6 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [offer, setOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
 
@@ -124,25 +123,6 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     }
   };
 
-  const handleConfirmOrder = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return router.push("/signIn");
-    setConfirming(true);
-    try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/${order.id}/confirm`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success("Order confirmed!");
-      window.location.reload();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to confirm order");
-    } finally {
-      setConfirming(false);
-    }
-  };
 
   return (
     <div
@@ -218,19 +198,14 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             {order.status.toUpperCase()}
           </span>
           {isExpired && <span className="text-xs text-red-600">This offer expired</span>}
+          {order.status === "pending" && (
+            <span className="text-xs text-gray-600 text-center">
+              Show your QR code to the provider to confirm pickup
+            </span>
+          )}
         </div>
         {order.status === "pending" && (
           <div className="flex gap-2">
-            <button
-              onClick={handleConfirmOrder}
-              disabled={confirming}
-              className={`px-4 py-1 rounded-full text-white font-semibold transition-colors ${
-                confirming ? "bg-emerald-300 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-600"
-              }`}
-            >
-              {confirming ? "Confirming..." : "Confirm pickup"}
-            </button>
-
             <button
               onClick={handleCancelOrder}
               disabled={canceling}
