@@ -111,32 +111,57 @@ const ProfilePage = () => {
           return;
         }
 
-        // profile
-        const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers = { Authorization: `Bearer ${token}` };
+        const userId = JSON.parse(atob(token.split(".")[1])).id;
+
+        // Fetch profile and orders in parallel for faster initial load
+        const [profileRes, ordersRes] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers }),
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, { headers }),
+        ]);
+
+        // Show profile immediately
         const { username, phoneNumber, profileImage } = profileRes.data || {};
         setUsername(username || "");
         setPhoneNumber(phoneNumber ?? null);
         setFormData({ username: username || "", phoneNumber: phoneNumber ?? null });
         setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
 
-        // orders
-        const userId = JSON.parse(atob(token.split(".")[1])).id;
-        const ordersRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Show orders immediately (even without offer details)
         const ordersData = ordersRes.data || [];
         setOrders(ordersData);
 
-        for (const order of ordersData) {
-          const offerRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+        // Fetch all offers in parallel (non-blocking - can load after orders are shown)
+        if (ordersData.length > 0) {
+          const offerPromises = ordersData.map((order: Order) =>
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
+              headers,
+            }).then((offerRes) => ({
+              offerId: order.offerId,
+              offer: offerRes.data,
+            })).catch((err) => {
+              console.error(`Failed to fetch offer ${order.offerId}:`, err);
+              return null;
+            })
+          );
+
+          Promise.all(offerPromises).then((offerResults) => {
+            const offersMap: Record<number, any> = {};
+            offerResults.forEach((result) => {
+              if (result) {
+                offersMap[result.offerId] = result.offer;
+              }
+            });
+            setOffersDetails(offersMap);
+
+            // Set image from first order's offer if available
+            if (ordersData.length > 0 && offersMap[ordersData[0].offerId]) {
+              const firstOffer = offersMap[ordersData[0].offerId];
+              const firstImage = firstOffer.images?.[0];
+              const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_BAG_IMAGE;
+              setImageSrc(image);
+            }
           });
-          setOffersDetails((prev) => ({ ...prev, [order.offerId]: offerRes.data }));
-          const firstImage = offerRes.data.images?.[0];
-          const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_BAG_IMAGE;
-          setImageSrc(image);
         }
       } catch (err) {
         toast.error("Failed to fetch profile or orders");

@@ -19,32 +19,39 @@ const Home = () => {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) {
-        router.push("/signIn");
-        return;
+          router.push("/signIn");
+          return;
         }
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setOffers(response.data);
 
-        // fetch pending orders
-        try {
-          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-          const userId = tokenPayload.id;
-          const ordRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          const pending = (ordRes.data || []).filter(
+        const headers = { Authorization: `Bearer ${token}` };
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        const userId = tokenPayload.id;
+
+        // Fetch offers and pending orders in parallel for faster loading
+        const [offersResponse, ordersResponse] = await Promise.allSettled([
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`, { headers }),
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, { headers }),
+        ]);
+
+        // Process offers (critical - show immediately)
+        if (offersResponse.status === "fulfilled") {
+          setOffers(offersResponse.value.data);
+        } else {
+          console.error("Failed to fetch offers:", offersResponse.reason);
+          setError("Failed to fetch offers. Please try again later.");
+        }
+
+        // Process pending orders (non-critical - can fail silently)
+        if (ordersResponse.status === "fulfilled") {
+          const pending = (ordersResponse.value.data || []).filter(
             (o: any) => o.status === "pending"
           ).length;
           setPendingCount(pending);
-        } catch (e) {
-          console.debug("Could not fetch pending orders", e);
+        } else {
+          console.debug("Could not fetch pending orders", ordersResponse.reason);
         }
       } catch (fetchError) {
-        console.error("Failed to fetch offers:", fetchError);
+        console.error("Failed to fetch data:", fetchError);
         setError("Failed to fetch offers. Please try again later.");
       } finally {
         setLoading(false);

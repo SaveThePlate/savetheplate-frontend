@@ -64,33 +64,37 @@ const useProviderProfile = () => {
         return;
       }
 
-      // Fetch profile
-      const profileRes = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const userId = JSON.parse(atob(token.split(".")[1])).id;
+      const headers = { Authorization: `Bearer ${token}` };
 
+      // Fetch profile, offers, and orders in parallel for faster loading
+      const [profileRes, offersRes, ordersRes] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${userId}`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, { headers }),
+      ]);
+
+      // Process profile data first (show immediately)
       const { username, location, phoneNumber, profileImage, mapsLink } =
         profileRes.data || {};
       
-      // If location is not set but mapsLink exists, try to extract it
+      // Extract location if needed (non-blocking, can happen after profile is shown)
       let finalLocation = location;
       if (!finalLocation && mapsLink) {
-        try {
-          const locationRes = await axios.post(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
-            { mapsLink },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          finalLocation = locationRes.data.locationName || location;
-        } catch (err) {
+        // Don't await this - set profile first, then update location if needed
+        axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+          { mapsLink },
+          { headers }
+        ).then((locationRes) => {
+          const extractedLocation = locationRes.data.locationName || location;
+          setProfile((prev) => prev ? { ...prev, location: extractedLocation || "Location" } : null);
+        }).catch((err) => {
           console.error("Failed to extract location:", err);
-          // Use existing location or fallback
-        }
+        });
       }
       
+      // Set profile immediately
       setProfile({
         username: username || "Username",
         location: finalLocation || "Location",
@@ -99,28 +103,12 @@ const useProviderProfile = () => {
         profileImage: profileImage ?? undefined,
       });
 
-      // Fetch offers for stats
-      const userId = JSON.parse(atob(token.split(".")[1])).id;
-      const offersRes = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      // Process stats
       const offers = offersRes.data || [];
       const totalOffers = offers.length;
       const totalItems = offers.reduce(
         (sum: number, o: any) => sum + (o.quantity ?? 0),
         0
-      );
-
-      // Fetch orders to calculate revenue
-      const ordersRes = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
       );
 
       const orders: Order[] = ordersRes.data || [];

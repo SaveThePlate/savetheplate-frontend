@@ -33,8 +33,8 @@ const AddOfferPage = () => {
     verifyToken();
   }, [router]);
 
-return (
-  <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
+  return (
+    <div className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
     <main className="relative w-full max-w-lg bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-100">
       {/* Back Button */}
       <Button
@@ -73,9 +73,8 @@ return (
         </p>
       </footer>
     </main>
-  </div>
-);
-
+    </div>
+  );
 };
 
 export default AddOfferPage;

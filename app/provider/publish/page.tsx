@@ -46,7 +46,7 @@ const SelectOfferTypePage = () => {
         <div className="w-full flex flex-col gap-5">
           <button
             className="w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl bg-emerald-600 text-white shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
-            onClick={() => router.push("./addOffer")}
+            onClick={() => router.push("/provider/addOffer")}
           >
             <ShoppingBag className="w-5 h-5" />
             Custom Offer
@@ -54,7 +54,7 @@ const SelectOfferTypePage = () => {
 
           <button
             className="w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl bg-[#EAF7ED] text-[#1B4332] border-2 border-emerald-200 shadow-sm hover:bg-[#d5f2e0] hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
-            onClick={() => router.push("./createMagicBox")}
+            onClick={() => router.push("/provider/createMagicBox")}
           >
             <Gift className="w-5 h-5" />
             Quick Rescue Pack
