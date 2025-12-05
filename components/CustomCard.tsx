@@ -45,6 +45,7 @@ interface CustomCardProps {
   title: string;
   description: string;
   price: number;
+  originalPrice?: number;
   ownerId: number;
   quantity: number;
   expirationDate?: string;
@@ -62,6 +63,7 @@ const CustomCard: FC<CustomCardProps> = ({
   title,
   description,
   price,
+  originalPrice,
   ownerId,
   quantity,
   expirationDate,
@@ -81,6 +83,7 @@ const CustomCard: FC<CustomCardProps> = ({
     title,
     description,
     price,
+    originalPrice: originalPrice || "",
     quantity,
   });
 
@@ -136,16 +139,26 @@ const CustomCard: FC<CustomCardProps> = ({
     if (!token) return router.push("/signIn");
 
     try {
+      const originalPriceValue = localData.originalPrice 
+        ? parseFloat(localData.originalPrice as any) 
+        : undefined;
+
       const payload = {
         ...localData,
         price: parseFloat(localData.price as any),
+        originalPrice: originalPriceValue && !isNaN(originalPriceValue) && originalPriceValue > parseFloat(localData.price as any)
+          ? originalPriceValue 
+          : undefined,
         quantity: parseInt(localData.quantity as any, 10),
       };
       await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Offer updated successfully");
-      setLocalData(payload);
+      setLocalData({
+        ...payload,
+        originalPrice: payload.originalPrice || "",
+      });
       setIsEditing(false);
       onUpdate?.(offerId, payload);
     } catch (err: any) {
@@ -251,8 +264,20 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
             </div>
           )}
 
-          <div className="absolute top-3 right-3 bg-teal-600 text-white font-semibold px-3 py-1 rounded-full text-sm shadow-md">
-            {localData.price} dt
+          <div className="absolute top-3 right-3 bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-full text-sm shadow-md">
+            <div className="flex flex-col items-end leading-tight">
+              <span className="font-bold">{localData.price} dt</span>
+              {originalPrice && originalPrice > localData.price && (
+                <>
+                  <span className="text-xs font-normal line-through opacity-75">
+                    {originalPrice.toFixed(2)} dt
+                  </span>
+                  <span className="text-xs font-bold mt-0.5 bg-white/20 px-1.5 py-0.5 rounded">
+                    -{((1 - localData.price / originalPrice) * 100).toFixed(0)}%
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
           <div
@@ -400,8 +425,20 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         )}
 
         {/* 💰 Price Badge */}
-        <div className="absolute top-3 right-3 bg-teal-600 text-white font-semibold px-3 py-1 rounded-full text-sm shadow-md">
-          {localData.price} dt
+        <div className="absolute top-3 right-3 bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-full text-sm shadow-md">
+          <div className="flex flex-col items-end leading-tight">
+            <span className="font-bold">{localData.price} dt</span>
+            {originalPrice && originalPrice > localData.price && (
+              <>
+                <span className="text-xs font-normal line-through opacity-75">
+                  {originalPrice.toFixed(2)} dt
+                </span>
+                <span className="text-xs font-bold mt-0.5 bg-white/20 px-1.5 py-0.5 rounded">
+                  -{((1 - localData.price / originalPrice) * 100).toFixed(0)}%
+                </span>
+              </>
+            )}
+          </div>
         </div>
 
         {/* 📦 Quantity Badge */}
@@ -575,23 +612,42 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
                     <div className="flex gap-3 flex-wrap w-full">
                       <div className="flex flex-col flex-1 min-w-[120px]">
+                        <label htmlFor="originalPrice" className="text-sm font-medium text-gray-700">
+                          Original Price (Optional)
+                        </label>
+                        <input
+                          id="originalPrice"
+                          type="number"
+                          step="0.01"
+                          name="originalPrice"
+                          value={localData.originalPrice}
+                          onChange={handleInputChange}
+                          className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
+                          disabled={loading}
+                          placeholder="0.00"
+                        />
+                      </div>
+
+                      <div className="flex flex-col flex-1 min-w-[120px]">
                         <label htmlFor="price" className="text-sm font-medium text-gray-700">
-                          Price
+                          Your Price <span className="text-red-500">*</span>
                         </label>
                         <input
                           id="price"
                           type="number"
+                          step="0.01"
                           name="price"
                           value={localData.price}
                           onChange={handleInputChange}
                           className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
                           disabled={loading}
+                          required
                         />
                       </div>
 
                       <div className="flex flex-col flex-1 min-w-[120px]">
                         <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
-                          Quantity
+                          Quantity <span className="text-red-500">*</span>
                         </label>
                         <input
                           id="quantity"
@@ -601,6 +657,7 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                           onChange={handleInputChange}
                           className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
                           disabled={loading}
+                          required
                         />
                       </div>
                     </div>

@@ -31,6 +31,7 @@ const AddOffer: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [originalPrice, setOriginalPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
@@ -178,10 +179,13 @@ const AddOffer: React.FC = () => {
         absoluteUrl: img.absoluteUrl,
       }));
 
+      const originalPriceToFloat = originalPrice ? parseFloat(originalPrice) : undefined;
+
       const payload = {
         title: title.trim(),
         description: description.trim(),
         price: priceToFloat,
+        originalPrice: originalPriceToFloat && !isNaN(originalPriceToFloat) && originalPriceToFloat > priceToFloat ? originalPriceToFloat : undefined,
         quantity: quantityToFloat,
         expirationDate: expirationDateObj.toISOString(),
         pickupLocation: pickupLocation.trim(),
@@ -195,6 +199,7 @@ const AddOffer: React.FC = () => {
       setTitle("");
       setDescription("");
       setPrice("");
+      setOriginalPrice("");
       setQuantity("");
       setExpirationDate("");
       setPickupLocation("");
@@ -275,13 +280,40 @@ const AddOffer: React.FC = () => {
 
         {/* Price and Quantity Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Price */}
+          {/* Original Price (Optional) */}
+          <div>
+            <label
+              htmlFor="originalPrice"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Original Price (TND) <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+            </label>
+            <div className="relative">
+              <Input
+                id="originalPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={originalPrice}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*\.?\d*$/.test(value)) setOriginalPrice(value);
+                }}
+                placeholder="0.00"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">What was the original price? (if applicable)</p>
+          </div>
+
+          {/* Current Price */}
           <div>
             <label
               htmlFor="price"
               className="block text-sm font-semibold text-gray-700 mb-2"
             >
-              Price (TND) <span className="text-red-500">*</span>
+              Your Price (TND) <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Input
@@ -300,32 +332,39 @@ const AddOffer: React.FC = () => {
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Set a fair price for your offer</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {originalPrice && parseFloat(originalPrice) > parseFloat(price || "0") && (
+                <span className="text-emerald-600 font-semibold">
+                  Save {((1 - parseFloat(price || "0") / parseFloat(originalPrice)) * 100).toFixed(0)}%!
+                </span>
+              )}
+              {(!originalPrice || parseFloat(originalPrice) <= parseFloat(price || "0")) && "Set your selling price"}
+            </p>
           </div>
+        </div>
 
-          {/* Quantity */}
-          <div>
-            <label
-              htmlFor="quantity"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              Available Quantity <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="quantity"
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value)) setQuantity(value);
-              }}
-              placeholder="1"
-              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">How many units are available?</p>
-          </div>
+        {/* Quantity */}
+        <div>
+          <label
+            htmlFor="quantity"
+            className="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            Available Quantity <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="quantity"
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*$/.test(value)) setQuantity(value);
+            }}
+            placeholder="1"
+            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">How many units are available?</p>
         </div>
 
         {/* Pickup Location */}

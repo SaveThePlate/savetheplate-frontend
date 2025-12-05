@@ -33,6 +33,12 @@ const CreateMagicBoxPage = () => {
   const [error, setError] = useState<string>("");
   const [quantity, setQuantity] = useState("");
 
+  const [originalPrice, setOriginalPrice] = useState<Record<RescuePackSize, string>>({
+    small: "",
+    medium: "",
+    large: "",
+  });
+
   const rescuePackOptions: Record<RescuePackSize, RescuePackOption> = {
     small: { 
       price: 5, 
@@ -104,12 +110,19 @@ const CreateMagicBoxPage = () => {
         },
       ]);
 
+      const originalPriceValue = originalPrice[selectedSize] 
+        ? parseFloat(originalPrice[selectedSize]) 
+        : undefined;
+
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
         {
           title: `${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Rescue Pack`,
           description: `${rescuePackOptions[selectedSize].description}. Contains ${rescuePackOptions[selectedSize].items} of rescued food items.`,
           price: rescuePackOptions[selectedSize].price,
+          originalPrice: originalPriceValue && !isNaN(originalPriceValue) && originalPriceValue > rescuePackOptions[selectedSize].price 
+            ? originalPriceValue 
+            : undefined,
           expirationDate: expirationDateObj.toISOString(),
           pickupLocation: pickupLocation.trim(),
           latitude: 0,
@@ -206,6 +219,11 @@ const CreateMagicBoxPage = () => {
               </p>
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <p className="font-bold text-2xl text-emerald-700">{price} dt</p>
+                {originalPrice[size] && parseFloat(originalPrice[size]) > price && (
+                  <p className="text-xs text-gray-500 line-through mt-1">
+                    {parseFloat(originalPrice[size]).toFixed(2)} dt
+                  </p>
+                )}
               </div>
             </div>
           ))}
@@ -213,24 +231,58 @@ const CreateMagicBoxPage = () => {
 
         {/* Inputs */}
         <div className="space-y-5">
-          <div>
-            <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-2">
-              Available Quantity <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="quantity"
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value)) setQuantity(value);
-              }}
-              placeholder="How many packs are available?"
-              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">Enter the number of {selectedSize} rescue packs available</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-2">
+                Available Quantity <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) setQuantity(value);
+                }}
+                placeholder="How many packs?"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Number of {selectedSize} packs available</p>
+            </div>
+
+            <div>
+              <label htmlFor="originalPrice" className="block text-sm font-semibold text-gray-700 mb-2">
+                Original Price (TND) <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+              </label>
+              <div className="relative">
+                <Input
+                  id="originalPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={originalPrice[selectedSize]}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*\.?\d*$/.test(value)) {
+                      setOriginalPrice(prev => ({ ...prev, [selectedSize]: value }));
+                    }
+                  }}
+                  placeholder="0.00"
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12 text-base"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {originalPrice[selectedSize] && parseFloat(originalPrice[selectedSize]) > rescuePackOptions[selectedSize].price && (
+                  <span className="text-emerald-600 font-semibold">
+                    Save {((1 - rescuePackOptions[selectedSize].price / parseFloat(originalPrice[selectedSize])) * 100).toFixed(0)}%!
+                  </span>
+                )}
+                {(!originalPrice[selectedSize] || parseFloat(originalPrice[selectedSize]) <= rescuePackOptions[selectedSize].price) && "What was the original value?"}
+              </p>
+            </div>
           </div>
 
           <div>
