@@ -207,67 +207,74 @@ const ProfilePage = () => {
           progressClassName="bg-white/80"
         />
 
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 mb-6 flex flex-col items-center text-center border border-gray-100 shadow-sm">
+      {/* Minimal Profile Section */}
+      <div className="w-full max-w-2xl mx-auto mb-6">
         {pendingCount > 0 && (
-          <div className="w-full mb-4 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800 text-sm">
-            You have {pendingCount} pending order{pendingCount > 1 ? "s" : ""}. Check <strong>My Orders</strong> to view.
+          <div className="mb-4 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs text-center">
+            {pendingCount} pending order{pendingCount > 1 ? "s" : ""}
           </div>
         )}
-
-        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-emerald-200 mb-4 shadow-md">
-          <Image src={profileImage} alt="Profile" width={128} height={128} priority className="object-cover w-full h-full" />
+        
+        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+              <Image src={profileImage} alt="Profile" width={56} height={56} priority className="object-cover w-full h-full" />
+            </div>
+            
+            {isEditing ? (
+              <div className="flex-1 flex flex-col gap-2">
+                <input
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  placeholder="Username"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800 text-sm"
+                />
+                <input
+                  name="phoneNumber"
+                  type="number"
+                  value={formData.phoneNumber ?? ""}
+                  onChange={handleInputChange}
+                  placeholder="Phone number"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800 text-sm"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg font-medium hover:bg-emerald-700 text-sm"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-lg hover:bg-gray-200 text-sm"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setFormData({ username, phoneNumber });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-between">
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">{username || "Username"}</h1>
+                  {phoneNumber && (
+                    <p className="text-xs text-gray-500 mt-0.5">{phoneNumber}</p>
+                  )}
+                </div>
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium hover:bg-gray-200 text-xs"
+                >
+                  Edit
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-
-        {isEditing ? (
-          <div className="w-full flex flex-col gap-3">
-            <input
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="Username"
-              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800"
-            />
-            <input
-              name="phoneNumber"
-              type="number"
-              value={formData.phoneNumber ?? ""}
-              onChange={handleInputChange}
-              placeholder="Phone number"
-              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800"
-            />
-            <div className="flex gap-3 justify-center mt-2 flex-wrap">
-              <Button
-                className="bg-emerald-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-emerald-700"
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-              <Button
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-xl hover:bg-gray-300"
-                onClick={() => {
-                  setIsEditing(false);
-                  setFormData({ username, phoneNumber });
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold text-gray-800">{username || "Username"}</h1>
-            <p className="text-gray-600 mt-1">{phoneNumber ?? "Phone number"}</p>
-            <div className="mt-4">
-              <Button
-                onClick={() => setIsEditing(true)}
-                className="bg-emerald-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-emerald-700"
-              >
-                Edit Profile
-              </Button>
-            </div>
-          </>
-        )}
       </div>
 
       {/* Stats Section */}
