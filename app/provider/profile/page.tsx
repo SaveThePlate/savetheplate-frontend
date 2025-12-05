@@ -40,6 +40,11 @@ interface Order {
   };
 }
 
+interface Offer {
+  id: number;
+  quantity: number;
+}
+
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
 // Custom hook for fetching profile and stats
@@ -50,6 +55,9 @@ const useProviderProfile = () => {
     totalOffers: 0,
     totalItems: 0,
     revenue: 0,
+    totalMealsSaved: 0,
+    co2Saved: 0,
+    waterSaved: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,10 +128,23 @@ const useProviderProfile = () => {
         return sum + order.quantity * price;
       }, 0);
 
+      // Calculate environmental impact from confirmed orders
+      // Each order quantity represents meals/bags saved
+      const totalMealsSaved = confirmedOrders.reduce((sum, order) => sum + order.quantity, 0);
+      
+      // Environmental impact calculations
+      // 1 meal saved ≈ 1.5 kg CO2 equivalent (conservative estimate)
+      // 1 meal ≈ 1,500 liters of water saved
+      const co2Saved = totalMealsSaved * 1.5; // kg CO2
+      const waterSaved = totalMealsSaved * 1500; // liters
+
       setStats({
         totalOffers,
         totalItems,
         revenue,
+        totalMealsSaved,
+        co2Saved,
+        waterSaved,
       });
     } catch (err: any) {
       console.error("Failed to fetch data:", err);
@@ -691,6 +712,95 @@ export default function ProviderProfile() {
           >
             Edit Profile
           </Button>
+        </div>
+      </div>
+
+      {/* Environmental Impact Section */}
+      <div className="w-full max-w-2xl mt-8">
+        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center">
+                <span className="text-3xl">🌱</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-teal-900">Environmental Impact</h2>
+                <p className="text-sm text-teal-700">Your contribution to saving the planet</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => router.push("/impact")}
+              className="bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 text-sm"
+            >
+              Learn More
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Meals Saved */}
+            <div className="bg-white rounded-xl p-5 border border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <span className="text-xl">🍽️</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Meals Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.totalMealsSaved}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Food rescued from waste
+              </p>
+            </div>
+
+            {/* CO2 Saved */}
+            <div className="bg-white rounded-xl p-5 border border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <span className="text-xl">🌍</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">CO₂ Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.co2Saved.toFixed(1)} kg
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Equivalent to {loading ? "..." : (stats.co2Saved / 21).toFixed(1)} trees planted
+              </p>
+            </div>
+
+            {/* Water Saved */}
+            <div className="bg-white rounded-xl p-5 border border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <span className="text-xl">💧</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Water Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} L
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Water footprint avoided
+              </p>
+            </div>
+          </div>
+
+          {/* Impact Message */}
+          {!loading && stats.totalMealsSaved > 0 && (
+            <div className="mt-6 p-4 bg-teal-100 rounded-xl border border-teal-300">
+              <p className="text-sm text-teal-900 font-medium text-center">
+                🌟 Amazing! You've helped save {stats.totalMealsSaved} meal{stats.totalMealsSaved !== 1 ? "s" : ""} from going to waste, 
+                preventing {stats.co2Saved.toFixed(1)} kg of CO₂ emissions and saving {stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} liters of water!
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
