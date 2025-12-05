@@ -1,0 +1,286 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Html5Qrcode } from "html5-qrcode";
+import { X, Camera, CheckCircle, AlertCircle, Keyboard, QrCode } from "lucide-react";
+import axios from "axios";
+
+interface QRScannerProps {
+  onScanSuccess: (result: string) => void;
+  onClose: () => void;
+  providerId: number;
+}
+
+const QRScanner: React.FC<QRScannerProps> = ({
+  onScanSuccess,
+  onClose,
+  providerId,
+}) => {
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [scanningOrder, setScanningOrder] = useState(false);
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualCode, setManualCode] = useState("");
+  const [useCamera, setUseCamera] = useState(true);
+
+  useEffect(() => {
+    if (!useCamera || showManualEntry) return;
+
+    const startScanning = async () => {
+      try {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        scannerRef.current = html5QrCode;
+
+        await html5QrCode.start(
+          { facingMode: "environment" }, // Use back camera
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          (decodedText) => {
+            handleScanResult(decodedText);
+          },
+          (errorMessage) => {
+            // Ignore scanning errors (they're frequent during scanning)
+          }
+        );
+
+        setScanning(true);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error starting scanner:", err);
+        setError(
+          err.message || "Failed to start camera. Please check permissions."
+        );
+        // If camera fails, suggest manual entry
+        setShowManualEntry(true);
+        setUseCamera(false);
+      }
+    };
+
+    startScanning();
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current
+          .stop()
+          .then(() => {
+            scannerRef.current = null;
+          })
+          .catch((err) => {
+            console.error("Error stopping scanner:", err);
+          });
+      }
+    };
+  }, [useCamera, showManualEntry]);
+
+  const handleScanResult = async (qrCodeToken: string) => {
+    if (scanningOrder) return; // Prevent multiple scans
+    setScanningOrder(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setError("Please log in to scan orders");
+        setScanningOrder(false);
+        return;
+      }
+
+      // First, preview the order
+      const previewResponse = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/qr/${qrCodeToken}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const order = previewResponse.data;
+
+      // Confirm the order
+      const confirmResponse = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/scan`,
+        { qrCodeToken },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (confirmResponse.data.alreadyConfirmed) {
+        setSuccess(
+          `Order #${order.id} was already confirmed. Customer: ${order.user?.username || "N/A"}`
+        );
+      } else {
+        setSuccess(
+          `Order #${order.id} confirmed successfully! Customer: ${order.user?.username || "N/A"}`
+        );
+      }
+
+      // Stop scanning and call success callback
+      setTimeout(() => {
+        if (scannerRef.current) {
+          scannerRef.current.stop();
+        }
+        onScanSuccess(qrCodeToken);
+      }, 2000);
+    } catch (err: any) {
+      console.error("Error scanning QR code:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Invalid QR code or order not found"
+      );
+      setScanningOrder(false);
+    }
+  };
+
+  const handleManualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualCode.trim()) {
+      setError("Please enter a QR code");
+      return;
+    }
+    await handleScanResult(manualCode.trim());
+  };
+
+  const handleClose = () => {
+    if (scannerRef.current) {
+      scannerRef.current
+        .stop()
+        .then(() => {
+          scannerRef.current = null;
+          onClose();
+        })
+        .catch((err) => {
+          console.error("Error stopping scanner:", err);
+          onClose();
+        });
+    } else {
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900">Scan QR Code</h2>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Close scanner"
+          >
+            <X size={24} className="text-gray-600" />
+          </button>
+        </div>
+
+        {/* Scanner or Manual Entry */}
+        <div className="p-4">
+          {!showManualEntry && useCamera ? (
+            <div
+              id="qr-reader"
+              className="w-full rounded-xl overflow-hidden bg-gray-100"
+              style={{ minHeight: "300px" }}
+            />
+          ) : (
+            <div className="w-full">
+              <div className="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 text-center mb-4">
+                <Keyboard size={48} className="mx-auto text-gray-400 mb-3" />
+                <p className="text-sm text-gray-600 mb-4">
+                  Enter the QR code manually
+                </p>
+                <form onSubmit={handleManualSubmit} className="space-y-3">
+                  <input
+                    type="text"
+                    value={manualCode}
+                    onChange={(e) => {
+                      setManualCode(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="Paste or type QR code here"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-center font-mono text-sm"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowManualEntry(false);
+                        setUseCamera(true);
+                        setManualCode("");
+                        setError(null);
+                      }}
+                      className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                    >
+                      Use Camera
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!manualCode.trim() || scanningOrder}
+                      className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                    >
+                      {scanningOrder ? "Validating..." : "Validate Code"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Toggle Button */}
+          {!showManualEntry && useCamera && (
+            <button
+              onClick={() => {
+                if (scannerRef.current) {
+                  scannerRef.current.stop();
+                }
+                setShowManualEntry(true);
+                setUseCamera(false);
+              }}
+              className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+            >
+              <Keyboard size={18} />
+              Enter Code Manually
+            </button>
+          )}
+
+          {/* Status Messages */}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+              <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-green-800">{success}</p>
+            </div>
+          )}
+
+          {!error && !success && scanning && useCamera && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+              <Camera size={20} className="text-blue-600" />
+              <p className="text-sm text-blue-800">
+                Point camera at customer's QR code
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Instructions */}
+        <div className="p-4 bg-gray-50 border-t border-gray-200">
+          <p className="text-xs text-gray-600 text-center">
+            {useCamera && !showManualEntry
+              ? "Ask the customer to show their QR code from the app. Point your camera at it to confirm pickup."
+              : "If the camera doesn't work, you can manually enter the QR code shown by the customer."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default QRScanner;
+

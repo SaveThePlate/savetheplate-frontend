@@ -5,6 +5,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import QRScanner from "@/components/QRScanner";
+import { QrCode } from "lucide-react";
 
 interface User {
   id: number;
@@ -55,6 +57,8 @@ const ProviderOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
+  const [showScanner, setShowScanner] = useState(false);
+  const [providerId, setProviderId] = useState<number | null>(null);
 
   // Fetch orders when component mounts. Keep the async function inside the effect
   // so it doesn't change on every render and trigger the exhaustive-deps warning.
@@ -66,6 +70,15 @@ const ProviderOrders = () => {
           router.push("/signIn");
           return;
         }
+
+        // Get provider ID from token
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          setProviderId(payload.id);
+        } catch {
+          console.error("Failed to parse token");
+        }
+
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -83,6 +96,25 @@ const ProviderOrders = () => {
 
     run();
   }, [router]);
+
+  const handleScanSuccess = (qrCodeToken: string) => {
+    toast.success("Order confirmed successfully!");
+    setShowScanner(false);
+    // Refresh orders
+    const run = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOrders(res.data || []);
+      } catch (err) {
+        console.error("Failed to refresh orders:", err);
+      }
+    };
+    run();
+  };
 
   const confirmed = orders.filter((o) => o.status === "confirmed");
   const pending = orders.filter((o) => o.status === "pending");
@@ -109,6 +141,13 @@ const ProviderOrders = () => {
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
             Orders for your offers
           </h1>
+          <button
+            onClick={() => setShowScanner(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
+          >
+            <QrCode size={20} />
+            Scan QR Code
+          </button>
         </div>
 
         {/* Stats */}
@@ -143,7 +182,11 @@ const ProviderOrders = () => {
                   <h2 className="text-xl font-semibold text-gray-700 mb-3 capitalize">{status}</h2>
                   <div className="flex flex-col gap-4">
                     {list.map((order) => (
-                      <OrderCard key={order.id} order={order} />
+                      <OrderCard 
+                        key={order.id} 
+                        order={order}
+                        onScanClick={() => setShowScanner(true)}
+                      />
                     ))}
                   </div>
                 </section>
@@ -152,11 +195,23 @@ const ProviderOrders = () => {
           </div>
         )}
       </div>
+
+      {/* QR Scanner Modal */}
+      {showScanner && providerId && (
+        <QRScanner
+          onScanSuccess={handleScanSuccess}
+          onClose={() => setShowScanner(false)}
+          providerId={providerId}
+        />
+      )}
     </main>
   );
 };
 
-const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
+const OrderCard: React.FC<{ 
+  order: Order;
+  onScanClick?: () => void;
+}> = ({ order, onScanClick }) => {
   const offer = order.offer;
   const user = order.user;
 
@@ -212,6 +267,16 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClass(order.status)}`}>
           {order.status.toUpperCase()}
         </span>
+        {order.status === "pending" && onScanClick && (
+          <button
+            onClick={onScanClick}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors"
+            title="Scan customer's QR code to confirm pickup"
+          >
+            <QrCode size={14} />
+            Scan QR
+          </button>
+        )}
       </div>
     </div>
   );

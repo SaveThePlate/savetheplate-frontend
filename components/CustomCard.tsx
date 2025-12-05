@@ -230,8 +230,8 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
   if (isClient) {
     // Client card: show image, title, pickup location, expiration date and action buttons (Order + Details).
     return (
-      <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
-        {/* Image (same as provider) */}
+      <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm h-full min-h-[480px]">
+      {/* Image (same as provider) */}
         <div className="relative w-full h-56 sm:h-64">
           {currentImage ? (
             <Image

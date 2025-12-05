@@ -6,6 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import OrderQRCode from "./OrderQRCode";
 
 interface CartOrderProps {
   order: {
@@ -16,6 +17,7 @@ interface CartOrderProps {
     createdAt: string;
     status: string;
     mapsLink?: string;
+    qrCodeToken?: string;
   };
 }
 
@@ -241,6 +243,17 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           </div>
         )}
       </div>
+
+      {/* QR Code for Pending Orders */}
+      {order.status === "pending" && order.qrCodeToken && (
+        <div className="w-full mt-4 pt-4 border-t border-gray-200">
+          <OrderQRCode
+            qrCodeToken={order.qrCodeToken}
+            orderId={order.id}
+            orderTitle={offer?.title}
+          />
+        </div>
+      )}
     </div>
   );
 };
