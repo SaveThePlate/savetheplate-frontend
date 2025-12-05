@@ -60,7 +60,7 @@ const AddOffer: React.FC = () => {
     if (localFiles === null && uploadedImages.length > 0) {
       setUploadedImages([]);
     }
-  }, [localFiles]);
+  }, [localFiles, uploadedImages.length]);
 
   // ✅ Upload files
   async function uploadFiles(files: File[]): Promise<UploadedImage[]> {

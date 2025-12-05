@@ -10,12 +10,21 @@ import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
 
 interface Offer {
   id: number;
-  owner: string;
+  ownerId?: number;
+  owner?: {
+    id: number;
+    username: string;
+    location?: string;
+    phoneNumber?: number;
+    mapsLink?: string;
+    profileImage?: string;
+  };
   images?: { filename: string; alt?: string; url?: string }[];
   title: string;
   description: string;
   expirationDate: string;
   pickupLocation: string;
+  mapsLink?: string;
   quantity: number;
 }
 
@@ -141,7 +150,8 @@ const Offers = () => {
 
           <div className="text-sm text-gray-600 space-y-1">
             <p>
-              <span className="font-semibold">Pickup:</span> {offer.pickupLocation}
+              <span className="font-semibold">Pickup:</span>{" "}
+              {offer.owner?.location || offer.pickupLocation}
             </p>
             <p>
               <span className="font-semibold">Expires:</span>{" "}

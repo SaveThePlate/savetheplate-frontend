@@ -27,7 +27,14 @@ interface Offer {
   pickupLocation: string;
   quantity: number;
   mapsLink?: string;
-
+  owner?: {
+    id: number;
+    username: string;
+    location?: string;
+    phoneNumber?: number;
+    mapsLink?: string;
+    profileImage?: string;
+  };
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
@@ -308,16 +315,16 @@ const ProfilePage = () => {
             <div className="p-5 flex flex-col justify-between flex-1 space-y-3">
               <div className="space-y-3">
                 {/* Unified Pickup Button */}
-                {offer?.pickupLocation && (
+                {(offer?.owner?.location || offer?.pickupLocation) && (
                   <a
-                    href={offer?.mapsLink}
+                    href={offer?.owner?.mapsLink || offer?.mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center w-full bg-[#FFAE8A]/10 hover:bg-[#FFAE8A]/20 text-[#FF7F50] font-semibold text-sm py-2 px-3 rounded-full transition-all"
                   >
                     📍 Pickup:{" "}
                     <span className="ml-1 text-gray-800 truncate font-medium">
-                      {offer.pickupLocation}
+                      {offer.owner?.location || offer.pickupLocation}
                     </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

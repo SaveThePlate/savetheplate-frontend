@@ -23,7 +23,15 @@ interface Offer {
   expirationDate: string;
   pickupLocation: string;
   mapsLink: string;
-  user?: { username: string };
+  owner?: {
+    id: number;
+    username: string;
+    location?: string;
+    phoneNumber?: number;
+    mapsLink?: string;
+    profileImage?: string;
+  };
+  user?: { username: string }; // Legacy field
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
@@ -133,6 +141,10 @@ const OffersPage = () => {
           const imageSrc = resolveImageSource(firstImage);
           const imageAlt = firstImage?.alt ?? offer.title;
 
+          // Use owner's current location if available, otherwise fallback to stored pickupLocation
+          const currentLocation = offer.owner?.location || offer.pickupLocation;
+          const currentMapsLink = offer.owner?.mapsLink || offer.mapsLink;
+
           return (
             <CustomCard
               key={offer.id}
@@ -146,8 +158,8 @@ const OffersPage = () => {
               originalPrice={offer.originalPrice}
               quantity={offer.quantity}
               expirationDate={offer.expirationDate}
-              pickupLocation={offer.pickupLocation}
-              mapsLink={offer.mapsLink}
+              pickupLocation={currentLocation}
+              mapsLink={currentMapsLink}
               reserveLink={`/client/offers/${offer.id}`}
             />
           );

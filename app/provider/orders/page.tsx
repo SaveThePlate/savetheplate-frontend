@@ -6,13 +6,16 @@ import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/components/QRScanner";
-import { QrCode } from "lucide-react";
+import { QrCode, RefreshCw } from "lucide-react";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
 
 interface User {
   id: number;
+  email?: string;
   username?: string;
-  phoneNumber?: string;
+  phoneNumber?: number | string;
+  location?: string;
+  profileImage?: string;
 }
 
 interface Offer {
@@ -48,57 +51,49 @@ const ProviderOrders = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [providerId, setProviderId] = useState<number | null>(null);
 
-  // Fetch orders when component mounts. Keep the async function inside the effect
-  // so it doesn't change on every render and trigger the exhaustive-deps warning.
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          router.push("/signIn");
-          return;
-        }
-
-        // Get provider ID from token
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setProviderId(payload.id);
-        } catch {
-          console.error("Failed to parse token");
-        }
-
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOrders(res.data || []);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch provider orders");
-      } finally {
-        setLoading(false);
+  // Fetch orders function - can be called to refresh
+  const fetchOrders = React.useCallback(async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        router.push("/signIn");
+        return;
       }
-    };
 
-    run();
+      // Get provider ID from token
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setProviderId(payload.id);
+      } catch {
+        console.error("Failed to parse token");
+      }
+
+      // Add cache-busting timestamp to ensure fresh data
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider?t=${Date.now()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setOrders(res.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch provider orders");
+    } finally {
+      setLoading(false);
+    }
   }, [router]);
+
+  // Fetch orders when component mounts
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleScanSuccess = (qrCodeToken: string) => {
     toast.success("Order confirmed successfully!");
     setShowScanner(false);
-    // Refresh orders
-    const run = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return;
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setOrders(res.data || []);
-      } catch (err) {
-        console.error("Failed to refresh orders:", err);
-      }
-    };
-    run();
+    // Refresh orders to get updated data
+    fetchOrders();
   };
 
   const confirmed = orders.filter((o) => o.status === "confirmed");
@@ -126,13 +121,23 @@ const ProviderOrders = () => {
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
             Orders for your offers
           </h1>
-          <button
-            onClick={() => setShowScanner(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
-          >
-            <QrCode size={20} />
-            Scan QR Code
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchOrders}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all"
+              title="Refresh orders to see latest customer information"
+            >
+              <RefreshCw size={18} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button
+              onClick={() => setShowScanner(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
+            >
+              <QrCode size={20} />
+              Scan QR Code
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -303,12 +308,23 @@ const OrderCard: React.FC<{
         <h3 className="text-md font-semibold text-gray-900 truncate">{offer?.title || "Offer"}</h3>
         <p className="text-sm text-gray-600">
           Ordered by:{" "}
-          <span className="font-medium text-gray-800">{user?.username || `User ${order.userId}`}</span>
+          <span className="font-medium text-gray-800">
+            {user?.username || `User ${order.userId}`}
+          </span>
         </p>
         <p className="text-sm text-gray-600">
-          Client phone number:{" "}
-          <span className="font-medium text-gray-800">{user?.phoneNumber || `User ${order.userId}`}</span>
+          Phone:{" "}
+          <span className="font-medium text-gray-800">
+            {user?.phoneNumber 
+              ? (typeof user.phoneNumber === 'number' ? user.phoneNumber.toString() : user.phoneNumber)
+              : 'N/A'}
+          </span>
         </p>
+        {user?.location && (
+          <p className="text-sm text-gray-500">
+            Location: <span className="font-medium text-gray-700">{user.location}</span>
+          </p>
+        )}
         <p className="text-sm text-gray-500">
           Quantity: <span className="font-medium">{order.quantity}</span>
         </p>

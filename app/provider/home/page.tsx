@@ -30,6 +30,14 @@ interface Offer {
   expirationDate: string;
   pickupLocation: string;
   mapsLink: string;
+  owner?: {
+    id: number;
+    username: string;
+    location?: string;
+    phoneNumber?: number;
+    mapsLink?: string;
+    profileImage?: string;
+  };
 }
 
 const DEFAULT_PROFILE_IMAGE = "/defaultBag.png";
@@ -158,6 +166,10 @@ const ProviderHome = () => {
   // Use unified image resolution
   const imageSrc = resolveImageSource(firstImage);
 
+  // Use owner's current location if available, otherwise fallback to stored pickupLocation
+  const currentLocation = offer.owner?.location || offer.pickupLocation;
+  const currentMapsLink = offer.owner?.mapsLink || offer.mapsLink;
+
   return (
       <CustomCard
         key={offer.id}
@@ -171,8 +183,8 @@ const ProviderHome = () => {
         quantity={offer.quantity}
         description={offer.description}
         expirationDate={offer.expirationDate}
-        pickupLocation={offer.pickupLocation}
-        mapsLink={offer.mapsLink}
+        pickupLocation={currentLocation}
+        mapsLink={currentMapsLink}
         reserveLink={`/reserve/${offer.id}`}
         onDelete={handleDeleteOffer}
       />

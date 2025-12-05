@@ -37,7 +37,14 @@ interface CartOrderProps {
 
 type Offer = {
   id: number;
-  owner: string;
+  owner?: {
+    id: number;
+    username: string;
+    location?: string;
+    phoneNumber?: number;
+    mapsLink?: string;
+    profileImage?: string;
+  };
   images?: { path?: string; url?: string; alt?: string }[];
   title: string;
   description: string;
@@ -259,11 +266,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                 Pickup Location
               </p>
               <p className="text-sm font-medium text-gray-900 mb-1">
-                {offer.pickupLocation}
+                {offer.owner?.location || offer.pickupLocation}
               </p>
-              {offer.mapsLink && (
+              {(offer.owner?.mapsLink || offer.mapsLink) && (
                 <a
-                  href={offer.mapsLink}
+                  href={offer.owner?.mapsLink || offer.mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
