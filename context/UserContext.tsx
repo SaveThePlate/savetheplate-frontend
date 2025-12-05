@@ -20,9 +20,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserRole = async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
-        router.push("/signIn");
-        return;
-      }
+      // No token - user is not authenticated, but don't redirect
+      // Let individual pages handle their own authentication checks
+      setUserRole(null);
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
@@ -37,10 +40,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         console.error('Failed to fetch user role:', response.data.message);
         setError(response.data.message);
+        setUserRole(null);
       }
     } catch (error) {
       console.error('Error fetching user role:', error);
       setError('Could not fetch user role. Please try again later.');
+      setUserRole(null);
     } finally {
       setLoading(false);
     }
@@ -54,7 +59,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchUserRole();
-    refreshUserRole();
   }, []);
 
   return (
