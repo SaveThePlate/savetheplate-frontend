@@ -219,9 +219,9 @@ const CreateMagicBoxPage = () => {
               </p>
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <p className="font-bold text-2xl text-emerald-700">{price} dt</p>
-                {originalPrice[size] && parseFloat(originalPrice[size]) > price && (
+                {originalPrice[size as RescuePackSize] && parseFloat(originalPrice[size as RescuePackSize]) > price && (
                   <p className="text-xs text-gray-500 line-through mt-1">
-                    {parseFloat(originalPrice[size]).toFixed(2)} dt
+                    {parseFloat(originalPrice[size as RescuePackSize]).toFixed(2)} dt
                   </p>
                 )}
               </div>

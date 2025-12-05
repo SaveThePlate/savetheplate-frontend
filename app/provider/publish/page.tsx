@@ -38,7 +38,7 @@ const SelectOfferTypePage = () => {
             Create New Offer
           </h1>
           <p className="text-gray-500 text-sm sm:text-base mt-2 max-w-xs">
-            Choose how you'd like to share your surplus and make a positive impact 🌍
+            Choose how you&apos;d like to share your surplus and make a positive impact 🌍
           </p>
         </div>
 
