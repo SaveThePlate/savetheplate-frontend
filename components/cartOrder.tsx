@@ -8,6 +8,19 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OrderQRCode from "./OrderQRCode";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { 
+  MapPin, 
+  Calendar, 
+  Package, 
+  QrCode, 
+  X, 
+  ExternalLink,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  ChevronDown,
+  ChevronUp
+} from "lucide-react";
 
 interface CartOrderProps {
   order: {
@@ -45,6 +58,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_IMAGE]);
+  const [showQRCode, setShowQRCode] = useState(false);
 
   useEffect(() => {
     const run = async () => {
@@ -78,18 +92,45 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   const isExpired = offer && new Date(offer.expirationDate).getTime() <= Date.now();
 
-  const statusColor = () => {
+  const getStatusConfig = () => {
     switch (order.status) {
       case "pending":
-        return "bg-yellow-200 text-yellow-800";
+        return {
+          bg: "bg-yellow-50",
+          border: "border-yellow-300",
+          text: "text-yellow-800",
+          badge: "bg-yellow-100 text-yellow-800 border-yellow-300",
+          icon: Clock,
+        };
       case "confirmed":
-        return "bg-teal-600 text-white";
+        return {
+          bg: "bg-emerald-50",
+          border: "border-emerald-300",
+          text: "text-emerald-800",
+          badge: "bg-emerald-100 text-emerald-800 border-emerald-300",
+          icon: CheckCircle2,
+        };
       case "cancelled":
-        return "bg-red-300 text-red-800";
+        return {
+          bg: "bg-red-50",
+          border: "border-red-300",
+          text: "text-red-800",
+          badge: "bg-red-100 text-red-800 border-red-300",
+          icon: XCircle,
+        };
       default:
-        return "bg-gray-200 text-gray-700";
+        return {
+          bg: "bg-gray-50",
+          border: "border-gray-300",
+          text: "text-gray-800",
+          badge: "bg-gray-100 text-gray-800 border-gray-300",
+          icon: Package,
+        };
     }
   };
+
+  const statusConfig = getStatusConfig();
+  const StatusIcon = statusConfig.icon;
 
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("accessToken");
@@ -113,10 +154,36 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   };
 
 
+  if (loading) {
+    return (
+      <div className="w-full bg-white rounded-2xl shadow-md p-6 border border-gray-200">
+        <div className="animate-pulse flex gap-4">
+          <div className="w-24 h-24 bg-gray-200 rounded-xl"></div>
+          <div className="flex-1 space-y-3">
+            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !offer) {
+    return (
+      <div className="w-full bg-red-50 rounded-2xl shadow-md p-6 border border-red-200">
+        <p className="text-red-600 text-center">{error || "Failed to load order details"}</p>
+      </div>
+    );
+  }
+
+  const orderDate = new Date(order.createdAt);
+  const expirationDate = new Date(offer.expirationDate);
+
   return (
     <div
-      className={`w-full bg-white rounded-xl shadow-md flex flex-col sm:flex-row items-center p-4 sm:p-6 mb-6 gap-4 ${
-        isExpired ? "opacity-90 ring-1 ring-red-100 bg-red-50" : ""
+      className={`w-full bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border-2 ${
+        isExpired ? `${statusConfig.border} opacity-75` : statusConfig.border
       }`}
     >
       <ToastContainer
@@ -133,100 +200,195 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         progressClassName="bg-white/80"
       />
 
-      {/* Image */}
-      <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 relative rounded-lg overflow-hidden shadow">
-        <Image
-          src={imageSrc}
-          alt={offer?.title || "Offer Image"}
-          fill
-          sizes="(max-width: 640px) 96px, 128px"
-          className="object-cover"
-          priority
-          onError={() => {
-            const nextIndex = fallbackIndex + 1;
-            if (nextIndex < fallbacks.length) {
-              setFallbackIndex(nextIndex);
-              setImageSrc(fallbacks[nextIndex]);
-            } else {
-              setImageSrc(DEFAULT_IMAGE);
-            }
-          }}
-        />
-      </div>
+      <div className="p-6">
+        {/* Header Section */}
+        <div className="flex gap-4 mb-6">
+          {/* Image */}
+          <div className="flex-shrink-0 w-28 h-28 sm:w-32 sm:h-32 relative rounded-xl overflow-hidden shadow-md border-2 border-gray-100">
+            <Image
+              src={imageSrc}
+              alt={offer.title}
+              fill
+              sizes="(max-width: 640px) 112px, 128px"
+              className="object-cover"
+              priority
+              onError={() => {
+                const nextIndex = fallbackIndex + 1;
+                if (nextIndex < fallbacks.length) {
+                  setFallbackIndex(nextIndex);
+                  setImageSrc(fallbacks[nextIndex]);
+                } else {
+                  setImageSrc(DEFAULT_IMAGE);
+                }
+              }}
+            />
+          </div>
 
-      {/* Details */}
-      <div className="flex-1 flex flex-col justify-between min-w-0">
-        <h2 className="text-lg sm:text-xl font-semibold text-teal-600 truncate">
-          {offer ? offer.title : "Loading..."} x {order.quantity}
-        </h2>
-        <p className="text-sm sm:text-base text-gray-600 mt-1 truncate">
-          Pickup: {offer?.pickupLocation || "N/A"}
-        </p>
-        {offer?.mapsLink && (
-          <a
-            href={offer.mapsLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-teal-700 font-medium underline hover:text-teal-800 mt-1"
-          >
-            📍 Show Map
-          </a>
-        )}
-        <p className="text-sm sm:text-base text-gray-500 mt-1 flex items-center gap-2">
-          <span>
-            Expires:{" "}
-            {offer
-              ? `${new Date(offer.expirationDate).toLocaleDateString()} at ${new Date(
-                  offer.expirationDate
-                ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-              : "N/A"}
-          </span>
-          {isExpired && (
-            <span className="inline-block ml-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-              Expired
-            </span>
-          )}
-        </p>
-      </div>
-
-      {/* Status & Actions */}
-      <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
-        <div className="flex flex-col items-center gap-2">
-          <span className={`px-4 py-1 rounded-full font-bold text-center ${statusColor()}`}>
-            {order.status.toUpperCase()}
-          </span>
-          {isExpired && <span className="text-xs text-red-600">This offer expired</span>}
-          {order.status === "pending" && (
-            <span className="text-xs text-gray-600 text-center">
-              Show your QR code to the provider to confirm pickup
-            </span>
-          )}
+          {/* Title and Status */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 flex-1">
+                {offer.title}
+              </h3>
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${statusConfig.badge} flex-shrink-0`}>
+                <StatusIcon className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wide">
+                  {order.status}
+                </span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+              {offer.description}
+            </p>
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+              <Package className="w-4 h-4" />
+              <span>Quantity: {order.quantity}</span>
+            </div>
+          </div>
         </div>
-        {order.status === "pending" && (
-          <div className="flex gap-2">
+
+        {/* Information Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {/* Pickup Location */}
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-emerald-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Pickup Location
+              </p>
+              <p className="text-sm font-medium text-gray-900 mb-1">
+                {offer.pickupLocation}
+              </p>
+              {offer.mapsLink && (
+                <a
+                  href={offer.mapsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Open in Maps
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Expiration Date */}
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-amber-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Pickup Deadline
+              </p>
+              <p className="text-sm font-medium text-gray-900">
+                {expirationDate.toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {expirationDate.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              {isExpired && (
+                <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                  Expired
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Order Date */}
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-blue-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Ordered On
+              </p>
+              <p className="text-sm font-medium text-gray-900">
+                {orderDate.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {orderDate.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          </div>
+
+          {/* Order ID */}
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+              <Package className="w-5 h-5 text-purple-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                Order ID
+              </p>
+              <p className="text-sm font-mono font-semibold text-gray-900">
+                #{order.id}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions Section */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+          {order.status === "pending" && order.qrCodeToken && (
+            <button
+              onClick={() => setShowQRCode(!showQRCode)}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              <QrCode className="w-5 h-5" />
+              {showQRCode ? "Hide QR Code" : "Show QR Code"}
+              {showQRCode ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+          )}
+          {order.status === "pending" && (
             <button
               onClick={handleCancelOrder}
               disabled={canceling}
-              className={`px-4 py-1 rounded-full text-white font-semibold transition-colors ${
-                canceling ? "bg-red-300 cursor-not-allowed" : "bg-red-400 hover:bg-red-500"
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                canceling
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
               }`}
             >
-              {canceling ? "Cancelling..." : "Cancel"}
+              <X className="w-5 h-5" />
+              {canceling ? "Cancelling..." : "Cancel Order"}
             </button>
+          )}
+        </div>
+
+        {/* QR Code Section (Collapsible) */}
+        {order.status === "pending" && order.qrCodeToken && showQRCode && (
+          <div className="mt-6 pt-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
+            <OrderQRCode
+              qrCodeToken={order.qrCodeToken}
+              orderId={order.id}
+              orderTitle={offer.title}
+            />
           </div>
         )}
       </div>
-
-      {/* QR Code for Pending Orders */}
-      {order.status === "pending" && order.qrCodeToken && (
-        <div className="w-full mt-4 pt-4 border-t border-gray-200">
-          <OrderQRCode
-            qrCodeToken={order.qrCodeToken}
-            orderId={order.id}
-            orderTitle={offer?.title}
-          />
-        </div>
-      )}
     </div>
   );
 };
