@@ -419,7 +419,7 @@ const ProfilePage = () => {
           {!loading && totalMealsSaved > 0 && (
             <div className="mt-6 p-4 bg-teal-100 rounded-xl border border-teal-300">
               <p className="text-sm text-teal-900 font-medium text-center">
-                🌟 Amazing! You've saved {totalMealsSaved} meal{totalMealsSaved !== 1 ? "s" : ""} from going to waste, 
+                🌟 Amazing! You&apos;ve saved {totalMealsSaved} meal{totalMealsSaved !== 1 ? "s" : ""} from going to waste, 
                 preventing {co2Saved.toFixed(1)} kg of CO₂ emissions and saving {waterSaved >= 1000 ? `${(waterSaved / 1000).toFixed(1)}k` : waterSaved.toFixed(0)} liters of water!
               </p>
             </div>

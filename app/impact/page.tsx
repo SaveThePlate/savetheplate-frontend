@@ -59,7 +59,7 @@ const ImpactPage = () => {
             Understanding Your Impact
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Every meal you save from waste makes a real difference. Learn how we calculate your environmental impact and the positive change you're creating.
+            Every meal you save from waste makes a real difference. Learn how we calculate your environmental impact and the positive change you&apos;re creating.
           </p>
         </div>
 
@@ -80,7 +80,7 @@ const ImpactPage = () => {
               <li>It represents a <strong>massive economic loss</strong> for businesses and consumers</li>
             </ul>
             <p className="pt-2">
-              By rescuing food that would otherwise be wasted, you're directly reducing these negative impacts!
+              By rescuing food that would otherwise be wasted, you&apos;re directly reducing these negative impacts!
             </p>
           </div>
         </div>
@@ -101,12 +101,12 @@ const ImpactPage = () => {
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Meals Saved</h3>
                 <p className="text-gray-700 mb-3">
-                  This represents the total number of meals or food packages you've rescued from going to waste.
+                  This represents the total number of meals or food packages you&apos;ve rescued from going to waste.
                 </p>
                 <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
-                  <p className="text-sm font-semibold text-orange-900 mb-1">How it's calculated:</p>
+                  <p className="text-sm font-semibold text-orange-900 mb-1">How it&apos;s calculated:</p>
                   <p className="text-sm text-orange-800">
-                    Each confirmed order counts as meals saved. If you order 3 rescue packs, that's 3 meals saved!
+                    Each confirmed order counts as meals saved. If you order 3 rescue packs, that&apos;s 3 meals saved!
                   </p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ const ImpactPage = () => {
                   Carbon dioxide equivalent (CO₂e) represents the greenhouse gas emissions prevented by saving food from waste.
                 </p>
                 <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <p className="text-sm font-semibold text-blue-900 mb-1">How it's calculated:</p>
+                  <p className="text-sm font-semibold text-blue-900 mb-1">How it&apos;s calculated:</p>
                   <p className="text-sm text-blue-800 mb-2">
                     We use a conservative estimate: <strong>1.5 kg CO₂e per meal saved</strong>
                   </p>
@@ -157,7 +157,7 @@ const ImpactPage = () => {
                   Water footprint represents all the water used in the production, processing, and transportation of food.
                 </p>
                 <div className="bg-cyan-50 rounded-xl p-4 border border-cyan-200">
-                  <p className="text-sm font-semibold text-cyan-900 mb-1">How it's calculated:</p>
+                  <p className="text-sm font-semibold text-cyan-900 mb-1">How it&apos;s calculated:</p>
                   <p className="text-sm text-cyan-800 mb-2">
                     We estimate: <strong>1,500 liters of water per meal saved</strong>
                   </p>
@@ -210,7 +210,7 @@ const ImpactPage = () => {
               <h3 className="text-xl font-bold text-teal-900">For Providers</h3>
             </div>
             <p className="text-teal-800 mb-4">
-              By listing your surplus food, you're preventing waste at the source. Every offer you create has the potential to save multiple meals!
+              By listing your surplus food, you&apos;re preventing waste at the source. Every offer you create has the potential to save multiple meals!
             </p>
             <ul className="space-y-2 text-sm text-teal-700">
               <li className="flex items-start gap-2">
