@@ -66,6 +66,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_IMAGE]);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [showDetails, setShowDetails] = useState(false); // For confirmed/cancelled orders
 
   useEffect(() => {
     const run = async () => {
@@ -98,6 +99,10 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   }, [order.offerId, router]);
 
   const isExpired = offer && new Date(offer.expirationDate).getTime() <= Date.now();
+  
+  // For pending orders, always show details. For others, use state
+  const isPending = order.status === "pending";
+  const shouldShowDetails = isPending || showDetails;
 
   const getStatusConfig = () => {
     switch (order.status) {
@@ -254,121 +259,147 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           </div>
         </div>
 
-        {/* Information Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {/* Pickup Location */}
-          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-emerald-700" />
+        {/* Information Grid - Collapsible for non-pending orders */}
+        {shouldShowDetails && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 animate-in slide-in-from-top-2 duration-300">
+            {/* Pickup Location */}
+            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-emerald-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  Pickup Location
+                </p>
+                <p className="text-sm font-medium text-gray-900 mb-1">
+                  {offer.owner?.location || offer.pickupLocation}
+                </p>
+                {(offer.owner?.mapsLink || offer.mapsLink) && (
+                  <a
+                    href={offer.owner?.mapsLink || offer.mapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Open in Maps
+                  </a>
+                )}
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                Pickup Location
-              </p>
-              <p className="text-sm font-medium text-gray-900 mb-1">
-                {offer.owner?.location || offer.pickupLocation}
-              </p>
-              {(offer.owner?.mapsLink || offer.mapsLink) && (
-                <a
-                  href={offer.owner?.mapsLink || offer.mapsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  Open in Maps
-                </a>
-              )}
+
+            {/* Expiration Date */}
+            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-amber-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  Pickup Deadline
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  {expirationDate.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {expirationDate.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+                {isExpired && (
+                  <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                    Expired
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Order Date */}
+            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-blue-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  Ordered On
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  {orderDate.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {orderDate.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Expiration Date */}
-          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-amber-700" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                Pickup Deadline
-              </p>
-              <p className="text-sm font-medium text-gray-900">
-                {expirationDate.toLocaleDateString("en-US", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                {expirationDate.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-              {isExpired && (
-                <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                  Expired
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Order Date */}
-          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-blue-700" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                Ordered On
-              </p>
-              <p className="text-sm font-medium text-gray-900">
-                {orderDate.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">
-                {orderDate.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions Section */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
-          {order.status === "pending" && order.qrCodeToken && (
+        {/* Toggle Details Button - Only for non-pending orders */}
+        {!isPending && (
+          <div className="mb-4">
             <button
-              onClick={() => setShowQRCode(!showQRCode)}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
+              onClick={() => setShowDetails(!showDetails)}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
             >
-              <QrCode className="w-5 h-5" />
-              {showQRCode ? "Hide QR Code" : "Show QR Code"}
-              {showQRCode ? (
-                <ChevronUp className="w-4 h-4" />
+              {showDetails ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  Hide Details
+                </>
               ) : (
-                <ChevronDown className="w-4 h-4" />
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  Show Details
+                </>
               )}
             </button>
-          )}
-          {order.status === "pending" && (
-            <button
-              onClick={handleCancelOrder}
-              disabled={canceling}
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                canceling
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
-              }`}
-            >
-              <X className="w-5 h-5" />
-              {canceling ? "Cancelling..." : "Cancel Order"}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Actions Section - Only show for pending orders or when details are expanded */}
+        {shouldShowDetails && (
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+            {order.status === "pending" && order.qrCodeToken && (
+              <button
+                onClick={() => setShowQRCode(!showQRCode)}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                <QrCode className="w-5 h-5" />
+                {showQRCode ? "Hide QR Code" : "Show QR Code"}
+                {showQRCode ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
+            )}
+            {order.status === "pending" && (
+              <button
+                onClick={handleCancelOrder}
+                disabled={canceling}
+                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                  canceling
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
+                }`}
+              >
+                <X className="w-5 h-5" />
+                {canceling ? "Cancelling..." : "Cancel Order"}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* QR Code Section (Collapsible) */}
         {order.status === "pending" && order.qrCodeToken && showQRCode && (
