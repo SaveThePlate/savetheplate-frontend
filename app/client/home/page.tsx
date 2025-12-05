@@ -5,61 +5,78 @@ import Offers from "@/components/Offers";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [offers, setOffers] = useState<{ id: number; title: string; latitude: number; longitude: number }[]>([]);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          router.push("/signIn");
-          return;
-        }
+  // Fetch offers function - can be called to refresh
+  const fetchOffers = React.useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
-        const headers = { Authorization: `Bearer ${token}` };
-        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        const userId = tokenPayload.id;
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
 
-        // Fetch offers and pending orders in parallel for faster loading
-        const [offersResponse, ordersResponse] = await Promise.allSettled([
-          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`, { headers }),
-          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, { headers }),
-        ]);
+      const headers = { Authorization: `Bearer ${token}` };
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.id;
 
-        // Process offers (critical - show immediately)
-        if (offersResponse.status === "fulfilled") {
-          setOffers(offersResponse.value.data);
-        } else {
-          console.error("Failed to fetch offers:", offersResponse.reason);
+      // Add cache-busting timestamp to ensure fresh data
+      const timestamp = Date.now();
+
+      // Fetch offers and pending orders in parallel for faster loading
+      const [offersResponse, ordersResponse] = await Promise.allSettled([
+        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}?t=${timestamp}`, { headers }),
+      ]);
+
+      // Process offers (critical - show immediately)
+      if (offersResponse.status === "fulfilled") {
+        setOffers(offersResponse.value.data);
+        setError(null);
+      } else {
+        console.error("Failed to fetch offers:", offersResponse.reason);
+        if (!isRefresh) {
           setError("Failed to fetch offers. Please try again later.");
         }
-
-        // Process pending orders (non-critical - can fail silently)
-        if (ordersResponse.status === "fulfilled") {
-          const pending = (ordersResponse.value.data || []).filter(
-            (o: any) => o.status === "pending"
-          ).length;
-          setPendingCount(pending);
-        } else {
-          console.debug("Could not fetch pending orders", ordersResponse.reason);
-        }
-      } catch (fetchError) {
-        console.error("Failed to fetch data:", fetchError);
-        setError("Failed to fetch offers. Please try again later.");
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchOffers();
+      // Process pending orders (non-critical - can fail silently)
+      if (ordersResponse.status === "fulfilled") {
+        const pending = (ordersResponse.value.data || []).filter(
+          (o: any) => o.status === "pending"
+        ).length;
+        setPendingCount(pending);
+      } else {
+        console.debug("Could not fetch pending orders", ordersResponse.reason);
+      }
+    } catch (fetchError) {
+      console.error("Failed to fetch data:", fetchError);
+      if (!isRefresh) {
+        setError("Failed to fetch offers. Please try again later.");
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, [router]);
+
+  useEffect(() => {
+    fetchOffers();
+  }, [fetchOffers]);
 
   return (
     <main className="min-h-screen flex flex-col items-center pt-24 pb-20 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
@@ -99,13 +116,24 @@ const Home = () => {
         )}
 
         {/* Header */}
-        <div className="text-center sm:text-left space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#344e41] tracking-tight">
-            Available Offers
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base font-medium">
-            Discover local meals ready to be rescued 🍃
-          </p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-center sm:text-left space-y-2 flex-1">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#344e41] tracking-tight">
+              Available Offers
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base font-medium">
+              Discover local meals ready to be rescued 🍃
+            </p>
+          </div>
+          <button
+            onClick={() => fetchOffers(true)}
+            disabled={refreshing || loading}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh offers to see latest available meals"
+          >
+            <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
         </div>
 
         {/* Offers List */}

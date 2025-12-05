@@ -605,111 +605,136 @@ const CustomCard: FC<CustomCardProps> = ({
                   </button>
                 </CredenzaTrigger>
 
-                <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-6 max-w-full sm:max-w-md mx-auto border border-gray-100">
-                  <CredenzaHeader>
-                    <CredenzaTitle className="text-lg font-semibold text-gray-900">
+                <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-lg mx-auto border border-gray-100">
+                  <CredenzaHeader className="mb-4">
+                    <CredenzaTitle className="text-xl font-bold text-gray-900">
                       Edit Offer
                     </CredenzaTitle>
+                    <CredenzaDescription className="text-sm text-gray-500 mt-1">
+                      Update your offer details below
+                    </CredenzaDescription>
                   </CredenzaHeader>
 
-                  <CredenzaDescription className="text-sm text-gray-600">
-                    Edit the fields below to update this offer. Changes will be saved when you click Save.
-                  </CredenzaDescription>
-
-                  <CredenzaBody className="flex flex-col gap-4 mt-3">
-                    <div className="flex flex-col w-full">
-                      <label htmlFor="title" className="text-sm font-medium text-gray-700">
-                        Title
+                  <CredenzaBody className="space-y-4">
+                    {/* Title */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">
+                        Title <span className="text-red-500">*</span>
                       </label>
                       <input
-                        id="title"
+                        id="edit-title"
                         name="title"
                         value={localData.title}
                         onChange={handleInputChange}
-                        className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                         disabled={loading}
+                        placeholder="Enter offer title"
                       />
                     </div>
 
-                    <div className="flex flex-col w-full">
-                      <label htmlFor="description" className="text-sm font-medium text-gray-700">
-                        Description
+                    {/* Description */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit-description" className="text-sm font-semibold text-gray-700">
+                        Description <span className="text-red-500">*</span>
                       </label>
                       <textarea
-                        id="description"
+                        id="edit-description"
                         name="description"
                         value={localData.description}
                         onChange={handleInputChange}
-                        className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none resize-none"
+                        rows={4}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
                         disabled={loading}
+                        placeholder="Describe your offer..."
                       />
                     </div>
 
-                    <div className="flex gap-3 flex-wrap w-full">
-                      <div className="flex flex-col flex-1 min-w-[120px]">
-                        <label htmlFor="originalPrice" className="text-sm font-medium text-gray-700">
-                          Original Price (Optional)
+                    {/* Price Fields */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label htmlFor="edit-price" className="text-sm font-semibold text-gray-700">
+                          Price <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          id="originalPrice"
-                          type="number"
-                          step="0.01"
-                          name="originalPrice"
-                          value={localData.originalPrice}
-                          onChange={handleInputChange}
-                          className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
-                          disabled={loading}
-                          placeholder="0.00"
-                        />
+                        <div className="relative">
+                          <input
+                            id="edit-price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            name="price"
+                            value={localData.price}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                            disabled={loading}
+                            placeholder="0.00"
+                            required
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">dt</span>
+                        </div>
                       </div>
 
-                      <div className="flex flex-col flex-1 min-w-[120px]">
-                        <label htmlFor="price" className="text-sm font-medium text-gray-700">
-                          Your Price <span className="text-red-500">*</span>
+                      <div className="space-y-1.5">
+                        <label htmlFor="edit-originalPrice" className="text-sm font-semibold text-gray-700">
+                          Original Price
                         </label>
-                        <input
-                          id="price"
-                          type="number"
-                          step="0.01"
-                          name="price"
-                          value={localData.price}
-                          onChange={handleInputChange}
-                          className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
-                          disabled={loading}
-                          required
-                        />
+                        <div className="relative">
+                          <input
+                            id="edit-originalPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            name="originalPrice"
+                            value={localData.originalPrice}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                            disabled={loading}
+                            placeholder="0.00"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">dt</span>
+                        </div>
+                        {localData.originalPrice && parseFloat(localData.originalPrice as any) > parseFloat(localData.price as any) && (
+                          <p className="text-xs text-emerald-600 font-medium">
+                            Save {((1 - parseFloat(localData.price as any) / parseFloat(localData.originalPrice as any)) * 100).toFixed(0)}%
+                          </p>
+                        )}
                       </div>
+                    </div>
 
-                      <div className="flex flex-col flex-1 min-w-[120px]">
-                        <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
-                          Quantity <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          id="quantity"
-                          type="number"
-                          name="quantity"
-                          value={localData.quantity}
-                          onChange={handleInputChange}
-                          className="border border-gray-200 rounded-2xl p-2 w-full focus:ring-2 focus:ring-teal-400 outline-none"
-                          disabled={loading}
-                          required
-                        />
-                      </div>
+                    {/* Quantity */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit-quantity" className="text-sm font-semibold text-gray-700">
+                        Quantity <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="edit-quantity"
+                        type="number"
+                        min="0"
+                        name="quantity"
+                        value={localData.quantity}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                        disabled={loading}
+                        placeholder="0"
+                        required
+                      />
                     </div>
                   </CredenzaBody>
 
-                  <CredenzaFooter className="flex flex-wrap justify-end gap-3 mt-4">
+                  <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                     <CredenzaClose asChild>
-                      <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
+                      <button 
+                        className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                        disabled={loading}
+                      >
                         Cancel
                       </button>
                     </CredenzaClose>
                     <button
                       onClick={handleEdit}
                       disabled={loading}
-                      className="px-4 py-2 bg-teal-500 text-white rounded-xl"
+                      className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loading ? "Saving..." : "Save"}
+                      {loading ? "Saving..." : "Save Changes"}
                     </button>
                   </CredenzaFooter>
                 </CredenzaContent>
