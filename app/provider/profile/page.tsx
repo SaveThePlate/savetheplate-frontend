@@ -638,80 +638,130 @@ export default function ProviderProfile() {
       />
 
       {/* Profile Card */}
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-8 md:p-12 flex flex-col items-center text-center">
-        {/* Profile Image */}
-        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-[#E5F3E9] mb-6 shadow-md">
-          <Image
-            src={profileImageSrc}
-            alt="Store Logo"
-            width={160}
-            height={160}
-            className="object-cover w-full h-full"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = DEFAULT_PROFILE_IMAGE;
-            }}
-          />
-        </div>
+      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+        {/* Profile Header Section */}
+        <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 px-6 md:px-8 py-6 md:py-8 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Profile Image */}
+            <div className="relative flex-shrink-0">
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-lg ring-4 ring-emerald-100">
+                <Image
+                  src={profileImageSrc}
+                  alt="Store Logo"
+                  width={112}
+                  height={112}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = DEFAULT_PROFILE_IMAGE;
+                  }}
+                />
+              </div>
+            </div>
 
-        {/* Store Details */}
-        <h1 className="text-3xl md:text-4xl font-bold text-[#1B4332] mb-2">
-          {loading ? "Loading..." : profile?.username || "Your Store"}
-        </h1>
-        <p className="text-lg text-gray-600 mb-1">
-          {loading ? "..." : profile?.location || "Location"}
-        </p>
-        <p className="text-base text-gray-500 mb-8">
-          {loading ? "..." : profile?.phoneNumber || "Phone number"}
-        </p>
+            {/* Store Details */}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                {loading ? "Loading..." : profile?.username || "Your Store"}
+              </h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm md:text-base">
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>{loading ? "..." : profile?.location || "Location"}</span>
+                </div>
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span>{loading ? "..." : profile?.phoneNumber || "Phone number"}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+              <Link href="/provider/publish" className="sm:w-auto">
+                <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create Offer
+                </Button>
+              </Link>
+              <Button
+                onClick={() => setIsEditModalOpen(true)}
+                variant="outline"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Profile
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Stats Grid */}
-        <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {/* Number of Offers */}
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200">
-            <div className="text-4xl font-bold text-emerald-700 mb-2">
-              {loading ? "..." : stats.totalOffers}
+        <div className="p-6 md:p-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Number of Offers */}
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-lg bg-emerald-200 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Offers</p>
+                  <p className="text-3xl font-bold text-emerald-800">
+                    {loading ? "..." : stats.totalOffers}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-emerald-700 mt-1">Published offers</p>
             </div>
-            <div className="text-sm font-medium text-emerald-600">
-              Offers Published
+
+            {/* Number of Items */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-lg bg-blue-200 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Items</p>
+                  <p className="text-3xl font-bold text-blue-800">
+                    {loading ? "..." : stats.totalItems}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-blue-700 mt-1">Total items available</p>
+            </div>
+
+            {/* Generated Revenue */}
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-xl p-5 border border-amber-200 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-lg bg-amber-200 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">Revenue</p>
+                  <p className="text-3xl font-bold text-amber-800">
+                    {loading ? "..." : stats.revenue.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-amber-700 mt-1">Total earnings (TND)</p>
             </div>
           </div>
-
-          {/* Number of Items */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
-            <div className="text-4xl font-bold text-blue-700 mb-2">
-              {loading ? "..." : stats.totalItems}
-            </div>
-            <div className="text-sm font-medium text-blue-600">
-              Total Items
-            </div>
-          </div>
-
-          {/* Generated Revenue */}
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-6 border border-yellow-200">
-            <div className="text-4xl font-bold text-yellow-700 mb-2">
-              {loading ? "..." : stats.revenue.toFixed(2)}
-            </div>
-            <div className="text-sm font-medium text-yellow-600">
-              Revenue (TND)
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-          <Link href="/provider/publish" className="flex-1">
-            <Button className="w-full bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 px-6 py-3 rounded-full font-semibold shadow hover:shadow-md transition hover:-translate-y-0.5">
-              Create New Offer
-            </Button>
-          </Link>
-          <Button
-            onClick={() => setIsEditModalOpen(true)}
-            variant="outline"
-            className="flex-1 px-6 py-3 rounded-full font-semibold border-2"
-          >
-            Edit Profile
-          </Button>
         </div>
       </div>
 
