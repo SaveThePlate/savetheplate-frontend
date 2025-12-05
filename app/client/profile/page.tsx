@@ -26,6 +26,8 @@ interface Offer {
   images?: { filename: string; alt?: string; url?: string }[];
   pickupLocation: string;
   quantity: number;
+  price?: number;
+  originalPrice?: number;
   mapsLink?: string;
   owner?: {
     id: number;
@@ -37,25 +39,6 @@ interface Offer {
   };
 }
 
-const DEFAULT_BAG_IMAGE = "/defaultBag.png";
-const getImage = (filename?: string | null): string => {
-  if (!filename) return DEFAULT_BAG_IMAGE;
-
-  // full URL from API
-  if (/^https?:\/\//i.test(filename)) return filename;
-
-  // path starting with /storage/ should be served from backend storage
-  if (filename.startsWith("/storage/")) {
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    return origin + filename;
-  }
-
-  // leading slash -> public asset in frontend's /public
-  if (filename.startsWith("/")) return filename;
-
-  // bare filename, fallback to public folder
-  return `/${filename}`;
-};
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -65,7 +48,10 @@ const ProfilePage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [offersDetails, setOffersDetails] = useState<Record<number, Offer>>({});
   const [loading, setLoading] = useState(true);
-  const [imageSrc, setImageSrc] = useState<string>(DEFAULT_BAG_IMAGE);
+  const [totalSavings, setTotalSavings] = useState<number>(0);
+  const [totalMealsSaved, setTotalMealsSaved] = useState<number>(0);
+  const [co2Saved, setCo2Saved] = useState<number>(0);
+  const [waterSaved, setWaterSaved] = useState<number>(0);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<{ username: string; phoneNumber: number | null }>({ username: "", phoneNumber: null });
   const [isSaving, setIsSaving] = useState(false);
@@ -138,7 +124,7 @@ const ProfilePage = () => {
         const ordersData = ordersRes.data || [];
         setOrders(ordersData);
 
-        // Fetch all offers in parallel (non-blocking - can load after orders are shown)
+        // Fetch all offers in parallel to calculate savings
         if (ordersData.length > 0) {
           const offerPromises = ordersData.map((order: Order) =>
             axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
@@ -161,13 +147,35 @@ const ProfilePage = () => {
             });
             setOffersDetails(offersMap);
 
-            // Set image from first order's offer if available
-            if (ordersData.length > 0 && offersMap[ordersData[0].offerId]) {
-              const firstOffer = offersMap[ordersData[0].offerId];
-              const firstImage = firstOffer.images?.[0];
-              const image = firstImage?.filename ? getImage(firstImage.filename) : DEFAULT_BAG_IMAGE;
-              setImageSrc(image);
-            }
+            // Calculate total savings and environmental impact from confirmed orders
+            const confirmedOrders = ordersData.filter((o: Order) => o.status === "confirmed");
+            let savings = 0;
+            let mealsSaved = 0;
+            
+            confirmedOrders.forEach((order: Order) => {
+              const offer = offersMap[order.offerId];
+              if (offer) {
+                // Calculate financial savings
+                if (offer.originalPrice && offer.price && offer.originalPrice > offer.price) {
+                  const savingsPerItem = offer.originalPrice - offer.price;
+                  savings += savingsPerItem * order.quantity;
+                }
+                // Each order quantity represents meals/bags saved
+                mealsSaved += order.quantity;
+              }
+            });
+            
+            setTotalSavings(savings);
+            setTotalMealsSaved(mealsSaved);
+            
+            // Environmental impact calculations
+            // 1 meal saved ≈ 1.5 kg CO2 equivalent (conservative estimate)
+            // 1 meal ≈ 1,500 liters of water saved
+            const co2 = mealsSaved * 1.5; // kg CO2
+            const water = mealsSaved * 1500; // liters
+            
+            setCo2Saved(co2);
+            setWaterSaved(water);
           });
         }
       } catch (err) {
@@ -181,13 +189,7 @@ const ProfilePage = () => {
   }, [router]);
 
   const pendingCount = orders.filter((o) => o.status === "pending").length;
-  const priority: Record<string, number> = { pending: 0, confirmed: 1, cancelled: 2 };
-  const sortedOrders = [...orders].sort((a, b) => {
-    const pa = priority[a.status] ?? 99;
-    const pb = priority[b.status] ?? 99;
-    if (pa !== pb) return pa - pb;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  const confirmedCount = orders.filter((o) => o.status === "confirmed").length;
 
   return (
     <main className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 lg:px-16">
@@ -205,14 +207,14 @@ const ProfilePage = () => {
           progressClassName="bg-white/80"
         />
 
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 mb-10 flex flex-col items-center text-center border border-gray-100">
+      <div className="w-full max-w-md bg-white rounded-3xl p-8 mb-6 flex flex-col items-center text-center border border-gray-100 shadow-sm">
         {pendingCount > 0 && (
           <div className="w-full mb-4 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800 text-sm">
-            You have {pendingCount} pending order{pendingCount > 1 ? "s" : ""}. Check <strong>My Purchases</strong> to confirm.
+            You have {pendingCount} pending order{pendingCount > 1 ? "s" : ""}. Check <strong>My Orders</strong> to view.
           </div>
         )}
 
-        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#CFE8D5] mb-4">
+        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-emerald-200 mb-4 shadow-md">
           <Image src={profileImage} alt="Profile" width={128} height={128} priority className="object-cover w-full h-full" />
         </div>
 
@@ -235,7 +237,7 @@ const ProfilePage = () => {
             />
             <div className="flex gap-3 justify-center mt-2 flex-wrap">
               <Button
-                className="bg-[#FFAE8A] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#ff9966]"
+                className="bg-emerald-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-emerald-700"
                 onClick={handleSave}
                 disabled={isSaving}
               >
@@ -259,7 +261,7 @@ const ProfilePage = () => {
             <div className="mt-4">
               <Button
                 onClick={() => setIsEditing(true)}
-                className="bg-[#FFAE8A] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#ff9966]"
+                className="bg-emerald-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-emerald-700"
               >
                 Edit Profile
               </Button>
@@ -268,117 +270,155 @@ const ProfilePage = () => {
         )}
       </div>
 
-{/* Orders Section */}
-<section className="w-full max-w-6xl mx-auto px-4 space-y-10">
-  <h2 className="text-3xl font-bold text-gray-900 text-center">My Past Orders</h2>
-
-  {loading ? (
-    <p className="text-gray-600 text-center">Loading orders...</p>
-  ) : orders.length === 0 ? (
-    <div className="text-center text-gray-600">
-      <p className="text-lg mb-4">You haven’t placed any orders yet.</p>
-      <Button
-        className="bg-[#FFAE8A] text-white px-6 py-2 rounded-full font-semibold hover:bg-[#ff9966] transition"
-        onClick={() => router.push("./home")}
-      >
-        Explore Offers
-      </Button>
-    </div>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {sortedOrders.map((order) => {
-        const offer = offersDetails[order.offerId];
-        return (
-          <div
-            key={order.id}
-            className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
-          >
-            {/* 🖼️ Image Header */}
-            <div className="relative h-48 w-full overflow-hidden">
-              <Image
-                src={imageSrc}
-                alt={offer?.title || "Order Image"}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-              <div className="absolute bottom-3 left-3">
-                <h3 className="text-white text-lg font-semibold drop-shadow-sm">
-                  {offer?.title || "Offer"}
-                </h3>
+      {/* Stats Section */}
+      <div className="w-full max-w-6xl mx-auto px-4 space-y-6">
+        {/* Financial & Order Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Total Savings Card */}
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-2xl">💰</span>
+              </div>
+              <div>
+                <p className="text-sm text-emerald-700 font-medium">Total Saved</p>
+                <p className="text-2xl font-bold text-emerald-800">
+                  {loading ? "..." : totalSavings.toFixed(2)} dt
+                </p>
               </div>
             </div>
+            <p className="text-xs text-emerald-600 mt-2">
+              Money saved from confirmed orders
+            </p>
+          </div>
 
-            {/* 🧾 Card Content */}
-            <div className="p-5 flex flex-col justify-between flex-1 space-y-3">
-              <div className="space-y-3">
-                {/* Unified Pickup Button */}
-                {(offer?.owner?.location || offer?.pickupLocation) && (
-                  <a
-                    href={offer?.owner?.mapsLink || offer?.mapsLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-full bg-[#FFAE8A]/10 hover:bg-[#FFAE8A]/20 text-[#FF7F50] font-semibold text-sm py-2 px-3 rounded-full transition-all"
-                  >
-                    📍 Pickup:{" "}
-                    <span className="ml-1 text-gray-800 truncate font-medium">
-                      {offer.owner?.location || offer.pickupLocation}
-                    </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-4 h-4 ml-2"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                      />
-                    </svg>
-                  </a>
-                )}
+          {/* Total Orders Card */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-2xl">📦</span>
+              </div>
+              <div>
+                <p className="text-sm text-blue-700 font-medium">Total Orders</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {loading ? "..." : orders.length}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              {confirmedCount} confirmed, {pendingCount} pending
+            </p>
+          </div>
 
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="mr-2">🗓️</span>
-                  <span>
-                    Ordered on{" "}
-                    <span className="font-medium text-gray-700">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </span>
-                  </span>
+          {/* View Orders Card */}
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                <span className="text-2xl">📋</span>
+              </div>
+              <div>
+                <p className="text-sm text-amber-700 font-medium">My Orders</p>
+                <Button
+                  onClick={() => router.push("/client/orders")}
+                  className="mt-2 bg-amber-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-amber-700 text-sm"
+                >
+                  View All
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-amber-600 mt-2">
+              Manage your orders
+            </p>
+          </div>
+        </div>
+
+        {/* Environmental Impact Section */}
+        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center">
+                <span className="text-3xl">🌱</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-teal-900">Environmental Impact</h2>
+                <p className="text-sm text-teal-700">Your contribution to saving the planet</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => router.push("/impact")}
+              className="bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 text-sm"
+            >
+              Learn More
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Meals Saved */}
+            <div className="bg-white rounded-xl p-5 border border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <span className="text-xl">🍽️</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Meals Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : totalMealsSaved}
+                  </p>
                 </div>
               </div>
+              <p className="text-xs text-gray-500">
+                Food rescued from waste
+              </p>
+            </div>
 
-              {/* 🏷️ Status + Quantity */}
-              <div className="flex items-center justify-between pt-2">
-                <span
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-full ${
-                    order.status === "pending"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : order.status === "confirmed"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-600"
-                  }`}
-                >
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </span>
-
-                <span className="bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-1.5 rounded-full">
-                  {order.quantity} {order.quantity > 1 ? "items" : "item"}
-                </span>
+            {/* CO2 Saved */}
+            <div className="bg-white rounded-xl p-5 border border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <span className="text-xl">🌍</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">CO₂ Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : co2Saved.toFixed(1)} kg
+                  </p>
+                </div>
               </div>
+              <p className="text-xs text-gray-500">
+                Equivalent to {loading ? "..." : (co2Saved / 21).toFixed(1)} trees planted
+              </p>
+            </div>
+
+            {/* Water Saved */}
+            <div className="bg-white rounded-xl p-5 border border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                  <span className="text-xl">💧</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Water Saved</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : waterSaved >= 1000 ? `${(waterSaved / 1000).toFixed(1)}k` : waterSaved.toFixed(0)} L
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Water footprint avoided
+              </p>
             </div>
           </div>
-        );
-      })}
-    </div>
-  )}
-</section>
+
+          {/* Impact Message */}
+          {!loading && totalMealsSaved > 0 && (
+            <div className="mt-6 p-4 bg-teal-100 rounded-xl border border-teal-300">
+              <p className="text-sm text-teal-900 font-medium text-center">
+                🌟 Amazing! You've saved {totalMealsSaved} meal{totalMealsSaved !== 1 ? "s" : ""} from going to waste, 
+                preventing {co2Saved.toFixed(1)} kg of CO₂ emissions and saving {waterSaved >= 1000 ? `${(waterSaved / 1000).toFixed(1)}k` : waterSaved.toFixed(0)} liters of water!
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
     </main>
   );

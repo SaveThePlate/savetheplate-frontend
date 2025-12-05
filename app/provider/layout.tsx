@@ -50,6 +50,9 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             <Link href="/provider/orders" className="hover:text-green-600 transition-colors">
               Orders
             </Link>
+            <Link href="/impact" className="hover:text-green-600 transition-colors">
+              Impact
+            </Link>
             <Link
               href="/provider/logout"
               className="flex items-center gap-2 text-red-500 hover:text-red-600 transition-colors"
@@ -113,6 +116,13 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               className="hover:text-green-600"
             >
               Orders
+            </Link>
+            <Link
+              href="/impact"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-green-600"
+            >
+              Impact
             </Link>
             <Link
               href="/provider/logout"

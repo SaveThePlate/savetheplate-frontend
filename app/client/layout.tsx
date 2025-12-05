@@ -66,6 +66,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <Link href="/client/profile" className="hover:text-green-600 transition-colors">
               Profile
             </Link>
+            <Link href="/impact" className="hover:text-green-600 transition-colors">
+              Impact
+            </Link>
             <Link
               href="/client/logout"
               className="flex items-center gap-2 text-red-500 hover:text-red-600 transition-colors"
@@ -123,6 +126,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               className="hover:text-green-600"
             >
               Profile
+            </Link>
+            <Link
+              href="/impact"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-green-600"
+            >
+              Impact
             </Link>
             <Link
               href="/client/logout"
