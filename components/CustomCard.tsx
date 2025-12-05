@@ -9,6 +9,12 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
 import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/dropFile";
+import {
   Credenza,
   CredenzaTrigger,
   CredenzaContent,
@@ -102,6 +108,15 @@ const CustomCard: FC<CustomCardProps> = ({
     originalPrice: originalPrice || "",
     quantity,
   });
+  
+  // Image upload state
+  const [localFiles, setLocalFiles] = useState<File[] | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<Array<{
+    filename: string;
+    url: string;
+    absoluteUrl: string;
+  }>>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false); // close modal first
@@ -144,6 +159,92 @@ const CustomCard: FC<CustomCardProps> = ({
     setLocalData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Create axios instance for image uploads
+  const axiosInstance = axios.create({
+    baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+
+  // Upload images function
+  const uploadFiles = async (files: File[]): Promise<Array<{
+    filename: string;
+    url: string;
+    absoluteUrl: string;
+  }>> => {
+    if (!files || files.length === 0) return [];
+
+    const fd = new FormData();
+    files.forEach((f) => fd.append("files", f));
+
+    try {
+      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const res = await axiosInstance.post("/storage/upload", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const data = res.data as any[];
+      const mapped = data.map((item) => {
+        const filename = item.filename || item.path || "";
+        const url = item.url || `/storage/${filename}`;
+        
+        let absoluteUrl = item.absoluteUrl;
+        if (!absoluteUrl) {
+          if (url.startsWith("http://") || url.startsWith("https://")) {
+            absoluteUrl = url;
+          } else if (url.startsWith("/storage/") && backendUrl) {
+            absoluteUrl = `${backendUrl}${url}`;
+          } else if (backendUrl) {
+            absoluteUrl = `${backendUrl}/storage/${filename}`;
+          } else {
+            absoluteUrl = url;
+          }
+        }
+
+        return {
+          filename: filename,
+          url: url,
+          absoluteUrl: absoluteUrl,
+        };
+      });
+      return mapped;
+    } catch (err: any) {
+      console.error("Upload error", err?.response?.data || err.message || err);
+      const errorMessage = err?.response?.data?.message || err?.message || "Failed to upload images";
+      toast.error(errorMessage);
+      throw err;
+    }
+  };
+
+  // Handle image upload
+  const handleImageUpload = async (files: File[] | null) => {
+    if (!files || files.length === 0) {
+      setLocalFiles(null);
+      setUploadedImages([]);
+      return;
+    }
+    
+    setUploadingImages(true);
+    try {
+      const uploaded = await uploadFiles(files);
+      setUploadedImages(uploaded);
+      setLocalFiles(files);
+      toast.success(`${uploaded.length} image(s) uploaded successfully!`);
+    } catch (error: any) {
+      setLocalFiles(null);
+      setUploadedImages([]);
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const handleEdit = async () => {
     if (!localData.title || !localData.description) {
       toast.error("Please fill out all fields");
@@ -155,11 +256,31 @@ const CustomCard: FC<CustomCardProps> = ({
     if (!token) return router.push("/signIn");
 
     try {
+      // Upload images if new ones were selected
+      let finalImages = uploadedImages;
+      if (localFiles && localFiles.length > 0 && uploadedImages.length === 0) {
+        toast.info("Uploading images...");
+        finalImages = await uploadFiles(localFiles);
+        setUploadedImages(finalImages);
+      }
+
       const originalPriceValue = localData.originalPrice 
         ? parseFloat(localData.originalPrice as any) 
         : undefined;
 
-      const payload = {
+      // Format images payload for backend (same format as AddOffer)
+      const imagesPayload = finalImages.length > 0 
+        ? finalImages.map((img) => ({
+            filename: img.filename,
+            url: img.url,
+            absoluteUrl: img.absoluteUrl,
+            original: img.url.startsWith("/") && !img.url.startsWith("/storage/") 
+              ? { url: img.url }
+              : undefined,
+          }))
+        : undefined;
+
+      const payload: any = {
         ...localData,
         price: parseFloat(localData.price as any),
         originalPrice: originalPriceValue && !isNaN(originalPriceValue) && originalPriceValue > parseFloat(localData.price as any)
@@ -167,6 +288,12 @@ const CustomCard: FC<CustomCardProps> = ({
           : undefined,
         quantity: parseInt(localData.quantity as any, 10),
       };
+
+      // Include images if they were updated
+      if (imagesPayload && imagesPayload.length > 0) {
+        payload.images = JSON.stringify(imagesPayload);
+      }
+
       await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -175,6 +302,9 @@ const CustomCard: FC<CustomCardProps> = ({
         ...payload,
         originalPrice: payload.originalPrice || "",
       });
+      // Clear image upload state
+      setLocalFiles(null);
+      setUploadedImages([]);
       setIsEditing(false);
       onUpdate?.(offerId, payload);
     } catch (err: any) {
@@ -595,7 +725,18 @@ const CustomCard: FC<CustomCardProps> = ({
           <CardFooter className="mt-4 flex w-full gap-3">
             {/* ✏️ Edit Modal */}
             <div className="flex-1">
-              <Credenza open={isEditing} onOpenChange={setIsEditing}>
+              <Credenza 
+                open={isEditing} 
+                onOpenChange={(open) => {
+                  setIsEditing(open);
+                  // Reset image upload state when modal closes
+                  if (!open) {
+                    setLocalFiles(null);
+                    setUploadedImages([]);
+                    setUploadingImages(false);
+                  }
+                }}
+              >
                 <CredenzaTrigger asChild>
                   <button
                     disabled={loading}
@@ -718,6 +859,67 @@ const CustomCard: FC<CustomCardProps> = ({
                         required
                       />
                     </div>
+
+                    {/* Images Upload */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-gray-700">
+                        Images {uploadedImages.length > 0 && <span className="text-emerald-600">({uploadedImages.length} uploaded)</span>}
+                      </label>
+                      <FileUploader
+                        value={localFiles || []}
+                        onValueChange={handleImageUpload}
+                        dropzoneOptions={{
+                          accept: { "image/*": [".jpg", ".jpeg", ".png"] },
+                          multiple: true,
+                          maxFiles: 5,
+                          maxSize: 5 * 1024 * 1024,
+                        }}
+                      >
+                        <FileInput>
+                          <div className="flex flex-col items-center justify-center h-32 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
+                            {uploadingImages ? (
+                              <>
+                                <div className="animate-spin text-2xl mb-2">⏳</div>
+                                <p className="text-gray-600 text-sm">Uploading...</p>
+                              </>
+                            ) : localFiles && localFiles.length > 0 ? (
+                              <>
+                                <div className="text-2xl mb-2">✓</div>
+                                <p className="text-gray-600 text-sm">{localFiles.length} image(s) ready</p>
+                              </>
+                            ) : (
+                              <>
+                                <div className="text-2xl mb-2">📸</div>
+                                <p className="text-gray-600 text-sm">Click to upload or drag and drop</p>
+                                <p className="text-xs text-gray-500 mt-1">Up to 5 images (optional)</p>
+                              </>
+                            )}
+                          </div>
+                        </FileInput>
+                        <FileUploaderContent>
+                          {localFiles && localFiles.map((file, index) => (
+                            <FileUploaderItem
+                              key={index}
+                              index={index}
+                              className="size-24 p-0 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
+                            >
+                              <Image
+                                src={URL.createObjectURL(file)}
+                                alt={`Preview ${index + 1}`}
+                                width={96}
+                                height={96}
+                                className="size-24 object-cover rounded-xl"
+                              />
+                            </FileUploaderItem>
+                          ))}
+                        </FileUploaderContent>
+                      </FileUploader>
+                      <p className="text-xs text-gray-500">
+                        {uploadedImages.length > 0 
+                          ? "New images will replace existing ones. Leave empty to keep current images."
+                          : "Upload new images to replace existing ones, or leave empty to keep current images."}
+                      </p>
+                    </div>
                   </CredenzaBody>
 
                   <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
@@ -731,10 +933,10 @@ const CustomCard: FC<CustomCardProps> = ({
                     </CredenzaClose>
                     <button
                       onClick={handleEdit}
-                      disabled={loading}
+                      disabled={loading || uploadingImages}
                       className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loading ? "Saving..." : "Save Changes"}
+                      {loading ? "Saving..." : uploadingImages ? "Uploading..." : "Save Changes"}
                     </button>
                   </CredenzaFooter>
                 </CredenzaContent>
