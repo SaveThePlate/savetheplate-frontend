@@ -187,6 +187,11 @@ const ProviderHome = () => {
         mapsLink={currentMapsLink}
         reserveLink={`/reserve/${offer.id}`}
         onDelete={handleDeleteOffer}
+        owner={offer.owner ? {
+          id: offer.owner.id,
+          username: offer.owner.username,
+          profileImage: offer.owner.profileImage,
+        } : undefined}
       />
     );
   })}

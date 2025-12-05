@@ -161,6 +161,11 @@ const OffersPage = () => {
               pickupLocation={currentLocation}
               mapsLink={currentMapsLink}
               reserveLink={`/client/offers/${offer.id}`}
+              owner={offer.owner ? {
+                id: offer.owner.id,
+                username: offer.owner.username,
+                profileImage: offer.owner.profileImage,
+              } : undefined}
             />
           );
         })}

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { getImageFallbacks } from "@/utils/imageUtils";
+import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
 import {
   Credenza,
   CredenzaTrigger,
@@ -33,8 +33,16 @@ const formatDateTime = (dateString: string | undefined) => {
   if (!dateString) return { date: "N/A", time: "" };
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return { date: "Invalid date", time: "" };
+  
+  // Check if the date is today
+  const today = new Date();
+  const isToday = 
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
+  
   return {
-    date: date.toLocaleDateString(),
+    date: isToday ? "Today" : date.toLocaleDateString(),
     time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   };
 };
@@ -55,6 +63,11 @@ interface CustomCardProps {
   reserveLink?: string;
   onDelete?: (id: number) => void;
   onUpdate?: (id: number, data: any) => void;
+  owner?: {
+    id: number;
+    username: string;
+    profileImage?: string;
+  };
 }
 
 const CustomCard: FC<CustomCardProps> = ({
@@ -73,6 +86,7 @@ const CustomCard: FC<CustomCardProps> = ({
   reserveLink = "#",
   onDelete,
   onUpdate,
+  owner,
 }) => {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
@@ -80,6 +94,7 @@ const CustomCard: FC<CustomCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [localData, setLocalData] = useState({
     title,
     description,
@@ -200,12 +215,15 @@ const CustomCard: FC<CustomCardProps> = ({
     }
   };
 
+  // Check if this is a Rescue Pack
+  const isRescuePack = localData.title.toLowerCase().includes("rescue pack");
+
   if (isClient) {
-    // Client card: show image, title, pickup location, expiration date and action buttons (Order + Details).
+    // Client card: simple, clean design matching reference
     return (
-      <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm h-full min-h-[480px]">
-      {/* Image (same as provider) */}
-        <div className="relative w-full h-56 sm:h-64">
+      <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-md transition-shadow cursor-pointer">
+        {/* Image */}
+        <div className="relative w-full h-48 sm:h-52">
           {currentImage ? (
             <Image
               src={currentImage || DEFAULT_LOGO}
@@ -224,15 +242,16 @@ const CustomCard: FC<CustomCardProps> = ({
             </div>
           )}
 
-          <div className="absolute top-3 right-3 bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-full text-sm shadow-md">
+          {/* Price Badge - top right */}
+          <div className="absolute top-2 right-2 bg-emerald-600 text-white font-semibold px-2.5 py-1.5 rounded-full text-xs shadow-md z-10">
             <div className="flex flex-col items-end leading-tight">
-              <span className="font-bold">{localData.price} dt</span>
+              <span className="font-bold text-sm">{localData.price} dt</span>
               {originalPrice && originalPrice > localData.price && (
                 <>
-                  <span className="text-xs font-normal line-through opacity-75">
+                  <span className="text-[10px] font-normal line-through opacity-75">
                     {originalPrice.toFixed(2)} dt
                   </span>
-                  <span className="text-xs font-bold mt-0.5 bg-white/20 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] font-bold mt-0.5 bg-white/20 px-1 py-0.5 rounded">
                     -{((1 - localData.price / originalPrice) * 100).toFixed(0)}%
                   </span>
                 </>
@@ -240,124 +259,160 @@ const CustomCard: FC<CustomCardProps> = ({
             </div>
           </div>
 
-          <div
-            className={`absolute bottom-3 left-3 px-3 py-1 text-sm font-medium rounded-full shadow-md ${
-              localData.quantity > 0
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-600"
-            }`}
-          >
-            {localData.quantity > 0 ? `${localData.quantity} left` : "Sold Out"}
-          </div>
+          {/* Quantity Badge - top left */}
+          {localData.quantity > 0 && !isExpired && (
+            <div className="absolute top-2 left-2 bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
+              {localData.quantity} left
+            </div>
+          )}
 
+          {/* Provider Profile Image and Name Overlay - bottom left */}
+          {owner && (
+            <div className="absolute bottom-2 left-2 flex items-center gap-2 z-10 bg-white/90 backdrop-blur-sm px-2 py-1.5 rounded-full shadow-lg border border-white/50">
+              <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0">
+                <Image
+                  src={owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"}
+                  alt={owner.username}
+                  width={32}
+                  height={32}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/logo.png";
+                  }}
+                />
+              </div>
+              <p className="text-xs font-semibold text-gray-800 truncate max-w-[100px]">{owner.username}</p>
+            </div>
+          )}
+
+          {/* Expired Badge */}
           {isExpired && (
-            <div className="absolute top-3 left-3 bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
+            <div className="absolute top-2 left-2 bg-gray-800 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
               Expired
             </div>
           )}
         </div>
 
-        <div className="flex flex-col flex-1 p-3">
-          <CardHeader className="p-0">
-            <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
-              {localData.title}
-            </CardTitle>
+        {/* Content - Simple and Clean */}
+        <div className="flex flex-col flex-1 p-4">
+          {/* Offer Type Label */}
+          <p className="text-sm font-medium text-gray-700 mb-1">
+            {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+          </p>
 
-            <div className="flex flex-col gap-2">
-              {mapsLink ? (
-                <a
-                  href={mapsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl text-left"
-                >
-                  <span className="text-lg">📍</span>
-                  <span className="truncate">{pickupLocation || "View on Map"}</span>
-                </a>
-              ) : (
-                <p className="text-gray-600 font-medium w-full">{pickupLocation || "Provider"}</p>
-              )}
-
-              <p className="text-gray-600 text-sm mt-1">🕑 {formattedDate} {formattedTime}</p>
-            </div>
-          </CardHeader>
-
-          {/* Footer buttons shown to clients */}
-          <CardFooter className=" mt-4 flex flex-row gap-3 w-full items-center justify-between">
-            {isExpired ? (
-              <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
-                Expired
-              </div>
-            ) : localData.quantity > 0 ? (
-              <Link
-                href={reserveLink}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm"
-              >
-                Order
-              </Link>
-            ) : (
-              <div className="flex-1"></div>
-            )}
-
-            <Credenza>
-              <CredenzaTrigger asChild>
-                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm">
-                  Details
-                </button>
-              </CredenzaTrigger>
-
-              <CredenzaContent className="bg-white rounded-3xl shadow-lg p-6 max-w-md mx-auto border border-gray-100">
-                <CredenzaHeader className="mb-3">
-                  <CredenzaTitle className="text-xl font-bold text-gray-900">
-                    {localData.title}
-                  </CredenzaTitle>
-                </CredenzaHeader>
-
-                <CredenzaDescription className="text-sm text-gray-600 mb-3">
-                  Details about this offer: {localData.title}
-                </CredenzaDescription>
-
-                <CredenzaBody className="space-y-3 text-gray-700 text-sm">
-                  <p>{localData.description}</p>
-                  <p>
-                    <strong>Pickup Time:</strong> {formattedDate} at {formattedTime}
-                  </p>
-                  <p>
-                    <strong>Location:</strong> {pickupLocation}
-                  </p>
-                  {isExpired && (
-                    <p className="text-red-600 font-semibold">
-                      <strong>Expired</strong>
-                    </p>
-                  )}
-                </CredenzaBody>
-
-                <CredenzaFooter className="flex justify-between gap-3 mt-5">
-                  {mapsLink ? (
-                    <a
-                      href={mapsLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 font-medium rounded-xl"
-                    >
-                      📍 Open in Maps
-                    </a>
-                  ) : (
-                    <div />
-                  )}
-
-                  <div className="flex items-center">
-                    <CredenzaClose asChild>
-                      <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition">
-                        Close
-                      </button>
-                    </CredenzaClose>
-                  </div>
-                </CredenzaFooter>
-              </CredenzaContent>
-            </Credenza>
-          </CardFooter>
+          {/* Pickup Time */}
+          <p className="text-xs text-gray-600 mb-3">
+            Pick up {formattedDate === "Today" ? "today" : formattedDate} {formattedTime}
+          </p>
         </div>
+
+        {/* Details Modal - Redesigned */}
+        <Credenza open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <CredenzaTrigger asChild>
+            <div className="absolute inset-0" />
+          </CredenzaTrigger>
+
+          <CredenzaContent className="bg-white rounded-3xl shadow-xl max-w-lg mx-auto border border-gray-100 p-0 overflow-hidden">
+            {/* Large Image at Top */}
+            <div className="relative w-full h-64">
+              {currentImage ? (
+                <Image
+                  src={currentImage || DEFAULT_LOGO}
+                  alt={localData.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  onError={handleImageError}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-400">No image</span>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6">
+              {/* Store Information */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {owner && (
+                    <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden bg-white flex-shrink-0">
+                      <Image
+                        src={owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"}
+                        alt={owner.username}
+                        width={48}
+                        height={48}
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "/logo.png";
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {owner?.username || "Provider"}
+                    </h3>
+                    <p className="text-sm text-gray-600">{pickupLocation}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold text-gray-900">{localData.price} dt</p>
+                  {originalPrice && originalPrice > localData.price && (
+                    <p className="text-sm text-gray-500 line-through">{originalPrice.toFixed(2)} dt</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Offer Details */}
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+                  {owner && ` rescued by ${owner.username}`}
+                </p>
+                <p className="text-base text-gray-800 leading-relaxed">{localData.description}</p>
+              </div>
+
+              {/* Pickup Information */}
+              <div className="mb-4 p-3 bg-gray-50 rounded-xl">
+                <p className="text-sm font-medium text-gray-900 mb-1">Pickup Details</p>
+                <p className="text-sm text-gray-600">
+                  {formattedDate} at {formattedTime}
+                </p>
+                {mapsLink && (
+                  <a
+                    href={mapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-emerald-600 font-medium mt-1 inline-flex items-center gap-1"
+                  >
+                    View on Maps →
+                  </a>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-2">
+                {!isExpired && localData.quantity > 0 && (
+                  <Link
+                    href={reserveLink}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Order Now
+                  </Link>
+                )}
+                {isExpired && (
+                  <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
+                    Expired
+                  </div>
+                )}
+              </div>
+            </div>
+          </CredenzaContent>
+        </Credenza>
       </Card>
     );
   }
@@ -365,7 +420,7 @@ const CustomCard: FC<CustomCardProps> = ({
   return (
     <Card className="flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
       {/* 🖼️ Image */}
-      <div className="relative w-full h-56 sm:h-64">
+      <div className="relative w-full h-40 sm:h-44">
         {currentImage ? (
           <Image
             src={currentImage || DEFAULT_LOGO}
@@ -385,15 +440,15 @@ const CustomCard: FC<CustomCardProps> = ({
         )}
 
         {/* 💰 Price Badge */}
-        <div className="absolute top-3 right-3 bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-full text-sm shadow-md">
+        <div className="absolute top-2 right-2 bg-emerald-600 text-white font-semibold px-2 py-1 rounded-full text-xs shadow-md">
           <div className="flex flex-col items-end leading-tight">
-            <span className="font-bold">{localData.price} dt</span>
+            <span className="font-bold text-sm">{localData.price} dt</span>
             {originalPrice && originalPrice > localData.price && (
               <>
-                <span className="text-xs font-normal line-through opacity-75">
+                <span className="text-[10px] font-normal line-through opacity-75">
                   {originalPrice.toFixed(2)} dt
                 </span>
-                <span className="text-xs font-bold mt-0.5 bg-white/20 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-bold mt-0.5 bg-white/20 px-1 py-0.5 rounded">
                   -{((1 - localData.price / originalPrice) * 100).toFixed(0)}%
                 </span>
               </>
@@ -401,9 +456,9 @@ const CustomCard: FC<CustomCardProps> = ({
           </div>
         </div>
 
-        {/* 📦 Quantity Badge */}
+        {/* 📦 Quantity Badge - moved to bottom-right to avoid conflict with provider overlay */}
         <div
-          className={`absolute bottom-3 left-3 px-3 py-1 text-sm font-medium rounded-full shadow-md ${
+          className={`absolute bottom-2 right-2 px-2 py-0.5 text-xs font-medium rounded-full shadow-md ${
             localData.quantity > 0
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-600"
@@ -412,9 +467,29 @@ const CustomCard: FC<CustomCardProps> = ({
           {localData.quantity > 0 ? `${localData.quantity} left` : "Sold Out"}
         </div>
 
-        {/* 🕒 Expired Badge */}
+        {/* Provider Profile Image and Name Overlay */}
+        {owner && (
+          <div className="absolute bottom-2 left-2 flex items-center gap-2 z-10 bg-white/90 backdrop-blur-sm px-2 py-1.5 rounded-full shadow-lg border border-white/50">
+            <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0">
+              <Image
+                src={owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"}
+                alt={owner.username}
+                width={32}
+                height={32}
+                className="object-cover w-full h-full"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/logo.png";
+                }}
+              />
+            </div>
+            <p className="text-xs font-semibold text-gray-800 truncate max-w-[100px]">{owner.username}</p>
+          </div>
+        )}
+
+        {/* Expired Badge */}
         {isExpired && (
-          <div className="absolute top-3 left-3 bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
+          <div className="absolute top-2 left-2 bg-gray-800 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-md z-10">
             Expired
           </div>
         )}

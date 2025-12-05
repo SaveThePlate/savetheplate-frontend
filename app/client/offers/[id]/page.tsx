@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { ArrowLeft, MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
 
 interface Offer {
   id: number;
@@ -22,6 +23,8 @@ interface Offer {
   images?: { filename: string; alt?: string; url?: string }[];
   title: string;
   description: string;
+  price?: number;
+  originalPrice?: number;
   expirationDate: string;
   pickupLocation: string;
   mapsLink?: string;
@@ -29,6 +32,26 @@ interface Offer {
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
+
+const formatDateTime = (dateString: string) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const isToday = 
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
+  
+  return {
+    date: isToday ? "Today" : date.toLocaleDateString("en-US", { 
+      weekday: "long", 
+      year: "numeric", 
+      month: "long", 
+      day: "numeric" 
+    }),
+    time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+    isToday,
+  };
+};
 
 const Offers = () => {
   const router = useRouter();
@@ -98,104 +121,243 @@ const Offers = () => {
     }
   };
 
-  if (!offer) return <div className="text-center py-20">Loading...</div>;
+  const isRescuePack = offer?.title.toLowerCase().includes("rescue pack") || false;
+  const isExpired = offer ? new Date(offer.expirationDate).getTime() <= new Date().getTime() : false;
+  const { date: formattedDate, time: formattedTime, isToday } = offer 
+    ? formatDateTime(offer.expirationDate)
+    : { date: "", time: "", isToday: false };
+  const currentMapsLink = offer?.owner?.mapsLink || offer?.mapsLink;
+  const currentLocation = offer?.owner?.location || offer?.pickupLocation;
+
+  if (!offer) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading offer details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] min-h-screen flex justify-center items-center px-4 py-10">
-        <ToastContainer
-          position="top-right"
-          autoClose={1000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnFocusLoss
-          draggable
-          limit={3}
-          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-          bodyClassName="text-sm font-medium"
-          progressClassName="bg-white/80"
-        />
-      <div className="w-full max-w-md bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
-        {/* Image */}
-        <div className="relative w-full h-60 bg-gray-100">
-          <Image
-            src={imageSrc}
-            alt={offer.title}
-            fill
-            // card has max-w-md; use 100vw on small screens, otherwise limit to ~400px
-            sizes="(max-width: 640px) 100vw, 400px"
-            // This image is likely the Largest Contentful Paint (LCP) on the offer detail page.
-            // Mark it as priority so Next.js preloads it to improve LCP metrics.
-            priority
-            className="object-cover"
-            onError={() => {
-              const nextIndex = fallbackIndex + 1;
-              if (nextIndex < fallbacks.length) {
-                setFallbackIndex(nextIndex);
-                setImageSrc(fallbacks[nextIndex]);
-              } else {
-                setImageSrc(DEFAULT_BAG_IMAGE);
-              }
-            }}
-          />
-          <div className="absolute top-3 right-3 bg-emerald-100 text-emerald-800 text-sm font-semibold px-3 py-1 rounded-full">
-            {offer.quantity} left
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        limit={3}
+        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+        bodyClassName="text-sm font-medium"
+        progressClassName="bg-white/80"
+      />
 
-        {/* Content */}
-        <div className="p-6 flex flex-col gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">{offer.title}</h1>
-          <p className="text-gray-700 text-sm leading-relaxed">{offer.description}</p>
-
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>
-              <span className="font-semibold">Pickup:</span>{" "}
-              {offer.owner?.location || offer.pickupLocation}
-            </p>
-            <p>
-              <span className="font-semibold">Expires:</span>{" "}
-              {new Date(offer.expirationDate).toLocaleDateString()}
-            </p>
-          </div>
-
-          {/* Quantity Selector */}
-          <div className="flex justify-center items-center gap-4 mt-3">
-            <button
-              onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
-              className="px-3 py-1.5 bg-gray-100 rounded-full hover:bg-gray-200 font-semibold text-lg"
-              disabled={quantity <= 1}
-            >
-              −
-            </button>
-            <span className="text-lg font-semibold text-gray-800">{quantity}</span>
-            <button
-              onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
-              className="px-3 py-1.5 bg-gray-100 rounded-full hover:bg-gray-200 font-semibold text-lg"
-              disabled={quantity >= offer.quantity}
-            >
-              +
-            </button>
-          </div>
-
-          {/* Order Button */}
+      {/* Header with Back Button */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
-            onClick={handleOrder}
-            disabled={offer.quantity === 0}
-            className={`w-full py-3 mt-4 rounded-full font-semibold text-lg transition-all ${
-              offer.quantity === 0
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : inCart
-                ? "bg-emerald-400 text-white hover:bg-emerald-500"
-                : "bg-[#FFAE8A] text-white hover:bg-[#ff9966]"
-            }`}
+            onClick={() => router.back()}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            {offer.quantity === 0
-              ? "Out of Stock"
-              : inCart
-              ? "Added to Cart"
-              : "Add to Cart"}
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
+          <h1 className="text-lg font-semibold text-gray-900 truncate">Offer Details</h1>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200">
+          {/* Hero Image */}
+          <div className="relative w-full h-80 sm:h-96 bg-gray-100">
+            <Image
+              src={imageSrc}
+              alt={offer.title}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+              onError={() => {
+                const nextIndex = fallbackIndex + 1;
+                if (nextIndex < fallbacks.length) {
+                  setFallbackIndex(nextIndex);
+                  setImageSrc(fallbacks[nextIndex]);
+                } else {
+                  setImageSrc(DEFAULT_BAG_IMAGE);
+                }
+              }}
+            />
+            
+            {/* Badges Overlay */}
+            <div className="absolute top-4 left-4 flex flex-col gap-2">
+              {isExpired && (
+                <div className="bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
+                  Expired
+                </div>
+              )}
+              {offer.quantity > 0 && !isExpired && (
+                <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
+                  {offer.quantity} left
+                </div>
+              )}
+            </div>
+
+            {/* Price Badge - Top Right */}
+            {offer.price && (
+              <div className="absolute top-4 right-4 bg-emerald-600 text-white font-semibold px-4 py-2 rounded-2xl text-sm shadow-lg z-10">
+                <div className="flex flex-col items-end leading-tight">
+                  <span className="font-bold text-lg">{offer.price} dt</span>
+                  {offer.originalPrice && offer.originalPrice > offer.price && (
+                    <>
+                      <span className="text-xs font-normal line-through opacity-75">
+                        {offer.originalPrice.toFixed(2)} dt
+                      </span>
+                      <span className="text-xs font-bold mt-1 bg-white/20 px-2 py-0.5 rounded">
+                        -{((1 - offer.price / offer.originalPrice) * 100).toFixed(0)}%
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Title and Type */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
+                  {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{offer.title}</h1>
+              <p className="text-gray-700 leading-relaxed">{offer.description}</p>
+            </div>
+
+            {/* Provider Information */}
+            {offer.owner && (
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0 shadow-md">
+                  <Image
+                    src={offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png"}
+                    alt={offer.owner.username}
+                    width={56}
+                    height={56}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/logo.png";
+                    }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-gray-900 truncate">{offer.owner.username}</h3>
+                  {offer.owner.phoneNumber && (
+                    <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                      <Phone className="w-4 h-4" />
+                      <span>{offer.owner.phoneNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pickup Information */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-emerald-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    Pickup Location
+                  </p>
+                  <p className="text-base font-semibold text-gray-900 mb-1">{currentLocation}</p>
+                  {currentMapsLink && (
+                    <a
+                      href={currentMapsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Open in Maps
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-amber-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    Pickup Deadline
+                  </p>
+                  <p className="text-base font-semibold text-gray-900">
+                    {isToday ? "Today" : formattedDate}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">{formattedTime}</p>
+                  {isExpired && (
+                    <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                      Expired
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Quantity</p>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
+                  className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-emerald-500 font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={quantity <= 1}
+                >
+                  −
+                </button>
+                <span className="text-2xl font-bold text-gray-900 min-w-[3rem] text-center">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
+                  className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-emerald-500 font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={quantity >= offer.quantity}
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                {offer.quantity} available
+              </p>
+            </div>
+
+            {/* Order Button */}
+            <button
+              onClick={handleOrder}
+              disabled={offer.quantity === 0 || isExpired}
+              className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${
+                offer.quantity === 0 || isExpired
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : inCart
+                  ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+              }`}
+            >
+              {offer.quantity === 0
+                ? "Out of Stock"
+                : isExpired
+                ? "Expired"
+                : inCart
+                ? "✓ Added to Cart"
+                : `Order Now - ${offer.price ? `${(offer.price * quantity).toFixed(2)} dt` : "Free"}`}
+            </button>
+          </div>
         </div>
       </div>
     </div>
