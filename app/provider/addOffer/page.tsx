@@ -48,17 +48,16 @@ return (
 
       {/* Header */}
       <div className="flex flex-col items-center mt-6 mb-8 text-center">
-        <div className="bg-green-100 text-green-800 px-4 py-1 rounded-full text-xs font-medium mb-3">
-          🌱 Reduce Waste, Share More
+        <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm">
+          🌱 Create Custom Offer
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-green-900 tracking-tight">
-          Add a New Offer
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+          Create Custom Offer
         </h1>
 
-        <p className="text-gray-500 text-sm sm:text-base mt-2 max-w-sm leading-relaxed">
-          Surprise your customers and help reduce waste 💚 <br />
-          Every box you create makes a difference 🌍
+        <p className="text-gray-600 text-sm sm:text-base mt-3 max-w-md leading-relaxed">
+          Set your own title, description, price, and photos. Perfect for specific items or special promotions! 💚
         </p>
       </div>
 
@@ -68,9 +67,9 @@ return (
       </section>
 
       {/* Footer Message */}
-      <footer className="mt-10 text-center border-t border-gray-100 pt-5">
-        <p className="text-xs sm:text-sm text-gray-400">
-          Every offer helps make a positive impact 🍃
+      <footer className="mt-8 text-center border-t border-gray-100 pt-6">
+        <p className="text-xs text-gray-400">
+          💡 Tip: Add clear photos and detailed descriptions to attract more customers!
         </p>
       </footer>
     </main>

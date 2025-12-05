@@ -33,6 +33,7 @@ const AddOffer: React.FC = () => {
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
+  const [pickupLocation, setPickupLocation] = useState("");
   const [localFiles, setLocalFiles] = useState<File[] | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [offers, setOffers] = useState<{ price: number; title: string }[]>([]);
@@ -120,11 +121,47 @@ const AddOffer: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const priceToFloat = parseFloat(price);
-    const quantityToFloat = parseFloat(quantity);
+    // Validation
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
 
-    if (isNaN(priceToFloat)) {
-      toast.error("Invalid price value!");
+    if (!description.trim()) {
+      toast.error("Please enter a description");
+      return;
+    }
+
+    if (description.trim().length < 10) {
+      toast.error("Description must be at least 10 characters");
+      return;
+    }
+
+    const priceToFloat = parseFloat(price);
+    if (isNaN(priceToFloat) || priceToFloat <= 0) {
+      toast.error("Please enter a valid price");
+      return;
+    }
+
+    const quantityToFloat = parseFloat(quantity);
+    if (isNaN(quantityToFloat) || quantityToFloat <= 0) {
+      toast.error("Please enter a valid quantity");
+      return;
+    }
+
+    if (!expirationDate) {
+      toast.error("Please select an expiration date");
+      return;
+    }
+
+    const expirationDateObj = new Date(expirationDate);
+    if (expirationDateObj <= new Date()) {
+      toast.error("Expiration date must be in the future");
+      return;
+    }
+
+    if (!pickupLocation.trim()) {
+      toast.error("Please enter a pickup location");
       return;
     }
 
@@ -142,37 +179,45 @@ const AddOffer: React.FC = () => {
       }));
 
       const payload = {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         price: priceToFloat,
         quantity: quantityToFloat,
-        expirationDate: new Date(expirationDate).toISOString(),
+        expirationDate: expirationDateObj.toISOString(),
+        pickupLocation: pickupLocation.trim(),
         images: JSON.stringify(imagesPayload),
       };
 
       await axiosInstance.post("/offers", payload);
-      toast.success("Offer submitted successfully!");
+      toast.success("Offer created successfully! 🎉");
 
-      setOffers([...offers, { price: priceToFloat, title }]);
+      // Reset form
       setTitle("");
       setDescription("");
       setPrice("");
       setQuantity("");
       setExpirationDate("");
+      setPickupLocation("");
       setLocalFiles(null);
       setUploadedImages([]);
-    } catch (error) {
+      
+      // Redirect to home after short delay
+      setTimeout(() => {
+        window.location.href = "/provider/home";
+      }, 1500);
+    } catch (error: any) {
       console.error("Error submitting offer:", error);
-      toast.error("Error submitting offer!");
+      const errorMessage = error?.response?.data?.message || "Failed to create offer";
+      toast.error(errorMessage);
     }
   };
 
   // ✅ Return JSX
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
+    <div className="w-full">
       <ToastContainer
         position="top-right"
-        autoClose={1000}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop
         closeOnClick
@@ -184,99 +229,148 @@ const AddOffer: React.FC = () => {
         progressClassName="bg-white/80"
       />
 
-      <h1 className="text-xl font-semibold text-700">Publish your offer now!</h1>
-      <br />
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
           <label
             htmlFor="title"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Title
+            Offer Title <span className="text-red-500">*</span>
           </label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter title"
+            placeholder="e.g., Fresh Pastries Bundle"
+            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+            required
+            maxLength={100}
           />
+          <p className="text-xs text-gray-500 mt-1">A clear, descriptive title helps customers find your offer</p>
         </div>
 
         {/* Description */}
         <div>
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Description
+            Description <span className="text-red-500">*</span>
           </label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter description"
+            placeholder="Describe what's included in this offer. Be specific about items, quantities, and any special details..."
+            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[120px] resize-none"
+            required
+            minLength={10}
+            maxLength={500}
           />
+          <p className="text-xs text-gray-500 mt-1">
+            {description.length}/500 characters. Minimum 10 characters required.
+          </p>
         </div>
 
-        {/* Price */}
-        <div>
-          <label
-            htmlFor="price"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Price in dinars
-          </label>
-          <Input
-            id="price"
-            value={price}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^\d*\.?\d*$/.test(value)) setPrice(value);
-            }}
-            placeholder="Enter price"
-          />
+        {/* Price and Quantity Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Price */}
+          <div>
+            <label
+              htmlFor="price"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Price (TND) <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={price}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*\.?\d*$/.test(value)) setPrice(value);
+                }}
+                placeholder="0.00"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
+                required
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Set a fair price for your offer</p>
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <label
+              htmlFor="quantity"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Available Quantity <span className="text-red-500">*</span>
+            </label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) setQuantity(value);
+              }}
+              placeholder="1"
+              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">How many units are available?</p>
+          </div>
         </div>
 
-        {/* Quantity */}
+        {/* Pickup Location */}
         <div>
           <label
-            htmlFor="quantity"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            htmlFor="pickupLocation"
+            className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Quantity
+            Pickup Location <span className="text-red-500">*</span>
           </label>
           <Input
-            id="quantity"
-            value={quantity}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^\d*\.?\d*$/.test(value)) setQuantity(value);
-            }}
-            placeholder="Enter quantity"
+            id="pickupLocation"
+            value={pickupLocation}
+            onChange={(e) => setPickupLocation(e.target.value)}
+            placeholder="e.g., 123 Main Street, Tunis"
+            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+            required
           />
+          <p className="text-xs text-gray-500 mt-1">Where should customers pick up their order?</p>
         </div>
 
         {/* Expiration Date */}
         <div>
           <label
             htmlFor="expirationDate"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Expiration Date
+            Pickup Deadline <span className="text-red-500">*</span>
           </label>
           <Input
             id="expirationDate"
             type="datetime-local"
             value={expirationDate}
             onChange={(e) => setExpirationDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 16)}
+            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+            required
           />
+          <p className="text-xs text-gray-500 mt-1">When should customers pick up by?</p>
         </div>
 
         {/* Image Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Images
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Photos <span className="text-gray-400 font-normal">(Optional)</span>
           </label>
           <FileUploader
             value={localFiles || []}
@@ -284,38 +378,42 @@ const AddOffer: React.FC = () => {
             dropzoneOptions={dropzone}
           >
             <FileInput>
-              <div className="flex items-center justify-center h-32 w-full border border-dashed border-gray-300 bg-gray-50 rounded-md">
-                <p className="text-gray-400">Drop files here or click to upload</p>
+              <div className="flex flex-col items-center justify-center h-40 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
+                <div className="text-4xl mb-2">📸</div>
+                <p className="text-gray-600 font-medium">Click or drag to upload photos</p>
+                <p className="text-xs text-gray-400 mt-1">Up to 5 images, max 5MB each</p>
               </div>
             </FileInput>
 
-            <FileUploaderContent className="flex items-center flex-row gap-2 mt-2">
+            <FileUploaderContent className="flex items-center flex-row gap-3 mt-3 flex-wrap">
               {localFiles?.map((file, i) => (
                 <FileUploaderItem
                   key={i}
                   index={i}
-                  className="size-20 p-0 rounded-md overflow-hidden"
+                  className="size-24 p-0 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm"
                   aria-roledescription={`File ${i + 1} containing ${file.name}`}
                 >
                   <Image
                     src={URL.createObjectURL(file) || DEFAULT_BAG_IMAGE}
                     alt={file.name}
-                    height={80}
-                    width={80}
-                    className="size-20 object-cover rounded-md"
+                    height={96}
+                    width={96}
+                    className="size-24 object-cover rounded-xl"
                   />
                 </FileUploaderItem>
               ))}
             </FileUploaderContent>
           </FileUploader>
+          <p className="text-xs text-gray-500 mt-2">Good photos help attract more customers!</p>
         </div>
 
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full bg-green-600 text-white hover:bg-green-700 transition duration-200"
+          disabled={!title.trim() || !description.trim() || !price || !quantity || !expirationDate || !pickupLocation.trim()}
+          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01] mt-2"
         >
-          Post Offer
+          Create Offer
         </Button>
       </form>
     </div>

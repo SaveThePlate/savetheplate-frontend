@@ -35,40 +35,47 @@ const SelectOfferTypePage = () => {
             <Gift className="w-8 h-8 text-green-800" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
-            Select Offer Type
+            Create New Offer
           </h1>
           <p className="text-gray-500 text-sm sm:text-base mt-2 max-w-xs">
-            Choose how you’d like to share your surplus and make a positive impact 🌍
+            Choose how you'd like to share your surplus and make a positive impact 🌍
           </p>
         </div>
 
         {/* Offer Buttons */}
         <div className="w-full flex flex-col gap-5">
           <button
-            className="w-full flex items-center justify-center gap-3 font-semibold py-3.5 rounded-2xl bg-[#EAF7ED] text-[#1B4332] shadow-sm hover:bg-[#d5f2e0] hover:shadow-md transition-transform hover:scale-[1.02]"
+            className="w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl bg-emerald-600 text-white shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
             onClick={() => router.push("./addOffer")}
           >
             <ShoppingBag className="w-5 h-5" />
-            Add Offer
+            Custom Offer
           </button>
 
           <button
-            className="w-full flex items-center justify-center gap-3 font-semibold py-3.5 rounded-2xl bg-[#1EC27B] text-white shadow-md hover:bg-[#18a569] hover:shadow-lg transition-transform hover:scale-[1.02]"
+            className="w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl bg-[#EAF7ED] text-[#1B4332] border-2 border-emerald-200 shadow-sm hover:bg-[#d5f2e0] hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
             onClick={() => router.push("./createMagicBox")}
           >
             <Gift className="w-5 h-5" />
-            Create Magic Box
+            Quick Rescue Pack
           </button>
         </div>
 
-        {/* Magic Box Info Section */}
-        <section className="mt-10 w-full bg-[#FFFBEA] border border-[#E0DCC5] rounded-2xl p-6 shadow-inner">
-          <h2 className="text-lg sm:text-xl font-semibold text-[#243B28] mb-2">
-            What is a Magic Box?
-          </h2>
-          <p className="text-[#4A4A4A] text-sm leading-relaxed">
-            A Magic Box contains a surprise assortment of unsold items — each box is unique and helps reduce waste while delighting customers with unexpected finds 🍞🥐🍓
-          </p>
+        {/* Rescue Pack Info Section */}
+        <section className="mt-10 w-full bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <Gift className="w-5 h-5 text-amber-700" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-semibold text-[#243B28] mb-2">
+                What is a Rescue Pack?
+              </h2>
+              <p className="text-[#4A4A4A] text-sm leading-relaxed">
+                A Rescue Pack is a pre-configured bundle of rescued food items. Choose from small, medium, or large sizes with preset prices. Perfect for quick listings when you have mixed surplus items! 🍞🥐🍓
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Footer */}

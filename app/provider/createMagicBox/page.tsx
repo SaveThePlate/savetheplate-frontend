@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Gift } from "lucide-react";
 import Image from "next/image";
 
-type MagicBoxSize = "small" | "medium" | "big";
+type RescuePackSize = "small" | "medium" | "large";
 
-interface MagicBoxOption {
+interface RescuePackOption {
   price: number;
   description: string;
   images?: string;
+  items: string;
 }
 
 const DEFAULT_IMAGE = "/defaultBag.png";
@@ -25,16 +26,32 @@ const smallSurpriseBag = "/smallsurprisebag.png";
 
 const CreateMagicBoxPage = () => {
   const router = useRouter();
-  const [selectedSize, setSelectedSize] = useState<MagicBoxSize>("small");
+  const [selectedSize, setSelectedSize] = useState<RescuePackSize>("small");
   const [expirationDate, setExpirationDate] = useState<string>("");
+  const [pickupLocation, setPickupLocation] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [quantity, setQuantity] = useState("");
 
-  const magicBoxOptions: Record<MagicBoxSize, MagicBoxOption> = {
-    small: { price: 5, description: "A small box with a selection of items.", images: smallSurpriseBag },
-    medium: { price: 7, description: "A medium box with more items.", images: mediumSurpriseBag },
-    big: { price: 10, description: "A big box with a wide variety of items.", images: largeSurpriseBag },
+  const rescuePackOptions: Record<RescuePackSize, RescuePackOption> = {
+    small: { 
+      price: 5, 
+      description: "Perfect for individuals - a curated mix of rescued items", 
+      images: smallSurpriseBag,
+      items: "2-3 items"
+    },
+    medium: { 
+      price: 7, 
+      description: "Great for small families - more variety and value", 
+      images: mediumSurpriseBag,
+      items: "4-5 items"
+    },
+    large: { 
+      price: 10, 
+      description: "Ideal for larger groups - maximum variety and savings", 
+      images: largeSurpriseBag,
+      items: "6+ items"
+    },
   };
 
   useEffect(() => {
@@ -42,8 +59,35 @@ const CreateMagicBoxPage = () => {
     if (!token) router.push("/signIn");
   }, [router]);
 
-  const handleCreateMagicBox = async () => {
+  const handleCreateRescuePack = async () => {
+    // Validation
+    if (!quantity || parseFloat(quantity) <= 0) {
+      setError("Please enter a valid quantity");
+      toast.error("Quantity is required");
+      return;
+    }
+
+    if (!expirationDate) {
+      setError("Please select an expiration date");
+      toast.error("Expiration date is required");
+      return;
+    }
+
+    if (!pickupLocation.trim()) {
+      setError("Please enter a pickup location");
+      toast.error("Pickup location is required");
+      return;
+    }
+
+    const expirationDateObj = new Date(expirationDate);
+    if (expirationDateObj <= new Date()) {
+      setError("Expiration date must be in the future");
+      toast.error("Please select a future date");
+      return;
+    }
+
     setLoading(true);
+    setError("");
     const token = localStorage.getItem("accessToken");
     if (!token) {
       router.push("/signIn");
@@ -53,19 +97,7 @@ const CreateMagicBoxPage = () => {
     const quantityToFloat = parseFloat(quantity);
 
     try {
-      // Build the images payload with an absoluteUrl pointing to frontend-hosted asset
-      const imagePath = magicBoxOptions[selectedSize].images || DEFAULT_IMAGE;
-      // Prefer NEXT_PUBLIC_FRONTEND_URL (set in .env.local), otherwise use window.location.origin
-      const frontendOrigin =
-        (process.env.NEXT_PUBLIC_FRONTEND_URL as string) ||
-        (typeof window !== "undefined" ? window.location.origin : "");
-      const absoluteUrl =
-        frontendOrigin.replace(/\/$/, "") +
-        (imagePath.startsWith("/") ? imagePath : `/${imagePath}`);
-
-      // The backend expects an array of image objects. For frontend-hosted assets
-      // we store only the `url` pointing to the frontend public path (leading slash).
-      // Example: [{ "url": "/mediumsurprisebag.png" }]
+      const imagePath = rescuePackOptions[selectedSize].images || DEFAULT_IMAGE;
       const imagesPayload = JSON.stringify([
         {
           url: imagePath.startsWith("/") ? imagePath : `/${imagePath}`,
@@ -75,27 +107,28 @@ const CreateMagicBoxPage = () => {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
         {
-          title: `${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Magic Box`,
-          description: magicBoxOptions[selectedSize].description,
-          price: magicBoxOptions[selectedSize].price,
-          expirationDate: new Date(expirationDate).toISOString(),
-          pickupLocation: "Default Location",
+          title: `${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Rescue Pack`,
+          description: `${rescuePackOptions[selectedSize].description}. Contains ${rescuePackOptions[selectedSize].items} of rescued food items.`,
+          price: rescuePackOptions[selectedSize].price,
+          expirationDate: expirationDateObj.toISOString(),
+          pickupLocation: pickupLocation.trim(),
           latitude: 0,
           longitude: 0,
-          // send the richer images payload (contains url and absoluteUrl)
           images: imagesPayload,
           quantity: quantityToFloat,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Magic Box created successfully!");
-      // optionally redirect after creation
-      // router.push('/offers') or similar
-    } catch (error) {
+      toast.success("Rescue Pack created successfully! 🎉");
+      setTimeout(() => {
+        router.push("/provider/home");
+      }, 1500);
+    } catch (error: any) {
       console.error(error);
-      toast.error("Error submitting offer!");
-      setError("Failed to create magic box.");
+      const errorMessage = error?.response?.data?.message || "Failed to create rescue pack";
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -129,46 +162,51 @@ const CreateMagicBoxPage = () => {
         </Button>
 
         {/* Header */}
-        <div className="flex flex-col items-center mb-10 mt-10 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#EAF7ED] flex items-center justify-center mb-5">
-            <Gift className="w-10 h-10 text-green-800" />
+        <div className="flex flex-col items-center mb-8 mt-8 text-center">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mb-4 shadow-sm">
+            <Gift className="w-10 h-10 text-emerald-700" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-green-900 leading-tight">
-            Create Magic Box
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+            Create Rescue Pack
           </h1>
           <p className="text-gray-600 text-base mt-2 max-w-sm">
-            Surprise your customers and help reduce waste 💚
+            Quick setup with preset sizes and prices. Perfect for mixed surplus items! 💚
           </p>
         </div>
 
-        {/* Magic Box Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-          {Object.entries(magicBoxOptions).map(([size, { price, description, images }]) => (
+        {/* Rescue Pack Size Options */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {Object.entries(rescuePackOptions).map(([size, { price, description, images, items }]) => (
             <div
               key={size}
-              onClick={() => setSelectedSize(size as MagicBoxSize)}
-              className={`cursor-pointer rounded-2xl p-5 text-center transition-all duration-200 shadow-sm hover:shadow-md border ${
+              onClick={() => setSelectedSize(size as RescuePackSize)}
+              className={`cursor-pointer rounded-2xl p-5 text-center transition-all duration-200 shadow-sm hover:shadow-md border-2 ${
                 selectedSize === size
-                  ? "bg-[#EAF7ED] border-green-600 scale-[1.03]"
-                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                  ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-500 scale-[1.02] shadow-md"
+                  : "bg-white border-gray-200 hover:border-emerald-300 hover:bg-gray-50"
               }`}
             >
               <div className="flex items-center justify-center mb-3">
                 <Image
                   src={images || DEFAULT_IMAGE}
-                  alt={`${size} magic box`}
-                  width={80}
-                  height={80}
+                  alt={`${size} rescue pack`}
+                  width={90}
+                  height={90}
                   className="object-contain mx-auto"
                 />
               </div>
-              <h2 className="text-lg font-semibold text-green-900 capitalize">
+              <h2 className="text-lg font-bold text-gray-900 capitalize mb-1">
                 {size}
               </h2>
-              <p className="text-gray-600 text-sm mt-1 mb-2 leading-snug">
+              <p className="text-xs text-emerald-700 font-medium mb-2">
+                {items}
+              </p>
+              <p className="text-gray-600 text-sm mb-3 leading-snug min-h-[40px]">
                 {description}
               </p>
-              <p className="font-bold text-green-800">{price} dt</p>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="font-bold text-2xl text-emerald-700">{price} dt</p>
+              </div>
             </div>
           ))}
         </div>
@@ -176,49 +214,82 @@ const CreateMagicBoxPage = () => {
         {/* Inputs */}
         <div className="space-y-5">
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-              Quantity
+            <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-2">
+              Available Quantity <span className="text-red-500">*</span>
             </label>
             <Input
               id="quantity"
+              type="number"
+              min="1"
               value={quantity}
               onChange={(e) => {
                 const value = e.target.value;
-                if (/^\d*\.?\d*$/.test(value)) setQuantity(value);
+                if (/^\d*$/.test(value)) setQuantity(value);
               }}
-              placeholder="Enter quantity"
-              className="border-gray-300 focus:ring-green-500 focus:border-green-500 rounded-xl py-2.5"
+              placeholder="How many packs are available?"
+              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+              required
             />
+            <p className="text-xs text-gray-500 mt-1">Enter the number of {selectedSize} rescue packs available</p>
           </div>
 
           <div>
-            <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Expiration Date
+            <label htmlFor="pickupLocation" className="block text-sm font-semibold text-gray-700 mb-2">
+              Pickup Location <span className="text-red-500">*</span>
+            </label>
+            <Input
+              id="pickupLocation"
+              value={pickupLocation}
+              onChange={(e) => setPickupLocation(e.target.value)}
+              placeholder="e.g., 123 Main Street, Tunis"
+              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Where should customers pick up their order?</p>
+          </div>
+
+          <div>
+            <label htmlFor="expirationDate" className="block text-sm font-semibold text-gray-700 mb-2">
+              Pickup Deadline <span className="text-red-500">*</span>
             </label>
             <Input
               id="expirationDate"
               type="datetime-local"
               value={expirationDate}
               onChange={(e) => setExpirationDate(e.target.value)}
-              className="border-gray-300 focus:ring-green-500 focus:border-green-500 rounded-xl py-2.5"
+              min={new Date().toISOString().slice(0, 16)}
+              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+              required
             />
+            <p className="text-xs text-gray-500 mt-1">When should customers pick up by?</p>
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
         {/* Submit Button */}
         <Button
-          onClick={handleCreateMagicBox}
-          disabled={loading}
-          className="mt-10 w-full bg-[#FFD84D] text-[#243B28] font-bold py-3.5 rounded-full shadow-md transition-transform hover:scale-[1.03] hover:bg-[#FFE169]"
+          onClick={handleCreateRescuePack}
+          disabled={loading || !quantity || !expirationDate || !pickupLocation.trim()}
+          className="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01]"
         >
-          {loading ? "Creating..." : "Create Magic Box"}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin">⏳</span> Creating Rescue Pack...
+            </span>
+          ) : (
+            `Create ${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Rescue Pack`
+          )}
         </Button>
 
-        {error && <p className="text-red-500 text-center text-sm mt-4">{error}</p>}
-
         {/* Footer */}
-        <p className="mt-8 text-center text-sm text-gray-500">
-          Every box you create makes a difference 🌍
+        <p className="mt-8 text-center text-xs text-gray-400">
+          Every rescue pack helps reduce food waste and supports your community 🌍
         </p>
       </main>
     </div>
