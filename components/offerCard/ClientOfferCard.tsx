@@ -35,6 +35,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
   reserveLink,
   owner,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [fallbacks, setFallbacks] = useState<string[]>([]);
@@ -67,7 +68,9 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
   const isRescuePack = title.toLowerCase().includes("rescue pack");
 
   return (
-    <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-md transition-shadow cursor-pointer">
+    <Credenza open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <CredenzaTrigger asChild>
+        <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-md transition-shadow cursor-pointer">
       {/* Image */}
       <div className="relative w-full h-48 sm:h-52">
         {currentImage ? (

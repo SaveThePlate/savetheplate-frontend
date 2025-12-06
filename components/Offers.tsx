@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import CustomCard from "./CustomCard";
+import { ClientOfferCard } from "./offerCard";
 import { useRouter } from "next/navigation";
 import { resolveImageSource } from "@/utils/imageUtils";
 
@@ -64,8 +64,13 @@ const OffersPage = () => {
 
     const fetchOffers = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`, {
-          headers: { Authorization: `Bearer ${token}` },
+        // Add cache-busting timestamp to ensure fresh data
+        const timestamp = Date.now();
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache'
+          },
         });
 
         // normalize images array and normalize absoluteUrl if backend storage path is provided
@@ -146,13 +151,12 @@ const OffersPage = () => {
           const currentMapsLink = offer.owner?.mapsLink || offer.mapsLink;
 
           return (
-            <CustomCard
+            <ClientOfferCard
               key={offer.id}
               offerId={offer.id}
               imageSrc={imageSrc}
               imageAlt={imageAlt}
               title={offer.title}
-              ownerId={offer.ownerId}
               description={offer.description}
               price={offer.price}
               originalPrice={offer.originalPrice}
@@ -164,6 +168,7 @@ const OffersPage = () => {
               owner={offer.owner ? {
                 id: offer.owner.id,
                 username: offer.owner.username,
+                location: offer.owner.location,
                 profileImage: offer.owner.profileImage,
               } : undefined}
             />

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CustomCard from "@/components/CustomCard";
+import { ProviderOfferCard } from "@/components/offerCard";
 import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
@@ -171,11 +171,10 @@ const ProviderHome = () => {
   const currentMapsLink = offer.owner?.mapsLink || offer.mapsLink;
 
   return (
-      <CustomCard
+      <ProviderOfferCard
         key={offer.id}
         offerId={offer.id}
         imageSrc={imageSrc}
-        ownerId={offer.ownerId}
         imageAlt={offer.title}
         title={offer.title}
         price={offer.price}
@@ -185,11 +184,16 @@ const ProviderHome = () => {
         expirationDate={offer.expirationDate}
         pickupLocation={currentLocation}
         mapsLink={currentMapsLink}
-        reserveLink={`/reserve/${offer.id}`}
+        ownerId={offer.ownerId}
         onDelete={handleDeleteOffer}
+        onUpdate={(id, data) => {
+          // Refresh offers after update
+          setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data } : o));
+        }}
         owner={offer.owner ? {
           id: offer.owner.id,
           username: offer.owner.username,
+          location: offer.owner.location,
           profileImage: offer.owner.profileImage,
         } : undefined}
       />
