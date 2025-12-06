@@ -3,6 +3,7 @@ export interface OfferOwner {
   id: number;
   username: string;
   location?: string;
+  mapsLink?: string;
   profileImage?: string;
 }
 

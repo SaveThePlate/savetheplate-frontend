@@ -9,7 +9,7 @@ import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
-import { getImageFallbacks } from "@/utils/imageUtils";
+import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
 import {
   Credenza,
   CredenzaTrigger,
@@ -113,7 +113,10 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
       </div>
 
       {/* Footer */}
-      <CardFooter className="mt-4 flex flex-row gap-3 w-full items-center justify-between">
+      <CardFooter 
+        className="mt-4 flex flex-row gap-3 w-full items-center justify-between"
+        onClick={(e) => e.stopPropagation()} // Prevent card click when clicking footer
+      >
         {expired ? (
           <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
             Expired
@@ -121,51 +124,123 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
         ) : quantity > 0 ? (
           <Link
             href={reserveLink}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm"
+            onClick={(e) => e.stopPropagation()} // Prevent card click when clicking order button
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm hover:bg-teal-700 transition-colors"
           >
-            Order
+            Order Now
           </Link>
         ) : (
-          <div className="flex-1"></div>
+          <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
+            Sold Out
+          </div>
         )}
-
-        {/* Details Modal */}
-        <Credenza>
-          <CredenzaTrigger asChild>
-            <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm">
-              Details
-            </button>
-          </CredenzaTrigger>
-
-          <CredenzaContent className="bg-white rounded-3xl shadow-lg p-6 max-w-md mx-auto border border-gray-100">
-            <CredenzaHeader className="mb-3">
-              <CredenzaTitle className="text-xl font-bold text-gray-900">
-                {title}
-              </CredenzaTitle>
-            </CredenzaHeader>
-
-            <CredenzaDescription className="text-sm text-gray-600 mb-3">
-              Details about this offer: {title}
-            </CredenzaDescription>
-
-            <CredenzaBody className="space-y-3 text-gray-700 text-sm">
-              <p>{description}</p>
-              <p>
-                <strong>Pickup Time:</strong> {formattedDate} at {formattedTime}
-              </p>
-              {mapsLink && (
-                <p>
-                  <strong>Location:</strong>{" "}
-                  <a href={mapsLink} target="_blank" rel="noopener noreferrer" className="text-emerald-600">
-                    {pickupLocation}
-                  </a>
-                </p>
-              )}
-            </CredenzaBody>
-          </CredenzaContent>
-        </Credenza>
       </CardFooter>
     </Card>
+    </CredenzaTrigger>
+
+      {/* Details Modal */}
+      <CredenzaContent className="bg-white rounded-3xl shadow-xl max-w-lg mx-auto border border-gray-100 p-0 overflow-hidden">
+        {/* Large Image at Top */}
+        <div className="relative w-full h-64">
+          {currentImage ? (
+            <Image
+              src={currentImage || DEFAULT_LOGO}
+              alt={title}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              onError={handleImageError}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <span className="text-gray-400">No image</span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-6">
+          {/* Store Information */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              {owner && (
+                <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden bg-white flex-shrink-0">
+                  <Image
+                    src={owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"}
+                    alt={owner.location || pickupLocation}
+                    width={48}
+                    height={48}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/logo.png";
+                    }}
+                  />
+                </div>
+              )}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  {owner?.location || pickupLocation}
+                </h3>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-bold text-gray-900">{price} dt</p>
+              {originalPrice && originalPrice > price && (
+                <p className="text-sm text-gray-500 line-through">{originalPrice.toFixed(2)} dt</p>
+              )}
+            </div>
+          </div>
+
+          {/* Offer Details */}
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-2">
+              {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+            </p>
+            <p className="text-base text-gray-800 leading-relaxed">{description}</p>
+          </div>
+
+          {/* Pickup Information */}
+          <div className="mb-4 p-3 bg-gray-50 rounded-xl">
+            <p className="text-sm font-medium text-gray-900 mb-1">Pickup Details</p>
+            <p className="text-sm text-gray-600">
+              {formattedDate} at {formattedTime}
+            </p>
+            {(owner?.mapsLink || mapsLink) && (
+              <a
+                href={owner?.mapsLink || mapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-emerald-600 font-medium mt-1 inline-flex items-center gap-1 hover:underline"
+              >
+                View on Maps →
+              </a>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-2">
+            {!expired && quantity > 0 && (
+              <Link
+                href={reserveLink}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                Order Now
+              </Link>
+            )}
+            {expired && (
+              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
+                Expired
+              </div>
+            )}
+            {quantity === 0 && !expired && (
+              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
+                Sold Out
+              </div>
+            )}
+          </div>
+        </div>
+      </CredenzaContent>
+    </Credenza>
   );
 };
 

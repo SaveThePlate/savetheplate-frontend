@@ -169,6 +169,7 @@ const OffersPage = () => {
                 id: offer.owner.id,
                 username: offer.owner.username,
                 location: offer.owner.location,
+                mapsLink: offer.owner.mapsLink,
                 profileImage: offer.owner.profileImage,
               } : undefined}
             />
