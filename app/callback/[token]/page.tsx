@@ -28,6 +28,11 @@ function AuthCallback() {
           },
         });
 
+        // Check if response data exists
+        if (!resp.data || !resp.data.accessToken || !resp.data.refreshToken) {
+          throw new Error("Invalid response from server");
+        }
+
         // Store tokens
         LocalStorage.setItem("refresh-token", resp.data.refreshToken);
         LocalStorage.setItem("accessToken", resp.data.accessToken);
