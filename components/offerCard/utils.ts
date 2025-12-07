@@ -30,6 +30,43 @@ export const formatDateTime = (dateString: string | undefined) => {
   };
 };
 
+// Format date and time range for display
+export const formatDateTimeRange = (
+  startTime?: string,
+  endTime?: string,
+  expirationDate?: string
+) => {
+  // If we have start and end times, use them
+  if (startTime && endTime) {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      // Fallback to expirationDate if times are invalid
+      return formatDateTime(expirationDate);
+    }
+    
+    const today = new Date();
+    const isToday = 
+      start.getDate() === today.getDate() &&
+      start.getMonth() === today.getMonth() &&
+      start.getFullYear() === today.getFullYear();
+    
+    const startTimeStr = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const endTimeStr = end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    
+    return {
+      date: isToday ? "Today" : start.toLocaleDateString(),
+      time: `${startTimeStr} - ${endTimeStr}`,
+      startTime: startTimeStr,
+      endTime: endTimeStr,
+    };
+  }
+  
+  // Fallback to expirationDate for backward compatibility
+  return formatDateTime(expirationDate);
+};
+
 // Check if offer is expired
 export const isOfferExpired = (expirationDate?: string): boolean => {
   if (!expirationDate) return false;

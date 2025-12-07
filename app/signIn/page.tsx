@@ -9,13 +9,17 @@ import useOpenApiFetch from "@/lib/OpenApiFetch";
 import { AuthToast, ErrorToast } from "@/components/Toasts";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SignIn() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [showAuthToast, setShowAuthToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const clientApi = useOpenApiFetch();
@@ -61,28 +65,69 @@ export default function SignIn() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
+    
+    // Validate email format
+    if (!email || !email.includes('@')) {
+      setShowErrorToast(true);
+      setShowAuthToast(false);
+      return;
+    }
 
-    clientApi
-      .POST("/auth/send-magic-mail", {
+    setLoading(true);
+    setShowErrorToast(false);
+    setShowAuthToast(false);
+
+    try {
+      const resp = await clientApi.POST("/auth/send-magic-mail", {
         body: { email },
-      })
-      .then((resp) => {
-        if (resp.response.status === 201) {
-          setShowAuthToast(true);
-          setShowErrorToast(false);
-        } else {
-          setShowErrorToast(true);
-          setShowAuthToast(false);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to send magic link:", err);
+      });
+
+      // Accept both 200 (OK) and 201 (Created) status codes
+      const status = resp.response?.status;
+      if (status === 200 || status === 201) {
+        setShowAuthToast(true);
+        setShowErrorToast(false);
+      } else {
+        console.error("Unexpected status code:", status, resp);
         setShowErrorToast(true);
         setShowAuthToast(false);
-        setLoading(false);
-      });
+      }
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Failed to send magic link:", err);
+      
+      let userMessage = "There was an error sending the magic link. Please try again.";
+      
+      // Check if it's a network error (502, CORS, etc.)
+      if (err?.isNetworkError || 
+          err?.status === 502 || 
+          err?.status === 503 ||
+          err?.message?.includes("Server is temporarily unavailable") ||
+          err?.message?.includes("Network error")) {
+        console.error("Network/Server error detected");
+        userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
+      }
+      // Check for CORS errors (usually happens when backend is down and Cloudflare returns 502 without CORS headers)
+      else if (err?.message?.includes("CORS") || 
+               err?.message?.includes("Access-Control") ||
+               err?.message?.includes("Failed to fetch")) {
+        console.error("CORS/Network error - likely backend is down");
+        userMessage = "Unable to connect to the server. Please check your connection and try again.";
+      }
+      // Check if it's an API error with response data
+      else if (err?.response?.data || err?.data) {
+        const errorData = err.response?.data || err.data;
+        console.error("API error details:", errorData);
+        if (typeof errorData === 'object' && errorData.message) {
+          userMessage = errorData.message;
+        }
+      }
+      
+      setErrorMessage(userMessage);
+      setShowErrorToast(true);
+      setShowAuthToast(false);
+      setLoading(false);
+    }
   }
 
   // Show loading state while checking authentication
@@ -99,6 +144,11 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] overflow-x-hidden flex items-center justify-center py-8 sm:py-12">
+      {/* Language Switcher - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher variant="button" />
+      </div>
+
       <div className="w-full max-w-md mx-auto px-4 sm:px-6 lg:px-8">
         {/* Sign In Form */}
         <main className="relative z-10 w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg px-6 sm:px-8 py-8 sm:py-10 border border-[#f5eae0] text-center">
@@ -109,13 +159,13 @@ export default function SignIn() {
 
           {/* Header */}
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#344e41] mb-3 animate-fadeInDown">
-            {!isNewUser ? "Welcome to SaveThePlate! 🥳" : "Welcome back! 🥰"}
+            {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
           </h1>
 
           <p className="text-gray-700 text-sm sm:text-base mb-6 font-medium animate-fadeInUp">
             {!isNewUser
-              ? "Join us in reducing food waste and saving the planet, one meal at a time 🌍"
-              : "We're happy to have you back! Keep rescuing meals 🌿"}
+              ? t("signin.description_new")
+              : t("signin.description_back")}
           </p>
 
           {/* Form */}
@@ -134,7 +184,7 @@ export default function SignIn() {
                 className="w-full bg-[#A8DADC] text-white font-semibold py-3 rounded-xl flex justify-center items-center"
               >
                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
+                {t("signin.sending")}
               </Button>
             ) : (
               <Button
@@ -142,7 +192,7 @@ export default function SignIn() {
                 type="submit"
                 id="sign-in-button"
               >
-                Sign In with Email
+                {t("signin.sign_in_email")}
               </Button>
             )}
           </form>
@@ -151,13 +201,13 @@ export default function SignIn() {
           <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
 
           {showAuthToast && AuthToast}
-          {showErrorToast && ErrorToast}
+          {showErrorToast && <ErrorToast message={errorMessage} />}
 
           {/* Footer */}
           <p className="mt-4 text-center font-light text-xs sm:text-sm text-gray-500">
             {!isNewUser
-              ? "Check your inbox to complete your registration 💌"
-              : "We've sent your magic link — check your email ✉️"}
+              ? t("signin.footer_new")
+              : t("signin.footer_back")}
           </p>
         </main>
       </div>

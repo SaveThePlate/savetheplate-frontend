@@ -1,13 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, Suspense } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import QRScanner from "@/components/QRScanner";
-import { QrCode, RefreshCw } from "lucide-react";
+import { QrCode, RefreshCw, CheckCircle } from "lucide-react";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { useLanguage } from "@/context/LanguageContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 interface User {
   id: number;
@@ -44,12 +46,17 @@ interface Order {
 
 const DEFAULT_IMAGE = "/defaultBag.png";
 
-const ProviderOrders = () => {
+const ProviderOrdersContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [providerId, setProviderId] = useState<number | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [confirmedOrderId, setConfirmedOrderId] = useState<number | null>(null);
+  const [alreadyConfirmed, setAlreadyConfirmed] = useState(false);
+  const { t } = useLanguage();
 
   // Fetch orders function - can be called to refresh
   const fetchOrders = React.useCallback(async () => {
@@ -89,6 +96,63 @@ const ProviderOrders = () => {
     fetchOrders();
   }, [fetchOrders]);
 
+  // Check for success query parameters and show modal
+  useEffect(() => {
+    const confirmed = searchParams.get('confirmed');
+    const orderId = searchParams.get('orderId');
+    const alreadyConfirmedParam = searchParams.get('alreadyConfirmed');
+
+    if (confirmed === 'true' && orderId) {
+      setConfirmedOrderId(parseInt(orderId, 10));
+      setAlreadyConfirmed(alreadyConfirmedParam === 'true');
+      setShowSuccessModal(true);
+      
+      // Refresh orders to get updated data
+      fetchOrders();
+
+      // Remove query parameters from URL
+      router.replace('/provider/orders', { scroll: false });
+    }
+  }, [searchParams, router, fetchOrders]);
+
+  // Handle real-time order updates
+  const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
+    const { type, order } = data;
+    
+    setOrders((prevOrders) => {
+      if (type === 'created') {
+        // Add new order if it's for this provider's offers
+        const offerIds = prevOrders.map(o => o.offerId);
+        if (order.offerId && offerIds.includes(order.offerId)) {
+          return [order, ...prevOrders];
+        }
+        // Or check if order is for provider's offer
+        if (order.offer?.ownerId === providerId) {
+          return [order, ...prevOrders];
+        }
+        return prevOrders;
+      } else if (type === 'updated') {
+        // Update existing order
+        return prevOrders.map((o) => (o.id === order.id ? order : o));
+      } else if (type === 'deleted') {
+        // Remove deleted order
+        return prevOrders.filter((o) => o.id !== order.id);
+      }
+      return prevOrders;
+    });
+
+    // Show toast notification
+    if (type === 'updated' && order.status === 'confirmed') {
+      toast.success(`Order #${order.id} confirmed!`);
+    }
+  }, [providerId]);
+
+  // Connect to WebSocket for real-time updates
+  useWebSocket({
+    onOrderUpdate: handleOrderUpdate,
+    enabled: !!providerId,
+  });
+
   const handleScanSuccess = (qrCodeToken: string) => {
     toast.success("Order confirmed successfully!");
     setShowScanner(false);
@@ -119,7 +183,7 @@ const ProviderOrders = () => {
       <div className="w-full max-w-6xl px-4">
         <div className="w-full flex items-center justify-between mb-6 pt-6">
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-            Orders for your offers
+            {t("provider.orders_title")}
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -143,10 +207,10 @@ const ProviderOrders = () => {
         {/* Stats */}
         <div className="mb-6 flex flex-wrap gap-4">
           {[
-            { label: "Total orders", value: orders.length, bg: "bg-gray-100", text: "text-gray-900" },
-            { label: "Confirmed", value: confirmed.length, bg: "bg-white", text: "text-emerald-700" },
-            { label: "Pending", value: pending.length, bg: "bg-white", text: "text-yellow-800" },
-            { label: "Cancelled", value: cancelled.length, bg: "bg-white", text: "text-red-700" },
+            { label: t("provider.total_orders"), value: orders.length, bg: "bg-gray-100", text: "text-gray-900" },
+            { label: t("provider.confirmed_orders"), value: confirmed.length, bg: "bg-white", text: "text-emerald-700" },
+            { label: t("provider.pending_orders"), value: pending.length, bg: "bg-white", text: "text-yellow-800" },
+            { label: t("provider.cancelled_orders"), value: cancelled.length, bg: "bg-white", text: "text-red-700" },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -159,9 +223,9 @@ const ProviderOrders = () => {
         </div>
 
         {loading ? (
-          <p className="text-center text-gray-600">Loading orders...</p>
+          <p className="text-center text-gray-600">{t("provider.loading_orders")}</p>
         ) : orders.length === 0 ? (
-          <p className="text-center text-gray-600">No orders for your offers yet.</p>
+          <p className="text-center text-gray-600">{t("provider.no_orders")}</p>
         ) : (
           <div className="flex flex-col gap-6">
             {["pending", "confirmed", "cancelled"].map((status) => {
@@ -193,6 +257,36 @@ const ProviderOrders = () => {
           onClose={() => setShowScanner(false)}
           providerId={providerId}
         />
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                <CheckCircle size={40} className="text-emerald-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {alreadyConfirmed ? t("orders.already_confirmed") : t("orders.confirmed_title")}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {alreadyConfirmed 
+                  ? t("orders.already_confirmed_message")
+                  : t("orders.confirmed_message", { orderId: confirmedOrderId })}
+              </p>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setConfirmedOrderId(null);
+                }}
+                className="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
@@ -354,6 +448,21 @@ const OrderCard: React.FC<{
         )}
       </div>
     </div>
+  );
+};
+
+const ProviderOrders = () => {
+  return (
+    <Suspense fallback={
+      <main className="bg-[#e8f4ee] min-h-screen pt-24 pb-20 flex flex-col items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </main>
+    }>
+      <ProviderOrdersContent />
+    </Suspense>
   );
 };
 

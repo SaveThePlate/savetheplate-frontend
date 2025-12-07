@@ -6,10 +6,12 @@ import { LocalStorage } from "@/lib/utils";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
 import axios from "axios";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import { useLanguage } from "@/context/LanguageContext";
 
 function AuthCallback() {
   const { token }: { token: string } = useParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const clientApi = useOpenApiFetch();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,32 +41,35 @@ function AuthCallback() {
         LocalStorage.setItem("accessToken", resp.data.accessToken);
         LocalStorage.removeItem("remember");
 
-        // Use redirectTo from backend response (most reliable)
-        // Backend determines redirect based on user's actual role in database
-        let redirectTo = '/onboarding'; // Default fallback
+        // Determine redirect based on user's role
+        // Priority: Check role first to identify new users, then use backend redirectTo if available
+        const role = resp.data.role || resp.data.user?.role;
+        let redirectTo = '/onboarding'; // Default for new users
         
-        if (typeof resp.data.redirectTo === 'string' && resp.data.redirectTo) {
-          // Use redirectTo from backend if provided and is a string
-          redirectTo = resp.data.redirectTo;
+        // If user has a valid role, determine redirect
+        if (role === 'PROVIDER') {
+          redirectTo = '/provider/home';
+        } else if (role === 'PENDING_PROVIDER') {
+          redirectTo = '/onboarding/thank-you';
+        } else if (role === 'CLIENT') {
+          redirectTo = '/client/home';
         } else {
-          // Fallback: determine redirect from role
-          const role = resp.data.role || resp.data.user?.role;
-          if (role === 'PROVIDER') {
-            redirectTo = '/provider/home';
-          } else if (role === 'PENDING_PROVIDER') {
-            redirectTo = '/onboarding/thank-you';
-          } else if (role === 'CLIENT') {
-            redirectTo = '/client/home';
-          } else {
-            redirectTo = '/onboarding';
-          }
+          // User has no role or role is 'NONE' - they are new and need onboarding
+          redirectTo = '/onboarding';
         }
 
-        // Redirect to the path determined by backend
+        // Only use backend's redirectTo if user already has a valid role
+        // This prevents new users from being redirected to '/' or other incorrect paths
+        if (role && role !== 'NONE' && typeof resp.data.redirectTo === 'string' && resp.data.redirectTo && resp.data.redirectTo !== '/') {
+          // Backend provided a redirectTo and user has a valid role, use it
+          redirectTo = resp.data.redirectTo;
+        }
+
+        // Redirect to the determined path
         router.push(redirectTo);
       } catch (error: any) {
         console.error("Error verifying magic link:", error);
-        setError("Failed to verify magic link. Please try signing in again.");
+        setError(t("callback.verify_failed"));
         // Redirect to sign in after a delay
         setTimeout(() => {
           router.push("/signIn");
@@ -75,7 +80,7 @@ function AuthCallback() {
     };
 
     verifyAndRedirect();
-  }, [token, clientApi, router]);
+  }, [token, clientApi, router, t]);
 
   // Show loading state while verifying
   if (loading) {
@@ -83,7 +88,7 @@ function AuthCallback() {
       <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
         <div className="flex flex-col items-center gap-3">
           <ReloadIcon className="h-6 w-6 animate-spin text-[#A8DADC]" />
-          <p className="text-gray-600 text-sm">Verifying your magic link...</p>
+          <p className="text-gray-600 text-sm">{t("callback.verifying")}</p>
         </div>
       </div>
     );
@@ -95,7 +100,7 @@ function AuthCallback() {
       <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
         <div className="flex flex-col items-center gap-3 text-center max-w-md">
           <p className="text-red-600 font-semibold">{error}</p>
-          <p className="text-gray-600 text-sm">Redirecting to sign in...</p>
+          <p className="text-gray-600 text-sm">{t("callback.redirecting")}</p>
         </div>
       </div>
     );

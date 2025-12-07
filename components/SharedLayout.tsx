@@ -6,12 +6,15 @@ import React, { useEffect, useState } from "react";
 import { Home, ShoppingBag, User, LogOut, Menu, X, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SharedLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -78,43 +81,44 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
+          <div className="hidden lg:flex items-center space-x-4 text-[15px] font-medium text-gray-700">
+            <LanguageSwitcher variant="button" />
             <Link href={homeLink} className="hover:text-green-600 transition-colors">
-              Home
+              {t("nav.home")}
             </Link>
             {isClient && (
               <Link
                 href={ordersLink}
                 className="hover:text-green-600 transition-colors"
               >
-                My Purchases
+                {t("nav.my_purchases")}
               </Link>
             )}
             {isProvider && (
               <>
                 <Link href="/provider/publish" className="hover:text-green-600 transition-colors">
-                  Publish Offer
+                  {t("nav.publish_offer")}
                 </Link>
                 <Link href="/provider/orders" className="hover:text-green-600 transition-colors">
-                  Orders
+                  {t("nav.orders")}
                 </Link>
               </>
             )}
             <Link href={profileLink} className="hover:text-green-600 transition-colors">
-              Profile
+              {t("nav.profile")}
             </Link>
             <Link href="/impact" className="hover:text-green-600 transition-colors">
-              Impact
+              {t("nav.impact")}
             </Link>
             <Link href="/contact" className="hover:text-green-600 transition-colors">
-              Contact
+              {t("nav.contact")}
             </Link>
             {(isClient || isProvider) && (
               <Link
                 href={logoutLink}
                 className="flex items-center gap-2 text-red-500 hover:text-red-600 transition-colors"
               >
-                <LogOut size={18} /> Logout
+                <LogOut size={18} /> {t("nav.logout")}
               </Link>
             )}
           </div>
@@ -148,12 +152,15 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
           </div>
 
           <nav className="flex flex-col p-6 space-y-4 text-gray-700 font-medium">
+            <div className="pb-2 border-b border-gray-200">
+              <LanguageSwitcher variant="button" />
+            </div>
             <Link
               href={homeLink}
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Home
+              {t("nav.home")}
             </Link>
             {isClient && (
               <Link
@@ -161,7 +168,7 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
                 onClick={() => setMenuOpen(false)}
                 className="hover:text-green-600"
               >
-                My Purchases
+                {t("nav.my_purchases")}
               </Link>
             )}
             {isProvider && (
@@ -171,14 +178,14 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
                   onClick={() => setMenuOpen(false)}
                   className="hover:text-green-600"
                 >
-                  Publish Offer
+                  {t("nav.publish_offer")}
                 </Link>
                 <Link
                   href="/provider/orders"
                   onClick={() => setMenuOpen(false)}
                   className="hover:text-green-600"
                 >
-                  Orders
+                  {t("nav.orders")}
                 </Link>
               </>
             )}
@@ -187,21 +194,21 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Profile
+              {t("nav.profile")}
             </Link>
             <Link
               href="/impact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Impact
+              {t("nav.impact")}
             </Link>
             <Link
               href="/contact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Contact
+              {t("nav.contact")}
             </Link>
             {(isClient || isProvider) && (
               <Link
@@ -209,7 +216,7 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
                 onClick={() => setMenuOpen(false)}
                 className="text-red-500 flex items-center gap-2 hover:text-red-600"
               >
-                <LogOut size={18} /> Logout
+                <LogOut size={18} /> {t("nav.logout")}
               </Link>
             )}
           </nav>
@@ -239,21 +246,21 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <Home size={22} />
-                <span className="text-xs mt-1">Home</span>
+                <span className="text-xs mt-1">{t("nav.home")}</span>
               </Link>
               <Link
                 href={ordersLink}
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <ShoppingBag size={22} />
-                <span className="text-xs mt-1">Orders</span>
+                <span className="text-xs mt-1">{t("nav.orders")}</span>
               </Link>
               <Link
                 href="/client/profile"
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <User size={22} />
-                <span className="text-xs mt-1">Profile</span>
+                <span className="text-xs mt-1">{t("nav.profile")}</span>
               </Link>
             </>
           ) : (
@@ -263,28 +270,28 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <Home size={22} />
-                <span className="text-xs mt-1">Home</span>
+                <span className="text-xs mt-1">{t("nav.home")}</span>
               </Link>
               <Link
                 href="/provider/publish"
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <Plus size={22} />
-                <span className="text-xs mt-1">Publish</span>
+                <span className="text-xs mt-1">{t("nav.publish")}</span>
               </Link>
               <Link
                 href="/provider/orders"
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <ShoppingBag size={22} />
-                <span className="text-xs mt-1">Orders</span>
+                <span className="text-xs mt-1">{t("nav.orders")}</span>
               </Link>
               <Link
                 href="/provider/profile"
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <User size={22} />
-                <span className="text-xs mt-1">Profile</span>
+                <span className="text-xs mt-1">{t("nav.profile")}</span>
               </Link>
             </>
           )}

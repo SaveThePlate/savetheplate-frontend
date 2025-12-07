@@ -4,9 +4,12 @@ import Image from 'next/image';
 import { Button } from "./ui/button";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Nav = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -55,16 +58,17 @@ const Nav = () => {
         </Link>
 
         <div className="flex items-center gap-3 h-full">
+          <LanguageSwitcher variant="button" />
           {userRole === 'PROVIDER' ? (
             <Link href="/provider/addOffer">
               <Button className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl">
-                Publish an Offer
+                {t("nav.publish_offer")}
               </Button>
             </Link>
           ) : userRole === 'CLIENT' ? (
             <Link href="/client/offers">
               <Button className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl">
-                View Offers
+                {t("nav.view_offers")}
               </Button>
             </Link>
           ) : null}

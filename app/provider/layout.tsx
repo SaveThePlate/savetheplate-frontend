@@ -5,9 +5,12 @@ import Image from "next/image";
 import { X, Menu, LogOut, Home, ShoppingBag, User, Plus } from "lucide-react";
 import { useState } from "react";
 import React from "react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ProviderLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
@@ -38,29 +41,30 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
+            <LanguageSwitcher variant="button" />
             <Link href="/provider/home" className="hover:text-green-600 transition-colors">
-              Home
+              {t("nav.home")}
             </Link>
             <Link href="/provider/profile" className="hover:text-green-600 transition-colors">
-              Profile
+              {t("nav.profile")}
             </Link>
             <Link href="/provider/publish" className="hover:text-green-600 transition-colors">
-              Publish Offer
+              {t("nav.publish_offer")}
             </Link>
             <Link href="/provider/orders" className="hover:text-green-600 transition-colors">
-              Orders
+              {t("nav.orders")}
             </Link>
             <Link href="/impact" className="hover:text-green-600 transition-colors">
-              Impact
+              {t("nav.impact")}
             </Link>
             <Link href="/contact" className="hover:text-green-600 transition-colors">
-              Contact
+              {t("nav.contact")}
             </Link>
             <Link
               href="/provider/logout"
               className="flex items-center gap-2 text-red-500 hover:text-red-600 transition-colors"
             >
-              <LogOut size={18} /> Logout
+              <LogOut size={18} /> {t("nav.logout")}
             </Link>
           </div>
 
@@ -92,54 +96,57 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             </button>
           </div>
           <nav className="flex flex-col p-6 space-y-4 text-gray-700 font-medium">
+            <div className="pb-2 border-b border-gray-200">
+              <LanguageSwitcher variant="button" />
+            </div>
             <Link
               href="/provider/home"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Home
+              {t("nav.home")}
             </Link>
             <Link
               href="/provider/profile"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Profile
+              {t("nav.profile")}
             </Link>
             <Link
               href="/provider/publish"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Publish Offer
+              {t("nav.publish_offer")}
             </Link>
             <Link
               href="/provider/orders"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Orders
+              {t("nav.orders")}
             </Link>
             <Link
               href="/impact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Impact
+              {t("nav.impact")}
             </Link>
             <Link
               href="/contact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
-              Contact
+              {t("nav.contact")}
             </Link>
             <Link
               href="/provider/logout"
               onClick={() => setMenuOpen(false)}
               className="text-red-500 flex items-center gap-2 hover:text-red-600"
             >
-              <LogOut size={18} /> Logout
+              <LogOut size={18} /> {t("nav.logout")}
             </Link>
           </nav>
         </div>
@@ -165,28 +172,28 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
           className="flex flex-col items-center text-gray-700 hover:text-green-600"
         >
           <Home size={22} />
-          <span className="text-xs mt-1">Home</span>
+          <span className="text-xs mt-1">{t("nav.home")}</span>
         </Link>
         <Link
           href="/provider/publish"
           className="flex flex-col items-center text-gray-700 hover:text-green-600"
         >
           <Plus size={22} />
-          <span className="text-xs mt-1">Publish</span>
+          <span className="text-xs mt-1">{t("nav.publish")}</span>
         </Link>
         <Link
           href="/provider/orders"
           className="flex flex-col items-center text-gray-700 hover:text-green-600"
         >
           <ShoppingBag size={22} />
-          <span className="text-xs mt-1">Orders</span>
+          <span className="text-xs mt-1">{t("nav.orders")}</span>
         </Link>
         <Link
           href="/provider/profile"
           className="flex flex-col items-center text-gray-700 hover:text-green-600"
         >
           <User size={22} />
-          <span className="text-xs mt-1">Profile</span>
+          <span className="text-xs mt-1">{t("nav.profile")}</span>
         </Link>
       </nav>
     </section>

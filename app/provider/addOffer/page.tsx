@@ -7,9 +7,11 @@ import AddOffer from "@/components/AddOffer";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
 const AddOfferPage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -43,21 +45,21 @@ const AddOfferPage = () => {
         className="absolute top-4 left-4 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base transition-colors duration-200"
       >
         <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span className="hidden sm:inline font-medium">Back</span>
+        <span className="hidden sm:inline font-medium">{t("common.back")}</span>
       </Button>
 
       {/* Header */}
       <div className="flex flex-col items-center mt-6 mb-8 text-center">
         <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm">
-          🌱 Create Custom Offer
+          {t("add_offer.badge")}
         </div>
 
         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-          Create Custom Offer
+          {t("add_offer.title")}
         </h1>
 
         <p className="text-gray-600 text-sm sm:text-base mt-3 max-w-md leading-relaxed">
-          Set your own title, description, price, and photos. Perfect for specific items or special promotions! 💚
+          {t("add_offer.subtitle")}
         </p>
       </div>
 
@@ -69,7 +71,7 @@ const AddOfferPage = () => {
       {/* Footer Message */}
       <footer className="mt-8 text-center border-t border-gray-100 pt-6">
         <p className="text-xs text-gray-400">
-          💡 Tip: Add clear photos and detailed descriptions to attract more customers!
+          {t("add_offer.tip")}
         </p>
       </footer>
     </main>

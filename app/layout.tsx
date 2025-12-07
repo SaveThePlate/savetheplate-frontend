@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { UserProvider } from "@/context/UserContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -17,8 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <UserProvider>
-      <html lang="en">
-        <body className="flex flex-col min-h-screen bg-white">
+      <LanguageProvider>
+        <html lang="en">
+          <body className="flex flex-col min-h-screen bg-white">
           {/* Google Analytics - gtag.js */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
@@ -40,8 +42,9 @@ export default function RootLayout({
           
 
           <Toaster position="top-right" reverseOrder={false} />
-        </body>
-      </html>
+          </body>
+        </html>
+      </LanguageProvider>
     </UserProvider>
   );
 }

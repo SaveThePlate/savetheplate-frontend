@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
@@ -42,6 +43,7 @@ interface Offer {
 
 const ProfilePage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState<number | null>(null);
   const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
@@ -85,10 +87,10 @@ const ProfilePage = () => {
       setUsername(formData.username);
       setPhoneNumber(formData.phoneNumber);
       setIsEditing(false);
-      toast.success("Profile updated successfully");
+      toast.success(t("client.profile.profile_updated"));
     } catch (err: any) {
       console.error(err?.response?.data || err?.message || err);
-      toast.error("Failed to update profile");
+      toast.error(t("client.profile.update_failed"));
     } finally {
       setIsSaving(false);
     }
@@ -179,7 +181,7 @@ const ProfilePage = () => {
           });
         }
       } catch (err) {
-        toast.error("Failed to fetch profile or orders");
+        toast.error(t("client.profile.fetch_failed"));
       } finally {
         setLoading(false);
       }
@@ -211,7 +213,7 @@ const ProfilePage = () => {
       <div className="w-full max-w-2xl mx-auto mb-6">
         {pendingCount > 0 && (
           <div className="mb-4 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs text-center">
-            {pendingCount} pending order{pendingCount > 1 ? "s" : ""}
+            {pendingCount} {pendingCount === 1 ? t("client.profile.pending_order") : t("client.profile.pending_orders")}
           </div>
         )}
         
@@ -227,7 +229,7 @@ const ProfilePage = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  placeholder="Username"
+                  placeholder={t("client.profile.username")}
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800 text-sm"
                 />
                 <input
@@ -235,7 +237,7 @@ const ProfilePage = () => {
                   type="number"
                   value={formData.phoneNumber ?? ""}
                   onChange={handleInputChange}
-                  placeholder="Phone number"
+                  placeholder={t("client.profile.phone_number")}
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:outline-none text-gray-800 text-sm"
                 />
                 <div className="flex gap-2">
@@ -244,7 +246,7 @@ const ProfilePage = () => {
                     onClick={handleSave}
                     disabled={isSaving}
                   >
-                    {isSaving ? "Saving..." : "Save"}
+                    {isSaving ? t("common.saving") : t("common.save")}
                   </Button>
                   <Button
                     className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-lg hover:bg-gray-200 text-sm"
@@ -253,14 +255,14 @@ const ProfilePage = () => {
                       setFormData({ username, phoneNumber });
                     }}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="flex-1 flex items-center justify-between">
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">{username || "Username"}</h1>
+                  <h1 className="text-lg font-bold text-gray-900">{username || t("client.profile.username")}</h1>
                   {phoneNumber && (
                     <p className="text-xs text-gray-500 mt-0.5">{phoneNumber}</p>
                   )}
@@ -269,7 +271,7 @@ const ProfilePage = () => {
                   onClick={() => setIsEditing(true)}
                   className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium hover:bg-gray-200 text-xs"
                 >
-                  Edit
+                  {t("common.edit")}
                 </Button>
               </div>
             )}
@@ -288,14 +290,14 @@ const ProfilePage = () => {
                 <span className="text-2xl">💰</span>
               </div>
               <div>
-                <p className="text-sm text-emerald-700 font-medium">Total Saved</p>
+                <p className="text-sm text-emerald-700 font-medium">{t("client.profile.total_saved")}</p>
                 <p className="text-2xl font-bold text-emerald-800">
                   {loading ? "..." : totalSavings.toFixed(2)} dt
                 </p>
               </div>
             </div>
             <p className="text-xs text-emerald-600 mt-2">
-              Money saved from confirmed orders
+              {t("client.profile.money_saved")}
             </p>
           </div>
 
@@ -306,14 +308,14 @@ const ProfilePage = () => {
                 <span className="text-2xl">📦</span>
               </div>
               <div>
-                <p className="text-sm text-blue-700 font-medium">Total Orders</p>
+                <p className="text-sm text-blue-700 font-medium">{t("client.profile.total_orders")}</p>
                 <p className="text-2xl font-bold text-blue-800">
                   {loading ? "..." : orders.length}
                 </p>
               </div>
             </div>
             <p className="text-xs text-blue-600 mt-2">
-              {confirmedCount} confirmed, {pendingCount} pending
+              {t("client.profile.confirmed_pending", { confirmed: confirmedCount, pending: pendingCount })}
             </p>
           </div>
 
@@ -324,17 +326,17 @@ const ProfilePage = () => {
                 <span className="text-2xl">📋</span>
               </div>
               <div>
-                <p className="text-sm text-amber-700 font-medium">My Orders</p>
+                <p className="text-sm text-amber-700 font-medium">{t("client.profile.my_orders")}</p>
                 <Button
                   onClick={() => router.push("/client/orders")}
                   className="mt-2 bg-amber-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-amber-700 text-sm"
                 >
-                  View All
+                  {t("client.profile.view_all")}
                 </Button>
               </div>
             </div>
             <p className="text-xs text-amber-600 mt-2">
-              Manage your orders
+              {t("client.profile.manage_orders")}
             </p>
           </div>
         </div>
@@ -347,15 +349,15 @@ const ProfilePage = () => {
                 <span className="text-3xl">🌱</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-teal-900">Environmental Impact</h2>
-                <p className="text-sm text-teal-700">Your contribution to saving the planet</p>
+                <h2 className="text-2xl font-bold text-teal-900">{t("client.profile.environmental_impact")}</h2>
+                <p className="text-sm text-teal-700">{t("client.profile.contribution")}</p>
               </div>
             </div>
             <Button
               onClick={() => router.push("/impact")}
               className="bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 text-sm"
             >
-              Learn More
+              {t("client.profile.learn_more")}
             </Button>
           </div>
 
@@ -367,14 +369,14 @@ const ProfilePage = () => {
                   <span className="text-xl">🍽️</span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Meals Saved</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("client.profile.meals_saved")}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {loading ? "..." : totalMealsSaved}
                   </p>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Food rescued from waste
+                {t("client.profile.food_rescued")}
               </p>
             </div>
 
@@ -385,14 +387,14 @@ const ProfilePage = () => {
                   <span className="text-xl">🌍</span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">CO₂ Saved</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("client.profile.co2_saved")}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {loading ? "..." : co2Saved.toFixed(1)} kg
                   </p>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Equivalent to {loading ? "..." : (co2Saved / 21).toFixed(1)} trees planted
+                {t("client.profile.equivalent_trees", { trees: loading ? "..." : (co2Saved / 21).toFixed(1) })}
               </p>
             </div>
 
@@ -403,14 +405,14 @@ const ProfilePage = () => {
                   <span className="text-xl">💧</span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Water Saved</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("client.profile.water_saved")}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {loading ? "..." : waterSaved >= 1000 ? `${(waterSaved / 1000).toFixed(1)}k` : waterSaved.toFixed(0)} L
                   </p>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Water footprint avoided
+                {t("client.profile.water_footprint")}
               </p>
             </div>
           </div>
@@ -419,8 +421,12 @@ const ProfilePage = () => {
           {!loading && totalMealsSaved > 0 && (
             <div className="mt-6 p-4 bg-teal-100 rounded-xl border border-teal-300">
               <p className="text-sm text-teal-900 font-medium text-center">
-                🌟 Amazing! You&apos;ve saved {totalMealsSaved} meal{totalMealsSaved !== 1 ? "s" : ""} from going to waste, 
-                preventing {co2Saved.toFixed(1)} kg of CO₂ emissions and saving {waterSaved >= 1000 ? `${(waterSaved / 1000).toFixed(1)}k` : waterSaved.toFixed(0)} liters of water!
+                {t("client.profile.impact_message", { 
+                  meals: totalMealsSaved, 
+                  plural: totalMealsSaved !== 1 ? "s" : "",
+                  co2: co2Saved.toFixed(1),
+                  water: waterSaved >= 1000 ? `${(waterSaved / 1000).toFixed(1)}k` : waterSaved.toFixed(0)
+                })}
               </p>
             </div>
           )}

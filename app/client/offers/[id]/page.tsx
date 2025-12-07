@@ -7,7 +7,9 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { ArrowLeft, MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Offer {
   id: number;
@@ -26,6 +28,8 @@ interface Offer {
   price?: number;
   originalPrice?: number;
   expirationDate: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
   pickupLocation: string;
   mapsLink?: string;
   quantity: number;
@@ -33,28 +37,10 @@ interface Offer {
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
-const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString);
-  const today = new Date();
-  const isToday = 
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
-  
-  return {
-    date: isToday ? "Today" : date.toLocaleDateString("en-US", { 
-      weekday: "long", 
-      year: "numeric", 
-      month: "long", 
-      day: "numeric" 
-    }),
-    time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-    isToday,
-  };
-};
 
 const Offers = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const { id } = useParams();
   const [offer, setOffer] = useState<Offer | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -81,11 +67,11 @@ const Offers = () => {
         setFallbackIndex(0);
         setOffer(res.data);
       } catch {
-        toast.error("Failed to load offer");
+        toast.error(t("client.offers.detail.failed"));
       }
     };
     fetchOffer();
-  }, [id, router]);
+  }, [id, router, t]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -104,9 +90,9 @@ const Offers = () => {
   const handleOrder = async () => {
     if (!offer) return;
     const token = localStorage.getItem("accessToken");
-    if (!token) return toast.error("You need to log in");
+    if (!token) return toast.error(t("client.offers.detail.login_required"));
     if (new Date(offer.expirationDate).getTime() <= new Date().getTime()) {
-      return toast.error("This offer has expired and cannot be ordered.");
+      return toast.error(t("client.offers.detail.expired_cannot_order"));
     }
     try {
       await axios.post(
@@ -115,17 +101,18 @@ const Offers = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInCart(true);
-      toast.success("Order placed successfully!");
+      toast.success(t("client.offers.detail.order_success"));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to order");
+      toast.error(err.response?.data?.message || t("client.offers.detail.order_failed"));
     }
   };
 
   const isRescuePack = offer?.title.toLowerCase().includes("rescue pack") || false;
   const isExpired = offer ? new Date(offer.expirationDate).getTime() <= new Date().getTime() : false;
-  const { date: formattedDate, time: formattedTime, isToday } = offer 
-    ? formatDateTime(offer.expirationDate)
-    : { date: "", time: "", isToday: false };
+  const { date: formattedDate, time: formattedTime } = offer 
+    ? formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate)
+    : { date: "", time: "" };
+  const isToday = formattedDate === "Today";
   const currentMapsLink = offer?.owner?.mapsLink || offer?.mapsLink;
   const currentLocation = offer?.owner?.location || offer?.pickupLocation;
 
@@ -134,7 +121,7 @@ const Offers = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading offer details...</p>
+          <p className="text-gray-600">{t("client.offers.detail.loading")}</p>
         </div>
       </div>
     );
@@ -165,7 +152,7 @@ const Offers = () => {
           >
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900 truncate">Offer Details</h1>
+          <h1 className="text-lg font-semibold text-gray-900 truncate">{t("client.offers.detail.title")}</h1>
         </div>
       </div>
 
@@ -195,12 +182,12 @@ const Offers = () => {
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               {isExpired && (
                 <div className="bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
-                  Expired
+                  {t("common.expired")}
                 </div>
               )}
               {offer.quantity > 0 && !isExpired && (
                 <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
-                  {offer.quantity} left
+                  {offer.quantity} {t("common.left")}
                 </div>
               )}
             </div>
@@ -231,7 +218,7 @@ const Offers = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
-                  {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+                  {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
                 </span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{offer.title}</h1>
@@ -274,7 +261,7 @@ const Offers = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    Pickup Location
+                    {t("client.offers.detail.pickup_location")}
                   </p>
                   <p className="text-base font-semibold text-gray-900 mb-1">{currentLocation}</p>
                   {currentMapsLink && (
@@ -285,7 +272,7 @@ const Offers = () => {
                       className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
                     >
                       <MapPin className="w-4 h-4" />
-                      Open in Maps
+                      {t("common.open_in_maps")}
                     </a>
                   )}
                 </div>
@@ -297,15 +284,17 @@ const Offers = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    Pickup Deadline
+                    {t("client.offers.detail.pickup_deadline")}
                   </p>
                   <p className="text-base font-semibold text-gray-900">
-                    {isToday ? "Today" : formattedDate}
+                    {isToday ? t("common.today") : formattedDate}
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">{formattedTime}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {formattedTime ? (formattedTime.includes(" - ") ? `${t("common.between")} ${formattedTime}` : `${t("common.at")} ${formattedTime}`) : ""}
+                  </p>
                   {isExpired && (
                     <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                      Expired
+                      {t("common.expired")}
                     </span>
                   )}
                 </div>
@@ -314,7 +303,7 @@ const Offers = () => {
 
             {/* Quantity Selector */}
             <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Quantity</p>
+              <p className="text-sm font-semibold text-gray-700 mb-3">{t("client.offers.detail.quantity")}</p>
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
@@ -333,7 +322,7 @@ const Offers = () => {
                 </button>
               </div>
               <p className="text-xs text-gray-500 text-center mt-2">
-                {offer.quantity} available
+                {offer.quantity} {t("client.offers.detail.available")}
               </p>
             </div>
 
@@ -350,12 +339,12 @@ const Offers = () => {
               }`}
             >
               {offer.quantity === 0
-                ? "Out of Stock"
+                ? t("common.out_of_stock")
                 : isExpired
-                ? "Expired"
+                ? t("common.expired")
                 : inCart
-                ? "✓ Added to Cart"
-                : `Order Now - ${offer.price ? `${(offer.price * quantity).toFixed(2)} dt` : "Free"}`}
+                ? t("common.added_to_cart")
+                : t("client.offers.detail.order_button", { price: offer.price ? `${(offer.price * quantity).toFixed(2)}` : t("common.free") })}
             </button>
           </div>
         </div>

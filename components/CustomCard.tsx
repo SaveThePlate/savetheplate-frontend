@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
+import { formatDateTimeRange } from "./offerCard/utils";
 import {
   FileInput,
   FileUploader,
@@ -35,23 +36,6 @@ const getBlurDataURL = (color = "#eaeaea") => {
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
-const formatDateTime = (dateString: string | undefined) => {
-  if (!dateString) return { date: "N/A", time: "" };
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return { date: "Invalid date", time: "" };
-  
-  // Check if the date is today
-  const today = new Date();
-  const isToday = 
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
-  
-  return {
-    date: isToday ? "Today" : date.toLocaleDateString(),
-    time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-  };
-};
 
 interface CustomCardProps {
   offerId: number;
@@ -64,6 +48,8 @@ interface CustomCardProps {
   ownerId: number;
   quantity: number;
   expirationDate?: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
   pickupLocation: string;
   mapsLink?: string;
   reserveLink?: string;
@@ -87,6 +73,8 @@ const CustomCard: FC<CustomCardProps> = ({
   ownerId,
   quantity,
   expirationDate,
+  pickupStartTime,
+  pickupEndTime,
   pickupLocation,
   mapsLink = "#",
   reserveLink = "#",
@@ -107,6 +95,8 @@ const CustomCard: FC<CustomCardProps> = ({
     price,
     originalPrice: originalPrice || "",
     quantity,
+    expirationDate: expirationDate || "",
+    pickupLocation: pickupLocation || "",
   });
   
   // Image upload state
@@ -126,7 +116,11 @@ const CustomCard: FC<CustomCardProps> = ({
     }, 250);
   };
 
-  const { date: formattedDate, time: formattedTime } = formatDateTime(expirationDate);
+  const { date: formattedDate, time: formattedTime } = formatDateTimeRange(
+    pickupStartTime,
+    pickupEndTime,
+    expirationDate
+  );
   const isExpired =
     expirationDate && new Date(expirationDate).getTime() <= new Date().getTime();
 
@@ -264,9 +258,15 @@ const CustomCard: FC<CustomCardProps> = ({
         setUploadedImages(finalImages);
       }
 
-      const originalPriceValue = localData.originalPrice 
-        ? parseFloat(localData.originalPrice as any) 
-        : undefined;
+      // Parse originalPrice - include it if it's a valid positive number
+      let originalPriceValue: number | undefined = undefined;
+      const originalPriceStr = localData.originalPrice as any;
+      if (originalPriceStr && String(originalPriceStr).trim() !== "") {
+        const parsed = parseFloat(String(originalPriceStr).trim());
+        if (!isNaN(parsed) && parsed > 0) {
+          originalPriceValue = parsed;
+        }
+      }
 
       // Format images payload for backend (same format as AddOffer)
       const imagesPayload = finalImages.length > 0 
@@ -282,12 +282,18 @@ const CustomCard: FC<CustomCardProps> = ({
 
       const payload: any = {
         ...localData,
+        title: localData.title,
+        description: localData.description,
         price: parseFloat(localData.price as any),
-        originalPrice: originalPriceValue && !isNaN(originalPriceValue) && originalPriceValue > parseFloat(localData.price as any)
-          ? originalPriceValue 
-          : undefined,
         quantity: parseInt(localData.quantity as any, 10),
+        expirationDate: localData.expirationDate,
+        pickupLocation: localData.pickupLocation,
       };
+
+      // Only include originalPrice if it has a value (don't send undefined)
+      if (originalPriceValue !== undefined) {
+        payload.originalPrice = originalPriceValue;
+      }
 
       // Include images if they were updated
       if (imagesPayload && imagesPayload.length > 0) {
@@ -433,7 +439,7 @@ const CustomCard: FC<CustomCardProps> = ({
 
           {/* Pickup Time */}
           <p className="text-xs text-gray-600 mb-3">
-            Pick up {formattedDate === "Today" ? "today" : formattedDate} {formattedTime}
+            Pick up {formattedDate === "Today" ? "today" : formattedDate}{formattedTime && (formattedTime.includes(" - ") ? ` between ${formattedTime}` : ` at ${formattedTime}`)}
           </p>
         </div>
 
@@ -509,7 +515,7 @@ const CustomCard: FC<CustomCardProps> = ({
               <div className="mb-4 p-3 bg-gray-50 rounded-xl">
                 <p className="text-sm font-medium text-gray-900 mb-1">Pickup Details</p>
                 <p className="text-sm text-gray-600">
-                  {formattedDate} at {formattedTime}
+                  {formattedDate}{formattedTime && (formattedTime.includes(" - ") ? ` between ${formattedTime}` : ` at ${formattedTime}`)}
                 </p>
                 {mapsLink && (
                   <a
@@ -651,7 +657,7 @@ const CustomCard: FC<CustomCardProps> = ({
               <p className="text-gray-600 font-medium w-full">{pickupLocation || "Provider"}</p>
             )}
 
-            <p className="text-gray-600 text-sm mt-1">🕑 {formattedDate} {formattedTime}</p>
+            <p className="text-gray-600 text-sm mt-1">🕑 {formattedDate}{formattedTime && (formattedTime.includes(" - ") ? ` between ${formattedTime}` : ` at ${formattedTime}`)}</p>
           </div>
         </CardHeader>
 
@@ -695,8 +701,7 @@ const CustomCard: FC<CustomCardProps> = ({
                 <CredenzaBody className="space-y-3 text-gray-700 text-sm">
                   <p>{localData.description}</p>
                   <p>
-                    <strong>Pickup Time:</strong> {formattedDate} at{" "}
-                    {formattedTime}
+                    <strong>Pickup Time:</strong> {formattedDate}{formattedTime && (formattedTime.includes(" - ") ? ` between ${formattedTime}` : ` at ${formattedTime}`)}
                   </p>
                   <p>
                     <strong>Location:</strong> {pickupLocation}

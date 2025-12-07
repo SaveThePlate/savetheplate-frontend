@@ -14,7 +14,7 @@ export const AuthToast = (
   </div>
 );
 
-export const ErrorToast = (
+export const ErrorToast = ({ message }: { message?: string }) => (
   <div className="flex flex-col gap-2 mx-4 my-2 p-4 bg-red-50 border border-red-200 rounded-lg shadow-lg max-w-md">
     <div className="flex gap-3 items-center">
       <div className="bg-red-200 flex justify-center items-center w-9 h-9 rounded-lg">
@@ -23,7 +23,7 @@ export const ErrorToast = (
       <h2 className="font-semibold text-lg text-red-900">Error</h2>
     </div>
     <p className="font-normal text-red-800 text-sm">
-      There was an error, please try again.
+      {message || "There was an error, please try again."}
     </p>
   </div>
 );

@@ -62,8 +62,14 @@ const Credenza = ({ children, open, onOpenChange, ...props }: RootCredenzaProps)
     }
   }, [isDesktop, open])
 
+  // For mobile Drawer, prevent closing when swiping down (only close via close button)
+  // This prevents the drawer from closing when scrolling inside
+  const drawerProps = !isDesktop ? { 
+    dismissible: false
+  } : {}
+
   return (
-    <Component open={open} onOpenChange={onOpenChange} {...(props as any)}>
+    <Component open={open} onOpenChange={onOpenChange} {...(props as any)} {...drawerProps}>
       {children}
     </Component>
   )

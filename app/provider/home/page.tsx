@@ -8,6 +8,7 @@ import { ProviderOfferCard } from "@/components/offerCard";
 import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Offer {
   price: number;
@@ -28,6 +29,8 @@ interface Offer {
   title: string;
   description: string;
   expirationDate: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
   pickupLocation: string;
   mapsLink: string;
   owner?: {
@@ -44,6 +47,7 @@ const DEFAULT_PROFILE_IMAGE = "/defaultBag.png";
 
 const ProviderHome = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +105,9 @@ const ProviderHome = () => {
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Offer deleted successfully");
+      toast.success(t("provider.home.offer_deleted"));
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to delete offer");
+      toast.error(err?.response?.data?.message || t("provider.home.delete_failed"));
       // refetch if failed
       setLoading(true);
       const response = await axios.get(
@@ -135,10 +139,10 @@ const ProviderHome = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex flex-col gap-1 text-center sm:text-left">
             <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
-              Your Published Offers
+              {t("provider.home.title")}
             </h1>
             <p className="text-gray-600 text-sm sm:text-base">
-              Manage your offers and reach more customers 🌍
+              {t("provider.home.subtitle")}
             </p>
           </div>
           <button
@@ -146,18 +150,18 @@ const ProviderHome = () => {
             className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-800 font-semibold rounded-xl shadow-md hover:bg-green-600 hover:text-white transition duration-300 transform hover:scale-[1.02]"
           >
             <PlusCircle size={22} />
-            Publish Offer
+            {t("provider.home.publish_offer")}
           </button>
         </div>
 
         {/* Offers Grid */}
         {loading ? (
-          <p className="text-gray-600 text-lg text-center mt-10">Loading your offers...</p>
+          <p className="text-gray-600 text-lg text-center mt-10">{t("provider.home.loading_offers")}</p>
         ) : error ? (
           <p className="text-red-600 text-center mt-10">{error}</p>
         ) : offers.length === 0 ? (
           <p className="text-gray-600 text-lg text-center mt-10">
-            You have no published offers yet. Start by creating one!
+            {t("provider.home.no_offers")}
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

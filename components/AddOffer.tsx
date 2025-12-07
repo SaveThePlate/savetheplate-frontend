@@ -33,7 +33,9 @@ const AddOffer: React.FC = () => {
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [expirationDate, setExpirationDate] = useState("");
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupStartTime, setPickupStartTime] = useState("");
+  const [pickupEndTime, setPickupEndTime] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
   const [localFiles, setLocalFiles] = useState<File[] | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
@@ -183,14 +185,32 @@ const AddOffer: React.FC = () => {
       return;
     }
 
-    if (!expirationDate) {
-      toast.error("Please select an expiration date");
+    if (!pickupDate) {
+      toast.error("Please select a pickup date");
       return;
     }
 
-    const expirationDateObj = new Date(expirationDate);
-    if (expirationDateObj <= new Date()) {
-      toast.error("Expiration date must be in the future");
+    if (!pickupStartTime) {
+      toast.error("Please select a start time");
+      return;
+    }
+
+    if (!pickupEndTime) {
+      toast.error("Please select an end time");
+      return;
+    }
+
+    // Combine date and times
+    const startDateTime = new Date(`${pickupDate}T${pickupStartTime}`);
+    const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
+
+    if (startDateTime >= endDateTime) {
+      toast.error("End time must be after start time");
+      return;
+    }
+
+    if (endDateTime <= new Date()) {
+      toast.error("Pickup time must be in the future");
       return;
     }
 
@@ -223,18 +243,34 @@ const AddOffer: React.FC = () => {
           }))
         : [];
 
-      const originalPriceToFloat = originalPrice ? parseFloat(originalPrice) : undefined;
+      // Parse originalPrice - include it if it's a valid positive number
+      let originalPriceValue: number | undefined = undefined;
+      if (originalPrice && originalPrice.trim() !== "") {
+        const parsed = parseFloat(originalPrice.trim());
+        if (!isNaN(parsed) && parsed > 0) {
+          originalPriceValue = parsed;
+        }
+      }
 
-      const payload = {
+      // Use end time as expiration date for backward compatibility
+      const payload: any = {
         title: title.trim(),
         description: description.trim(),
         price: priceToFloat,
-        originalPrice: originalPriceToFloat && !isNaN(originalPriceToFloat) && originalPriceToFloat > priceToFloat ? originalPriceToFloat : undefined,
         quantity: quantityToFloat,
-        expirationDate: expirationDateObj.toISOString(),
+        expirationDate: endDateTime.toISOString(),
+        pickupStartTime: startDateTime.toISOString(),
+        pickupEndTime: endDateTime.toISOString(),
         pickupLocation: pickupLocation.trim(),
         images: JSON.stringify(imagesPayload),
       };
+
+      // Only include originalPrice if it has a value (don't send undefined)
+      if (originalPriceValue !== undefined) {
+        payload.originalPrice = originalPriceValue;
+      }
+
+      console.log("Sending payload:", payload); // Debug log
 
       await axiosInstance.post("/offers", payload);
       toast.success("Offer created successfully! 🎉");
@@ -245,7 +281,9 @@ const AddOffer: React.FC = () => {
       setPrice("");
       setOriginalPrice("");
       setQuantity("");
-      setExpirationDate("");
+      setPickupDate("");
+      setPickupStartTime("");
+      setPickupEndTime("");
       setPickupLocation("");
       setLocalFiles(null);
       setUploadedImages([]);
@@ -430,24 +468,65 @@ const AddOffer: React.FC = () => {
           <p className="text-xs text-gray-500 mt-1">Where should customers pick up their order?</p>
         </div>
 
-        {/* Expiration Date */}
-        <div>
-          <label
-            htmlFor="expirationDate"
-            className="block text-sm font-semibold text-gray-700 mb-2"
-          >
-            Pickup Deadline <span className="text-red-500">*</span>
-          </label>
-          <Input
-            id="expirationDate"
-            type="datetime-local"
-            value={expirationDate}
-            onChange={(e) => setExpirationDate(e.target.value)}
-            min={new Date().toISOString().slice(0, 16)}
-            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-            required
-          />
-          <p className="text-xs text-gray-500 mt-1">When should customers pick up by?</p>
+        {/* Pickup Date and Time Range */}
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="pickupDate"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Pickup Date <span className="text-red-500">*</span>
+            </label>
+            <Input
+              id="pickupDate"
+              type="date"
+              value={pickupDate}
+              onChange={(e) => setPickupDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Select the pickup date</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="pickupStartTime"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Start Time <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="pickupStartTime"
+                type="time"
+                value={pickupStartTime}
+                onChange={(e) => setPickupStartTime(e.target.value)}
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Earliest pickup time</p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="pickupEndTime"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                End Time <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="pickupEndTime"
+                type="time"
+                value={pickupEndTime}
+                onChange={(e) => setPickupEndTime(e.target.value)}
+                min={pickupStartTime || undefined}
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Latest pickup time</p>
+            </div>
+          </div>
         </div>
 
         {/* Image Upload */}
@@ -555,7 +634,7 @@ const AddOffer: React.FC = () => {
         {/* Submit */}
         <Button
           type="submit"
-          disabled={!title.trim() || !description.trim() || !price || !quantity || !expirationDate || !pickupLocation.trim()}
+          disabled={!title.trim() || !description.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime || !pickupLocation.trim()}
           className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01] mt-2"
         >
           Create Offer

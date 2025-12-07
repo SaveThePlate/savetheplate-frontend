@@ -17,6 +17,8 @@ export interface BaseOfferCardProps {
   originalPrice?: number;
   quantity: number;
   expirationDate?: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
   pickupLocation: string;
   mapsLink?: string;
   owner?: OfferOwner;

@@ -6,9 +6,12 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Mail, Phone, MapPin, Send, MessageSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const ContactPage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -71,12 +74,12 @@ const ContactPage = () => {
     e.preventDefault();
     
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("contact.fill_required"));
       return;
     }
 
     if (!formData.email.includes("@")) {
-      toast.error("Please enter a valid email address");
+      toast.error(t("contact.valid_email"));
       return;
     }
 
@@ -114,7 +117,7 @@ const ContactPage = () => {
           },
           { headers }
         );
-        toast.success("Message sent successfully! We will get back to you soon.");
+        toast.success(t("contact.message_sent"));
         setFormData({ name: "", email: "", subject: "", message: "" });
       } catch (backendError: any) {
         // If backend endpoint doesn't exist, use mailto as fallback
@@ -126,7 +129,7 @@ const ContactPage = () => {
             `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
           );
           window.location.href = `mailto:savetheplatetunisia@gmail.com?subject=${subject}&body=${body}`;
-          toast.success("Opening your email client...");
+          toast.success(t("contact.opening_email"));
         } else {
           throw backendError;
         }
@@ -135,7 +138,7 @@ const ContactPage = () => {
       console.error("Error sending message:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Failed to send message. Please try again or email us directly."
+          t("contact.send_failed")
       );
     } finally {
       setLoading(false);
@@ -144,6 +147,11 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] px-4 sm:px-6 lg:px-8">
+      {/* Language Switcher - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher variant="button" />
+      </div>
+
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -162,11 +170,10 @@ const ContactPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-[#1B4332] mb-4">
-            Contact Us
+            {t("contact.title")}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Have a question, suggestion, or need help? We&apos;d love to hear from you!
-            Get in touch and we&apos;ll respond as soon as possible.
+            {t("contact.subtitle")}
           </p>
         </div>
 
@@ -179,7 +186,7 @@ const ContactPage = () => {
                   <Mail className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1">{t("contact.email")}</h3>
                   <a
                     href="mailto:savetheplatetunisia@gmail.com"
                     className="text-emerald-600 hover:text-emerald-700 text-sm"
@@ -213,9 +220,9 @@ const ContactPage = () => {
                   <MapPin className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Location</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1">{t("contact.location")}</h3>
                   <p className="text-gray-600 text-sm">
-                    The Dot, Lac 2, Tunis, Tunisia
+                    {t("contact.location_address")}
                   </p>
                 </div>
               </div>
@@ -225,10 +232,10 @@ const ContactPage = () => {
             <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border-2 border-emerald-200">
               <div className="flex items-center gap-3 mb-2">
                 <MessageSquare className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-semibold text-emerald-900">Response Time</h3>
+                <h3 className="font-semibold text-emerald-900">{t("contact.response_time")}</h3>
               </div>
               <p className="text-sm text-emerald-700">
-                We typically respond within 24-48 hours during business days.
+                {t("contact.response_time_message")}
               </p>
             </div>
           </div>
@@ -238,7 +245,7 @@ const ContactPage = () => {
             <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <Send className="w-6 h-6 text-emerald-600" />
-                Send us a Message
+                {t("contact.send_message")}
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -248,7 +255,7 @@ const ContactPage = () => {
                     htmlFor="name"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Name <span className="text-red-500">*</span>
+                    {t("contact.name")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -260,7 +267,7 @@ const ContactPage = () => {
                       onChange={handleInputChange}
                       required
                       className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      placeholder="Your name"
+                      placeholder={t("contact.name_placeholder")}
                     />
                   </div>
                 </div>
@@ -271,7 +278,7 @@ const ContactPage = () => {
                     htmlFor="email"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Email <span className="text-red-500">*</span>
+                    {t("contact.email")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -283,7 +290,7 @@ const ContactPage = () => {
                       onChange={handleInputChange}
                       required
                       className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      placeholder="your.email@example.com"
+                      placeholder={t("contact.email_placeholder")}
                     />
                   </div>
                 </div>
@@ -294,7 +301,7 @@ const ContactPage = () => {
                     htmlFor="subject"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Subject
+                    {t("contact.subject")}
                   </label>
                   <input
                     id="subject"
@@ -303,7 +310,7 @@ const ContactPage = () => {
                     value={formData.subject}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                    placeholder="What&apos;s this about?"
+                    placeholder={t("contact.subject_placeholder")}
                   />
                 </div>
 
@@ -313,7 +320,7 @@ const ContactPage = () => {
                     htmlFor="message"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Message <span className="text-red-500">*</span>
+                    {t("contact.message")} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="message"
@@ -323,10 +330,10 @@ const ContactPage = () => {
                     required
                     rows={6}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
-                    placeholder="Tell us how we can help you..."
+                    placeholder={t("contact.message_placeholder")}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {formData.message.length} characters
+                    {t("contact.characters", { count: formData.message.length })}
                   </p>
                 </div>
 
@@ -339,12 +346,12 @@ const ContactPage = () => {
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Sending...
+                      {t("contact.sending")}
                     </>
                   ) : (
                     <>
                       <Send className="w-5 h-5" />
-                      Send Message
+                      {t("contact.send_message_button")}
                     </>
                   )}
                 </button>

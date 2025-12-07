@@ -22,6 +22,7 @@ import {
 } from "@/components/dropFile";
 import { useRouter } from "next/navigation";
 import { resolveImageSource } from "@/utils/imageUtils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ProfileData {
   username: string;
@@ -175,6 +176,7 @@ const EditProfileDialog: React.FC<{
     profileImage?: string;
   }) => Promise<void>;
 }> = ({ open, onOpenChange, profile, onSave }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     username: "",
     phoneNumber: "",
@@ -209,9 +211,53 @@ const EditProfileDialog: React.FC<{
     }
   }, [open, profile, dialogJustOpened]);
 
+  // Clean and extract Google Maps URL from pasted text
+  const cleanGoogleMapsUrl = (text: string): string => {
+    if (!text.trim()) return "";
+    
+    // Remove any leading/trailing whitespace
+    text = text.trim();
+    
+    // Try to find a Google Maps URL in the text
+    // Pattern 1: Full URLs (maps.google.com, google.com/maps, goo.gl/maps, maps.app.goo.gl)
+    const urlPattern = /(https?:\/\/)?(www\.)?(maps\.)?(google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl|maps\.google\.com)[^\s]*/gi;
+    const urlMatch = text.match(urlPattern);
+    if (urlMatch && urlMatch[0]) {
+      let url = urlMatch[0];
+      // Ensure it starts with http:// or https://
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      // Remove any trailing characters that aren't part of the URL
+      url = url.replace(/[.,;!?]+$/, "");
+      return url;
+    }
+    
+    // Pattern 2: Short links (goo.gl, maps.app.goo.gl)
+    const shortLinkPattern = /(https?:\/\/)?(goo\.gl|maps\.app\.goo\.gl)\/[a-zA-Z0-9]+/gi;
+    const shortMatch = text.match(shortLinkPattern);
+    if (shortMatch && shortMatch[0]) {
+      let url = shortMatch[0];
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      return url;
+    }
+    
+    // If no URL pattern found, return the text as-is (might be a valid URL format we don't recognize)
+    return text;
+  };
+
   // Extract location from Google Maps link
   const fetchLocationName = async (url: string) => {
     if (!url.trim()) {
+      setLocation("");
+      return;
+    }
+
+    // Clean the URL first
+    const cleanedUrl = cleanGoogleMapsUrl(url);
+    if (!cleanedUrl) {
       setLocation("");
       return;
     }
@@ -220,7 +266,7 @@ const EditProfileDialog: React.FC<{
       const token = localStorage.getItem("accessToken") || "";
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
-        { mapsLink: url },
+        { mapsLink: cleanedUrl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -233,9 +279,22 @@ const EditProfileDialog: React.FC<{
   };
 
   const handleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setFormData((prev) => ({ ...prev, mapsLink: url }));
-    fetchLocationName(url);
+    const inputValue = e.target.value;
+    // Clean the URL and set it
+    const cleanedUrl = cleanGoogleMapsUrl(inputValue);
+    setFormData((prev) => ({ ...prev, mapsLink: cleanedUrl || inputValue }));
+    fetchLocationName(cleanedUrl || inputValue);
+  };
+
+  // Handle paste events to clean the URL
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedText = e.clipboardData.getData("text");
+    const cleanedUrl = cleanGoogleMapsUrl(pastedText);
+    if (cleanedUrl && cleanedUrl !== pastedText) {
+      e.preventDefault();
+      setFormData((prev) => ({ ...prev, mapsLink: cleanedUrl }));
+      fetchLocationName(cleanedUrl);
+    }
   };
 
   // Handle profile image upload - using same method as AddOffer
@@ -253,7 +312,7 @@ const EditProfileDialog: React.FC<{
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        toast.error("Authentication required");
+        toast.error(t("client.offers.detail.login_required"));
         return;
       }
 
@@ -310,7 +369,7 @@ const EditProfileDialog: React.FC<{
       console.log("✅ Upload successful! Setting profile image to:", filename);
       console.log("✅ Upload response full:", uploaded);
       setProfileImage(filename);
-      toast.success("Profile image uploaded!");
+      toast.success(t("provider.profile.edit_dialog.image_ready"));
     } catch (error: any) {
       console.error("Error uploading image:", error);
       console.error("Error response:", error?.response?.data);
@@ -325,23 +384,23 @@ const EditProfileDialog: React.FC<{
   const handleSave = async () => {
     // Validation
     if (!formData.username.trim()) {
-      toast.error("Username is required");
+      toast.error(t("provider.profile.edit_dialog.username_required"));
       return;
     }
 
     if (!formData.phoneNumber.trim()) {
-      toast.error("Phone number is required");
+      toast.error(t("provider.profile.edit_dialog.phone_required"));
       return;
     }
 
     const normalizedPhone = formData.phoneNumber.trim();
     if (!/^\d{8}$/.test(normalizedPhone)) {
-      toast.error("Please enter a valid phone number (8 digits).");
+      toast.error(t("provider.profile.edit_dialog.phone_hint"));
       return;
     }
 
     if (!formData.mapsLink.trim()) {
-      toast.error("Google Maps link is required");
+      toast.error(t("provider.profile.edit_dialog.maps_required"));
       return;
     }
 
@@ -379,13 +438,13 @@ const EditProfileDialog: React.FC<{
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>{t("provider.profile.edit_dialog.title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {/* Username */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Username <span className="text-red-500">*</span>
+              {t("provider.profile.edit_dialog.username")} <span className="text-red-500">*</span>
             </label>
             <Input
               value={formData.username}
@@ -395,15 +454,15 @@ const EditProfileDialog: React.FC<{
                   username: e.target.value,
                 }))
               }
-              placeholder="Your store name"
+              placeholder={t("provider.profile.edit_dialog.store_name")}
             />
-            <p className="text-xs text-gray-500 mt-1">This will be displayed as your store name</p>
+            <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.store_name_hint")}</p>
           </div>
 
           {/* Profile Image Upload */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Profile Image
+              {t("provider.profile.edit_dialog.profile_image")}
             </label>
             <FileUploader
               value={localFile ? [localFile] : []}
@@ -420,17 +479,17 @@ const EditProfileDialog: React.FC<{
                   {uploadingImage ? (
                     <>
                       <div className="animate-spin text-2xl mb-2">⏳</div>
-                      <p className="text-gray-600 text-sm">Uploading...</p>
+                      <p className="text-gray-600 text-sm">{t("provider.profile.edit_dialog.uploading")}</p>
                     </>
                   ) : profileImage || localFile ? (
                     <>
                       <div className="text-2xl mb-2">✓</div>
-                      <p className="text-gray-600 text-sm">Image ready</p>
+                      <p className="text-gray-600 text-sm">{t("provider.profile.edit_dialog.image_ready")}</p>
                     </>
                   ) : (
                     <>
                       <div className="text-2xl mb-2">📸</div>
-                      <p className="text-gray-600 text-sm">Click to upload</p>
+                      <p className="text-gray-600 text-sm">{t("provider.profile.edit_dialog.click_to_upload")}</p>
                     </>
                   )}
                 </div>
@@ -452,13 +511,13 @@ const EditProfileDialog: React.FC<{
                 )}
               </FileUploaderContent>
             </FileUploader>
-            <p className="text-xs text-gray-500 mt-1">Upload your store logo or image</p>
+            <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.upload_logo")}</p>
           </div>
 
           {/* Phone Number */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Phone Number <span className="text-red-500">*</span>
+              {t("provider.profile.edit_dialog.phone_number")} <span className="text-red-500">*</span>
             </label>
             <Input
               value={formData.phoneNumber}
@@ -472,38 +531,39 @@ const EditProfileDialog: React.FC<{
               maxLength={8}
               type="tel"
             />
-            <p className="text-xs text-gray-500 mt-1">8 digits (e.g., 12345678)</p>
+            <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.phone_hint")}</p>
           </div>
 
           {/* Google Maps Link */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Google Maps Link <span className="text-red-500">*</span>
+              {t("provider.profile.edit_dialog.maps_link")} <span className="text-red-500">*</span>
             </label>
             <Input
               value={formData.mapsLink}
               onChange={handleMapsLinkChange}
-              placeholder="Paste your Google Maps location URL"
+              onPaste={handlePaste}
+              placeholder={t("provider.profile.edit_dialog.maps_placeholder")}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Copy the link from Google Maps and paste it here
+              {t("provider.profile.edit_dialog.maps_hint")}
             </p>
           </div>
 
           {/* Detected Location */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Detected Location
+              {t("provider.profile.edit_dialog.detected_location")}
             </label>
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="bg-gray-50 text-gray-600"
-              placeholder="Will be auto-filled from Google Maps link"
+              placeholder={t("provider.profile.edit_dialog.location_auto")}
               disabled
             />
             <p className="text-xs text-gray-500 mt-1">
-              This location will be extracted automatically
+              {t("provider.profile.edit_dialog.location_hint")}
             </p>
           </div>
         </div>
@@ -513,10 +573,10 @@ const EditProfileDialog: React.FC<{
             onClick={() => onOpenChange(false)}
             disabled={saving || uploadingImage}
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving || uploadingImage}>
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -526,6 +586,7 @@ const EditProfileDialog: React.FC<{
 
 export default function ProviderProfile() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { profile, stats, loading, refetch } = useProviderProfile();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -605,7 +666,7 @@ export default function ProviderProfile() {
         }
       );
 
-      toast.success("Profile updated successfully!");
+      toast.success(t("provider.profile.edit_dialog.profile_updated"));
       // Refetch to get updated data
       await refetch();
     } catch (err: any) {
@@ -615,7 +676,7 @@ export default function ProviderProfile() {
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
-        "Failed to update profile";
+        t("provider.profile.edit_dialog.update_failed");
       toast.error(errorMessage);
       throw err;
     }
@@ -662,7 +723,7 @@ export default function ProviderProfile() {
             {/* Store Details */}
             <div className="flex-1 text-center sm:text-left">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {loading ? "Loading..." : profile?.username || "Your Store"}
+                {loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}
               </h1>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm md:text-base">
                 <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-600">
@@ -670,13 +731,13 @@ export default function ProviderProfile() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>{loading ? "..." : profile?.location || "Location"}</span>
+                  <span>{loading ? "..." : profile?.location || t("provider.profile.location")}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-600">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <span>{loading ? "..." : profile?.phoneNumber || "Phone number"}</span>
+                  <span>{loading ? "..." : profile?.phoneNumber || t("provider.profile.phone_number")}</span>
                 </div>
               </div>
             </div>
@@ -688,7 +749,7 @@ export default function ProviderProfile() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Create Offer
+                  {t("provider.profile.create_offer")}
                 </Button>
               </Link>
               <Button
@@ -699,7 +760,7 @@ export default function ProviderProfile() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Edit Profile
+                {t("provider.profile.edit_profile")}
               </Button>
             </div>
           </div>
@@ -717,13 +778,13 @@ export default function ProviderProfile() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Offers</p>
+                  <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">{t("provider.profile.offers")}</p>
                   <p className="text-3xl font-bold text-emerald-800">
                     {loading ? "..." : stats.totalOffers}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-emerald-700 mt-1">Published offers</p>
+              <p className="text-xs text-emerald-700 mt-1">{t("provider.profile.published_offers")}</p>
             </div>
 
             {/* Number of Items */}
@@ -735,13 +796,13 @@ export default function ProviderProfile() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Items</p>
+                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">{t("provider.profile.items")}</p>
                   <p className="text-3xl font-bold text-blue-800">
                     {loading ? "..." : stats.totalItems}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-blue-700 mt-1">Total items available</p>
+              <p className="text-xs text-blue-700 mt-1">{t("provider.profile.total_items_available")}</p>
             </div>
 
             {/* Generated Revenue */}
@@ -753,13 +814,13 @@ export default function ProviderProfile() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">Revenue</p>
+                  <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">{t("provider.profile.revenue")}</p>
                   <p className="text-3xl font-bold text-amber-800">
                     {loading ? "..." : stats.revenue.toFixed(2)}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-amber-700 mt-1">Total earnings (TND)</p>
+              <p className="text-xs text-amber-700 mt-1">{t("provider.profile.total_earnings")}</p>
             </div>
           </div>
         </div>
@@ -774,15 +835,15 @@ export default function ProviderProfile() {
                 <span className="text-3xl">🌱</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-teal-900">Environmental Impact</h2>
-                <p className="text-sm text-teal-700">Your contribution to saving the planet</p>
+                <h2 className="text-2xl font-bold text-teal-900">{t("provider.profile.environmental_impact")}</h2>
+                <p className="text-sm text-teal-700">{t("provider.profile.contribution")}</p>
               </div>
             </div>
             <Button
               onClick={() => router.push("/impact")}
               className="bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 text-sm"
             >
-              Learn More
+              {t("provider.profile.learn_more")}
             </Button>
           </div>
 
@@ -794,14 +855,14 @@ export default function ProviderProfile() {
                   <span className="text-xl">🍽️</span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Meals Saved</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("provider.profile.meals_saved")}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {loading ? "..." : stats.totalMealsSaved}
                   </p>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Food rescued from waste
+                {t("provider.profile.food_rescued")}
               </p>
             </div>
 
@@ -812,14 +873,14 @@ export default function ProviderProfile() {
                   <span className="text-xl">🌍</span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">CO₂ Saved</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("provider.profile.co2_saved")}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {loading ? "..." : stats.co2Saved.toFixed(1)} kg
                   </p>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Equivalent to {loading ? "..." : (stats.co2Saved / 21).toFixed(1)} trees planted
+                {t("provider.profile.equivalent_trees", { trees: loading ? "..." : (stats.co2Saved / 21).toFixed(1) })}
               </p>
             </div>
 
@@ -830,14 +891,14 @@ export default function ProviderProfile() {
                   <span className="text-xl">💧</span>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">Water Saved</p>
+                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("provider.profile.water_saved")}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {loading ? "..." : stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} L
                   </p>
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Water footprint avoided
+                {t("provider.profile.water_footprint")}
               </p>
             </div>
           </div>
@@ -846,8 +907,12 @@ export default function ProviderProfile() {
           {!loading && stats.totalMealsSaved > 0 && (
             <div className="mt-6 p-4 bg-teal-100 rounded-xl border border-teal-300">
               <p className="text-sm text-teal-900 font-medium text-center">
-                🌟 Amazing! You&apos;ve helped save {stats.totalMealsSaved} meal{stats.totalMealsSaved !== 1 ? "s" : ""} from going to waste, 
-                preventing {stats.co2Saved.toFixed(1)} kg of CO₂ emissions and saving {stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} liters of water!
+                {t("provider.profile.impact_message", { 
+                  meals: stats.totalMealsSaved, 
+                  plural: stats.totalMealsSaved !== 1 ? "s" : "",
+                  co2: stats.co2Saved.toFixed(1),
+                  water: stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)
+                })}
               </p>
             </div>
           )}

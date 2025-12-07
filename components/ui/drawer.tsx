@@ -7,10 +7,12 @@ import { cn } from "@/lib/utils"
 
 const Drawer = ({
   shouldScaleBackground = true,
+  dismissible = true,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+}: React.ComponentProps<typeof DrawerPrimitive.Root> & { dismissible?: boolean }) => (
   <DrawerPrimitive.Root
     shouldScaleBackground={shouldScaleBackground}
+    dismissible={dismissible}
     {...props}
   />
 )
@@ -43,13 +45,15 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background max-h-[90vh] overflow-hidden",
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-      {children}
+      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted flex-shrink-0" />
+      <div className="overflow-y-auto flex-1 min-h-0">
+        {children}
+      </div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ))

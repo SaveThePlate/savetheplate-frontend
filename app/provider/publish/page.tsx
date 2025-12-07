@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ArrowLeft, ShoppingBag, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
 
 const SelectOfferTypePage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -26,7 +28,7 @@ const SelectOfferTypePage = () => {
           className="absolute top-4 left-4 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="hidden sm:inline">Back</span>
+          <span className="hidden sm:inline">{t("common.back")}</span>
         </Button>
 
         {/* Header */}
@@ -35,10 +37,10 @@ const SelectOfferTypePage = () => {
             <Gift className="w-8 h-8 text-green-800" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
-            Create New Offer
+            {t("publish.title")}
           </h1>
           <p className="text-gray-500 text-sm sm:text-base mt-2 max-w-xs">
-            Choose how you&apos;d like to share your surplus and make a positive impact 🌍
+            {t("publish.subtitle")}
           </p>
         </div>
 
@@ -49,7 +51,7 @@ const SelectOfferTypePage = () => {
             onClick={() => router.push("/provider/addOffer")}
           >
             <ShoppingBag className="w-5 h-5" />
-            Custom Offer
+            {t("publish.custom_offer")}
           </button>
 
           <button
@@ -57,7 +59,7 @@ const SelectOfferTypePage = () => {
             onClick={() => router.push("/provider/createMagicBox")}
           >
             <Gift className="w-5 h-5" />
-            Quick Rescue Pack
+            {t("publish.quick_rescue")}
           </button>
         </div>
 
@@ -69,10 +71,10 @@ const SelectOfferTypePage = () => {
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-semibold text-[#243B28] mb-2">
-                What is a Rescue Pack?
+                {t("publish.rescue_pack_title")}
               </h2>
               <p className="text-[#4A4A4A] text-sm leading-relaxed">
-                A Rescue Pack is a pre-configured bundle of rescued food items. Choose from small, medium, or large sizes with preset prices. Perfect for quick listings when you have mixed surplus items! 🍞🥐🍓
+                {t("publish.rescue_pack_description")}
               </p>
             </div>
           </div>
@@ -80,7 +82,7 @@ const SelectOfferTypePage = () => {
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-gray-400">
-          Let’s save good food together 💚
+          {t("publish.footer")}
         </p>
       </main>
     </div>

@@ -41,14 +41,14 @@ export type OpenAPIConfig = {
 
 export const OpenAPI: OpenAPIConfig = {
 	BASE: '',
-	CREDENTIALS: 'include',
+	CREDENTIALS: 'omit', // Changed from 'include' - we use Bearer tokens, not cookies
 	ENCODE_PATH: undefined,
 	HEADERS: undefined,
 	PASSWORD: undefined,
 	TOKEN: undefined,
 	USERNAME: undefined,
 	VERSION: '1.0',
-	WITH_CREDENTIALS: false,
+	WITH_CREDENTIALS: false, // Changed from true - we use Bearer tokens, not cookies
 	interceptors: {
 		request: new Interceptors(),
 		response: new Interceptors(),

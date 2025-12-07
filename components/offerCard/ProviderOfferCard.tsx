@@ -29,6 +29,7 @@ import {
   CredenzaFooter,
   CredenzaClose,
 } from "@/components/ui/credenza";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   offerId,
@@ -47,6 +48,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   onUpdate,
 }) => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     price,
     originalPrice: originalPrice || "",
     quantity,
+    expirationDate: expirationDate || "",
+    pickupLocation: pickupLocation || "",
   });
   
   // Image upload state
@@ -81,8 +85,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       price,
       originalPrice: originalPrice || "",
       quantity,
+      expirationDate: expirationDate || "",
+      pickupLocation: pickupLocation || "",
     });
-  }, [title, description, price, originalPrice, quantity, offerId]);
+  }, [title, description, price, originalPrice, quantity, expirationDate, pickupLocation, offerId]);
 
   // Sync image display
   useEffect(() => {
@@ -184,10 +190,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
       setLocalFiles(files);
-      toast.success(`${uploaded.length} image(s) uploaded successfully!`);
+      toast.success(t("offer_card.upload_success", { count: uploaded.length }));
     } catch (error: any) {
       setLocalFiles(null);
       setUploadedImages([]);
+      toast.error(t("offer_card.upload_failed"));
     } finally {
       setUploadingImages(false);
     }
@@ -195,7 +202,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
   const handleEdit = async () => {
     if (!localData.title || !localData.description) {
-      toast.error("Please fill out all fields");
+      toast.error(t("offer_card.fill_fields"));
       return;
     }
 
@@ -211,9 +218,15 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         setUploadedImages(finalImages);
       }
 
-      const originalPriceValue = localData.originalPrice 
-        ? parseFloat(localData.originalPrice as any) 
-        : undefined;
+      // Parse originalPrice - include it if it's a valid positive number
+      let originalPriceValue: number | undefined = undefined;
+      const originalPriceStr = localData.originalPrice as any;
+      if (originalPriceStr && String(originalPriceStr).trim() !== "") {
+        const parsed = parseFloat(String(originalPriceStr).trim());
+        if (!isNaN(parsed) && parsed > 0) {
+          originalPriceValue = parsed;
+        }
+      }
 
       const imagesPayload = finalImages.length > 0 
         ? finalImages.map((img) => ({
@@ -228,12 +241,18 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
       const payload: any = {
         ...localData,
+        title: localData.title,
+        description: localData.description,
         price: parseFloat(localData.price as any),
-        originalPrice: originalPriceValue && !isNaN(originalPriceValue) && originalPriceValue > parseFloat(localData.price as any)
-          ? originalPriceValue 
-          : undefined,
         quantity: parseInt(localData.quantity as any, 10),
+        expirationDate: localData.expirationDate,
+        pickupLocation: localData.pickupLocation,
       };
+
+      // Only include originalPrice if it has a value (don't send undefined)
+      if (originalPriceValue !== undefined) {
+        payload.originalPrice = originalPriceValue;
+      }
 
       if (imagesPayload && imagesPayload.length > 0) {
         payload.images = JSON.stringify(imagesPayload);
@@ -242,7 +261,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Offer updated successfully");
+      toast.success(t("offer_card.offer_updated"));
       setLocalData({
         ...payload,
         originalPrice: payload.originalPrice || "",
@@ -252,7 +271,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       setIsEditing(false);
       onUpdate?.(offerId, payload);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update offer");
+      toast.error(err?.response?.data?.message || t("offer_card.update_failed"));
     } finally {
       setLoading(false);
     }
@@ -298,7 +317,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
         {expired && (
           <div className="absolute top-2 left-2 bg-gray-800 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-md z-10">
-            Expired
+            {t("common.expired")}
           </div>
         )}
       </div>
@@ -351,17 +370,17 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   disabled={loading}
                   className="w-full bg-white border border-gray-300 text-gray-800 px-3 py-2 rounded-lg font-medium hover:bg-gray-50"
                 >
-                  Edit
+                  {t("common.edit")}
                 </button>
               </CredenzaTrigger>
 
               <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-lg mx-auto border border-gray-100">
                 <CredenzaHeader className="mb-4">
                   <CredenzaTitle className="text-xl font-bold text-gray-900">
-                    Edit Offer
+                    {t("offer_card.edit_offer")}
                   </CredenzaTitle>
                   <CredenzaDescription className="text-sm text-gray-500 mt-1">
-                    Update your offer details below
+                    {t("offer_card.update_details")}
                   </CredenzaDescription>
                 </CredenzaHeader>
 
@@ -369,7 +388,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   {/* Title */}
                   <div className="space-y-1.5">
                     <label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">
-                      Title <span className="text-red-500">*</span>
+                      {t("offer_card.title_label")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="edit-title"
@@ -378,14 +397,14 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       onChange={handleInputChange}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
-                      placeholder="Enter offer title"
+                      placeholder={t("offer_card.title_label")}
                     />
                   </div>
 
                   {/* Description */}
                   <div className="space-y-1.5">
                     <label htmlFor="edit-description" className="text-sm font-semibold text-gray-700">
-                      Description <span className="text-red-500">*</span>
+                      {t("offer_card.description_label")} <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       id="edit-description"
@@ -395,7 +414,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       rows={4}
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
                       disabled={loading}
-                      placeholder="Describe your offer..."
+                      placeholder={t("offer_card.description_label")}
                     />
                   </div>
 
@@ -403,7 +422,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <label htmlFor="edit-price" className="text-sm font-semibold text-gray-700">
-                        Price <span className="text-red-500">*</span>
+                        {t("offer_card.price_label")} <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <input
@@ -425,7 +444,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                     <div className="space-y-1.5">
                       <label htmlFor="edit-originalPrice" className="text-sm font-semibold text-gray-700">
-                        Original Price
+                        {t("offer_card.original_price_label")}
                       </label>
                       <div className="relative">
                         <input
@@ -453,7 +472,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   {/* Quantity */}
                   <div className="space-y-1.5">
                     <label htmlFor="edit-quantity" className="text-sm font-semibold text-gray-700">
-                      Quantity <span className="text-red-500">*</span>
+                      {t("offer_card.quantity_label")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="edit-quantity"
@@ -472,7 +491,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   {/* Images Upload */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-gray-700">
-                      Images {uploadedImages.length > 0 && <span className="text-emerald-600">({uploadedImages.length} uploaded)</span>}
+                      {t("offer_card.images_label")} {uploadedImages.length > 0 && <span className="text-emerald-600">({t("offer_card.images_uploaded", { count: uploadedImages.length })})</span>}
                     </label>
                     <FileUploader
                       value={localFiles || []}
@@ -489,18 +508,18 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           {uploadingImages ? (
                             <>
                               <div className="animate-spin text-2xl mb-2">⏳</div>
-                              <p className="text-gray-600 text-sm">Uploading...</p>
+                              <p className="text-gray-600 text-sm">{t("offer_card.uploading")}</p>
                             </>
                           ) : localFiles && localFiles.length > 0 ? (
                             <>
                               <div className="text-2xl mb-2">✓</div>
-                              <p className="text-gray-600 text-sm">{localFiles.length} image(s) ready</p>
+                              <p className="text-gray-600 text-sm">{t("offer_card.images_ready", { count: localFiles.length })}</p>
                             </>
                           ) : (
                             <>
                               <div className="text-2xl mb-2">📸</div>
-                              <p className="text-gray-600 text-sm">Click to upload or drag and drop</p>
-                              <p className="text-xs text-gray-500 mt-1">Up to 5 images (optional)</p>
+                              <p className="text-gray-600 text-sm">{t("offer_card.click_upload")}</p>
+                              <p className="text-xs text-gray-500 mt-1">{t("offer_card.up_to_5")}</p>
                             </>
                           )}
                         </div>
@@ -524,20 +543,18 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       </FileUploaderContent>
                     </FileUploader>
                     <p className="text-xs text-gray-500">
-                      {uploadedImages.length > 0 
-                        ? "New images will replace existing ones. Leave empty to keep current images."
-                        : "Upload new images to replace existing ones, or leave empty to keep current images."}
+                      {t("offer_card.images_hint")}
                     </p>
                   </div>
                 </CredenzaBody>
 
-                <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white z-10">
                   <CredenzaClose asChild>
                     <button 
                       className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
                       disabled={loading}
                     >
-                      Cancel
+                      {t("common.cancel")}
                     </button>
                   </CredenzaClose>
                   <button
@@ -545,7 +562,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                     disabled={loading || uploadingImages}
                     className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? "Saving..." : uploadingImages ? "Uploading..." : "Save Changes"}
+                    {loading ? t("common.saving") : uploadingImages ? t("offer_card.uploading") : t("offer_card.save_changes")}
                   </button>
                 </CredenzaFooter>
               </CredenzaContent>
@@ -557,32 +574,32 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
             <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
               <CredenzaTrigger asChild>
                 <button className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:bg-red-600">
-                  Delete
+                  {t("common.delete")}
                 </button>
               </CredenzaTrigger>
 
               <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-sm mx-auto border border-gray-100">
                 <CredenzaHeader>
                   <CredenzaTitle className="text-lg font-semibold text-gray-900">
-                    Confirm Deletion
+                    {t("offer_card.confirm_deletion")}
                   </CredenzaTitle>
                 </CredenzaHeader>
 
                 <CredenzaDescription className="text-sm text-gray-600 mt-2">
-                  Are you sure you want to delete this offer? This action cannot be undone.
+                  {t("offer_card.delete_message")}
                 </CredenzaDescription>
 
                 <CredenzaFooter className="flex justify-end gap-3 mt-4">
                   <CredenzaClose asChild>
                     <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200">
-                      Cancel
+                      {t("common.cancel")}
                     </button>
                   </CredenzaClose>
                   <button
                     onClick={handleDelete}
                     className="px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600"
                   >
-                    Delete
+                    {t("common.delete")}
                   </button>
                 </CredenzaFooter>
               </CredenzaContent>

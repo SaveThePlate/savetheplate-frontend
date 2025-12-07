@@ -7,12 +7,52 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 const FillDetails = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [location, setLocation] = useState(""); // extracted restaurant name
   const [phoneNumber, setPhoneNumber] = useState("");
   const [mapsLink, setMapsLink] = useState("");
+
+  // Clean and extract Google Maps URL from pasted text
+  const cleanGoogleMapsUrl = (text: string): string => {
+    if (!text.trim()) return "";
+    
+    // Remove any leading/trailing whitespace
+    text = text.trim();
+    
+    // Try to find a Google Maps URL in the text
+    // Pattern 1: Full URLs (maps.google.com, google.com/maps, goo.gl/maps, maps.app.goo.gl)
+    const urlPattern = /(https?:\/\/)?(www\.)?(maps\.)?(google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl|maps\.google\.com)[^\s]*/gi;
+    const urlMatch = text.match(urlPattern);
+    if (urlMatch && urlMatch[0]) {
+      let url = urlMatch[0];
+      // Ensure it starts with http:// or https://
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      // Remove any trailing characters that aren't part of the URL
+      url = url.replace(/[.,;!?]+$/, "");
+      return url;
+    }
+    
+    // Pattern 2: Short links (goo.gl, maps.app.goo.gl)
+    const shortLinkPattern = /(https?:\/\/)?(goo\.gl|maps\.app\.goo\.gl)\/[a-zA-Z0-9]+/gi;
+    const shortMatch = text.match(shortLinkPattern);
+    if (shortMatch && shortMatch[0]) {
+      let url = shortMatch[0];
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      return url;
+    }
+    
+    // If no URL pattern found, return the text as-is (might be a valid URL format we don't recognize)
+    return text;
+  };
 
   // --- Extract location name for preview
   const fetchLocationName = async (url: string) => {
@@ -21,11 +61,18 @@ const FillDetails = () => {
       return;
     }
 
+    // Clean the URL first
+    const cleanedUrl = cleanGoogleMapsUrl(url);
+    if (!cleanedUrl) {
+      setLocation("");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("accessToken") || "";
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
-        { mapsLink: url },
+        { mapsLink: cleanedUrl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -38,21 +85,34 @@ const FillDetails = () => {
   };
 
   const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setMapsLink(url);
-    fetchLocationName(url);
+    const inputValue = e.target.value;
+    // Clean the URL and set it
+    const cleanedUrl = cleanGoogleMapsUrl(inputValue);
+    setMapsLink(cleanedUrl || inputValue);
+    fetchLocationName(cleanedUrl || inputValue);
+  };
+
+  // Handle paste events to clean the URL
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedText = e.clipboardData.getData("text");
+    const cleanedUrl = cleanGoogleMapsUrl(pastedText);
+    if (cleanedUrl && cleanedUrl !== pastedText) {
+      e.preventDefault();
+      setMapsLink(cleanedUrl);
+      fetchLocationName(cleanedUrl);
+    }
   };
 
   const handleProfileUpdate = async () => {
     try {
       if (!mapsLink.trim()) {
-        toast.error("Please provide a Google Maps link.");
+        toast.error(t("onboarding.maps_required"));
         return;
       }
 
       const normalizedPhone = phoneNumber.trim();
       if (!/^\d{8}$/.test(normalizedPhone)) {
-        toast.error("Please enter a valid phone number (8 digits).");
+        toast.error(t("onboarding.phone_invalid"));
         return;
       }
 
@@ -73,16 +133,21 @@ const FillDetails = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Details submitted successfully!");
+      toast.success(t("onboarding.details_success"));
       router.push("/onboarding/thank-you");
     } catch (error) {
       console.error("Error adding restaurant details:", error);
-      toast.error("An error occurred while adding the restaurant.");
+      toast.error(t("onboarding.details_error"));
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6">
+      {/* Language Switcher - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher variant="button" />
+      </div>
+
       <div className="relative w-full max-w-2xl">
         {/* Decorative shapes */}
         <div className="pointer-events-none absolute -top-10 -left-10 w-32 h-32 rounded-full bg-[#FFD6C9] blur-3xl opacity-60" />
@@ -106,13 +171,13 @@ const FillDetails = () => {
           {/* Header */}
           <div className="text-center mb-8 space-y-2">
             <p className="text-xs font-semibold tracking-[0.25em] uppercase text-emerald-600">
-              Step 2 of 2
+              {t("onboarding.step_2_of_2")}
             </p>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#344E41]">
-              Add your <span className="text-[#FFAE8A]">location</span> details
+              {t("onboarding.add_location")}
             </h1>
             <p className="text-gray-700 text-sm sm:text-base max-w-md mx-auto">
-              Help customers find you easily and contact you if needed 🌿
+              {t("onboarding.location_help")}
             </p>
           </div>
 
@@ -129,7 +194,7 @@ const FillDetails = () => {
                 htmlFor="phoneNumber"
                 className="block text-sm font-medium text-gray-700"
               >
-                Phone number
+                {t("onboarding.phone_number")}
               </label>
               <Input
                 id="phoneNumber"
@@ -138,11 +203,11 @@ const FillDetails = () => {
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 maxLength={8}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#A8DADC] focus:border-[#A8DADC]"
-                placeholder="+216 ..."
+                placeholder={t("onboarding.phone_placeholder")}
                 required
               />
               <p className="text-xs text-gray-500">
-                Used by customers to reach you about their surprise bags.
+                {t("onboarding.phone_hint")}
               </p>
             </div>
 
@@ -151,18 +216,19 @@ const FillDetails = () => {
                 htmlFor="googleMapsLink"
                 className="block text-sm font-medium text-gray-700"
               >
-                Google Maps link
+                {t("onboarding.google_maps_link")}
               </label>
               <Input
                 id="googleMapsLink"
                 value={mapsLink}
                 onChange={handleGoogleMapsLinkChange}
+                onPaste={handlePaste}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#FFAE8A] focus:border-[#FFAE8A]"
-                placeholder="Paste your Google Maps location URL"
+                placeholder={t("onboarding.maps_placeholder")}
                 required
               />
               <p className="text-xs text-gray-500">
-                Copy the link from Google Maps and paste it here so we can guide clients to you.
+                {t("onboarding.maps_hint")}
               </p>
             </div>
 
@@ -171,14 +237,14 @@ const FillDetails = () => {
                 htmlFor="location"
                 className="block text-sm font-medium text-gray-700"
               >
-                Detected place name
+                {t("onboarding.detected_place")}
               </label>
               <Input
                 id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
-                placeholder="Will be auto-filled from your Google Maps link"
+                placeholder={t("onboarding.detected_placeholder")}
                 disabled
               />
             </div>
@@ -187,7 +253,7 @@ const FillDetails = () => {
               type="submit"
               className="mt-2 w-full bg-[#A8DADC] hover:bg-[#92C7C9] text-[#1D3557] font-semibold py-3 rounded-full transition-all duration-300 shadow-sm"
             >
-              Submit details
+              {t("onboarding.submit_details")}
             </Button>
           </form>
         </div>

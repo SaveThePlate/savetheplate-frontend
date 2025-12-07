@@ -31,6 +31,7 @@ const nextConfig = {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
       "style-src 'self' 'unsafe-inline' https:",
       "img-src 'self' data: blob: https:",
+      "media-src 'self' data: blob: https:",
       `connect-src 'self' ${backendUrl} http://localhost:*/ https: ws: wss:`,
       "font-src 'self' data: https:",
       "frame-ancestors 'none'",

@@ -8,7 +8,7 @@ import { ClientOfferCardProps } from "./types";
 import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
-import { formatDateTime, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
+import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
 import {
   Credenza,
@@ -19,6 +19,7 @@ import {
   CredenzaTitle,
   CredenzaBody,
 } from "@/components/ui/credenza";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const ClientOfferCard: FC<ClientOfferCardProps> = ({
   offerId,
@@ -30,11 +31,14 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
   originalPrice,
   quantity,
   expirationDate,
+  pickupStartTime,
+  pickupEndTime,
   pickupLocation,
   mapsLink,
   reserveLink,
   owner,
 }) => {
+  const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | undefined>(imageSrc);
   const [fallbackIndex, setFallbackIndex] = useState(0);
@@ -63,7 +67,11 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
     }
   };
 
-  const { date: formattedDate, time: formattedTime } = formatDateTime(expirationDate);
+  const { date: formattedDate, time: formattedTime } = formatDateTimeRange(
+    pickupStartTime,
+    pickupEndTime,
+    expirationDate
+  );
   const expired = isOfferExpired(expirationDate);
   const isRescuePack = title.toLowerCase().includes("rescue pack");
 
@@ -97,18 +105,24 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
 
         {expired && (
           <div className="absolute top-2 left-2 bg-gray-800 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
-            Expired
+            {t("common.expired")}
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-4">
+        <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2">
+          {title}
+        </h3>
         <p className="text-sm font-medium text-gray-700 mb-1">
-          {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+          {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
         </p>
         <p className="text-xs text-gray-600 mb-3">
-          Pick up {formattedDate === "Today" ? "today" : formattedDate} {formattedTime}
+          {t("offers.pick_up", { 
+            date: formattedDate === "Today" ? t("common.today") : formattedDate,
+            time: formattedTime ? (formattedTime.includes(" - ") ? ` ${t("common.between")} ${formattedTime}` : ` ${t("common.at")} ${formattedTime}`) : ""
+          })}
         </p>
       </div>
 
@@ -119,7 +133,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
       >
         {expired ? (
           <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
-            Expired
+            {t("common.expired")}
           </div>
         ) : quantity > 0 ? (
           <Link
@@ -127,11 +141,11 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
             onClick={(e) => e.stopPropagation()} // Prevent card click when clicking order button
             className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm hover:bg-teal-700 transition-colors"
           >
-            Order Now
+            {t("common.order_now")}
           </Link>
         ) : (
           <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
-            Sold Out
+            {t("common.sold_out")}
           </div>
         )}
       </CardFooter>
@@ -194,16 +208,16 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
           {/* Offer Details */}
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-2">
-              {isRescuePack ? "Rescue Pack" : "Custom Offer"}
+              {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
             </p>
             <p className="text-base text-gray-800 leading-relaxed">{description}</p>
           </div>
 
           {/* Pickup Information */}
           <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-            <p className="text-sm font-medium text-gray-900 mb-1">Pickup Details</p>
+            <p className="text-sm font-medium text-gray-900 mb-1">{t("offers.pickup_details")}</p>
             <p className="text-sm text-gray-600">
-              {formattedDate} at {formattedTime}
+              {formattedDate}{formattedTime && (formattedTime.includes(" - ") ? ` ${t("common.between")} ${formattedTime}` : ` ${t("common.at")} ${formattedTime}`)}
             </p>
             {(owner?.mapsLink || mapsLink) && (
               <a
@@ -212,7 +226,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
                 rel="noopener noreferrer"
                 className="text-sm text-emerald-600 font-medium mt-1 inline-flex items-center gap-1 hover:underline"
               >
-                View on Maps →
+                {t("common.view_on_maps")}
               </a>
             )}
           </div>
@@ -224,17 +238,17 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
                 href={reserveLink}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
               >
-                Order Now
+                {t("common.order_now")}
               </Link>
             )}
             {expired && (
               <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
-                Expired
+                {t("common.expired")}
               </div>
             )}
             {quantity === 0 && !expired && (
               <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
-                Sold Out
+                {t("common.sold_out")}
               </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Loader2, RefreshCw } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -14,6 +15,7 @@ const Home = () => {
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
 
   // Fetch offers function - can be called to refresh
   const fetchOffers = React.useCallback(async (isRefresh = false) => {
@@ -38,14 +40,28 @@ const Home = () => {
       const timestamp = Date.now();
 
       // Fetch offers and pending orders in parallel for faster loading
+      // Use fetch instead of axios to avoid automatic cache-control headers
       const [offersResponse, ordersResponse] = await Promise.allSettled([
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          // Don't use credentials: 'include' - we use Bearer tokens, not cookies
+          // Using credentials with CORS requires specific origin, not wildcard
+        }).then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        }),
         axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}?t=${timestamp}`, { headers }),
       ]);
 
       // Process offers (critical - show immediately)
       if (offersResponse.status === "fulfilled") {
-        setOffers(offersResponse.value.data);
+        // fetch returns data directly, axios returns { data }
+        const offersData = offersResponse.value;
+        setOffers(offersData);
         setError(null);
       } else {
         console.error("Failed to fetch offers:", offersResponse.reason);
@@ -90,11 +106,12 @@ const Home = () => {
           <div className="bg-[#FFF5DA] border border-[#FFE7A0] text-[#7C5A00] rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
             <div>
               <p className="font-semibold text-base sm:text-lg">
-                🍱 You have {pendingCount} pending order
-                {pendingCount > 1 ? "s" : ""}.
+                🍱 {pendingCount === 1 
+                  ? t("home.pending_orders_single", { count: pendingCount })
+                  : t("home.pending_orders_plural", { count: pendingCount })}
               </p>
               <p className="text-sm text-[#A68200]">
-                Don’t forget to collect and confirm them on time!
+                {t("home.pending_reminder")}
               </p>
             </div>
             <Button
@@ -110,7 +127,7 @@ const Home = () => {
               }}
               className="bg-[#FFAE8A] hover:bg-[#ff9966] text-white rounded-xl px-5 py-2 transition-all duration-200"
             >
-              View Orders
+              {t("home.view_orders")}
             </Button>
           </div>
         )}
@@ -119,10 +136,10 @@ const Home = () => {
         <div className="flex items-center justify-between gap-4">
           <div className="text-center sm:text-left space-y-2 flex-1">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#344e41] tracking-tight">
-              Available Offers
+              {t("offers.available_offers")}
             </h1>
             <p className="text-gray-600 text-sm sm:text-base font-medium">
-              Discover local meals ready to be rescued 🍃
+              {t("offers.discover_meals")}
             </p>
           </div>
           <button
@@ -132,7 +149,7 @@ const Home = () => {
             title="Refresh offers to see latest available meals"
           >
             <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="hidden sm:inline">{t("common.refresh")}</span>
           </button>
         </div>
 
@@ -141,7 +158,7 @@ const Home = () => {
           {loading ? (
             <div className="flex justify-center items-center h-64 text-gray-500">
               <Loader2 className="animate-spin w-6 h-6 mr-2" />
-              Loading offers...
+              {t("common.loading")}
             </div>
           ) : error ? (
             <p className="text-center text-red-600">{error}</p>
@@ -149,7 +166,7 @@ const Home = () => {
             <Offers />
           ) : (
             <p className="text-center text-gray-500 font-medium py-10">
-              No offers available right now. Check back soon 🌿
+              {t("offers.no_offers")}
             </p>
           )}
         </section>

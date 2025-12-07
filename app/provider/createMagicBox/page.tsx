@@ -27,7 +27,9 @@ const smallSurpriseBag = "/smallsurprisebag.png";
 const CreateMagicBoxPage = () => {
   const router = useRouter();
   const [selectedSize, setSelectedSize] = useState<RescuePackSize>("small");
-  const [expirationDate, setExpirationDate] = useState<string>("");
+  const [pickupDate, setPickupDate] = useState<string>("");
+  const [pickupStartTime, setPickupStartTime] = useState<string>("");
+  const [pickupEndTime, setPickupEndTime] = useState<string>("");
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -73,9 +75,21 @@ const CreateMagicBoxPage = () => {
       return;
     }
 
-    if (!expirationDate) {
-      setError("Please select an expiration date");
-      toast.error("Expiration date is required");
+    if (!pickupDate) {
+      setError("Please select a pickup date");
+      toast.error("Pickup date is required");
+      return;
+    }
+
+    if (!pickupStartTime) {
+      setError("Please select a start time");
+      toast.error("Start time is required");
+      return;
+    }
+
+    if (!pickupEndTime) {
+      setError("Please select an end time");
+      toast.error("End time is required");
       return;
     }
 
@@ -85,10 +99,19 @@ const CreateMagicBoxPage = () => {
       return;
     }
 
-    const expirationDateObj = new Date(expirationDate);
-    if (expirationDateObj <= new Date()) {
-      setError("Expiration date must be in the future");
-      toast.error("Please select a future date");
+    // Combine date and times
+    const startDateTime = new Date(`${pickupDate}T${pickupStartTime}`);
+    const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
+
+    if (startDateTime >= endDateTime) {
+      setError("End time must be after start time");
+      toast.error("End time must be after start time");
+      return;
+    }
+
+    if (endDateTime <= new Date()) {
+      setError("Pickup time must be in the future");
+      toast.error("Please select a future time");
       return;
     }
 
@@ -110,26 +133,41 @@ const CreateMagicBoxPage = () => {
         },
       ]);
 
-      const originalPriceValue = originalPrice[selectedSize] 
-        ? parseFloat(originalPrice[selectedSize]) 
-        : undefined;
+      // Parse originalPrice - include it if it's a valid positive number
+      let originalPriceValue: number | undefined = undefined;
+      const originalPriceStr = originalPrice[selectedSize];
+      if (originalPriceStr && originalPriceStr.trim() !== "") {
+        const parsed = parseFloat(originalPriceStr.trim());
+        if (!isNaN(parsed) && parsed > 0) {
+          originalPriceValue = parsed;
+        }
+      }
+
+      // Use end time as expiration date for backward compatibility
+      const payload: any = {
+        title: `${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Rescue Pack`,
+        description: `${rescuePackOptions[selectedSize].description}. Contains ${rescuePackOptions[selectedSize].items} of rescued food items.`,
+        price: rescuePackOptions[selectedSize].price,
+        expirationDate: endDateTime.toISOString(),
+        pickupStartTime: startDateTime.toISOString(),
+        pickupEndTime: endDateTime.toISOString(),
+        pickupLocation: pickupLocation.trim(),
+        latitude: 0,
+        longitude: 0,
+        images: imagesPayload,
+        quantity: quantityToFloat,
+      };
+
+      // Only include originalPrice if it has a value (don't send undefined)
+      if (originalPriceValue !== undefined) {
+        payload.originalPrice = originalPriceValue;
+      }
+
+      console.log("Sending payload:", payload); // Debug log
 
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
-        {
-          title: `${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Rescue Pack`,
-          description: `${rescuePackOptions[selectedSize].description}. Contains ${rescuePackOptions[selectedSize].items} of rescued food items.`,
-          price: rescuePackOptions[selectedSize].price,
-          originalPrice: originalPriceValue && !isNaN(originalPriceValue) && originalPriceValue > rescuePackOptions[selectedSize].price 
-            ? originalPriceValue 
-            : undefined,
-          expirationDate: expirationDateObj.toISOString(),
-          pickupLocation: pickupLocation.trim(),
-          latitude: 0,
-          longitude: 0,
-          images: imagesPayload,
-          quantity: quantityToFloat,
-        },
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -300,20 +338,55 @@ const CreateMagicBoxPage = () => {
             <p className="text-xs text-gray-500 mt-1">Where should customers pick up their order?</p>
           </div>
 
-          <div>
-            <label htmlFor="expirationDate" className="block text-sm font-semibold text-gray-700 mb-2">
-              Pickup Deadline <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="expirationDate"
-              type="datetime-local"
-              value={expirationDate}
-              onChange={(e) => setExpirationDate(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">When should customers pick up by?</p>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="pickupDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                Pickup Date <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="pickupDate"
+                type="date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Select the pickup date</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="pickupStartTime" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Start Time <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="pickupStartTime"
+                  type="time"
+                  value={pickupStartTime}
+                  onChange={(e) => setPickupStartTime(e.target.value)}
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Earliest pickup time</p>
+              </div>
+
+              <div>
+                <label htmlFor="pickupEndTime" className="block text-sm font-semibold text-gray-700 mb-2">
+                  End Time <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="pickupEndTime"
+                  type="time"
+                  value={pickupEndTime}
+                  onChange={(e) => setPickupEndTime(e.target.value)}
+                  min={pickupStartTime || undefined}
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Latest pickup time</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -327,7 +400,7 @@ const CreateMagicBoxPage = () => {
         {/* Submit Button */}
         <Button
           onClick={handleCreateRescuePack}
-          disabled={loading || !quantity || !expirationDate || !pickupLocation.trim()}
+          disabled={loading || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime || !pickupLocation.trim()}
           className="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01]"
         >
           {loading ? (

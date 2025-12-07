@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 const OnboardingPage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [role, setRole] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,6 +37,11 @@ const OnboardingPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4">
+      {/* Language Switcher - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher variant="button" />
+      </div>
+
       <div className="relative w-full max-w-2xl">
         {/* Decorative shapes */}
         <div className="pointer-events-none absolute -top-10 -left-10 w-32 h-32 rounded-full bg-[#FFD6C9] blur-3xl opacity-60" />
@@ -43,13 +51,13 @@ const OnboardingPage = () => {
           {/* Header */}
           <div className="text-center mb-8 space-y-2">
             <p className="text-xs font-semibold tracking-[0.25em] uppercase text-emerald-600">
-              Step 1 of 2
+              {t("onboarding.step_1_of_2")}
             </p>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#344E41]">
-              Tell us who you are
+              {t("onboarding.tell_us_who")}
             </h1>
             <p className="text-gray-600 text-sm sm:text-base max-w-md mx-auto">
-              Choose how you want to use Save The Plate.
+              {t("onboarding.choose_how")}
             </p>
           </div>
 
@@ -68,9 +76,9 @@ const OnboardingPage = () => {
                 🍽️
               </span>
               <div className="space-y-1">
-                <p className="font-semibold text-gray-900">Food provider</p>
+                <p className="font-semibold text-gray-900">{t("onboarding.food_provider")}</p>
                 <p className="text-xs text-gray-600">
-                  List surprise bags and reduce food waste while earning extra revenue.
+                  {t("onboarding.provider_description")}
                 </p>
               </div>
             </button>
@@ -88,9 +96,9 @@ const OnboardingPage = () => {
                 😋
               </span>
               <div className="space-y-1">
-                <p className="font-semibold text-gray-900">Client</p>
+                <p className="font-semibold text-gray-900">{t("onboarding.client")}</p>
                 <p className="text-xs text-gray-600">
-                  Discover delicious surprise bags around you at friendly prices.
+                  {t("onboarding.client_description")}
                 </p>
               </div>
             </button>
@@ -98,7 +106,7 @@ const OnboardingPage = () => {
 
           {/* Helper text */}
           <p className="text-xs text-gray-500 mb-4">
-            You&apos;ll be redirected to complete your information based on your choice.
+            {t("onboarding.helper_text")}
           </p>
 
           {/* Submit Button */}
@@ -107,7 +115,7 @@ const OnboardingPage = () => {
             disabled={!role || isSubmitting}
             className="w-full py-3 rounded-full bg-emerald-500 text-white font-semibold text-base sm:text-lg transition-colors disabled:bg-gray-200 disabled:text-gray-500"
           >
-            {isSubmitting ? "Saving your choice..." : role === "PROVIDER" ? "Continue as provider" : "Continue as client"}
+            {isSubmitting ? t("onboarding.saving_choice") : role === "PROVIDER" ? t("onboarding.continue_provider") : t("onboarding.continue_client")}
           </button>
         </div>
       </div>

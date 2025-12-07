@@ -8,6 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OrderQRCode from "./OrderQRCode";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { 
   MapPin, 
   Calendar, 
@@ -49,6 +50,8 @@ type Offer = {
   title: string;
   description: string;
   expirationDate: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
   pickupLocation: string;
   quantity: number;
   mapsLink?: string;
@@ -190,7 +193,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   }
 
   const orderDate = new Date(order.createdAt);
-  const expirationDate = new Date(offer.expirationDate);
+  const { date: formattedDate, time: formattedTime } = formatDateTimeRange(
+    offer.pickupStartTime,
+    offer.pickupEndTime,
+    offer.expirationDate
+  );
 
   return (
     <div
@@ -298,17 +305,10 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                   Pickup Deadline
                 </p>
                 <p className="text-sm font-medium text-gray-900">
-                  {expirationDate.toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formattedDate}
                 </p>
                 <p className="text-xs text-gray-600 mt-0.5">
-                  {expirationDate.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formattedTime ? (formattedTime.includes(" - ") ? `between ${formattedTime}` : `at ${formattedTime}`) : ""}
                 </p>
                 {isExpired && (
                   <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
