@@ -47,8 +47,7 @@ export default function SignIn() {
           // Redirect to client home
           router.push("/client/home");
         } else {
-          // No role assigned, redirect to onboarding
-          router.push("/onboarding");
+          setCheckingAuth(false);
         }
       } catch (error) {
         // Token is invalid or expired, allow sign in

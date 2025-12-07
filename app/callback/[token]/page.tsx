@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { LocalStorage } from "@/lib/utils";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
+import axios from "axios";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 function AuthCallback() {
@@ -38,32 +39,29 @@ function AuthCallback() {
         LocalStorage.setItem("accessToken", resp.data.accessToken);
         LocalStorage.removeItem("remember");
 
-        const accessToken = resp.data.accessToken;
-        if (accessToken) {
-          try {
-            const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
-            const role = decodedToken?.role;
-
-            // Redirect based on role
-            // If no role (new user), redirect to onboarding
-            // If role exists, redirect to appropriate home page
-            if (role === 'PROVIDER') {
-              router.push("/provider/home");
-            } else if (role === 'CLIENT') {
-              router.push("/client/home");
-            } else {
-              // New user - no role assigned yet, redirect to onboarding
-              router.push("/onboarding");
-            }
-          } catch (error) {
-            console.error("Error decoding token", error);
-            // If token decoding fails, redirect to onboarding as fallback
-            router.push("/onboarding");
-          }
+        // Use redirectTo from backend response (most reliable)
+        // Backend determines redirect based on user's actual role in database
+        let redirectTo = '/onboarding'; // Default fallback
+        
+        if (typeof resp.data.redirectTo === 'string' && resp.data.redirectTo) {
+          // Use redirectTo from backend if provided and is a string
+          redirectTo = resp.data.redirectTo;
         } else {
-          // No access token, redirect to onboarding
-          router.push("/onboarding");
+          // Fallback: determine redirect from role
+          const role = resp.data.role || resp.data.user?.role;
+          if (role === 'PROVIDER') {
+            redirectTo = '/provider/home';
+          } else if (role === 'PENDING_PROVIDER') {
+            redirectTo = '/onboarding/thank-you';
+          } else if (role === 'CLIENT') {
+            redirectTo = '/client/home';
+          } else {
+            redirectTo = '/onboarding';
+          }
         }
+
+        // Redirect to the path determined by backend
+        router.push(redirectTo);
       } catch (error: any) {
         console.error("Error verifying magic link:", error);
         setError("Failed to verify magic link. Please try signing in again.");

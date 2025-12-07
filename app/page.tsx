@@ -45,8 +45,8 @@ const WelcomePage = () => {
         } else if (userRole === 'CLIENT') {
           router.push("/client/home");
         } else {
-          // No role, redirect to onboarding
-          router.push("/onboarding");
+          // Role is NONE, PENDING_PROVIDER, or any other value - stay on landing page
+          setCheckingAuth(false);
         }
       } catch (error) {
         // Token is invalid or expired, stay on landing page
@@ -82,14 +82,14 @@ const WelcomePage = () => {
             ? "/provider/home"
             : userRole === "CLIENT"
             ? "/client/home"
-            : "/onboarding"
+            : "/signIn"
         );
       } else {
-        router.push("/onboarding");
+        router.push("/signIn");
       }
     } catch (error) {
       console.error("Error fetching role:", error);
-      router.push("/onboarding");
+      router.push("/signIn");
     } finally {
       setLoading(false);
     }
