@@ -42,9 +42,9 @@ export const sanitizeImageUrl = (url: string | null | undefined): string => {
  * Returns true for localhost, external backend URLs, or any non-public asset
  */
 export const shouldUnoptimizeImage = (url: string | null | undefined): boolean => {
-  // Handle invalid/empty URLs
+  // Handle invalid/empty URLs - default to unoptimized to be safe
   if (!url || typeof url !== 'string') {
-    return false; // Default to optimized for invalid URLs (will use fallback)
+    return true; // Changed to true to avoid optimization attempts on invalid URLs
   }
   
   // Blob URLs (from URL.createObjectURL) should always be unoptimized
@@ -57,14 +57,15 @@ export const shouldUnoptimizeImage = (url: string | null | undefined): boolean =
     return true;
   }
   
+  // All backend storage images should be unoptimized to avoid upstream fetch issues
+  // Check this FIRST before other checks to ensure we catch all storage URLs
+  if (url.includes('/storage/')) {
+    return true;
+  }
+  
   // Public assets (starting with / and not /storage/) can be optimized
   if (url.startsWith('/') && !url.startsWith('/storage/')) {
     return false;
-  }
-  
-  // All backend storage images should be unoptimized to avoid upstream fetch issues
-  if (url.includes('/storage/')) {
-    return true;
   }
   
   // Check if it's a full URL (external image)
@@ -75,11 +76,26 @@ export const shouldUnoptimizeImage = (url: string | null | undefined): boolean =
       if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
         return true;
       }
-      // External backend URLs should be unoptimized to avoid CORS/fetch issues
+      // Check if it's from the backend domain (more robust check)
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-      if (backendUrl && url.includes(backendUrl.replace(/^https?:\/\//, '').split('/')[0])) {
-        return true;
+      if (backendUrl) {
+        try {
+          const backendUrlObj = new URL(backendUrl);
+          // Check if hostname matches (handles both with and without www)
+          if (urlObj.hostname === backendUrlObj.hostname || 
+              urlObj.hostname.replace(/^www\./, '') === backendUrlObj.hostname.replace(/^www\./, '')) {
+            return true;
+          }
+        } catch {
+          // Fallback: check if URL contains backend hostname
+          const backendHost = backendUrl.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+          if (urlObj.hostname === backendHost || url.includes(backendHost)) {
+            return true;
+          }
+        }
       }
+      // All other external URLs should be unoptimized to avoid CORS/fetch issues
+      return true;
     } catch {
       // If URL parsing fails, assume it should be unoptimized
       return true;
