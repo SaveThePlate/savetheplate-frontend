@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { Mail, Phone, MapPin, Send, MessageSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const ContactPage = () => {
   const router = useRouter();
@@ -147,11 +146,6 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] px-4 sm:px-6 lg:px-8">
-      {/* Language Switcher - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageSwitcher variant="button" />
-      </div>
-
       <ToastContainer
         position="top-right"
         autoClose={3000}
