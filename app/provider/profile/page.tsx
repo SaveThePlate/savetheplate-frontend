@@ -832,8 +832,8 @@ export default function ProviderProfile() {
       {/* Environmental Impact Section */}
       <div className="w-full max-w-2xl mt-8">
         <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center">
                 <span className="text-3xl">🌱</span>
               </div>
