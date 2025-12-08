@@ -122,6 +122,24 @@
     "confirmed_orders": "Confirmed orders",
     "cancelled_orders": "Cancelled orders",
     "scan_qr": "Scan QR Code",
+    "refresh": "Refresh",
+    "scan_qr_code": "Scan QR Code",
+    "ordered_by": "Ordered by:",
+    "phone": "Phone:",
+    "location": "Location:",
+    "quantity": "Quantity:",
+    "ordered_on": "Ordered on:",
+    "at_time": "at",
+    "fetch_failed": "Failed to fetch provider orders",
+    "order_confirmed_toast": "Order #{orderId} confirmed!",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled"
+    },
+    "home": {
+      "fetch_offers_failed": "Failed to fetch offers: {error}"
+    },
     "profile": {
       "your_store": "Your Store",
       "location": "Location",
@@ -166,7 +184,9 @@
         "image_ready": "Image ready",
         "click_to_upload": "Click to upload",
         "profile_updated": "Profile updated successfully!",
-        "update_failed": "Failed to update profile"
+        "update_failed": "Failed to update profile",
+      "fetch_data_failed": "Failed to fetch data",
+      "upload_image_failed": "Failed to upload profile image"
       }
     }
   },
@@ -215,6 +235,9 @@
       "phone_number": "Phone Number",
       "fetch_failed": "Failed to fetch profile or orders"
     },
+    "home": {
+      "fetch_offers_failed": "Failed to fetch offers. Please try again later."
+    },
     "orders": {
       "my_orders": "My Orders",
       "track_orders": "Track and manage your food rescue orders",
@@ -252,7 +275,8 @@
     "rescue_pack": "Rescue Pack",
     "custom_offer": "Custom Offer",
     "pick_up": "Pick up {date}{time}",
-    "pickup_details": "Pickup Details"
+    "pickup_details": "Pickup Details",
+    "error_generic": "Something went wrong. Please try again later."
   },
   "contact": {
     "title": "Contact Us",
@@ -505,5 +529,66 @@
     "error_future_time_toast": "Please select a future time",
     "success_created": "Rescue Pack created successfully! 🎉",
     "error_create_failed": "Failed to create rescue pack"
+  },
+  "qr_scanner": {
+    "title": "Scan QR Code",
+    "login_required": "Please log in to scan orders",
+    "order_already_confirmed": "Order #{orderId} was already confirmed. Customer: {username}",
+    "order_confirmed_success": "Order #{orderId} confirmed successfully! Customer: {username}",
+    "invalid_qr": "Invalid QR code or order not found",
+    "camera_failed": "Failed to start camera. Please check permissions.",
+    "enter_manually": "Enter the QR code manually",
+    "paste_placeholder": "Paste or type QR code here",
+    "use_camera": "Use Camera",
+    "validating": "Validating...",
+    "validate_code": "Validate Code",
+    "enter_manually_button": "Enter Code Manually",
+    "point_camera": "Point camera at customer's QR code",
+    "instructions_camera": "Ask the customer to show their QR code from the app. Point your camera at it to confirm pickup.",
+    "instructions_manual": "If the camera doesn't work, you can manually enter the QR code shown by the customer."
+  },
+  "order_qr": {
+    "default_title": "Order",
+    "not_available": "QR code not available",
+    "pickup_qr_code": "Pickup QR Code",
+    "instructions": "Show this code to the provider when picking up your order",
+    "order_code": "Order Code",
+    "copied": "Copied!",
+    "copy_code": "Copy Code",
+    "download_qr": "Download QR"
+  },
+  "cart_order": {
+    "only_pending_cancellable": "Only pending orders can be cancelled",
+    "order_cancelled": "Order cancelled",
+    "cancel_failed": "Failed to cancel order",
+    "load_offer_failed": "Failed to load offer data",
+    "load_details_failed": "Failed to load order details",
+    "quantity_label": "Quantity:",
+    "pickup_location": "Pickup Location",
+    "open_in_maps": "Open in Maps",
+    "pickup_deadline": "Pickup Deadline",
+    "ordered_on": "Ordered On",
+    "hide_details": "Hide Details",
+    "show_details": "Show Details",
+    "hide_qr": "Hide QR Code",
+    "show_qr": "Show QR Code",
+    "cancelling": "Cancelling...",
+    "cancel_order": "Cancel Order"
+  },
+  "custom_card": {
+    "fill_all_fields": "Please fill out all fields",
+    "uploading_images": "Uploading images...",
+    "offer_updated": "Offer updated successfully",
+    "update_failed": "Failed to update offer",
+    "upload_failed": "Failed to upload images",
+    "pickup_time": "Pickup Time:",
+    "location_label": "Location:"
+  },
+  "drop_file": {
+    "file_error": "File error, probably too big"
+  },
+  "offer_carousel": {
+    "load_failed": "Failed to load offers.",
+    "fetch_user_failed": "Failed to fetch user details"
   }
 }

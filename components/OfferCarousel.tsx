@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 
 
@@ -33,6 +34,7 @@ interface Props {
 }
 
 const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
+  const { t } = useLanguage();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +70,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
         setOffers(response.data);
         setLoading(false); // Set loading to false after data is fetched
       } catch (error) {
-        setError("Failed to load offers.");
+        setError(t("offer_carousel.load_failed"));
         setLoading(false);
       }
     };
@@ -94,7 +96,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
         setUserRole(response.data.role);
       } catch (error) {
         console.error("Error fetching user details:", error);
-        setError("Failed to fetch user details");
+        setError(t("offer_carousel.fetch_user_failed"));
       }
     };
 

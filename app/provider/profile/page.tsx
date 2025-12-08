@@ -150,7 +150,7 @@ const useProviderProfile = () => {
     } catch (err: any) {
       console.error("Failed to fetch data:", err);
       setError(err?.response?.data?.message || "Failed to fetch data");
-      toast.error("Failed to fetch profile or stats");
+      toast.error(t("provider.profile.fetch_failed"));
     } finally {
       setLoading(false);
     }

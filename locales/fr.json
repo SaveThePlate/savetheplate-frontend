@@ -112,7 +112,8 @@
       "loading_offers": "Chargement de vos offres...",
       "no_offers": "Vous n'avez pas encore d'offres publiées. Commencez par en créer une !",
       "offer_deleted": "Offre supprimée avec succès",
-      "delete_failed": "Échec de la suppression de l'offre"
+      "delete_failed": "Échec de la suppression de l'offre",
+      "fetch_offers_failed": "Échec du chargement des offres : {error}"
     },
     "orders_title": "Commandes pour vos offres",
     "loading_orders": "Chargement des commandes...",
@@ -122,6 +123,21 @@
     "confirmed_orders": "Commandes confirmées",
     "cancelled_orders": "Commandes annulées",
     "scan_qr": "Scanner le Code QR",
+    "refresh": "Actualiser",
+    "scan_qr_code": "Scanner le Code QR",
+    "ordered_by": "Commandé par :",
+    "phone": "Téléphone :",
+    "location": "Emplacement :",
+    "quantity": "Quantité :",
+    "ordered_on": "Commandé le :",
+    "at_time": "à",
+    "fetch_failed": "Échec du chargement des commandes du fournisseur",
+    "order_confirmed_toast": "Commande #{orderId} confirmée !",
+    "status": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "cancelled": "Annulée"
+    },
     "profile": {
       "your_store": "Votre Magasin",
       "location": "Emplacement",
@@ -166,7 +182,9 @@
         "image_ready": "Image prête",
         "click_to_upload": "Cliquez pour télécharger",
         "profile_updated": "Profil mis à jour avec succès !",
-        "update_failed": "Échec de la mise à jour du profil"
+        "update_failed": "Échec de la mise à jour du profil",
+        "fetch_data_failed": "Échec du chargement des données",
+        "upload_image_failed": "Échec du téléchargement de l'image de profil"
       }
     }
   },
@@ -215,6 +233,9 @@
       "phone_number": "Numéro de téléphone",
       "fetch_failed": "Échec du chargement du profil ou des commandes"
     },
+    "home": {
+      "fetch_offers_failed": "Échec du chargement des offres. Veuillez réessayer plus tard."
+    },
     "orders": {
       "my_orders": "Mes Commandes",
       "track_orders": "Suivez et gérez vos commandes de sauvetage alimentaire",
@@ -252,7 +273,8 @@
     "rescue_pack": "Panier Anti-Gaspi",
     "custom_offer": "Offre Personnalisée",
     "pick_up": "Ramasser {date}{time}",
-    "pickup_details": "Détails de Ramassage"
+    "pickup_details": "Détails de Ramassage",
+    "error_generic": "Une erreur s'est produite. Veuillez réessayer plus tard."
   },
   "contact": {
     "title": "Contactez-nous",
@@ -451,6 +473,67 @@
     "received_info": "Nous avons reçu vos informations. Notre équipe examinera votre profil et vous contactera pour activer votre compte après vérification.",
     "email_approval": "Vous recevrez un email une fois votre compte approuvé.",
     "back_home": "Retour à la page d'accueil"
+  },
+  "qr_scanner": {
+    "title": "Scanner le Code QR",
+    "login_required": "Veuillez vous connecter pour scanner les commandes",
+    "order_already_confirmed": "La commande #{orderId} a déjà été confirmée. Client : {username}",
+    "order_confirmed_success": "Commande #{orderId} confirmée avec succès ! Client : {username}",
+    "invalid_qr": "Code QR invalide ou commande introuvable",
+    "camera_failed": "Échec du démarrage de la caméra. Veuillez vérifier les permissions.",
+    "enter_manually": "Entrez le code QR manuellement",
+    "paste_placeholder": "Collez ou tapez le code QR ici",
+    "use_camera": "Utiliser la Caméra",
+    "validating": "Validation...",
+    "validate_code": "Valider le Code",
+    "enter_manually_button": "Entrer le Code Manuellement",
+    "point_camera": "Pointez la caméra vers le code QR du client",
+    "instructions_camera": "Demandez au client de montrer son code QR depuis l'application. Pointez votre caméra dessus pour confirmer la collecte.",
+    "instructions_manual": "Si la caméra ne fonctionne pas, vous pouvez entrer manuellement le code QR affiché par le client."
+  },
+  "order_qr": {
+    "default_title": "Commande",
+    "not_available": "Code QR non disponible",
+    "pickup_qr_code": "Code QR de Ramassage",
+    "instructions": "Montrez ce code au fournisseur lors de la récupération de votre commande",
+    "order_code": "Code de Commande",
+    "copied": "Copié !",
+    "copy_code": "Copier le Code",
+    "download_qr": "Télécharger le QR"
+  },
+  "cart_order": {
+    "only_pending_cancellable": "Seules les commandes en attente peuvent être annulées",
+    "order_cancelled": "Commande annulée",
+    "cancel_failed": "Échec de l'annulation de la commande",
+    "load_offer_failed": "Échec du chargement des données de l'offre",
+    "load_details_failed": "Échec du chargement des détails de la commande",
+    "quantity_label": "Quantité :",
+    "pickup_location": "Lieu de Ramassage",
+    "open_in_maps": "Ouvrir dans Maps",
+    "pickup_deadline": "Date Limite de Ramassage",
+    "ordered_on": "Commandé Le",
+    "hide_details": "Masquer les Détails",
+    "show_details": "Afficher les Détails",
+    "hide_qr": "Masquer le Code QR",
+    "show_qr": "Afficher le Code QR",
+    "cancelling": "Annulation...",
+    "cancel_order": "Annuler la Commande"
+  },
+  "custom_card": {
+    "fill_all_fields": "Veuillez remplir tous les champs",
+    "uploading_images": "Téléchargement des images...",
+    "offer_updated": "Offre mise à jour avec succès",
+    "update_failed": "Échec de la mise à jour de l'offre",
+    "upload_failed": "Échec du téléchargement des images",
+    "pickup_time": "Heure de Ramassage :",
+    "location_label": "Emplacement :"
+  },
+  "drop_file": {
+    "file_error": "Erreur de fichier, probablement trop volumineux"
+  },
+  "offer_carousel": {
+    "load_failed": "Échec du chargement des offres.",
+    "fetch_user_failed": "Échec du chargement des détails de l'utilisateur"
   },
   "callback": {
     "verifying": "Vérification de votre lien magique...",

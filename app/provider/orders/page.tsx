@@ -85,7 +85,7 @@ const ProviderOrdersContent = () => {
       setOrders(res.data || []);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to fetch provider orders");
+      toast.error(t("provider.fetch_failed"));
     } finally {
       setLoading(false);
     }
@@ -143,7 +143,7 @@ const ProviderOrdersContent = () => {
 
     // Show toast notification
     if (type === 'updated' && order.status === 'confirmed') {
-      toast.success(`Order #${order.id} confirmed!`);
+      toast.success(t("provider.order_confirmed_toast", { orderId: order.id }));
     }
   }, [providerId]);
 
@@ -154,7 +154,7 @@ const ProviderOrdersContent = () => {
   });
 
   const handleScanSuccess = (qrCodeToken: string) => {
-    toast.success("Order confirmed successfully!");
+    toast.success(t("orders.confirmed"));
     setShowScanner(false);
     // Refresh orders to get updated data
     fetchOrders();
@@ -192,14 +192,14 @@ const ProviderOrdersContent = () => {
               title="Refresh orders to see latest customer information"
             >
               <RefreshCw size={18} />
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="hidden sm:inline">{t("provider.refresh")}</span>
             </button>
             <button
               onClick={() => setShowScanner(true)}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
             >
               <QrCode size={20} />
-              Scan QR Code
+              {t("provider.scan_qr_code")}
             </button>
           </div>
         </div>
@@ -233,7 +233,7 @@ const ProviderOrdersContent = () => {
               if (!list.length) return null;
               return (
                 <section key={status}>
-                  <h2 className="text-xl font-semibold text-gray-700 mb-3 capitalize">{status}</h2>
+                  <h2 className="text-xl font-semibold text-gray-700 mb-3 capitalize">{t(`provider.status.${status}`)}</h2>
                   <div className="flex flex-col gap-4">
                     {list.map((order) => (
                       <OrderCard 
@@ -401,13 +401,13 @@ const OrderCard: React.FC<{
       <div className="flex-1 min-w-0">
         <h3 className="text-md font-semibold text-gray-900 truncate">{offer?.title || "Offer"}</h3>
         <p className="text-sm text-gray-600">
-          Ordered by:{" "}
+          {t("provider.ordered_by")}{" "}
           <span className="font-medium text-gray-800">
             {user?.username || `User ${order.userId}`}
           </span>
         </p>
         <p className="text-sm text-gray-600">
-          Phone:{" "}
+          {t("provider.phone")}{" "}
           <span className="font-medium text-gray-800">
             {user?.phoneNumber 
               ? (typeof user.phoneNumber === 'number' ? user.phoneNumber.toString() : user.phoneNumber)
@@ -416,17 +416,17 @@ const OrderCard: React.FC<{
         </p>
         {user?.location && (
           <p className="text-sm text-gray-500">
-            Location: <span className="font-medium text-gray-700">{user.location}</span>
+            {t("provider.location")} <span className="font-medium text-gray-700">{user.location}</span>
           </p>
         )}
         <p className="text-sm text-gray-500">
-          Quantity: <span className="font-medium">{order.quantity}</span>
+          {t("provider.quantity")} <span className="font-medium">{order.quantity}</span>
         </p>
         <p className="text-sm text-gray-500">
-          Ordered on:{" "}
+          {t("provider.ordered_on")}{" "}
         <span className="font-medium">
           {new Date(order.createdAt).toLocaleDateString()}{" "}
-          at {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          {t("provider.at_time")} {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </span>
 
         </p>
@@ -443,7 +443,7 @@ const OrderCard: React.FC<{
             title="Scan customer's QR code to confirm pickup"
           >
             <QrCode size={14} />
-            Scan QR
+            {t("provider.scan_qr")}
           </button>
         )}
       </div>
@@ -457,7 +457,7 @@ const ProviderOrders = () => {
       <main className="bg-[#e8f4ee] min-h-screen pt-24 pb-20 flex flex-col items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{t("common.loading")}</p>
         </div>
       </main>
     }>

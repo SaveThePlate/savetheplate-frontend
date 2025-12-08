@@ -22,6 +22,7 @@ import {
   useDropzone,
 } from "react-dropzone";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/LanguageContext";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -75,6 +76,7 @@ export const FileUploader = forwardRef<
     const [isFileTooBig, setIsFileTooBig] = useState(false);
     const [isLOF, setIsLOF] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
+    const { t } = useLanguage();
     const {
       accept = {
         "image/*": [".jpg", ".jpeg", ".png", ".gif"],
@@ -157,7 +159,7 @@ export const FileUploader = forwardRef<
         const files = acceptedFiles;
 
         if (!files) {
-          toast.error("file error , probably too big");
+          toast.error(t("drop_file.file_error"));
           return;
         }
 

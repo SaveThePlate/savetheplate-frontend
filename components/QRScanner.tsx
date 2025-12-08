@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { X, Camera, CheckCircle, AlertCircle, Keyboard, QrCode } from "lucide-react";
 import axios from "axios";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface QRScannerProps {
   onScanSuccess: (result: string) => void;
@@ -24,6 +25,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [useCamera, setUseCamera] = useState(true);
+  const { t } = useLanguage();
 
   const handleScanResult = useCallback(async (qrCodeToken: string) => {
     if (scanningOrder) return; // Prevent multiple scans
@@ -34,7 +36,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        setError("Please log in to scan orders");
+        setError(t("qr_scanner.login_required"));
         setScanningOrder(false);
         return;
       }
@@ -56,11 +58,17 @@ const QRScanner: React.FC<QRScannerProps> = ({
 
       if (confirmResponse.data.alreadyConfirmed) {
         setSuccess(
-          `Order #${order.id} was already confirmed. Customer: ${order.user?.username || "N/A"}`
+          t("qr_scanner.order_already_confirmed", { 
+            orderId: order.id, 
+            username: order.user?.username || "N/A" 
+          })
         );
       } else {
         setSuccess(
-          `Order #${order.id} confirmed successfully! Customer: ${order.user?.username || "N/A"}`
+          t("qr_scanner.order_confirmed_success", { 
+            orderId: order.id, 
+            username: order.user?.username || "N/A" 
+          })
         );
       }
 
@@ -76,7 +84,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          "Invalid QR code or order not found"
+          t("qr_scanner.invalid_qr")
       );
       setScanningOrder(false);
     }
@@ -109,7 +117,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
       } catch (err: any) {
         console.error("Error starting scanner:", err);
         setError(
-          err.message || "Failed to start camera. Please check permissions."
+          err.message || t("qr_scanner.camera_failed")
         );
         // If camera fails, suggest manual entry
         setShowManualEntry(true);
@@ -136,7 +144,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualCode.trim()) {
-      setError("Please enter a QR code");
+      setError(t("qr_scanner.paste_placeholder"));
       return;
     }
     await handleScanResult(manualCode.trim());
@@ -164,7 +172,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">Scan QR Code</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t("qr_scanner.title")}</h2>
           <button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -187,7 +195,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
               <div className="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 text-center mb-4">
                 <Keyboard size={48} className="mx-auto text-gray-400 mb-3" />
                 <p className="text-sm text-gray-600 mb-4">
-                  Enter the QR code manually
+                  {t("qr_scanner.enter_manually")}
                 </p>
                 <form onSubmit={handleManualSubmit} className="space-y-3">
                   <input
@@ -197,7 +205,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
                       setManualCode(e.target.value);
                       setError(null);
                     }}
-                    placeholder="Paste or type QR code here"
+                    placeholder={t("qr_scanner.paste_placeholder")}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-center font-mono text-sm"
                     autoFocus
                   />
@@ -212,14 +220,14 @@ const QRScanner: React.FC<QRScannerProps> = ({
                       }}
                       className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
                     >
-                      Use Camera
+                      {t("qr_scanner.use_camera")}
                     </button>
                     <button
                       type="submit"
                       disabled={!manualCode.trim() || scanningOrder}
                       className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
                     >
-                      {scanningOrder ? "Validating..." : "Validate Code"}
+                      {scanningOrder ? t("qr_scanner.validating") : t("qr_scanner.validate_code")}
                     </button>
                   </div>
                 </form>
@@ -240,7 +248,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
               className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
             >
               <Keyboard size={18} />
-              Enter Code Manually
+              {t("qr_scanner.enter_manually_button")}
             </button>
           )}
 
@@ -263,7 +271,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
               <Camera size={20} className="text-blue-600" />
               <p className="text-sm text-blue-800">
-                Point camera at customer&apos;s QR code
+                {t("qr_scanner.point_camera")}
               </p>
             </div>
           )}
@@ -273,8 +281,8 @@ const QRScanner: React.FC<QRScannerProps> = ({
         <div className="p-4 bg-gray-50 border-t border-gray-200">
           <p className="text-xs text-gray-600 text-center">
             {useCamera && !showManualEntry
-              ? "Ask the customer to show their QR code from the app. Point your camera at it to confirm pickup."
-              : "If the camera doesn't work, you can manually enter the QR code shown by the customer."}
+              ? t("qr_scanner.instructions_camera")
+              : t("qr_scanner.instructions_manual")}
           </p>
         </div>
       </div>

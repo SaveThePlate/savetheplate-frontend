@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import OrderQRCode from "./OrderQRCode";
 import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
+import { useLanguage } from "@/context/LanguageContext";
 import { 
   MapPin, 
   Calendar, 
@@ -70,6 +71,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_IMAGE]);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showDetails, setShowDetails] = useState(false); // For confirmed/cancelled orders
+  const { t } = useLanguage();
 
   useEffect(() => {
     const run = async () => {
@@ -91,7 +93,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         setFallbackIndex(0);
       } catch (err) {
         console.error("Failed to fetch offer:", err);
-        setError("Failed to load offer data");
+        setError(t("cart_order.load_offer_failed"));
         // keep current imageSrc if set
       } finally {
         setLoading(false);
@@ -150,7 +152,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("accessToken");
     if (!token) return router.push("/signIn");
-    if (order.status !== "pending") return toast.error("Only pending orders can be cancelled");
+    if (order.status !== "pending") return toast.error(t("cart_order.only_pending_cancellable"));
     setCanceling(true);
     try {
       await axios.post(
@@ -158,11 +160,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Order cancelled");
+      toast.success(t("cart_order.order_cancelled"));
       window.location.reload();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to cancel order");
+      toast.error(t("cart_order.cancel_failed"));
     } finally {
       setCanceling(false);
     }
@@ -187,7 +189,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   if (error || !offer) {
     return (
       <div className="w-full bg-red-50 rounded-2xl shadow-md p-6 border border-red-200">
-        <p className="text-red-600 text-center">{error || "Failed to load order details"}</p>
+        <p className="text-red-600 text-center">{error || t("cart_order.load_details_failed")}</p>
       </div>
     );
   }
@@ -261,7 +263,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             </p>
             <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
               <Package className="w-4 h-4" />
-              <span>Quantity: {order.quantity}</span>
+              <span>{t("cart_order.quantity_label")} {order.quantity}</span>
             </div>
           </div>
         </div>
@@ -276,7 +278,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Pickup Location
+                  {t("cart_order.pickup_location")}
                 </p>
                 <p className="text-sm font-medium text-gray-900 mb-1">
                   {offer.owner?.location || offer.pickupLocation}
@@ -289,7 +291,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                     className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                   >
                     <ExternalLink className="w-3 h-3" />
-                    Open in Maps
+                    {t("cart_order.open_in_maps")}
                   </a>
                 )}
               </div>
@@ -302,17 +304,17 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Pickup Deadline
+                  {t("cart_order.pickup_deadline")}
                 </p>
                 <p className="text-sm font-medium text-gray-900">
                   {formattedDate}
                 </p>
                 <p className="text-xs text-gray-600 mt-0.5">
-                  {formattedTime ? (formattedTime.includes(" - ") ? `between ${formattedTime}` : `at ${formattedTime}`) : ""}
+                  {formattedTime ? (formattedTime.includes(" - ") ? `${t("common.between")} ${formattedTime}` : `${t("common.at")} ${formattedTime}`) : ""}
                 </p>
                 {isExpired && (
-                  <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                    Expired
+                    <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                    {t("common.expired")}
                   </span>
                 )}
               </div>
@@ -325,7 +327,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Ordered On
+                  {t("cart_order.ordered_on")}
                 </p>
                 <p className="text-sm font-medium text-gray-900">
                   {orderDate.toLocaleDateString("en-US", {
@@ -355,12 +357,12 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               {showDetails ? (
                 <>
                   <ChevronUp className="w-4 h-4" />
-                  Hide Details
+                  {t("cart_order.hide_details")}
                 </>
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4" />
-                  Show Details
+                  {t("cart_order.show_details")}
                 </>
               )}
             </button>
@@ -376,7 +378,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 <QrCode className="w-5 h-5" />
-                {showQRCode ? "Hide QR Code" : "Show QR Code"}
+                {showQRCode ? t("cart_order.hide_qr") : t("cart_order.show_qr")}
                 {showQRCode ? (
                   <ChevronUp className="w-4 h-4" />
                 ) : (
@@ -395,7 +397,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                 }`}
               >
                 <X className="w-5 h-5" />
-                {canceling ? "Cancelling..." : "Cancel Order"}
+                {canceling ? t("cart_order.cancelling") : t("cart_order.cancel_order")}
               </button>
             )}
           </div>

@@ -85,7 +85,7 @@ const ProviderHome = () => {
 
         setOffers(mappedOffers);
       } catch (err) {
-        setError("Failed to fetch offers: " + (err as Error).message);
+        setError(t("provider.home.fetch_offers_failed", { error: (err as Error).message }));
       } finally {
         setLoading(false);
       }

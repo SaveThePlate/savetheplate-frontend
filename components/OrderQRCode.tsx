@@ -3,6 +3,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { Download, Copy, Check } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface OrderQRCodeProps {
   qrCodeToken: string;
@@ -13,9 +14,11 @@ interface OrderQRCodeProps {
 const OrderQRCode: React.FC<OrderQRCodeProps> = ({
   qrCodeToken,
   orderId,
-  orderTitle = "Order",
+  orderTitle,
 }) => {
   const [copied, setCopied] = useState(false);
+  const { t } = useLanguage();
+  const defaultTitle = orderTitle || t("order_qr.default_title");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(qrCodeToken);
@@ -49,7 +52,7 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({
   if (!qrCodeToken) {
     return (
       <div className="p-6 bg-gray-50 rounded-xl border border-gray-200 text-center">
-        <p className="text-gray-500">QR code not available</p>
+        <p className="text-gray-500">{t("order_qr.not_available")}</p>
       </div>
     );
   }
@@ -58,10 +61,10 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({
     <div className="p-6 bg-white rounded-xl border-2 border-gray-200 shadow-sm">
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          Pickup QR Code
+          {t("order_qr.pickup_qr_code")}
         </h3>
         <p className="text-sm text-gray-600">
-          Show this code to the provider when picking up your order
+          {t("order_qr.instructions")}
         </p>
       </div>
 
@@ -78,7 +81,7 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({
 
         <div className="w-full space-y-2">
           <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-500 mb-1">Order Code</p>
+            <p className="text-xs text-gray-500 mb-1">{t("order_qr.order_code")}</p>
             <p className="text-sm font-mono font-semibold text-gray-900 break-all">
               {qrCodeToken}
             </p>
@@ -92,12 +95,12 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({
               {copied ? (
                 <>
                   <Check size={18} />
-                  Copied!
+                  {t("order_qr.copied")}
                 </>
               ) : (
                 <>
                   <Copy size={18} />
-                  Copy Code
+                  {t("order_qr.copy_code")}
                 </>
               )}
             </button>
@@ -106,7 +109,7 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
             >
               <Download size={18} />
-              Download QR
+              {t("order_qr.download_qr")}
             </button>
           </div>
         </div>

@@ -9,6 +9,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "./offerCard/utils";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   FileInput,
   FileUploader,
@@ -82,6 +83,7 @@ const CustomCard: FC<CustomCardProps> = ({
   onUpdate,
   owner,
 }) => {
+  const { t } = useLanguage();
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -241,7 +243,7 @@ const CustomCard: FC<CustomCardProps> = ({
 
   const handleEdit = async () => {
     if (!localData.title || !localData.description) {
-      toast.error("Please fill out all fields");
+      toast.error(t("custom_card.fill_all_fields"));
       return;
     }
 
@@ -253,7 +255,7 @@ const CustomCard: FC<CustomCardProps> = ({
       // Upload images if new ones were selected
       let finalImages = uploadedImages;
       if (localFiles && localFiles.length > 0 && uploadedImages.length === 0) {
-        toast.info("Uploading images...");
+        toast.info(t("custom_card.uploading_images"));
         finalImages = await uploadFiles(localFiles);
         setUploadedImages(finalImages);
       }
@@ -303,7 +305,7 @@ const CustomCard: FC<CustomCardProps> = ({
       await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Offer updated successfully");
+      toast.success(t("custom_card.offer_updated"));
       setLocalData({
         ...payload,
         originalPrice: payload.originalPrice || "",

@@ -115,7 +115,7 @@ const OffersPage = () => {
 
     Promise.all([fetchUserRole(), fetchOffers()]).catch((err) => {
       console.error("Error during data fetching:", err);
-      setError("Something went wrong. Please try again later.");
+      setError(t("offers.error_generic"));
       setLoading(false);
     });
   }, [router, t]);

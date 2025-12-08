@@ -66,7 +66,7 @@ const Home = () => {
       } else {
         console.error("Failed to fetch offers:", offersResponse.reason);
         if (!isRefresh) {
-          setError("Failed to fetch offers. Please try again later.");
+          setError(t("client.home.fetch_offers_failed"));
         }
       }
 
