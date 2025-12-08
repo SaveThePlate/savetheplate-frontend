@@ -160,8 +160,9 @@ const Offers = () => {
     ? formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate)
     : { date: "", time: "" };
   const isToday = formattedDate === "Today";
-  const currentMapsLink = offer?.owner?.mapsLink || offer?.mapsLink;
-  const currentLocation = offer?.owner?.location || offer?.pickupLocation;
+  // Prioritize offer's specific pickupLocation over owner's general location (matches backend logic)
+  const currentLocation = (offer?.pickupLocation && offer.pickupLocation.trim() !== '') ? offer.pickupLocation : (offer?.owner?.location || offer?.pickupLocation);
+  const currentMapsLink = (offer?.mapsLink && offer.mapsLink.trim() !== '') ? offer.mapsLink : (offer?.owner?.mapsLink || offer?.mapsLink);
 
   if (!offer) {
     return (
@@ -278,11 +279,12 @@ const Offers = () => {
               <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
                 <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0 shadow-md">
                   <Image
-                    src={offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png"}
+                    src={sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png")}
                     alt={offer.owner.username}
                     width={56}
                     height={56}
                     className="object-cover w-full h-full"
+                    unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png"))}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = "/logo.png";

@@ -367,13 +367,28 @@ const ProviderHome = () => {
         ) : (
           <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {offers.map((offer) => {
-  const firstImage = offer.images?.[0] || (offer.imageFileName ? { filename: offer.imageFileName } : null);
+  // Handle images - might be array, JSON string, or undefined
+  let imagesArray: any[] = [];
+  if (offer.images) {
+    if (typeof offer.images === 'string') {
+      try {
+        const parsed = JSON.parse(offer.images);
+        imagesArray = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        imagesArray = [];
+      }
+    } else if (Array.isArray(offer.images)) {
+      imagesArray = offer.images;
+    }
+  }
+  
+  const firstImage = imagesArray?.[0] || (offer.imageFileName ? { filename: offer.imageFileName } : null);
   // Use unified image resolution
   const imageSrc = resolveImageSource(firstImage);
 
-  // Use owner's current location if available, otherwise fallback to stored pickupLocation
-  const currentLocation = offer.owner?.location || offer.pickupLocation;
-  const currentMapsLink = offer.owner?.mapsLink || offer.mapsLink;
+  // Prioritize offer's specific pickupLocation over owner's general location (matches backend logic)
+  const currentLocation = (offer.pickupLocation && offer.pickupLocation.trim() !== '') ? offer.pickupLocation : (offer.owner?.location || offer.pickupLocation);
+  const currentMapsLink = (offer.mapsLink && offer.mapsLink.trim() !== '') ? offer.mapsLink : (offer.owner?.mapsLink || offer.mapsLink);
 
   return (
       <ProviderOfferCard
@@ -435,10 +450,28 @@ const ProviderHome = () => {
             });
           };
           
-          // If data has images array, use it directly (from PUT response)
-          if (data && Array.isArray(data.images)) {
+          // Handle images - they might be an array, JSON string, or undefined
+          let imagesToUse: any[] = [];
+          
+          if (data && data.images) {
+            // Check if images is a JSON string (from backend)
+            if (typeof data.images === 'string') {
+              try {
+                const parsed = JSON.parse(data.images);
+                imagesToUse = Array.isArray(parsed) ? parsed : [];
+              } catch {
+                console.warn("Failed to parse images JSON string");
+                imagesToUse = [];
+              }
+            } else if (Array.isArray(data.images)) {
+              imagesToUse = data.images;
+            }
+          }
+          
+          // If we have images, normalize and update
+          if (imagesToUse.length > 0) {
             console.log("✅ Using images from PUT response directly");
-            const normalizedImages = normalizeImages(data.images);
+            const normalizedImages = normalizeImages(imagesToUse);
             setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data, images: normalizedImages } : o));
             return;
           }
@@ -456,7 +489,22 @@ const ProviderHome = () => {
             );
             
             const updatedOffer = response.data;
-            const normalizedImages = normalizeImages(updatedOffer.images);
+            // Handle images from refetch - might be array or JSON string
+            let refetchImages: any[] = [];
+            if (updatedOffer.images) {
+              if (typeof updatedOffer.images === 'string') {
+                try {
+                  const parsed = JSON.parse(updatedOffer.images);
+                  refetchImages = Array.isArray(parsed) ? parsed : [];
+                } catch {
+                  refetchImages = [];
+                }
+              } else if (Array.isArray(updatedOffer.images)) {
+                refetchImages = updatedOffer.images;
+              }
+            }
+            
+            const normalizedImages = normalizeImages(refetchImages);
             
             // Update the offer in state with normalized data
             setOffers(prev => prev.map(o => o.id === id ? { ...o, ...updatedOffer, images: normalizedImages } : o));

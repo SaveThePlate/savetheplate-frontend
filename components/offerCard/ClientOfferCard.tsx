@@ -159,9 +159,9 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
     </CredenzaTrigger>
 
       {/* Details Modal */}
-      <CredenzaContent className="bg-white rounded-3xl shadow-xl max-w-lg mx-auto border border-gray-100 p-0 overflow-hidden">
+      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl max-w-lg mx-auto border border-gray-100 p-0 overflow-hidden">
         {/* Large Image at Top */}
-        <div className="relative w-full h-64">
+        <div className="relative w-full h-48 sm:h-64">
           {currentImage ? (
             <Image
               src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
@@ -179,9 +179,9 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
           )}
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Store Information */}
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0 mb-4">
             <div className="flex items-center gap-3">
               {owner && (
                 <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden bg-white flex-shrink-0">
@@ -205,31 +205,31 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                 </h3>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-xl font-bold text-gray-900">{price} dt</p>
+            <div className="text-left sm:text-right">
+              <p className="text-lg sm:text-xl font-bold text-gray-900">{price} dt</p>
               {originalPrice && originalPrice > price && (
-                <p className="text-sm text-gray-500 line-through">{originalPrice.toFixed(2)} dt</p>
+                <p className="text-xs sm:text-sm text-gray-500 line-through">{originalPrice.toFixed(2)} dt</p>
               )}
             </div>
           </div>
 
           {/* Offer Details */}
           <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-xs sm:text-sm text-gray-600 mb-2">
               {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
             </p>
-            <p className="text-base text-gray-800 leading-relaxed">{description}</p>
+            <p className="text-sm sm:text-base text-gray-800 leading-relaxed">{description}</p>
           </div>
 
           {/* Pickup Information */}
-          <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-            <p className="text-sm font-medium text-gray-900 mb-2">{t("offers.pickup_details")}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <span className="font-semibold">🕐</span>
+          <div className="mb-4 p-3 sm:p-4 bg-gray-50 rounded-xl">
+            <p className="text-xs sm:text-sm font-medium text-gray-900 mb-2">{t("offers.pickup_details")}</p>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
+              <span className="font-semibold text-base sm:text-lg">🕐</span>
               <span>
                 <span className="font-medium">{formattedDate === "Today" ? t("common.today") : formattedDate}</span>
                 {formattedTime && (
-                  <span className="font-semibold text-emerald-700 ml-2">
+                  <span className="font-semibold text-emerald-700 ml-1 sm:ml-2">
                     {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
                   </span>
                 )}
@@ -252,7 +252,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
             {!expired && quantity > 0 && (
               <Link
                 href={reserveLink}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 sm:py-3.5 bg-emerald-600 text-white text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl hover:bg-emerald-700 transition-colors"
               >
                 {t("common.order_now")}
               </Link>

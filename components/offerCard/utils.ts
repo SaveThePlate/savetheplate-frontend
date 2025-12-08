@@ -13,24 +13,34 @@ export const getBlurDataURL = (color = "#eaeaea") => {
 };
 
 // Format date and time for display
+// This function is safe for SSR - uses consistent formatting
 export const formatDateTime = (dateString: string | undefined) => {
   if (!dateString) return { date: "N/A", time: "" };
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return { date: "Invalid date", time: "" };
   
-  const today = new Date();
-  const isToday = 
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
+  // Use consistent date formatting that works on both server and client
+  // Always use the date from the input, not "today" check to avoid hydration issues
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const formattedDate = `${year}-${month}-${day}`;
   
+  // Format time consistently
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const formattedTime = `${hours}:${minutes}`;
+  
+  // Note: "Today" check should be done client-side only to avoid hydration mismatches
+  // Components should check isToday separately after hydration
   return {
-    date: isToday ? "Today" : date.toLocaleDateString(),
-    time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    date: formattedDate,
+    time: formattedTime,
   };
 };
 
 // Format date and time range for display
+// This function is safe for SSR - uses consistent formatting
 export const formatDateTimeRange = (
   startTime?: string,
   endTime?: string,
@@ -46,17 +56,25 @@ export const formatDateTimeRange = (
       return formatDateTime(expirationDate);
     }
     
-    const today = new Date();
-    const isToday = 
-      start.getDate() === today.getDate() &&
-      start.getMonth() === today.getMonth() &&
-      start.getFullYear() === today.getFullYear();
+    // Format times consistently (HH:MM format)
+    const startHours = String(start.getHours()).padStart(2, '0');
+    const startMinutes = String(start.getMinutes()).padStart(2, '0');
+    const startTimeStr = `${startHours}:${startMinutes}`;
     
-    const startTimeStr = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const endTimeStr = end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const endHours = String(end.getHours()).padStart(2, '0');
+    const endMinutes = String(end.getMinutes()).padStart(2, '0');
+    const endTimeStr = `${endHours}:${endMinutes}`;
     
+    // Format date consistently
+    const year = start.getFullYear();
+    const month = String(start.getMonth() + 1).padStart(2, '0');
+    const day = String(start.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    // Note: "Today" check should be done client-side only to avoid hydration mismatches
+    // Components should check isToday separately after hydration
     return {
-      date: isToday ? "Today" : start.toLocaleDateString(),
+      date: formattedDate,
       time: `${startTimeStr} - ${endTimeStr}`,
       startTime: startTimeStr,
       endTime: endTimeStr,
@@ -65,6 +83,22 @@ export const formatDateTimeRange = (
   
   // Fallback to expirationDate for backward compatibility
   return formatDateTime(expirationDate);
+};
+
+// Helper function to check if a date is today (client-side only)
+export const isDateToday = (dateString: string | undefined): boolean => {
+  if (!dateString) return false;
+  if (typeof window === 'undefined') return false; // Always false on server to avoid hydration issues
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return false;
+  
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
 };
 
 // Check if offer is expired

@@ -470,20 +470,20 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                 </button>
               </CredenzaTrigger>
 
-              <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-lg mx-auto border border-gray-100">
-                <CredenzaHeader className="mb-4">
-                  <CredenzaTitle className="text-xl font-bold text-gray-900">
+              <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 max-w-lg mx-auto border border-gray-100">
+                <CredenzaHeader className="mb-3 sm:mb-4">
+                  <CredenzaTitle className="text-lg sm:text-xl font-bold text-gray-900">
                     {t("offer_card.edit_offer")}
                   </CredenzaTitle>
-                  <CredenzaDescription className="text-sm text-gray-500 mt-1">
+                  <CredenzaDescription className="text-xs sm:text-sm text-gray-500 mt-1">
                     {t("offer_card.update_details")}
                   </CredenzaDescription>
                 </CredenzaHeader>
 
-                <CredenzaBody className="space-y-4">
+                <CredenzaBody className="space-y-3 sm:space-y-4">
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-title" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("offer_card.title_label")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -491,7 +491,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       name="title"
                       value={localData.title}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       placeholder={t("offer_card.title_label")}
                     />
@@ -499,7 +499,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Description */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-description" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-description" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("offer_card.description_label")} <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -507,17 +507,17 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       name="description"
                       value={localData.description}
                       onChange={handleInputChange}
-                      rows={4}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
+                      rows={3}
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
                       disabled={loading}
                       placeholder={t("offer_card.description_label")}
                     />
                   </div>
 
                   {/* Price Fields */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label htmlFor="edit-price" className="text-sm font-semibold text-gray-700">
+                      <label htmlFor="edit-price" className="text-xs sm:text-sm font-semibold text-gray-700">
                         {t("offer_card.price_label")} <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
@@ -529,17 +529,17 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           name="price"
                           value={localData.price}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                           disabled={loading}
                           placeholder="0.00"
                           required
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">dt</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm">dt</span>
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label htmlFor="edit-originalPrice" className="text-sm font-semibold text-gray-700">
+                      <label htmlFor="edit-originalPrice" className="text-xs sm:text-sm font-semibold text-gray-700">
                         {t("offer_card.original_price_label")}
                       </label>
                       <div className="relative">
@@ -551,11 +551,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           name="originalPrice"
                           value={localData.originalPrice}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                           disabled={loading}
                           placeholder="0.00"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">dt</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm">dt</span>
                       </div>
                       {localData.originalPrice && parseFloat(localData.originalPrice as any) > parseFloat(localData.price as any) && (
                         <p className="text-xs text-emerald-600 font-medium">
@@ -567,7 +567,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Quantity */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-quantity" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-quantity" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("offer_card.quantity_label")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -577,7 +577,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       name="quantity"
                       value={localData.quantity}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       placeholder="0"
                       required
@@ -586,26 +586,36 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Pickup Date */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-expirationDate" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-expirationDate" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="edit-expirationDate"
                       type="date"
                       name="expirationDate"
-                      value={localData.expirationDate ? new Date(localData.expirationDate).toISOString().split('T')[0] : ""}
+                      value={localData.expirationDate ? (() => {
+                        // Convert ISO string to local date string (YYYY-MM-DD) to avoid timezone issues
+                        const date = new Date(localData.expirationDate);
+                        // Get local date components to avoid UTC conversion issues
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                      })() : ""}
                       onChange={(e) => {
                         const dateValue = e.target.value;
                         if (dateValue) {
-                          // Set time to end of day for expiration date
-                          const date = new Date(dateValue);
-                          date.setHours(23, 59, 59, 999);
+                          // Parse the date value (YYYY-MM-DD) and create date in local timezone
+                          // Split the date string to avoid timezone conversion issues
+                          const [year, month, day] = dateValue.split('-').map(Number);
+                          // Create date at noon local time to avoid timezone shifts, then set to end of day
+                          const date = new Date(year, month - 1, day, 23, 59, 59, 999);
                           setLocalData(prev => ({ ...prev, expirationDate: date.toISOString() }));
                         } else {
                           setLocalData(prev => ({ ...prev, expirationDate: "" }));
                         }
                       }}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       required
                     />
@@ -613,7 +623,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Pickup Start Time */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-pickupStartTime" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-pickupStartTime" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("add_offer.start_time")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -625,8 +635,9 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         const timeValue = e.target.value;
                         if (timeValue && localData.expirationDate) {
                           const [hours, minutes] = timeValue.split(':');
-                          const date = new Date(localData.expirationDate);
-                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                          // Use the expiration date and set time in local timezone
+                          const expDate = new Date(localData.expirationDate);
+                          const date = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate(), parseInt(hours), parseInt(minutes), 0, 0);
                           setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
                         } else if (timeValue) {
                           const [hours, minutes] = timeValue.split(':');
@@ -637,7 +648,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           setLocalData(prev => ({ ...prev, pickupStartTime: "" }));
                         }
                       }}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       required
                     />
@@ -645,7 +656,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Pickup End Time */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-pickupEndTime" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-pickupEndTime" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("add_offer.end_time")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -657,8 +668,9 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         const timeValue = e.target.value;
                         if (timeValue && localData.expirationDate) {
                           const [hours, minutes] = timeValue.split(':');
-                          const date = new Date(localData.expirationDate);
-                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                          // Use the expiration date and set time in local timezone
+                          const expDate = new Date(localData.expirationDate);
+                          const date = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate(), parseInt(hours), parseInt(minutes), 0, 0);
                           setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
                         } else if (timeValue) {
                           const [hours, minutes] = timeValue.split(':');
@@ -669,7 +681,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           setLocalData(prev => ({ ...prev, pickupEndTime: "" }));
                         }
                       }}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       required
                     />
@@ -677,7 +689,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Pickup Location */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-pickupLocation" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-pickupLocation" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("add_offer.pickup_location")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -685,7 +697,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       name="pickupLocation"
                       value={localData.pickupLocation}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       placeholder={t("add_offer.pickup_location_placeholder")}
                       required
@@ -694,7 +706,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Maps Link */}
                   <div className="space-y-1.5">
-                    <label htmlFor="edit-mapsLink" className="text-sm font-semibold text-gray-700">
+                    <label htmlFor="edit-mapsLink" className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("onboarding.google_maps_link")}
                     </label>
                     <input
@@ -702,7 +714,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       name="mapsLink"
                       value={localData.mapsLink}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                       disabled={loading}
                       placeholder={t("onboarding.maps_placeholder")}
                     />
@@ -711,7 +723,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
                   {/* Images Upload */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">
+                    <label className="text-xs sm:text-sm font-semibold text-gray-700">
                       {t("offer_card.images_label")} {uploadedImages.length > 0 && <span className="text-emerald-600">({t("offer_card.images_uploaded", { count: uploadedImages.length })})</span>}
                     </label>
                     <FileUploader
@@ -725,22 +737,22 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       }}
                     >
                       <FileInput>
-                        <div className="flex flex-col items-center justify-center h-32 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
+                        <div className="flex flex-col items-center justify-center h-28 sm:h-32 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-colors cursor-pointer touch-manipulation">
                           {uploadingImages ? (
                             <>
-                              <div className="animate-spin text-2xl mb-2">⏳</div>
-                              <p className="text-gray-600 text-sm">{t("offer_card.uploading")}</p>
+                              <div className="animate-spin text-xl sm:text-2xl mb-1 sm:mb-2">⏳</div>
+                              <p className="text-gray-600 text-xs sm:text-sm">{t("offer_card.uploading")}</p>
                             </>
                           ) : localFiles && localFiles.length > 0 ? (
                             <>
-                              <div className="text-2xl mb-2">✓</div>
-                              <p className="text-gray-600 text-sm">{t("offer_card.images_ready", { count: localFiles.length })}</p>
+                              <div className="text-xl sm:text-2xl mb-1 sm:mb-2">✓</div>
+                              <p className="text-gray-600 text-xs sm:text-sm">{t("offer_card.images_ready", { count: localFiles.length })}</p>
                             </>
                           ) : (
                             <>
-                              <div className="text-2xl mb-2">📸</div>
-                              <p className="text-gray-600 text-sm">{t("offer_card.click_upload")}</p>
-                              <p className="text-xs text-gray-500 mt-1">{t("offer_card.up_to_5")}</p>
+                              <div className="text-xl sm:text-2xl mb-1 sm:mb-2">📸</div>
+                              <p className="text-gray-600 text-xs sm:text-sm">{t("offer_card.click_upload")}</p>
+                              <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">{t("offer_card.up_to_5")}</p>
                             </>
                           )}
                         </div>
@@ -750,14 +762,14 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           <FileUploaderItem
                             key={index}
                             index={index}
-                            className="size-24 p-0 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
+                            className="size-20 sm:size-24 p-0 rounded-lg sm:rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
                           >
                             <Image
                               src={URL.createObjectURL(file)}
                               alt={`Preview ${index + 1}`}
                               width={96}
                               height={96}
-                              className="w-full h-full object-cover rounded-xl"
+                              className="w-full h-full object-cover rounded-lg sm:rounded-xl"
                               unoptimized={true}
                             />
                           </FileUploaderItem>
@@ -770,7 +782,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   </div>
                 </CredenzaBody>
 
-                <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white z-10">
+                <CredenzaFooter className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white z-10">
                   <button 
                     onClick={() => {
                       setIsEditing(false);
@@ -791,7 +803,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       setUploadedImages([]);
                       setUploadingImages(false);
                     }}
-                    className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                    className="w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-gray-200 transition-colors"
                     disabled={loading}
                   >
                     {t("common.cancel")}
@@ -799,7 +811,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   <button
                     onClick={handleEdit}
                     disabled={loading || uploadingImages}
-                    className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-3 bg-emerald-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? t("common.saving") : uploadingImages ? t("offer_card.uploading") : t("offer_card.save_changes")}
                   </button>

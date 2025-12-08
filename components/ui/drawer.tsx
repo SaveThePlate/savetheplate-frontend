@@ -45,13 +45,13 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background max-h-[90vh] overflow-hidden",
+        "fixed inset-x-0 bottom-0 z-50 mt-20 sm:mt-24 flex h-auto flex-col rounded-t-[20px] sm:rounded-t-[24px] border-t border-l border-r bg-background max-h-[96vh] sm:max-h-[95vh] overflow-hidden shadow-2xl",
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted flex-shrink-0" />
-      <div className="overflow-y-auto flex-1 min-h-0">
+      <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-gray-300 flex-shrink-0" />
+      <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain pb-safe">
         {children}
       </div>
     </DrawerPrimitive.Content>
@@ -64,7 +64,7 @@ const DrawerHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
+    className={cn("grid gap-1.5 px-4 pt-4 pb-2 text-center sm:text-left sticky top-0 bg-background z-10 border-b", className)}
     {...props}
   />
 )
@@ -75,7 +75,7 @@ const DrawerFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+    className={cn("mt-auto flex flex-col gap-2 px-4 pt-4 pb-6 sticky bottom-0 bg-background border-t shadow-lg", className)}
     {...props}
   />
 )
