@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// import { io, Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 interface UseWebSocketOptions {
   onOrderUpdate?: (data: { type: "created" | "updated" | "deleted"; order: any }) => void;
@@ -11,17 +11,12 @@ interface UseWebSocketOptions {
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { onOrderUpdate, onOfferUpdate, enabled = true } = options;
-  const socketRef = useRef<any | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // WebSocket temporarily disabled for testing
-    return;
-    
     if (!enabled) return;
 
-    // WebSocket code temporarily disabled
-    /*
     const token = localStorage.getItem("accessToken");
     if (!token) {
       console.log("No access token, skipping WebSocket connection");
@@ -43,27 +38,40 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
+      // Suppress the initial websocket failure warning (it's expected - Socket.IO falls back to polling)
+      upgrade: true,
+      rememberUpgrade: false,
     });
 
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("WebSocket connected");
+      const transport = socket.io.engine.transport.name;
+      console.log(`✅ WebSocket connected to: ${wsUrl} (transport: ${transport})`);
       setIsConnected(true);
       
       // Subscribe to events
       socket.emit("subscribe:orders");
       socket.emit("subscribe:offers");
+      console.log("📡 Subscribed to orders and offers events");
     });
 
-    socket.on("disconnect", () => {
-      console.log("WebSocket disconnected");
+    socket.on("disconnect", (reason) => {
+      console.log("WebSocket disconnected:", reason);
       setIsConnected(false);
     });
 
     socket.on("connect_error", (error) => {
-      console.error("WebSocket connection error:", error);
+      // Only log if it's not the initial websocket upgrade failure (which is expected)
+      if (error.message && !error.message.includes("websocket")) {
+        console.error("WebSocket connection error:", error);
+      }
       setIsConnected(false);
+    });
+
+    // Listen for transport upgrades (websocket -> polling or vice versa)
+    socket.io.engine.on("upgrade", () => {
+      console.log("🔄 WebSocket transport upgraded to:", socket.io.engine.transport.name);
     });
 
     // Listen for order updates
@@ -78,21 +86,28 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     if (onOfferUpdate) {
       socket.on("offer:update", (data) => {
         console.log("🛍️ Offer update received:", data);
-        onOfferUpdate(data);
+        console.log("📦 Offer type:", data.type, "Offer ID:", data.offer?.id);
+        try {
+          onOfferUpdate(data);
+          console.log("✅ Offer update handler executed successfully");
+        } catch (error) {
+          console.error("❌ Error in offer update handler:", error);
+        }
       });
+    } else {
+      console.warn("⚠️ onOfferUpdate handler not provided, offer updates will be ignored");
     }
 
     return () => {
       if (onOrderUpdate) {
-        socket.off("order:update", onOrderUpdate);
+        socket.off("order:update");
       }
       if (onOfferUpdate) {
-        socket.off("offer:update", onOfferUpdate);
+        socket.off("offer:update");
       }
       socket.disconnect();
       socketRef.current = null;
     };
-    */
   }, [enabled, onOrderUpdate, onOfferUpdate]);
 
   return {

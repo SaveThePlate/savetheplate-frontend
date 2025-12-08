@@ -199,6 +199,12 @@ const OffersPage = () => {
   // Handle real-time offer updates
   const handleOfferUpdate = useCallback((data: { type: string; offer: any }) => {
     const { type, offer } = data;
+    console.log("🔄 handleOfferUpdate called with:", { type, offerId: offer?.id });
+    
+    if (!offer) {
+      console.warn("⚠️ Received offer update without offer data");
+      return;
+    }
     
     // Normalize the offer data to match our format
     const normalizeOffer = (o: any): Offer => {
@@ -206,26 +212,78 @@ const OffersPage = () => {
       const images = Array.isArray(o.images) ? o.images.map((img: any) => {
         if (!img) return img;
         
-        // Normalize absoluteUrl to use current backend URL
+        // Normalize absoluteUrl - preserve URLs from different backends
         if (typeof img.absoluteUrl === "string") {
-          // If it's a full URL, extract the storage path and reconstruct
           if (/^https?:\/\//i.test(img.absoluteUrl)) {
-            const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
-            if (match && backendOrigin) {
-              return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+            try {
+              const urlObj = new URL(img.absoluteUrl);
+              const urlHost = urlObj.hostname;
+              
+              let currentBackendHost = "";
+              if (backendOrigin) {
+                try {
+                  const backendUrlObj = new URL(backendOrigin);
+                  currentBackendHost = backendUrlObj.hostname;
+                } catch {
+                  const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                  if (match) currentBackendHost = match[1];
+                }
+              }
+              
+              // If URL is from a different backend, keep it as-is
+              if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+                return img; // Keep original URL from different backend
+              }
+              
+              // Same backend - normalize
+              const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+              if (match && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+              }
+            } catch {
+              const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+              if (match && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+              }
             }
           }
-          // If it's a relative storage path
           else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
             return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
           }
         }
         
-        // Normalize url field if it exists
+        // Normalize url field if it exists - same logic
         if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
-          const match = img.url.match(/\/(storage\/.+)$/);
-          if (match && backendOrigin) {
-            return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+          try {
+            const urlObj = new URL(img.url);
+            const urlHost = urlObj.hostname;
+            
+            let currentBackendHost = "";
+            if (backendOrigin) {
+              try {
+                const backendUrlObj = new URL(backendOrigin);
+                currentBackendHost = backendUrlObj.hostname;
+              } catch {
+                const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                if (match) currentBackendHost = match[1];
+              }
+            }
+            
+            // If from different backend, keep original
+            if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+              return { ...img, absoluteUrl: img.absoluteUrl || img.url };
+            }
+            
+            // Same backend - normalize
+            const match = img.url.match(/\/(storage\/.+)$/);
+            if (match && backendOrigin) {
+              return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+            }
+          } catch {
+            const match = img.url.match(/\/(storage\/.+)$/);
+            if (match && backendOrigin) {
+              return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+            }
           }
         }
         
@@ -236,18 +294,25 @@ const OffersPage = () => {
     };
 
     setOffers((prevOffers) => {
+      console.log(`📊 Current offers count: ${prevOffers.length}`);
       if (type === 'created') {
         // Add new offer at the beginning
         const normalized = normalizeOffer(offer);
-        return [normalized, ...prevOffers];
+        console.log(`➕ Adding new offer: ${normalized.id} - ${normalized.title}`);
+        const newOffers = [normalized, ...prevOffers];
+        console.log(`📊 New offers count: ${newOffers.length}`);
+        return newOffers;
       } else if (type === 'updated') {
         // Update existing offer
         const normalized = normalizeOffer(offer);
+        console.log(`🔄 Updating offer: ${normalized.id}`);
         return prevOffers.map((o) => (o.id === offer.id ? normalized : o));
       } else if (type === 'deleted') {
         // Remove deleted offer
+        console.log(`🗑️ Removing offer: ${offer.id}`);
         return prevOffers.filter((o) => o.id !== offer.id);
       }
+      console.warn(`⚠️ Unknown offer update type: ${type}`);
       return prevOffers;
     });
   }, []);

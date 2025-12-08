@@ -162,12 +162,8 @@ const Home = () => {
             </div>
           ) : error ? (
             <p className="text-center text-red-600">{error}</p>
-          ) : offers.length > 0 ? (
-            <Offers />
           ) : (
-            <p className="text-center text-gray-500 font-medium py-10">
-              {t("offers.no_offers")}
-            </p>
+            <Offers />
           )}
         </section>
       </div>

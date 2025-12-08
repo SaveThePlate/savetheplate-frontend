@@ -740,8 +740,17 @@ const CustomCard: FC<CustomCardProps> = ({
                 open={isEditing} 
                 onOpenChange={(open) => {
                   setIsEditing(open);
-                  // Reset image upload state when modal closes
+                  // Reset form data and image upload state when modal closes
                   if (!open) {
+                    setLocalData({
+                      title,
+                      description,
+                      price,
+                      originalPrice: originalPrice || "",
+                      quantity,
+                      expirationDate: expirationDate || "",
+                      pickupLocation: pickupLocation || "",
+                    });
                     setLocalFiles(null);
                     setUploadedImages([]);
                     setUploadingImages(false);

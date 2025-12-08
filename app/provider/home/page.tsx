@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 interface Offer {
   price: number;
@@ -164,6 +165,132 @@ const ProviderHome = () => {
 
     fetchOffers();
   }, [router, t]);
+
+  // Handle real-time offer updates
+  const handleOfferUpdate = useCallback((data: { type: string; offer: any }) => {
+    const { type, offer } = data;
+    
+    // Get current user ID to filter offers
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+    
+    const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+    const currentUserId = tokenPayload.id;
+    
+    // Only process offers that belong to this provider
+    if (offer.ownerId !== currentUserId) {
+      return;
+    }
+    
+    // Normalize the offer data to match our format
+    const normalizeOffer = (o: any): Offer => {
+      const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const images = Array.isArray(o.images) ? o.images.map((img: any) => {
+        if (!img) return img;
+        
+        // Normalize absoluteUrl - preserve URLs from different backends
+        if (typeof img.absoluteUrl === "string") {
+          if (/^https?:\/\//i.test(img.absoluteUrl)) {
+            try {
+              const urlObj = new URL(img.absoluteUrl);
+              const urlHost = urlObj.hostname;
+              
+              let currentBackendHost = "";
+              if (backendOrigin) {
+                try {
+                  const backendUrlObj = new URL(backendOrigin);
+                  currentBackendHost = backendUrlObj.hostname;
+                } catch {
+                  const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                  if (match) currentBackendHost = match[1];
+                }
+              }
+              
+              // If URL is from a different backend, keep it as-is
+              if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+                return img; // Keep original URL from different backend
+              }
+              
+              // Same backend - normalize
+              const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+              if (match && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+              }
+            } catch {
+              const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+              if (match && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+              }
+            }
+          }
+          else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+            return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+          }
+        }
+        
+        // Normalize url field if it exists - same logic
+        if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
+          try {
+            const urlObj = new URL(img.url);
+            const urlHost = urlObj.hostname;
+            
+            let currentBackendHost = "";
+            if (backendOrigin) {
+              try {
+                const backendUrlObj = new URL(backendOrigin);
+                currentBackendHost = backendUrlObj.hostname;
+              } catch {
+                const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                if (match) currentBackendHost = match[1];
+              }
+            }
+            
+            // If from different backend, keep original
+            if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+              return { ...img, absoluteUrl: img.absoluteUrl || img.url };
+            }
+            
+            // Same backend - normalize
+            const match = img.url.match(/\/(storage\/.+)$/);
+            if (match && backendOrigin) {
+              return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+            }
+          } catch {
+            const match = img.url.match(/\/(storage\/.+)$/);
+            if (match && backendOrigin) {
+              return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+            }
+          }
+        }
+        
+        return img;
+      }) : [];
+      
+      return { ...o, images };
+    };
+
+    setOffers((prevOffers) => {
+      if (type === 'created') {
+        // Add new offer at the beginning
+        const normalized = normalizeOffer(offer);
+        return [normalized, ...prevOffers];
+      } else if (type === 'updated') {
+        // Update existing offer
+        const normalized = normalizeOffer(offer);
+        return prevOffers.map((o) => (o.id === offer.id ? normalized : o));
+      } else if (type === 'deleted') {
+        // Remove deleted offer
+        return prevOffers.filter((o) => o.id !== offer.id);
+      }
+      return prevOffers;
+    });
+  }, []);
+
+  // Connect to WebSocket for real-time updates
+  useWebSocket({
+    onOfferUpdate: handleOfferUpdate,
+    enabled: true,
+  });
 
   const handleDeleteOffer = async (id: number) => {
     const token = localStorage.getItem("accessToken");
