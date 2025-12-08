@@ -88,7 +88,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
       );
       setScanningOrder(false);
     }
-  }, [onScanSuccess, scanningOrder]);
+  }, [onScanSuccess, scanningOrder, t]);
 
   useEffect(() => {
     if (!useCamera || showManualEntry) return;
@@ -139,7 +139,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
           });
       }
     };
-  }, [useCamera, showManualEntry, handleScanResult]);
+  }, [useCamera, showManualEntry, handleScanResult, t]);
 
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

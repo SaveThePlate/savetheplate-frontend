@@ -192,7 +192,7 @@ export const FileUploader = forwardRef<
           }
         }
       },
-      [maxFiles, maxSize, onValueChange, reSelectAll, value]
+      [maxFiles, maxSize, onValueChange, reSelectAll, value, t]
     );
 
     useEffect(() => {

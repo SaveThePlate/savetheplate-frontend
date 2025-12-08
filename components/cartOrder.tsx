@@ -101,7 +101,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     };
 
     run();
-  }, [order.offerId, router]);
+  }, [order.offerId, router, t]);
 
   const isExpired = offer && new Date(offer.expirationDate).getTime() <= Date.now();
   

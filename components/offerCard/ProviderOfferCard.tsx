@@ -359,6 +359,16 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
               onOpenChange={(open) => {
                 setIsEditing(open);
                 if (!open) {
+                  // Reset all form data to original values
+                  setLocalData({
+                    title,
+                    description,
+                    price,
+                    originalPrice: originalPrice || "",
+                    quantity,
+                    expirationDate: expirationDate || "",
+                    pickupLocation: pickupLocation || "",
+                  });
                   setLocalFiles(null);
                   setUploadedImages([]);
                   setUploadingImages(false);
@@ -549,14 +559,28 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                 </CredenzaBody>
 
                 <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white z-10">
-                  <CredenzaClose asChild>
-                    <button 
-                      className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-                      disabled={loading}
-                    >
-                      {t("common.cancel")}
-                    </button>
-                  </CredenzaClose>
+                  <button 
+                    onClick={() => {
+                      setIsEditing(false);
+                      // Reset all form data to original values
+                      setLocalData({
+                        title,
+                        description,
+                        price,
+                        originalPrice: originalPrice || "",
+                        quantity,
+                        expirationDate: expirationDate || "",
+                        pickupLocation: pickupLocation || "",
+                      });
+                      setLocalFiles(null);
+                      setUploadedImages([]);
+                      setUploadingImages(false);
+                    }}
+                    className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                    disabled={loading}
+                  >
+                    {t("common.cancel")}
+                  </button>
                   <button
                     onClick={handleEdit}
                     disabled={loading || uploadingImages}

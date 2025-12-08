@@ -89,7 +89,7 @@ const ProviderOrdersContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, t]);
 
   // Fetch orders when component mounts
   useEffect(() => {
@@ -145,7 +145,7 @@ const ProviderOrdersContent = () => {
     if (type === 'updated' && order.status === 'confirmed') {
       toast.success(t("provider.order_confirmed_toast", { orderId: order.id }));
     }
-  }, [providerId]);
+  }, [providerId, t]);
 
   // Connect to WebSocket for real-time updates
   useWebSocket({
@@ -296,6 +296,7 @@ const OrderCard: React.FC<{
   order: Order;
   onScanClick?: () => void;
 }> = ({ order, onScanClick }) => {
+  const { t } = useLanguage();
   const offer = order.offer;
   const user = order.user;
 
@@ -457,7 +458,7 @@ const ProviderOrders = () => {
       <main className="bg-[#e8f4ee] min-h-screen pt-24 pb-20 flex flex-col items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("common.loading")}</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </main>
     }>

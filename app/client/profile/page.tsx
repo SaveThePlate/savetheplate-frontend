@@ -188,7 +188,7 @@ const ProfilePage = () => {
     };
 
     run();
-  }, [router]);
+  }, [router, t]);
 
   const pendingCount = orders.filter((o) => o.status === "pending").length;
   const confirmedCount = orders.filter((o) => o.status === "confirmed").length;

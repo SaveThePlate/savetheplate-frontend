@@ -88,7 +88,7 @@ const Home = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     fetchOffers();

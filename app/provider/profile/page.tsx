@@ -51,6 +51,7 @@ const DEFAULT_PROFILE_IMAGE = "/logo.png";
 // Custom hook for fetching profile and stats
 const useProviderProfile = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [stats, setStats] = useState({
     totalOffers: 0,
@@ -154,7 +155,7 @@ const useProviderProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     fetchData();

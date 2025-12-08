@@ -92,7 +92,7 @@ const ProviderHome = () => {
     };
 
     fetchOffers();
-  }, [router]);
+  }, [router, t]);
 
   const handleDeleteOffer = async (id: number) => {
     const token = localStorage.getItem("accessToken");
