@@ -22,6 +22,26 @@ function AuthCallback() {
         setLoading(true);
         setError(null);
 
+        // Check if this is an order QR token (not an auth token)
+        // Order tokens are typically longer and don't match auth token format
+        // If the token looks like an order token, redirect providers to orders page
+        const accessToken = LocalStorage.getItem("accessToken");
+        if (accessToken && token.length > 50) {
+          // This might be an order QR token, check if user is a provider
+          try {
+            const testResponse = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/qr/${token}`,
+              { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+            // If this succeeds, it's an order token and user is logged in as provider
+            // Redirect to orders page
+            router.push("/provider/orders");
+            return;
+          } catch {
+            // Not an order token or user doesn't have access, continue with auth verification
+          }
+        }
+
         const resp = await clientApi.POST("/auth/verify-magic-mail", {
           headers: {
             Authorization: `Bearer ${token}`,

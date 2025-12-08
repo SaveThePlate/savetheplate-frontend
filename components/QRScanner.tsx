@@ -27,13 +27,38 @@ const QRScanner: React.FC<QRScannerProps> = ({
   const [useCamera, setUseCamera] = useState(true);
   const { t } = useLanguage();
 
-  const handleScanResult = useCallback(async (qrCodeToken: string) => {
+  const handleScanResult = useCallback(async (decodedText: string) => {
     if (scanningOrder) return; // Prevent multiple scans
     setScanningOrder(true);
     setError(null);
     setSuccess(null);
 
     try {
+      // Extract token from URL if QR code contains a URL
+      // Handle cases like: https://leftover.ccdev.space/callback/TOKEN or /callback/TOKEN
+      let qrCodeToken = decodedText.trim();
+      
+      // If it's a URL, extract the token from the path
+      if (/^https?:\/\//i.test(qrCodeToken) || qrCodeToken.startsWith('/')) {
+        try {
+          // Try to extract token from URL path (e.g., /callback/TOKEN or /orders/qr/TOKEN)
+          const urlMatch = qrCodeToken.match(/\/(?:callback|orders\/qr)\/([^\/\?]+)/);
+          if (urlMatch && urlMatch[1]) {
+            qrCodeToken = urlMatch[1];
+          } else {
+            // If no match, try to get the last segment of the path
+            const pathParts = qrCodeToken.split('/').filter(Boolean);
+            if (pathParts.length > 0) {
+              const lastPart = pathParts[pathParts.length - 1];
+              // Remove query parameters if any
+              qrCodeToken = lastPart.split('?')[0];
+            }
+          }
+        } catch {
+          // If URL parsing fails, use the original text
+        }
+      }
+
       const token = localStorage.getItem("accessToken");
       if (!token) {
         setError(t("qr_scanner.login_required"));

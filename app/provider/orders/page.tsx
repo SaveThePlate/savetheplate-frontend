@@ -158,6 +158,8 @@ const ProviderOrdersContent = () => {
     setShowScanner(false);
     // Refresh orders to get updated data
     fetchOrders();
+    // Ensure we stay on the orders page (redirect if needed)
+    router.push("/provider/orders");
   };
 
   const confirmed = orders.filter((o) => o.status === "confirmed");
