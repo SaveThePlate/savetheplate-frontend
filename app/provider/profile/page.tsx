@@ -506,7 +506,7 @@ const EditProfileDialog: React.FC<{
                       alt="Profile"
                       width={96}
                       height={96}
-                      className="size-24 object-cover rounded-xl"
+                      className="w-full h-full object-cover rounded-xl"
                       unoptimized={true}
                     />
                   </FileUploaderItem>

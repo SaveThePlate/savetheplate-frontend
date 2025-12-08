@@ -604,7 +604,8 @@ const AddOffer: React.FC = () => {
                       alt={file.name}
                       height={96}
                       width={96}
-                      className="size-24 object-cover rounded-xl"
+                      className="w-full h-full object-cover rounded-xl"
+                      unoptimized={true}
                     />
                     <div className="absolute top-1 right-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                       ⏳

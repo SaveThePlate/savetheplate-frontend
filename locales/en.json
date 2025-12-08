@@ -113,7 +113,7 @@
       "no_offers": "You have no published offers yet. Start by creating one!",
       "offer_deleted": "Offer deleted successfully",
       "delete_failed": "Failed to delete offer",
-      "fetch_offers_failed": "Failed to fetch offers. Please try again later."
+      "fetch_offers_failed": "Failed to fetch offers: {error}"
     },
     "orders_title": "Orders for your offers",
     "loading_orders": "Loading orders...",
@@ -137,9 +137,6 @@
       "pending": "Pending",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled"
-    },
-    "home": {
-      "fetch_offers_failed": "Failed to fetch offers: {error}"
     },
     "profile": {
       "your_store": "Your Store",

@@ -247,17 +247,43 @@ const CustomCard: FC<CustomCardProps> = ({
       return;
     }
 
+    // Validate required fields
+    if (!localData.price || !localData.quantity || !localData.expirationDate || !localData.pickupLocation) {
+      toast.error(t("custom_card.fill_all_fields"));
+      return;
+    }
+
     setLoading(true);
     const token = localStorage.getItem("accessToken");
-    if (!token) return router.push("/signIn");
+    if (!token) {
+      setLoading(false);
+      return router.push("/signIn");
+    }
 
     try {
-      // Upload images if new ones were selected
+      // Upload images if new files were selected
       let finalImages = uploadedImages;
-      if (localFiles && localFiles.length > 0 && uploadedImages.length === 0) {
+      if (localFiles && localFiles.length > 0) {
+        // Always upload when localFiles are present (user has selected new files)
         toast.info(t("custom_card.uploading_images"));
         finalImages = await uploadFiles(localFiles);
         setUploadedImages(finalImages);
+      }
+
+      // Parse and validate price
+      const priceValue = parseFloat(String(localData.price).trim());
+      if (isNaN(priceValue) || priceValue <= 0) {
+        toast.error(t("custom_card.invalid_price") || "Invalid price");
+        setLoading(false);
+        return;
+      }
+
+      // Parse and validate quantity
+      const quantityValue = parseInt(String(localData.quantity).trim(), 10);
+      if (isNaN(quantityValue) || quantityValue < 0) {
+        toast.error(t("custom_card.invalid_quantity") || "Invalid quantity");
+        setLoading(false);
+        return;
       }
 
       // Parse originalPrice - include it if it's a valid positive number
@@ -270,26 +296,34 @@ const CustomCard: FC<CustomCardProps> = ({
         }
       }
 
-      // Format images payload for backend (same format as AddOffer)
-      const imagesPayload = finalImages.length > 0 
-        ? finalImages.map((img) => ({
-            filename: img.filename,
-            url: img.url,
-            absoluteUrl: img.absoluteUrl,
-            original: img.url.startsWith("/") && !img.url.startsWith("/storage/") 
-              ? { url: img.url }
-              : undefined,
-          }))
-        : undefined;
+      // Validate expiration date
+      const expirationDateValue = new Date(localData.expirationDate);
+      if (isNaN(expirationDateValue.getTime())) {
+        toast.error(t("custom_card.invalid_date") || "Invalid expiration date");
+        setLoading(false);
+        return;
+      }
+
+      // Prepare images payload if images were uploaded
+      let imagesPayload: any = undefined;
+      if (finalImages && finalImages.length > 0) {
+        imagesPayload = finalImages.map((img) => ({
+          filename: img.filename,
+          url: img.url,
+          absoluteUrl: img.absoluteUrl,
+          original: img.url.startsWith("/") && !img.url.startsWith("/storage/") 
+            ? { url: img.url }
+            : undefined,
+        }));
+      }
 
       const payload: any = {
-        ...localData,
-        title: localData.title,
-        description: localData.description,
-        price: parseFloat(localData.price as any),
-        quantity: parseInt(localData.quantity as any, 10),
+        title: String(localData.title).trim(),
+        description: String(localData.description).trim(),
+        price: priceValue,
+        quantity: quantityValue,
         expirationDate: localData.expirationDate,
-        pickupLocation: localData.pickupLocation,
+        pickupLocation: String(localData.pickupLocation).trim(),
       };
 
       // Only include originalPrice if it has a value (don't send undefined)
@@ -297,26 +331,29 @@ const CustomCard: FC<CustomCardProps> = ({
         payload.originalPrice = originalPriceValue;
       }
 
-      // Include images if they were updated
+      // Include images only if new ones were uploaded (backend will handle the JSON string)
       if (imagesPayload && imagesPayload.length > 0) {
         payload.images = JSON.stringify(imagesPayload);
       }
 
-      await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(t("custom_card.offer_updated"));
       setLocalData({
-        ...payload,
-        originalPrice: payload.originalPrice || "",
+        ...localData,
+        originalPrice: originalPriceValue !== undefined ? String(originalPriceValue) : "",
       });
       // Clear image upload state
       setLocalFiles(null);
       setUploadedImages([]);
       setIsEditing(false);
-      onUpdate?.(offerId, payload);
+      // Pass the response data (updated offer) to onUpdate if available, otherwise use payload
+      onUpdate?.(offerId, response.data || payload);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update offer");
+      console.error("Error updating offer:", err);
+      const errorMessage = err?.response?.data?.message || err?.message || t("custom_card.update_failed") || "Failed to update offer";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -928,7 +965,7 @@ const CustomCard: FC<CustomCardProps> = ({
                                 alt={`Preview ${index + 1}`}
                                 width={96}
                                 height={96}
-                                className="size-24 object-cover rounded-xl"
+                                className="w-full h-full object-cover rounded-xl"
                                 unoptimized={true}
                               />
                             </FileUploaderItem>
@@ -944,14 +981,28 @@ const CustomCard: FC<CustomCardProps> = ({
                   </CredenzaBody>
 
                   <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
-                    <CredenzaClose asChild>
-                      <button 
-                        className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-                        disabled={loading}
-                      >
-                        Cancel
-                      </button>
-                    </CredenzaClose>
+                    <button 
+                      onClick={() => {
+                        setIsEditing(false);
+                        // Reset form data to original values
+                        setLocalData({
+                          title,
+                          description,
+                          price,
+                          originalPrice: originalPrice || "",
+                          quantity,
+                          expirationDate: expirationDate || "",
+                          pickupLocation: pickupLocation || "",
+                        });
+                        setLocalFiles(null);
+                        setUploadedImages([]);
+                        setUploadingImages(false);
+                      }}
+                      className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                      disabled={loading}
+                    >
+                      Cancel
+                    </button>
                     <button
                       onClick={handleEdit}
                       disabled={loading || uploadingImages}
@@ -989,14 +1040,15 @@ const CustomCard: FC<CustomCardProps> = ({
                   </CredenzaBody>
 
                   <CredenzaFooter className="flex justify-end gap-3 mt-4">
-                    <CredenzaClose asChild>
-                      <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl">
-                        Cancel
-                      </button>
-                    </CredenzaClose>
+                    <button 
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
                     <button
                       onClick={handleDelete}
-                      className="px-4 py-2 bg-rose-500 text-white rounded-xl"
+                      className="px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600"
                     >
                       Delete
                     </button>

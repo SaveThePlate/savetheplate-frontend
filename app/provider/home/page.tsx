@@ -388,9 +388,78 @@ const ProviderHome = () => {
         mapsLink={currentMapsLink}
         ownerId={offer.ownerId}
         onDelete={handleDeleteOffer}
-        onUpdate={(id, data) => {
-          // Refresh offers after update
-          setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data } : o));
+        onUpdate={async (id, data) => {
+          console.log("🔄 onUpdate called with id:", id, "data:", data);
+          console.log("🔄 data.images:", data?.images);
+          console.log("🔄 data.images is array?", Array.isArray(data?.images));
+          console.log("🔄 data.images type:", typeof data?.images);
+          
+          // Check if data is already the updated offer object (from PUT response)
+          const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+          
+          // Normalize images array helper
+          const normalizeImages = (images: any) => {
+            if (!Array.isArray(images)) {
+              console.log("⚠️ normalizeImages: not an array, returning empty");
+              return [];
+            }
+            return images.map((img: any) => {
+              if (!img) return img;
+              
+              // Normalize absoluteUrl
+              if (typeof img.absoluteUrl === "string") {
+                if (/^https?:\/\//i.test(img.absoluteUrl)) {
+                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                  if (match && backendOrigin) {
+                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                  }
+                } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                  return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+                }
+              }
+              
+              // Normalize url field
+              if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
+                const match = img.url.match(/\/(storage\/.+)$/);
+                if (match && backendOrigin) {
+                  return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+                }
+              }
+              
+              return img;
+            });
+          };
+          
+          // If data has images array, use it directly (from PUT response)
+          if (data && Array.isArray(data.images)) {
+            console.log("✅ Using images from PUT response directly");
+            const normalizedImages = normalizeImages(data.images);
+            setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data, images: normalizedImages } : o));
+            return;
+          }
+          
+          console.log("⚠️ Images not found in response, refetching...");
+          
+          // Otherwise, refetch the updated offer to get the latest data including images
+          try {
+            const token = localStorage.getItem("accessToken");
+            if (!token) return;
+            
+            const response = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            const updatedOffer = response.data;
+            const normalizedImages = normalizeImages(updatedOffer.images);
+            
+            // Update the offer in state with normalized data
+            setOffers(prev => prev.map(o => o.id === id ? { ...o, ...updatedOffer, images: normalizedImages } : o));
+          } catch (err) {
+            console.error("Failed to refetch updated offer:", err);
+            // Fallback to manual update if refetch fails
+            setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data } : o));
+          }
         }}
         owner={offer.owner ? {
           id: offer.owner.id,
