@@ -10,7 +10,7 @@ import { ProviderOfferCardProps } from "./types";
 import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
-import { formatDateTime, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
+import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { getImageFallbacks } from "@/utils/imageUtils";
 import {
@@ -42,6 +42,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   originalPrice,
   quantity,
   expirationDate,
+  pickupStartTime,
+  pickupEndTime,
   pickupLocation,
   mapsLink,
   owner,
@@ -61,7 +63,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     originalPrice: originalPrice || "",
     quantity,
     expirationDate: expirationDate || "",
+    pickupStartTime: pickupStartTime || "",
+    pickupEndTime: pickupEndTime || "",
     pickupLocation: pickupLocation || "",
+    mapsLink: mapsLink || "",
   });
   
   // Image upload state
@@ -87,9 +92,12 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       originalPrice: originalPrice || "",
       quantity,
       expirationDate: expirationDate || "",
+      pickupStartTime: pickupStartTime || "",
+      pickupEndTime: pickupEndTime || "",
       pickupLocation: pickupLocation || "",
+      mapsLink: mapsLink || "",
     });
-  }, [title, description, price, originalPrice, quantity, expirationDate, pickupLocation, offerId]);
+  }, [title, description, price, originalPrice, quantity, expirationDate, pickupStartTime, pickupEndTime, pickupLocation, mapsLink, offerId]);
 
   // Sync image display
   useEffect(() => {
@@ -208,9 +216,19 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     }
 
     // Validate required fields
-    if (!localData.price || !localData.quantity || !localData.expirationDate || !localData.pickupLocation) {
+    if (!localData.price || !localData.quantity || !localData.expirationDate || !localData.pickupLocation || !localData.pickupStartTime || !localData.pickupEndTime) {
       toast.error(t("offer_card.fill_fields"));
       return;
+    }
+
+    // Validate time range
+    if (localData.pickupStartTime && localData.pickupEndTime) {
+      const startTime = new Date(localData.pickupStartTime);
+      const endTime = new Date(localData.pickupEndTime);
+      if (endTime <= startTime) {
+        toast.error(t("add_offer.error_time_order"));
+        return;
+      }
     }
 
     setLoading(true);
@@ -283,7 +301,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         price: priceValue,
         quantity: quantityValue,
         expirationDate: localData.expirationDate,
+        pickupStartTime: localData.pickupStartTime,
+        pickupEndTime: localData.pickupEndTime,
         pickupLocation: String(localData.pickupLocation).trim(),
+        mapsLink: String(localData.mapsLink).trim(),
       };
 
       // Only include originalPrice if it has a value (don't send undefined)
@@ -308,6 +329,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       setLocalData({
         ...localData,
         originalPrice: originalPriceValue !== undefined ? String(originalPriceValue) : "",
+        mapsLink: String(localData.mapsLink).trim(),
       });
       setLocalFiles(null);
       setUploadedImages([]);
@@ -331,7 +353,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     }, 250);
   };
 
-  const { date: formattedDate, time: formattedTime } = formatDateTime(expirationDate);
+  const { date: formattedDate, time: formattedTime } = formatDateTimeRange(
+    pickupStartTime,
+    pickupEndTime,
+    expirationDate
+  );
   const expired = isOfferExpired(expirationDate);
   const isRescuePack = title.toLowerCase().includes("rescue pack");
 
@@ -393,7 +419,17 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
             ) : (
               <p className="text-gray-600 font-medium w-full">{pickupLocation || "Provider"}</p>
             )}
-            <p className="text-gray-600 text-sm mt-1">🕑 {formattedDate} {formattedTime}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+              <span className="font-medium">🕐</span>
+              <span>
+                {formattedDate === "Today" ? t("common.today") : formattedDate}
+                {formattedTime && (
+                  <span className="font-semibold text-emerald-700 ml-1">
+                    {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+                  </span>
+                )}
+              </span>
+            </div>
           </div>
         </CardHeader>
 
@@ -406,16 +442,19 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
               onOpenChange={(open) => {
                 setIsEditing(open);
                 if (!open) {
-                  // Reset all form data to original values
-                  setLocalData({
-                    title,
-                    description,
-                    price,
-                    originalPrice: originalPrice || "",
-                    quantity,
-                    expirationDate: expirationDate || "",
-                    pickupLocation: pickupLocation || "",
-                  });
+                      // Reset all form data to original values
+                      setLocalData({
+                        title,
+                        description,
+                        price,
+                        originalPrice: originalPrice || "",
+                        quantity,
+                        expirationDate: expirationDate || "",
+                        pickupStartTime: pickupStartTime || "",
+                        pickupEndTime: pickupEndTime || "",
+                        pickupLocation: pickupLocation || "",
+                        mapsLink: mapsLink || "",
+                      });
                   setLocalFiles(null);
                   setUploadedImages([]);
                   setUploadingImages(false);
@@ -545,6 +584,131 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                     />
                   </div>
 
+                  {/* Pickup Date */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit-expirationDate" className="text-sm font-semibold text-gray-700">
+                      {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="edit-expirationDate"
+                      type="date"
+                      name="expirationDate"
+                      value={localData.expirationDate ? new Date(localData.expirationDate).toISOString().split('T')[0] : ""}
+                      onChange={(e) => {
+                        const dateValue = e.target.value;
+                        if (dateValue) {
+                          // Set time to end of day for expiration date
+                          const date = new Date(dateValue);
+                          date.setHours(23, 59, 59, 999);
+                          setLocalData(prev => ({ ...prev, expirationDate: date.toISOString() }));
+                        } else {
+                          setLocalData(prev => ({ ...prev, expirationDate: "" }));
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      disabled={loading}
+                      required
+                    />
+                  </div>
+
+                  {/* Pickup Start Time */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit-pickupStartTime" className="text-sm font-semibold text-gray-700">
+                      {t("add_offer.start_time")} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="edit-pickupStartTime"
+                      type="time"
+                      name="pickupStartTime"
+                      value={localData.pickupStartTime ? new Date(localData.pickupStartTime).toISOString().slice(0, 16).split('T')[1] : ""}
+                      onChange={(e) => {
+                        const timeValue = e.target.value;
+                        if (timeValue && localData.expirationDate) {
+                          const [hours, minutes] = timeValue.split(':');
+                          const date = new Date(localData.expirationDate);
+                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                          setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
+                        } else if (timeValue) {
+                          const [hours, minutes] = timeValue.split(':');
+                          const date = new Date();
+                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                          setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
+                        } else {
+                          setLocalData(prev => ({ ...prev, pickupStartTime: "" }));
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      disabled={loading}
+                      required
+                    />
+                  </div>
+
+                  {/* Pickup End Time */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit-pickupEndTime" className="text-sm font-semibold text-gray-700">
+                      {t("add_offer.end_time")} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="edit-pickupEndTime"
+                      type="time"
+                      name="pickupEndTime"
+                      value={localData.pickupEndTime ? new Date(localData.pickupEndTime).toISOString().slice(0, 16).split('T')[1] : ""}
+                      onChange={(e) => {
+                        const timeValue = e.target.value;
+                        if (timeValue && localData.expirationDate) {
+                          const [hours, minutes] = timeValue.split(':');
+                          const date = new Date(localData.expirationDate);
+                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                          setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
+                        } else if (timeValue) {
+                          const [hours, minutes] = timeValue.split(':');
+                          const date = new Date();
+                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                          setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
+                        } else {
+                          setLocalData(prev => ({ ...prev, pickupEndTime: "" }));
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      disabled={loading}
+                      required
+                    />
+                  </div>
+
+                  {/* Pickup Location */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit-pickupLocation" className="text-sm font-semibold text-gray-700">
+                      {t("add_offer.pickup_location")} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="edit-pickupLocation"
+                      name="pickupLocation"
+                      value={localData.pickupLocation}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      disabled={loading}
+                      placeholder={t("add_offer.pickup_location_placeholder")}
+                      required
+                    />
+                  </div>
+
+                  {/* Maps Link */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit-mapsLink" className="text-sm font-semibold text-gray-700">
+                      {t("onboarding.google_maps_link")}
+                    </label>
+                    <input
+                      id="edit-mapsLink"
+                      name="mapsLink"
+                      value={localData.mapsLink}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                      disabled={loading}
+                      placeholder={t("onboarding.maps_placeholder")}
+                    />
+                    <p className="text-xs text-gray-500">{t("onboarding.maps_hint")}</p>
+                  </div>
+
                   {/* Images Upload */}
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-gray-700">
@@ -618,7 +782,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         originalPrice: originalPrice || "",
                         quantity,
                         expirationDate: expirationDate || "",
+                        pickupStartTime: pickupStartTime || "",
+                        pickupEndTime: pickupEndTime || "",
                         pickupLocation: pickupLocation || "",
+                        mapsLink: mapsLink || "",
                       });
                       setLocalFiles(null);
                       setUploadedImages([]);

@@ -119,12 +119,17 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         <p className="text-sm font-medium text-gray-700 mb-1">
           {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
         </p>
-        <p className="text-xs text-gray-600 mb-3">
-          {t("offers.pick_up", { 
-            date: formattedDate === "Today" ? t("common.today") : formattedDate,
-            time: formattedTime ? (formattedTime.includes(" - ") ? ` ${t("common.between")} ${formattedTime}` : ` ${t("common.at")} ${formattedTime}`) : ""
-          })}
-        </p>
+        <div className="flex items-center gap-2 text-xs text-gray-600 mb-3">
+          <span className="font-medium">🕐</span>
+          <span>
+            {formattedDate === "Today" ? t("common.today") : formattedDate}
+            {formattedTime && (
+              <span className="font-semibold text-emerald-700 ml-1">
+                {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+              </span>
+            )}
+          </span>
+        </div>
       </div>
 
       {/* Footer */}
@@ -218,10 +223,18 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
           {/* Pickup Information */}
           <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-            <p className="text-sm font-medium text-gray-900 mb-1">{t("offers.pickup_details")}</p>
-            <p className="text-sm text-gray-600">
-              {formattedDate}{formattedTime && (formattedTime.includes(" - ") ? ` ${t("common.between")} ${formattedTime}` : ` ${t("common.at")} ${formattedTime}`)}
-            </p>
+            <p className="text-sm font-medium text-gray-900 mb-2">{t("offers.pickup_details")}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <span className="font-semibold">🕐</span>
+              <span>
+                <span className="font-medium">{formattedDate === "Today" ? t("common.today") : formattedDate}</span>
+                {formattedTime && (
+                  <span className="font-semibold text-emerald-700 ml-2">
+                    {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+                  </span>
+                )}
+              </span>
+            </div>
             {(owner?.mapsLink || mapsLink) && (
               <a
                 href={owner?.mapsLink || mapsLink}

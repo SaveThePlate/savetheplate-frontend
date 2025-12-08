@@ -387,6 +387,8 @@ const ProviderHome = () => {
         quantity={offer.quantity}
         description={offer.description}
         expirationDate={offer.expirationDate}
+        pickupStartTime={offer.pickupStartTime}
+        pickupEndTime={offer.pickupEndTime}
         pickupLocation={currentLocation}
         mapsLink={currentMapsLink}
         ownerId={offer.ownerId}
