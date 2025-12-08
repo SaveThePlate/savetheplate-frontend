@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OrderQRCode from "./OrderQRCode";
-import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage } from "@/utils/imageUtils";
+import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import { 
@@ -83,16 +83,43 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         
-        // Normalize image URLs to use current backend URL
+        // Normalize image URLs - preserve URLs from different backends
         const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
         if (res.data.images && Array.isArray(res.data.images)) {
           res.data.images = res.data.images.map((img: any) => {
             if (!img) return img;
             if (typeof img.absoluteUrl === "string") {
               if (/^https?:\/\//i.test(img.absoluteUrl)) {
-                const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
-                if (match && backendOrigin) {
-                  return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                try {
+                  const urlObj = new URL(img.absoluteUrl);
+                  const urlHost = urlObj.hostname;
+                  
+                  let currentBackendHost = "";
+                  if (backendOrigin) {
+                    try {
+                      const backendUrlObj = new URL(backendOrigin);
+                      currentBackendHost = backendUrlObj.hostname;
+                    } catch {
+                      const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                      if (match) currentBackendHost = match[1];
+                    }
+                  }
+                  
+                  // If from different backend, keep original URL
+                  if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+                    return img;
+                  }
+                  
+                  // Same backend - normalize
+                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                  if (match && backendOrigin) {
+                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                  }
+                } catch {
+                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                  if (match && backendOrigin) {
+                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                  }
                 }
               } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
                 return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
@@ -247,13 +274,13 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           {/* Image */}
           <div className="flex-shrink-0 w-28 h-28 sm:w-32 sm:h-32 relative rounded-xl overflow-hidden shadow-md border-2 border-gray-100">
             <Image
-              src={imageSrc}
+              src={sanitizeImageUrl(imageSrc)}
               alt={offer.title}
               fill
               sizes="(max-width: 640px) 112px, 128px"
               className="object-cover"
               priority
-              unoptimized={shouldUnoptimizeImage(imageSrc)}
+              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(imageSrc))}
               onError={() => {
                 const nextIndex = fallbackIndex + 1;
                 if (nextIndex < fallbacks.length) {

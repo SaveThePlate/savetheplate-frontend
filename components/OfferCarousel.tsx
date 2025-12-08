@@ -7,15 +7,19 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { shouldUnoptimizeImage } from "@/utils/imageUtils";
+import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 
 
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
-const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + "/storage/";
 
 const getImage = (filename: string | null): string => {
-  return filename ? `${BASE_IMAGE_URL}${filename}` : DEFAULT_BAG_IMAGE;
+  if (!filename) return DEFAULT_BAG_IMAGE;
+  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+  if (backendUrl) {
+    return `${backendUrl}/storage/${filename}`;
+  }
+  return DEFAULT_BAG_IMAGE;
 };
 
 interface Offer {
@@ -138,10 +142,10 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
                 <Image
                 width={80} 
                 height={80} 
-                src={offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE}
+                src={sanitizeImageUrl(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE)}
                 alt={offer.title}
                 className="h-16 rounded-md"
-                unoptimized={shouldUnoptimizeImage(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE)}
+                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE))}
                 />
             </div>
 

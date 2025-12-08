@@ -9,7 +9,7 @@ import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
-import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
+import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import {
   Credenza,
   CredenzaTrigger,
@@ -83,7 +83,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
       <div className="relative w-full h-48 sm:h-52">
         {currentImage ? (
           <Image
-            src={currentImage || DEFAULT_LOGO}
+            src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -92,7 +92,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -159,12 +159,12 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
         <div className="relative w-full h-64">
           {currentImage ? (
             <Image
-              src={currentImage || DEFAULT_LOGO}
+              src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
               alt={title}
               fill
               sizes="100vw"
               className="object-cover"
-              unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
               onError={handleImageError}
             />
           ) : (
@@ -181,12 +181,12 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
               {owner && (
                 <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden bg-white flex-shrink-0">
                   <Image
-                    src={owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"}
+                    src={sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
                     alt={owner.location || pickupLocation}
                     width={48}
                     height={48}
                     className="object-cover w-full h-full"
-                    unoptimized={shouldUnoptimizeImage(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
+                    unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = "/logo.png";

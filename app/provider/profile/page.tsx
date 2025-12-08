@@ -21,7 +21,7 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import { useRouter } from "next/navigation";
-import { resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
+import { resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ProfileData {
@@ -709,12 +709,12 @@ export default function ProviderProfile() {
             <div className="relative flex-shrink-0">
               <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-lg ring-4 ring-emerald-100">
                 <Image
-                  src={profileImageSrc}
+                  src={sanitizeImageUrl(profileImageSrc)}
                   alt="Store Logo"
                   width={112}
                   height={112}
                   className="object-cover w-full h-full"
-                  unoptimized={shouldUnoptimizeImage(profileImageSrc)}
+                  unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(profileImageSrc))}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = DEFAULT_PROFILE_IMAGE;

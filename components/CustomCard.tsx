@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
+import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "./offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -364,7 +364,7 @@ const CustomCard: FC<CustomCardProps> = ({
         <div className="relative w-full h-48 sm:h-52">
           {currentImage ? (
             <Image
-              src={currentImage || DEFAULT_LOGO}
+              src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
               alt={localData.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -373,6 +373,7 @@ const CustomCard: FC<CustomCardProps> = ({
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
               className="object-cover"
+              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
             />
           ) : (
             <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -409,11 +410,12 @@ const CustomCard: FC<CustomCardProps> = ({
             <div className="absolute bottom-2 left-2 flex items-center gap-2 z-10 bg-white/90 backdrop-blur-sm px-2 py-1.5 rounded-full shadow-lg border border-white/50">
               <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0">
                 <Image
-                  src={owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"}
+                  src={sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
                   alt={owner.username}
                   width={32}
                   height={32}
                   className="object-cover w-full h-full"
+                  unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "/logo.png";
@@ -455,14 +457,15 @@ const CustomCard: FC<CustomCardProps> = ({
             {/* Large Image at Top */}
             <div className="relative w-full h-64">
               {currentImage ? (
-                <Image
-                  src={currentImage || DEFAULT_LOGO}
-                  alt={localData.title}
-                  fill
-                  sizes="100vw"
-                  className="object-cover"
-                  onError={handleImageError}
-                />
+            <Image
+              src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
+              alt={localData.title}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+              onError={handleImageError}
+            />
               ) : (
                 <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                   <span className="text-gray-400">No image</span>
@@ -561,7 +564,7 @@ const CustomCard: FC<CustomCardProps> = ({
       <div className="relative w-full h-40 sm:h-44">
         {currentImage ? (
           <Image
-            src={currentImage || DEFAULT_LOGO}
+            src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
             alt={localData.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -570,7 +573,7 @@ const CustomCard: FC<CustomCardProps> = ({
             placeholder="blur"
             blurDataURL={getBlurDataURL()}
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -912,11 +915,12 @@ const CustomCard: FC<CustomCardProps> = ({
                               className="size-24 p-0 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
                             >
                               <Image
-                                src={URL.createObjectURL(file)}
+                                src={sanitizeImageUrl(URL.createObjectURL(file))}
                                 alt={`Preview ${index + 1}`}
                                 width={96}
                                 height={96}
                                 className="size-24 object-cover rounded-xl"
+                                unoptimized={true}
                               />
                             </FileUploaderItem>
                           ))}

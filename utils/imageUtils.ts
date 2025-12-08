@@ -6,11 +6,56 @@
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
 /**
+ * Validates and sanitizes an image URL to ensure it's safe for Next.js Image component
+ */
+export const sanitizeImageUrl = (url: string | null | undefined): string => {
+  if (!url || typeof url !== 'string') {
+    return DEFAULT_BAG_IMAGE;
+  }
+  
+  // Blob URLs and data URLs are valid
+  if (url.startsWith('blob:') || url.startsWith('data:')) {
+    return url;
+  }
+  
+  // Relative paths starting with / are valid
+  if (url.startsWith('/')) {
+    return url;
+  }
+  
+  // Full URLs need to be validated
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      new URL(url);
+      return url;
+    } catch {
+      return DEFAULT_BAG_IMAGE;
+    }
+  }
+  
+  // If it's not a valid format, return default
+  return DEFAULT_BAG_IMAGE;
+};
+
+/**
  * Checks if an image URL should use unoptimized prop
  * Returns true for localhost, external backend URLs, or any non-public asset
  */
-export const shouldUnoptimizeImage = (url: string): boolean => {
-  if (!url) return false;
+export const shouldUnoptimizeImage = (url: string | null | undefined): boolean => {
+  // Handle invalid/empty URLs
+  if (!url || typeof url !== 'string') {
+    return false; // Default to optimized for invalid URLs (will use fallback)
+  }
+  
+  // Blob URLs (from URL.createObjectURL) should always be unoptimized
+  if (url.startsWith('blob:')) {
+    return true;
+  }
+  
+  // Data URLs should be unoptimized
+  if (url.startsWith('data:')) {
+    return true;
+  }
   
   // Public assets (starting with / and not /storage/) can be optimized
   if (url.startsWith('/') && !url.startsWith('/storage/')) {
@@ -97,17 +142,45 @@ export const getImage = (filename?: string | null): string => {
 
   const currentBackendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
 
-  // Full URL from API - normalize to current environment
+  // Full URL from API - check if it's from a different backend
   if (/^https?:\/\//i.test(filename)) {
-    // Extract storage path from URL (e.g., /storage/filename.jpg from https://domain.com/storage/filename.jpg)
-    // Handle both single and nested paths: /storage/file.jpg or /storage/subfolder/file.jpg
-    const urlMatch = filename.match(/\/(storage\/.+)$/);
-    if (urlMatch && currentBackendUrl) {
-      // Reconstruct using current backend URL to handle cross-environment scenarios
-      // This ensures images uploaded on production work on localhost and vice versa
-      return `${currentBackendUrl}${urlMatch[1]}`;
+    try {
+      const urlObj = new URL(filename);
+      const urlHost = urlObj.hostname;
+      
+      // Extract the current backend hostname
+      let currentBackendHost = "";
+      if (currentBackendUrl) {
+        try {
+          const currentBackendUrlObj = new URL(currentBackendUrl);
+          currentBackendHost = currentBackendUrlObj.hostname;
+        } catch {
+          // If current backend URL is invalid, extract hostname manually
+          const match = currentBackendUrl.match(/https?:\/\/([^\/]+)/);
+          if (match) currentBackendHost = match[1];
+        }
+      }
+      
+      // If the URL is from a different backend (production vs localhost), keep it as-is
+      // This allows production images to load on localhost and vice versa
+      if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+        // Different backend - keep original URL to access images from that backend
+        return filename;
+      }
+      
+      // Same backend or localhost - normalize to current backend URL
+      const urlMatch = filename.match(/\/(storage\/.+)$/);
+      if (urlMatch && currentBackendUrl) {
+        return `${currentBackendUrl}${urlMatch[1]}`;
+      }
+    } catch {
+      // If URL parsing fails, try to extract storage path anyway
+      const urlMatch = filename.match(/\/(storage\/.+)$/);
+      if (urlMatch && currentBackendUrl) {
+        return `${currentBackendUrl}${urlMatch[1]}`;
+      }
     }
-    // If we can't extract storage path, return as-is (might be external image or different format)
+    // If we can't extract storage path, return as-is
     return filename;
   }
 

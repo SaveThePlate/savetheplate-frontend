@@ -11,7 +11,7 @@ import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
-import { shouldUnoptimizeImage } from "@/utils/imageUtils";
+import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { getImageFallbacks } from "@/utils/imageUtils";
 import {
   FileInput,
@@ -296,7 +296,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       <div className="relative w-full h-40 sm:h-44">
         {currentImage ? (
           <Image
-            src={currentImage || DEFAULT_LOGO}
+            src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -305,7 +305,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
