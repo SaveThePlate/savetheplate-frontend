@@ -1,6 +1,6 @@
 import { FC } from "react";
 import Image from "next/image";
-import { resolveImageSource } from "@/utils/imageUtils";
+import { resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { OfferOwner } from "../types";
 
 interface ProviderOverlayProps {
@@ -25,6 +25,7 @@ export const ProviderOverlay: FC<ProviderOverlayProps> = ({
           width={32}
           height={32}
           className="object-cover w-full h-full"
+          unoptimized={shouldUnoptimizeImage(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = "/logo.png";

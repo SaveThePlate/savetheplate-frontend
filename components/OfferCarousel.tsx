@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { shouldUnoptimizeImage } from "@/utils/imageUtils";
 
 
 
@@ -140,6 +141,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
                 src={offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE}
                 alt={offer.title}
                 className="h-16 rounded-md"
+                unoptimized={shouldUnoptimizeImage(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE)}
                 />
             </div>
 

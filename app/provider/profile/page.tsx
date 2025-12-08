@@ -21,7 +21,7 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import { useRouter } from "next/navigation";
-import { resolveImageSource } from "@/utils/imageUtils";
+import { resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ProfileData {
@@ -507,6 +507,7 @@ const EditProfileDialog: React.FC<{
                       width={96}
                       height={96}
                       className="size-24 object-cover rounded-xl"
+                      unoptimized={true}
                     />
                   </FileUploaderItem>
                 )}
@@ -713,6 +714,7 @@ export default function ProviderProfile() {
                   width={112}
                   height={112}
                   className="object-cover w-full h-full"
+                  unoptimized={shouldUnoptimizeImage(profileImageSrc)}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = DEFAULT_PROFILE_IMAGE;
