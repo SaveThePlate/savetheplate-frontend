@@ -22,6 +22,12 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
   const { t } = useLanguage();
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted to true after component mounts (client-side only)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Check if tour should run externally
   useEffect(() => {
@@ -30,12 +36,33 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
     }
   }, [externalRun]);
 
+  const removeTourFromPage = () => {
+    // Force remove any remaining overlay/tooltip elements from DOM
+    setTimeout(() => {
+      // Remove joyride overlay and tooltip elements
+      const joyrideElements = document.querySelectorAll('[class*="__floater"], [class*="__overlay"], [class*="__tooltip"]');
+      joyrideElements.forEach(el => {
+        if (el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      });
+      // Also remove by data attributes if they exist
+      const overlays = document.querySelectorAll('[data-joyride-overlay], [data-testid="joyride-overlay"]');
+      overlays.forEach(el => el.remove());
+      const tooltips = document.querySelectorAll('[data-joyride-tooltip], [data-testid="joyride-tooltip"]');
+      tooltips.forEach(el => el.remove());
+    }, 100);
+  };
+
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index } = data;
 
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRun(false);
+      setStepIndex(0); // Reset to beginning
       localStorage.setItem(`tour-${tourKey}-completed`, "true");
+      // Remove tour elements from page
+      removeTourFromPage();
       if (onTourComplete) {
         onTourComplete();
       }
@@ -45,6 +72,18 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
     } else if (type === EVENTS.TARGET_NOT_FOUND) {
       // Skip step if target not found (e.g., pending orders banner not visible)
       setStepIndex(index + 1);
+    }
+  };
+
+  const closeTour = () => {
+    // Immediately stop the tour, reset step, and remove from page
+    setRun(false);
+    setStepIndex(0);
+    localStorage.setItem(`tour-${tourKey}-completed`, "true");
+    // Remove tour elements from page
+    removeTourFromPage();
+    if (onTourComplete) {
+      onTourComplete();
     }
   };
 
@@ -64,6 +103,9 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
         continuous={true}
         showProgress={true}
         showSkipButton={true}
+        hideCloseButton={true}
+        disableOverlayClose={true}
+        disableScrolling={false}
         styles={{
           options: {
             primaryColor: "#A8DADC",
@@ -77,6 +119,7 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
           tooltip: {
             borderRadius: 12,
             padding: 20,
+            position: "relative",
           },
           tooltipContainer: {
             textAlign: "left",
@@ -99,6 +142,25 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
             color: "#6B7280",
             fontSize: 14,
           },
+          buttonClose: {
+            color: "#6B7280",
+            fontSize: 18,
+            fontWeight: "bold",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            width: "28px",
+            height: "28px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: "1",
+          },
         }}
         locale={{
           back: t("tour.back") || "Back",
@@ -109,15 +171,15 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
           skip: t("tour.skip") || "Skip",
         }}
       />
-      <Button
-        onClick={startTour}
-        variant="outline"
-        size="icon"
-        className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg bg-white hover:bg-gray-50 border-2 border-[#A8DADC]"
-        title={t("tour.start_guide") || "Start guided tour"}
-      >
-        <HelpCircle className="h-5 w-5 text-[#344E41]" />
-      </Button>
+      {mounted && (
+        <button
+          onClick={startTour}
+          className="flex items-center hover:text-green-600 transition-colors text-gray-700"
+          title={t("tour.start_guide") || "Start guided tour"}
+        >
+          <HelpCircle size={18} />
+        </button>
+      )}
     </>
   );
 };

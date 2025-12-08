@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import GuidedTour from "@/components/GuidedTour";
-import { getClientHomeTourSteps } from "@/components/tourSteps";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -186,10 +184,6 @@ const Home = () => {
           animation: fadeIn 0.5s ease-in-out;
         }
       `}</style>
-      <GuidedTour
-        steps={getClientHomeTourSteps(t)}
-        tourKey="client-home"
-      />
     </main>
   );
 };

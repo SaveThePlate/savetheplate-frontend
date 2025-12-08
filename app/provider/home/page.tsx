@@ -10,8 +10,6 @@ import { PlusCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import GuidedTour from "@/components/GuidedTour";
-import { getProviderHomeTourSteps } from "@/components/tourSteps";
 
 interface Offer {
   price: number;
@@ -527,10 +525,6 @@ const ProviderHome = () => {
           </div>
         )}
       </div>
-      <GuidedTour
-        steps={getProviderHomeTourSteps(t)}
-        tourKey="provider-home"
-      />
     </main>
   );
 };
