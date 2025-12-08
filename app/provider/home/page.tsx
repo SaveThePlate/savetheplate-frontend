@@ -10,6 +10,8 @@ import { PlusCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import GuidedTour from "@/components/GuidedTour";
+import { getProviderHomeTourSteps } from "@/components/tourSteps";
 
 interface Offer {
   price: number;
@@ -344,6 +346,7 @@ const ProviderHome = () => {
             </p>
           </div>
           <button
+            data-tour="publish-button"
             onClick={() => router.push("./publish")}
             className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-800 font-semibold rounded-xl shadow-md hover:bg-green-600 hover:text-white transition duration-300 transform hover:scale-[1.02]"
           >
@@ -362,7 +365,7 @@ const ProviderHome = () => {
             {t("provider.home.no_offers")}
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {offers.map((offer) => {
   const firstImage = offer.images?.[0] || (offer.imageFileName ? { filename: offer.imageFileName } : null);
   // Use unified image resolution
@@ -474,6 +477,10 @@ const ProviderHome = () => {
           </div>
         )}
       </div>
+      <GuidedTour
+        steps={getProviderHomeTourSteps(t)}
+        tourKey="provider-home"
+      />
     </main>
   );
 };

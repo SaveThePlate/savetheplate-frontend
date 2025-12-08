@@ -585,5 +585,44 @@
   "offer_carousel": {
     "load_failed": "Failed to load offers.",
     "fetch_user_failed": "Failed to fetch user details"
+  },
+  "tour": {
+    "back": "Back",
+    "close": "Close",
+    "last": "Last",
+    "next": "Next",
+    "open": "Open",
+    "skip": "Skip",
+    "start_guide": "Start guided tour",
+    "client": {
+      "home": {
+        "step1_title": "Welcome to Save The Plate!",
+        "step1_content": "This is your home page where you can discover available food offers from local businesses.",
+        "step2_title": "Pending Orders",
+        "step2_content": "If you have pending orders, you'll see a banner here. Click 'View Orders' to manage them.",
+        "step3_title": "Available Offers",
+        "step3_content": "Browse through all available offers here. Click on any offer to see details and place an order.",
+        "step4_title": "Refresh Offers",
+        "step4_content": "Use this button to refresh and see the latest available offers.",
+        "step5_title": "Navigation Menu",
+        "step5_content": "Use the top navigation menu to access Home, Orders, Profile, Impact, and Contact pages. On desktop, all options are visible here.",
+        "step6_title": "Mobile Navigation",
+        "step6_content": "On mobile devices, use the bottom navigation bar for quick access to Home, Orders, and Profile."
+      }
+    },
+    "provider": {
+      "home": {
+        "step1_title": "Welcome to Your Provider Dashboard!",
+        "step1_content": "This is where you manage all your published offers. You can view, edit, or delete them here.",
+        "step2_title": "Publish New Offer",
+        "step2_content": "Click this button to create a new offer. You can create custom offers or quick rescue packs.",
+        "step3_title": "Your Offers",
+        "step3_content": "All your published offers appear here. Click on any offer card to edit or delete it.",
+        "step4_title": "Navigation Menu",
+        "step4_content": "Use the top navigation menu to access Home, Profile, Publish, Orders, Impact, and Contact pages. On desktop, all options are visible here.",
+        "step5_title": "Mobile Navigation",
+        "step5_content": "On mobile devices, use the bottom navigation bar for quick access to Home, Publish, Orders, and Profile."
+      }
+    }
   }
 }

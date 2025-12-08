@@ -40,7 +40,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
+          <div data-tour="navigation-menu" className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
             <LanguageSwitcher variant="button" />
             <Link href="/provider/home" className="hover:text-green-600 transition-colors">
               {t("nav.home")}
@@ -166,7 +166,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
       </main>
 
       {/* 📱 Bottom Navigation (mobile) */}
-      <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 z-40 lg:hidden">
+      <nav data-tour="bottom-nav" className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 z-40 lg:hidden">
         <Link
           href="/provider/home"
           className="flex flex-col items-center text-gray-700 hover:text-green-600"

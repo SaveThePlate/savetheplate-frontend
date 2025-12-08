@@ -539,5 +539,44 @@
     "verifying": "Vérification de votre lien magique...",
     "verify_failed": "Échec de la vérification du lien magique. Veuillez réessayer de vous connecter.",
     "redirecting": "Redirection vers la connexion..."
+  },
+  "tour": {
+    "back": "Retour",
+    "close": "Fermer",
+    "last": "Dernier",
+    "next": "Suivant",
+    "open": "Ouvrir",
+    "skip": "Passer",
+    "start_guide": "Démarrer le guide",
+    "client": {
+      "home": {
+        "step1_title": "Bienvenue sur Save The Plate !",
+        "step1_content": "Ceci est votre page d'accueil où vous pouvez découvrir les offres alimentaires disponibles des entreprises locales.",
+        "step2_title": "Commandes en attente",
+        "step2_content": "Si vous avez des commandes en attente, vous verrez une bannière ici. Cliquez sur 'Voir les commandes' pour les gérer.",
+        "step3_title": "Offres disponibles",
+        "step3_content": "Parcourez toutes les offres disponibles ici. Cliquez sur n'importe quelle offre pour voir les détails et passer une commande.",
+        "step4_title": "Actualiser les offres",
+        "step4_content": "Utilisez ce bouton pour actualiser et voir les dernières offres disponibles.",
+        "step5_title": "Menu de navigation",
+        "step5_content": "Utilisez le menu de navigation en haut pour accéder aux pages Accueil, Commandes, Profil, Impact et Contact. Sur ordinateur, toutes les options sont visibles ici.",
+        "step6_title": "Navigation mobile",
+        "step6_content": "Sur les appareils mobiles, utilisez la barre de navigation en bas pour un accès rapide à Accueil, Commandes et Profil."
+      }
+    },
+    "provider": {
+      "home": {
+        "step1_title": "Bienvenue sur votre tableau de bord fournisseur !",
+        "step1_content": "C'est ici que vous gérez toutes vos offres publiées. Vous pouvez les visualiser, les modifier ou les supprimer ici.",
+        "step2_title": "Publier une nouvelle offre",
+        "step2_content": "Cliquez sur ce bouton pour créer une nouvelle offre. Vous pouvez créer des offres personnalisées ou des packs de sauvetage rapides.",
+        "step3_title": "Vos offres",
+        "step3_content": "Toutes vos offres publiées apparaissent ici. Cliquez sur n'importe quelle carte d'offre pour la modifier ou la supprimer.",
+        "step4_title": "Menu de navigation",
+        "step4_content": "Utilisez le menu de navigation en haut pour accéder aux pages Accueil, Profil, Publier, Commandes, Impact et Contact. Sur ordinateur, toutes les options sont visibles ici.",
+        "step5_title": "Navigation mobile",
+        "step5_content": "Sur les appareils mobiles, utilisez la barre de navigation en bas pour un accès rapide à Accueil, Publier, Commandes et Profil."
+      }
+    }
   }
 }

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import GuidedTour from "@/components/GuidedTour";
+import { getClientHomeTourSteps } from "@/components/tourSteps";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ const Home = () => {
 
         {/* Pending Orders Banner */}
         {pendingCount > 0 && (
-          <div className="bg-[#FFF5DA] border border-[#FFE7A0] text-[#7C5A00] rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
+          <div data-tour="pending-orders" className="bg-[#FFF5DA] border border-[#FFE7A0] text-[#7C5A00] rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
             <div>
               <p className="font-semibold text-base sm:text-lg">
                 🍱 {pendingCount === 1 
@@ -143,6 +145,7 @@ const Home = () => {
             </p>
           </div>
           <button
+            data-tour="refresh-button"
             onClick={() => fetchOffers(true)}
             disabled={refreshing || loading}
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -154,7 +157,7 @@ const Home = () => {
         </div>
 
         {/* Offers List */}
-        <section className="relative min-h-[50vh] bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-3xl shadow-sm p-5 sm:p-8 transition-all duration-300 hover:shadow-md">
+        <section data-tour="offers-section" className="relative min-h-[50vh] bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-3xl shadow-sm p-5 sm:p-8 transition-all duration-300 hover:shadow-md">
           {loading ? (
             <div className="flex justify-center items-center h-64 text-gray-500">
               <Loader2 className="animate-spin w-6 h-6 mr-2" />
@@ -183,6 +186,10 @@ const Home = () => {
           animation: fadeIn 0.5s ease-in-out;
         }
       `}</style>
+      <GuidedTour
+        steps={getClientHomeTourSteps(t)}
+        tourKey="client-home"
+      />
     </main>
   );
 };
