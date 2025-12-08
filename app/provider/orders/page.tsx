@@ -1,15 +1,27 @@
 "use client";
 import React, { useEffect, useState, useCallback, Suspense } from "react";
+import dynamic from "next/dynamic";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import QRScanner from "@/components/QRScanner";
 import { QrCode, RefreshCw, CheckCircle } from "lucide-react";
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
+
+// Lazy load QRScanner to reduce initial bundle size (includes html5-qrcode library)
+const QRScanner = dynamic(() => import("@/components/QRScanner"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading scanner...</p>
+      </div>
+    </div>
+  ),
+});
 
 interface User {
   id: number;
@@ -252,13 +264,22 @@ const ProviderOrdersContent = () => {
         )}
       </div>
 
-      {/* QR Scanner Modal */}
+      {/* QR Scanner Modal - Only render when needed */}
       {showScanner && providerId && (
-        <QRScanner
-          onScanSuccess={handleScanSuccess}
-          onClose={() => setShowScanner(false)}
-          providerId={providerId}
-        />
+        <Suspense fallback={
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+            <div className="bg-white rounded-lg p-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading scanner...</p>
+            </div>
+          </div>
+        }>
+          <QRScanner
+            onScanSuccess={handleScanSuccess}
+            onClose={() => setShowScanner(false)}
+            providerId={providerId}
+          />
+        </Suspense>
       )}
 
       {/* Success Modal */}

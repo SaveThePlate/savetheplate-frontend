@@ -1,3 +1,4 @@
+/* Optimize font loading with font-display swap */
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400&display=swap');
 
 @tailwind base;
@@ -61,7 +62,7 @@
     }
   }
 
-  @layer base {
+   @layer base {
     * {
       @apply border-border;
     }
@@ -70,4 +71,8 @@
     }
   }
 
+  /* Import third-party CSS globally to avoid duplication */
+  @import 'react-toastify/dist/ReactToastify.css';
+  @import 'slick-carousel/slick/slick.css';
+  @import 'slick-carousel/slick/slick-theme.css';
   

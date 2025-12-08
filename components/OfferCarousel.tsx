@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useMemo, useCallback } from "react";
 import axios from "axios";
-import Slider from "react-slick"; 
+import dynamic from "next/dynamic";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
+
+// Lazy load react-slick to reduce initial bundle size
+const Slider = dynamic(() => import("react-slick"), { 
+  ssr: false,
+  loading: () => <div className="animate-pulse bg-gray-200 h-32 rounded" />
+});
 
 
 
@@ -48,15 +52,15 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
 
-  // Carousel settings
-  const carouselSettings = {
+  // Memoize carousel settings to prevent re-creation
+  const carouselSettings = useMemo(() => ({
     dots: true,
     infinite: false,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: true,
-  };
+  }), []);
 
   // Fetch offers from the backend
   useEffect(() => {
@@ -81,7 +85,9 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
     };
 
     fetchOffers();
-  }, [ownerId, offers, router, t]);
+    // Removed 'offers' from dependencies to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ownerId, router, t]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -110,26 +116,28 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
   
 
 
-  // Group offers by owner
-  const offersByOwner: Record<string, Offer[]> = offers.reduce(
-    (groups, offer) => {
-      // Check if the offer has a valid owner
-      if (offer && offer.ownerId) {
-        groups[offer.ownerId] = groups[offer.ownerId] || [];
-        groups[offer.ownerId].push(offer);
-      } else {
-        console.warn('Offer is missing owner:', offer); // Warn about malformed data
-      }
-      return groups;
-    },
-    {} as Record<string, Offer[]>
+  // Memoize grouped offers to prevent unnecessary recalculations
+  const offersByOwner: Record<string, Offer[]> = useMemo(() => 
+    offers.reduce(
+      (groups, offer) => {
+        // Check if the offer has a valid owner
+        if (offer && offer.ownerId) {
+          groups[offer.ownerId] = groups[offer.ownerId] || [];
+          groups[offer.ownerId].push(offer);
+        } else {
+          console.warn('Offer is missing owner:', offer); // Warn about malformed data
+        }
+        return groups;
+      },
+      {} as Record<string, Offer[]>
+    ),
+    [offers]
   );
   
 
 
   return (
     <div className="w-full">
-    <ToastContainer/>
     {Object.entries(offersByOwner).map(([ownerId, ownerOffers]) => (
   <div key={ownerId} className="mb-3"> {/* Reduced margin-bottom */}
     <Slider {...carouselSettings}>
@@ -145,6 +153,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
                 src={sanitizeImageUrl(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE)}
                 alt={offer.title}
                 className="h-16 rounded-md"
+                loading="lazy"
                 unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE))}
                 />
             </div>
@@ -179,4 +188,5 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
   );
 };
 
-export default OfferCarousel;
+// Memoize component to prevent unnecessary re-renders
+export default memo(OfferCarousel);

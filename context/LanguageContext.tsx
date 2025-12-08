@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
 
 type Language = "en" | "fr";
 
@@ -46,16 +46,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     loadTranslations();
   }, [language]);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     if (lang !== language) {
       setLanguageState(lang);
       if (typeof window !== "undefined") {
         localStorage.setItem("language", lang);
       }
     }
-  };
+  }, [language]);
 
-  const t = (key: string, params?: Record<string, any>): string => {
+  const t = useCallback((key: string, params?: Record<string, any>): string => {
     const keys = key.split(".");
     let value: any = translations;
     for (const k of keys) {
@@ -71,7 +71,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
     
     return result;
-  };
+  }, [translations]);
 
   // Update HTML lang attribute when language changes
   useEffect(() => {
@@ -80,8 +80,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [language]);
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({ language, setLanguage, t }),
+    [language, setLanguage, t]
+  );
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { toast } from "react-hot-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -54,8 +53,17 @@ const FillDetails = () => {
     return text;
   };
 
-  // --- Extract location name for preview
-  const fetchLocationName = async (url: string) => {
+  // Debounce timer ref
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // --- Extract location name for preview with debouncing
+  const fetchLocationName = useCallback(async (url: string) => {
+    // Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     if (!url.trim()) {
       setLocation("");
       return;
@@ -68,29 +76,64 @@ const FillDetails = () => {
       return;
     }
 
+    // Create new abort controller for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
       const token = localStorage.getItem("accessToken") || "";
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
         { mapsLink: cleanedUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          signal: abortController.signal,
+        }
       );
+
+      // Check if request was aborted
+      if (abortController.signal.aborted) return;
 
       const { locationName } = response.data;
       setLocation(locationName || "");
-    } catch (error) {
+    } catch (error: any) {
+      // Ignore abort errors
+      if (error.name === 'AbortError' || error.name === 'CanceledError') {
+        return;
+      }
       console.error("Error extracting location name:", error);
       setLocation("");
     }
-  };
+  }, []);
 
-  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGoogleMapsLinkChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     // Clean the URL and set it
     const cleanedUrl = cleanGoogleMapsUrl(inputValue);
     setMapsLink(cleanedUrl || inputValue);
-    fetchLocationName(cleanedUrl || inputValue);
-  };
+    
+    // Clear previous debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Debounce API call by 500ms
+    debounceTimerRef.current = setTimeout(() => {
+      fetchLocationName(cleanedUrl || inputValue);
+    }, 500);
+  }, [fetchLocationName]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // Handle paste events to clean the URL
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -154,19 +197,6 @@ const FillDetails = () => {
         <div className="pointer-events-none absolute -bottom-16 -right-6 w-40 h-40 rounded-full bg-[#C8E3F8] blur-3xl opacity-60" />
 
         <div className="relative z-10 w-full bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-[#f5eae0] px-6 py-8 sm:px-10 sm:py-10">
-          <ToastContainer
-            position="top-right"
-            autoClose={1000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            pauseOnFocusLoss
-            draggable
-            limit={3}
-            toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-            bodyClassName="text-sm font-medium"
-            progressClassName="bg-white/80"
-          />
 
           {/* Header */}
           <div className="text-center mb-8 space-y-2">

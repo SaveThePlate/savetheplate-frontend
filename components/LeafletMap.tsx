@@ -9,10 +9,8 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useParams } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import { ToastContainer } from "react-toastify";
+import dynamic from "next/dynamic";
 import OfferCarousel from "./OfferCarousel";
 import styles from "./design.module.css"; // Assuming you're using this for additional styling
 

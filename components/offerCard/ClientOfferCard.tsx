@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, memo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/credenza";
 import { useLanguage } from "@/context/LanguageContext";
 
-export const ClientOfferCard: FC<ClientOfferCardProps> = ({
+const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   offerId,
   imageSrc,
   imageAlt = "Offer image",
@@ -261,3 +261,5 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
   );
 };
 
+// Memoize component to prevent unnecessary re-renders
+export const ClientOfferCard = memo(ClientOfferCardComponent);

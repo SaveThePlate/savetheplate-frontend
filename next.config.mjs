@@ -1,5 +1,18 @@
 import nextPWA from 'next-pwa';
 
+// Bundle analyzer (optional - only when ANALYZE=true)
+// Install with: npm install --save-dev @next/bundle-analyzer
+let withBundleAnalyzer = (config) => config;
+if (process.env.ANALYZE === 'true') {
+  try {
+    withBundleAnalyzer = require('@next/bundle-analyzer')({
+      enabled: true,
+    });
+  } catch (e) {
+    console.warn('Bundle analyzer not installed. Run: npm install --save-dev @next/bundle-analyzer');
+  }
+}
+
 const withPWA = nextPWA({
   dest: 'public',      // service worker will be generated in /public
   register: true,      // auto-register the service worker
@@ -13,6 +26,13 @@ const withPWA = nextPWA({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  // Enable compression
+  compress: true,
+  // Optimize production builds
+  swcMinify: true,
+  // Enable React strict mode for better performance
+  reactStrictMode: true,
+  // Optimize images
   images: {
     remotePatterns: [
       // Localhost with any port (for development)
@@ -45,6 +65,42 @@ const nextConfig = {
       },
     ],
     unoptimized: false, // Enable optimization for better performance
+    formats: ['image/avif', 'image/webp'], // Use modern image formats
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  // Optimize webpack configuration
+  webpack: (config, { isServer }) => {
+    // Optimize bundle splitting
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk for large libraries
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20,
+            },
+            // Separate chunk for common libraries
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true,
+            },
+          },
+        },
+      };
+    }
+    return config;
   },
 
   async headers() {
@@ -76,4 +132,7 @@ const nextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+// Apply bundle analyzer if enabled
+const configWithAnalyzer = withBundleAnalyzer(nextConfig);
+
+export default withPWA(configWithAnalyzer);

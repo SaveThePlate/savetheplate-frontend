@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 interface UserContextType {
@@ -17,7 +17,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   
-  const fetchUserRole = async () => {
+  const fetchUserRole = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
       // No token - user is not authenticated, but don't redirect
@@ -49,20 +49,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
-
-  // refresh the user role, allowing components to trigger a refresh when needed
-  const refreshUserRole = async () => {
-    setLoading(true);
-    await fetchUserRole();
-  };
+  }, []);
 
   useEffect(() => {
     fetchUserRole();
-  }, []);
+  }, [fetchUserRole]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({ userRole, loading, error, fetchUserRole }),
+    [userRole, loading, error, fetchUserRole]
+  );
 
   return (
-    <UserContext.Provider value={{ userRole, loading, error, fetchUserRole }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );
