@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OrderQRCode from "./OrderQRCode";
-import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import { 
@@ -82,6 +82,26 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        // Normalize image URLs to use current backend URL
+        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        if (res.data.images && Array.isArray(res.data.images)) {
+          res.data.images = res.data.images.map((img: any) => {
+            if (!img) return img;
+            if (typeof img.absoluteUrl === "string") {
+              if (/^https?:\/\//i.test(img.absoluteUrl)) {
+                const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                if (match && backendOrigin) {
+                  return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                }
+              } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+              }
+            }
+            return img;
+          });
+        }
+        
         setOffer(res.data);
 
         const firstImage = res.data.images?.[0];
@@ -233,6 +253,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               sizes="(max-width: 640px) 112px, 128px"
               className="object-cover"
               priority
+              unoptimized={shouldUnoptimizeImage(imageSrc)}
               onError={() => {
                 const nextIndex = fallbackIndex + 1;
                 if (nextIndex < fallbacks.length) {

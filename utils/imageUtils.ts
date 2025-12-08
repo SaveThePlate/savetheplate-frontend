@@ -5,6 +5,54 @@
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
+/**
+ * Checks if an image URL should use unoptimized prop
+ * Returns true for localhost, external backend URLs, or any non-public asset
+ */
+export const shouldUnoptimizeImage = (url: string): boolean => {
+  if (!url) return false;
+  
+  // Public assets (starting with / and not /storage/) can be optimized
+  if (url.startsWith('/') && !url.startsWith('/storage/')) {
+    return false;
+  }
+  
+  // All backend storage images should be unoptimized to avoid upstream fetch issues
+  if (url.includes('/storage/')) {
+    return true;
+  }
+  
+  // Check if it's a full URL (external image)
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      const urlObj = new URL(url);
+      // Localhost images should be unoptimized
+      if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+        return true;
+      }
+      // External backend URLs should be unoptimized to avoid CORS/fetch issues
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+      if (backendUrl && url.includes(backendUrl.replace(/^https?:\/\//, '').split('/')[0])) {
+        return true;
+      }
+    } catch {
+      // If URL parsing fails, assume it should be unoptimized
+      return true;
+    }
+  }
+  
+  // Default: unoptimize to be safe
+  return true;
+};
+
+/**
+ * @deprecated Use shouldUnoptimizeImage instead
+ * Checks if an image URL is from localhost (needs unoptimized prop)
+ */
+export const isLocalhostImage = (url: string): boolean => {
+  return shouldUnoptimizeImage(url);
+};
+
 export interface ImageSource {
   original?: { url?: string };
   url?: string;
@@ -39,36 +87,43 @@ export const resolveImageSource = (imageSource: ImageSource | string | null | un
 /**
  * Resolves a filename/URL to a usable image path
  * Handles:
- * - Full URLs (http/https) - return as-is
- * - Backend storage paths (/storage/...) - prepend backend URL
+ * - Full URLs (http/https) - normalize to current environment's backend URL
+ * - Backend storage paths (/storage/...) - prepend current backend URL
  * - Frontend public assets (/) - return as-is
- * - Bare filenames - assume public asset
+ * - Bare filenames - use current backend storage
  */
 export const getImage = (filename?: string | null): string => {
   if (!filename) return DEFAULT_BAG_IMAGE;
 
-  // Full URL from API - return as-is
+  const currentBackendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+
+  // Full URL from API - normalize to current environment
   if (/^https?:\/\//i.test(filename)) {
+    // Extract storage path from URL (e.g., /storage/filename.jpg from https://domain.com/storage/filename.jpg)
+    // Handle both single and nested paths: /storage/file.jpg or /storage/subfolder/file.jpg
+    const urlMatch = filename.match(/\/(storage\/.+)$/);
+    if (urlMatch && currentBackendUrl) {
+      // Reconstruct using current backend URL to handle cross-environment scenarios
+      // This ensures images uploaded on production work on localhost and vice versa
+      return `${currentBackendUrl}${urlMatch[1]}`;
+    }
+    // If we can't extract storage path, return as-is (might be external image or different format)
     return filename;
   }
 
-  // Backend storage path - prepend backend origin
+  // Backend storage path - prepend current backend origin
   if (filename.startsWith("/storage/")) {
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-    return origin ? `${origin}${filename}` : filename;
+    return currentBackendUrl ? `${currentBackendUrl}${filename}` : filename;
   }
 
-  // Frontend public asset (leading slash) - return as-is
+  // Frontend public asset (leading slash, not /storage/) - return as-is
   if (filename.startsWith("/")) {
     return filename;
   }
 
-  // Bare filename - try backend storage first (most common case for uploaded images)
-  // If it doesn't exist there, fallback to public folder
-  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-  if (backendUrl) {
-    // Try backend storage first for bare filenames (uploaded images)
-    return `${backendUrl}/storage/${filename}`;
+  // Bare filename - use current backend storage
+  if (currentBackendUrl) {
+    return `${currentBackendUrl}/storage/${filename}`;
   }
   
   // Fallback to public folder if no backend URL
@@ -89,17 +144,30 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
   if (typeof imageSource === "string") {
     const resolved = getImage(imageSource);
     fallbacks.push(resolved);
-    // If it's a backend URL, also try as local public asset
+    
+    // Extract filename for fallback attempts
+    let extractedFilename: string | null = null;
+    
+    // Try to extract filename from various URL formats
     if (resolved.includes("/storage/")) {
-      const filename = resolved.split("/").pop();
-      if (filename) fallbacks.push(`/${filename}`);
+      extractedFilename = resolved.split("/storage/").pop() || null;
+    } else if (imageSource.includes("/storage/")) {
+      extractedFilename = imageSource.split("/storage/").pop() || null;
+    } else if (!imageSource.startsWith("/") && !/^https?:\/\//i.test(imageSource)) {
+      extractedFilename = imageSource;
     }
-    // If it's a local asset, also try backend storage
-    else if (resolved.startsWith("/") && !resolved.startsWith("/storage/")) {
-      const filename = resolved.replace(/^\//, "");
-      const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-      if (origin && filename) fallbacks.push(`${origin}/storage/${filename}`);
+    
+    // If we extracted a filename, try alternative URLs
+    if (extractedFilename) {
+      const currentBackendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      // Try current backend storage
+      if (currentBackendUrl) {
+        fallbacks.push(`${currentBackendUrl}/storage/${extractedFilename}`);
+      }
+      // Try as public asset
+      fallbacks.push(`/${extractedFilename}`);
     }
+    
     fallbacks.push(DEFAULT_BAG_IMAGE);
     return fallbacks;
   }

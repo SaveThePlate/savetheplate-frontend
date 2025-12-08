@@ -6,7 +6,7 @@ import Image from "next/image";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { ArrowLeft, MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -58,6 +58,26 @@ const Offers = () => {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        // Normalize image URLs to use current backend URL
+        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        if (res.data.images && Array.isArray(res.data.images)) {
+          res.data.images = res.data.images.map((img: any) => {
+            if (!img) return img;
+            if (typeof img.absoluteUrl === "string") {
+              if (/^https?:\/\//i.test(img.absoluteUrl)) {
+                const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                if (match && backendOrigin) {
+                  return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                }
+              } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+              }
+            }
+            return img;
+          });
+        }
+        
         const firstImage = res.data.images?.[0];
         // Use unified image resolution
         const resolved = resolveImageSource(firstImage);
@@ -167,6 +187,7 @@ const Offers = () => {
               sizes="100vw"
               priority
               className="object-cover"
+              unoptimized={shouldUnoptimizeImage(imageSrc)}
               onError={() => {
                 const nextIndex = fallbackIndex + 1;
                 if (nextIndex < fallbacks.length) {

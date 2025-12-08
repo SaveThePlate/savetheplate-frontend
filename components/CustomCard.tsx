@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
+import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "./offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -570,6 +570,7 @@ const CustomCard: FC<CustomCardProps> = ({
             placeholder="blur"
             blurDataURL={getBlurDataURL()}
             className="object-cover"
+            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">

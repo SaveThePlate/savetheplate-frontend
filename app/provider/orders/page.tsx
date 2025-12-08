@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import QRScanner from "@/components/QRScanner";
 import { QrCode, RefreshCw, CheckCircle } from "lucide-react";
-import { resolveImageSource, getImageFallbacks } from "@/utils/imageUtils";
+import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
 
@@ -368,6 +368,7 @@ const OrderCard: React.FC<{
           fill
           sizes="80px"
           className="object-cover"
+          unoptimized={shouldUnoptimizeImage(currentImageSrc)}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             // Try fallbacks

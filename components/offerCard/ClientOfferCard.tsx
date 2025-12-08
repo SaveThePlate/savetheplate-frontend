@@ -9,7 +9,7 @@ import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
-import { getImageFallbacks, resolveImageSource } from "@/utils/imageUtils";
+import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import {
   Credenza,
   CredenzaTrigger,
@@ -92,6 +92,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
+            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -163,6 +164,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
               fill
               sizes="100vw"
               className="object-cover"
+              unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
               onError={handleImageError}
             />
           ) : (
@@ -184,6 +186,7 @@ export const ClientOfferCard: FC<ClientOfferCardProps> = ({
                     width={48}
                     height={48}
                     className="object-cover w-full h-full"
+                    unoptimized={shouldUnoptimizeImage(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = "/logo.png";

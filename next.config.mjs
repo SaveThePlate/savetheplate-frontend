@@ -15,11 +15,34 @@ const nextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
-      { protocol: 'http', hostname: 'localhost', pathname: '/storage/**' },
-      { protocol: 'https', hostname: 'leftover-be.ccdev.space', pathname: '/storage/**' },
+      // Localhost with any port (for development)
+      { 
+        protocol: 'http', 
+        hostname: 'localhost',
+        pathname: '/storage/**',
+      },
+      { 
+        protocol: 'http', 
+        hostname: '127.0.0.1',
+        pathname: '/storage/**',
+      },
+      // Production backend
+      { 
+        protocol: 'https', 
+        hostname: 'leftover-be.ccdev.space', 
+        pathname: '/storage/**' 
+      },
       // Allow images from any domain (for flexibility)
-      { protocol: 'http', hostname: '**', pathname: '/storage/**' },
-      { protocol: 'https', hostname: '**', pathname: '/storage/**' },
+      { 
+        protocol: 'http', 
+        hostname: '**', 
+        pathname: '/storage/**' 
+      },
+      { 
+        protocol: 'https', 
+        hostname: '**', 
+        pathname: '/storage/**' 
+      },
     ],
     unoptimized: false, // Enable optimization for better performance
   },
@@ -30,7 +53,7 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
       "style-src 'self' 'unsafe-inline' https:",
-      "img-src 'self' data: blob: https:",
+      "img-src 'self' data: blob: https: http://localhost:* http://127.0.0.1:* http:",
       "media-src 'self' data: blob: https:",
       `connect-src 'self' ${backendUrl} http://localhost:*/ https: ws: wss:`,
       "font-src 'self' data: https:",

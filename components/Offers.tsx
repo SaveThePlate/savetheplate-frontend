@@ -88,16 +88,39 @@ const OffersPage = () => {
 
         const data = await response.json();
 
-        // normalize images array and normalize absoluteUrl if backend storage path is provided
+        // normalize images array - normalize all URLs to use current backend URL
         const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
         const mappedOffers: Offer[] = data.map((o: any) => {
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
             if (!img) return img;
-            // If backend stored the image under /storage/... make it absolute using the configured backend origin
-            if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
-              return { ...img, absoluteUrl: backendOrigin + img.absoluteUrl };
+            
+            // Normalize absoluteUrl to use current backend URL
+            if (typeof img.absoluteUrl === "string") {
+              // Extract filename from any URL format
+              let filename: string | null = null;
+              
+              // If it's a full URL, extract the storage path
+              if (/^https?:\/\//i.test(img.absoluteUrl)) {
+                const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                if (match && backendOrigin) {
+                  // Reconstruct with current backend URL
+                  return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                }
+              }
+              // If it's a relative storage path
+              else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+              }
             }
-            // leave as-is otherwise
+            
+            // Normalize url field if it exists
+            if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
+              const match = img.url.match(/\/(storage\/.+)$/);
+              if (match && backendOrigin) {
+                return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+              }
+            }
+            
             return img;
           }) : [];
 
@@ -129,9 +152,30 @@ const OffersPage = () => {
       const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       const images = Array.isArray(o.images) ? o.images.map((img: any) => {
         if (!img) return img;
-        if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
-          return { ...img, absoluteUrl: backendOrigin + img.absoluteUrl };
+        
+        // Normalize absoluteUrl to use current backend URL
+        if (typeof img.absoluteUrl === "string") {
+          // If it's a full URL, extract the storage path and reconstruct
+          if (/^https?:\/\//i.test(img.absoluteUrl)) {
+            const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+            if (match && backendOrigin) {
+              return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+            }
+          }
+          // If it's a relative storage path
+          else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+            return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+          }
         }
+        
+        // Normalize url field if it exists
+        if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
+          const match = img.url.match(/\/(storage\/.+)$/);
+          if (match && backendOrigin) {
+            return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+          }
+        }
+        
         return img;
       }) : [];
       
