@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import GuidedTour from "@/components/GuidedTour";
 import { getClientHomeTourSteps } from "@/components/tourSteps";
+import RouteGuard from "@/components/RouteGuard";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,7 +32,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }, [router]);
 
   return (
-    <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
+    <RouteGuard allowedRoles={["CLIENT"]} redirectTo="/signIn">
+      <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
       {/* 🌿 Header */}
       <header className="w-full fixed top-0 left-0 z-30 bg-white shadow-sm border-b border-gray-200 safe-area-inset-top">
         <nav className="w-full mx-auto flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
@@ -214,5 +216,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </Link>
       </nav>
     </section>
+    </RouteGuard>
   );
 }

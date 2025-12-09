@@ -7,6 +7,7 @@ import { ArrowLeft, Leaf, Droplet, Cloud, TreePine, Calculator, Info, TrendingUp
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import RouteGuard from "@/components/RouteGuard";
 
 const ImpactPage = () => {
   const router = useRouter();
@@ -38,7 +39,8 @@ const ImpactPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50 pb-20">
+    <RouteGuard allowedRoles={["CLIENT", "PROVIDER"]} redirectTo="/signIn">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50 pb-20">
       {/* Language Switcher - Fixed Position */}
       <div className="fixed top-4 right-4 z-[60]">
         <LanguageSwitcher variant="button" />
@@ -309,6 +311,7 @@ const ImpactPage = () => {
         </div>
       </div>
     </div>
+    </RouteGuard>
   );
 };
 
