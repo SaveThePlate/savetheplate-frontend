@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Offers from "@/components/Offers";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,14 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const { t } = useLanguage();
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Fetch offers function - can be called to refresh
   const fetchOffers = React.useCallback(async (isRefresh = false) => {
@@ -57,6 +65,8 @@ const Home = () => {
         axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}?t=${timestamp}`, { headers }),
       ]);
 
+      if (!isMountedRef.current) return;
+
       // Process offers (critical - show immediately)
       if (offersResponse.status === "fulfilled") {
         // fetch returns data directly, axios returns { data }
@@ -65,7 +75,7 @@ const Home = () => {
         setError(null);
       } else {
         console.error("Failed to fetch offers:", offersResponse.reason);
-        if (!isRefresh) {
+        if (!isRefresh && isMountedRef.current) {
           setError(t("client.home.fetch_offers_failed"));
         }
       }
@@ -75,18 +85,22 @@ const Home = () => {
         const pending = (ordersResponse.value.data || []).filter(
           (o: any) => o.status === "pending"
         ).length;
-        setPendingCount(pending);
+        if (isMountedRef.current) {
+          setPendingCount(pending);
+        }
       } else {
         console.debug("Could not fetch pending orders", ordersResponse.reason);
       }
     } catch (fetchError) {
       console.error("Failed to fetch data:", fetchError);
-      if (!isRefresh) {
+      if (!isRefresh && isMountedRef.current) {
         setError("Failed to fetch offers. Please try again later.");
       }
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [router, t]);
 

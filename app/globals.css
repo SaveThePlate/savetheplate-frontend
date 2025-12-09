@@ -1,9 +1,14 @@
+/* Import third-party CSS first (must be at top) */
+@import 'react-toastify/dist/ReactToastify.css';
+@import 'slick-carousel/slick/slick.css';
+@import 'slick-carousel/slick/slick-theme.css';
+
 /* Optimize font loading with font-display swap */
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400&display=swap');
 
 @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+@tailwind components;
+@tailwind utilities;
 
   @layer base {
     :root {
@@ -118,9 +123,3 @@
       overscroll-behavior-y: contain;
     }
   }
-
-  /* Import third-party CSS globally to avoid duplication */
-  @import 'react-toastify/dist/ReactToastify.css';
-  @import 'slick-carousel/slick/slick.css';
-  @import 'slick-carousel/slick/slick-theme.css';
-  

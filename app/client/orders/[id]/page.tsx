@@ -64,24 +64,24 @@ const Orders = () => {
   const totalOrders = orders.length;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] pt-24 pb-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] pt-20 sm:pt-24 pb-20">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-4xl sm:text-5xl font-bold text-[#1B4332] mb-2 flex items-center gap-3">
-                <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" />
-                {t("client.orders.my_orders")}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-[#1B4332] mb-2 flex items-center gap-2 sm:gap-3 flex-wrap">
+                <ShoppingBag className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-emerald-600 flex-shrink-0" />
+                <span className="break-words">{t("client.orders.my_orders")}</span>
               </h1>
-              <p className="text-gray-600 text-base sm:text-lg">
+              <p className="text-gray-600 text-sm xs:text-base sm:text-lg">
                 {t("client.orders.track_orders")}
               </p>
             </div>
             {hasOrders && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
-                <Package className="w-5 h-5 text-emerald-600" />
-                <span className="text-sm font-semibold text-gray-700">
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200 flex-shrink-0 self-start sm:self-auto">
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">
                   {totalOrders} {totalOrders === 1 ? t("client.orders.order") : t("client.orders.orders")}
                 </span>
               </div>
@@ -90,42 +90,42 @@ const Orders = () => {
 
           {/* Stats Cards */}
           {hasOrders && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
               {pendingOrders.length > 0 && (
-                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-yellow-700" />
+                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-2xl p-3 sm:p-4 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-700" />
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-yellow-800">{pendingOrders.length}</p>
-                      <p className="text-sm text-yellow-700 font-medium">{t("orders.pending")}</p>
+                    <div className="min-w-0">
+                      <p className="text-xl sm:text-2xl font-bold text-yellow-800">{pendingOrders.length}</p>
+                      <p className="text-xs sm:text-sm text-yellow-700 font-medium truncate">{t("orders.pending")}</p>
                     </div>
                   </div>
                 </div>
               )}
               {confirmedOrders.length > 0 && (
-                <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-emerald-700" />
+                <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-3 sm:p-4 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-emerald-800">{confirmedOrders.length}</p>
-                      <p className="text-sm text-emerald-700 font-medium">{t("orders.confirmed")}</p>
+                    <div className="min-w-0">
+                      <p className="text-xl sm:text-2xl font-bold text-emerald-800">{confirmedOrders.length}</p>
+                      <p className="text-xs sm:text-sm text-emerald-700 font-medium truncate">{t("orders.confirmed")}</p>
                     </div>
                   </div>
                 </div>
               )}
               {cancelledOrders.length > 0 && (
-                <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                      <XCircle className="w-6 h-6 text-red-700" />
+                <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-2xl p-3 sm:p-4 shadow-sm xs:col-span-2 sm:col-span-1">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-700" />
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-red-800">{cancelledOrders.length}</p>
-                      <p className="text-sm text-red-700 font-medium">{t("orders.cancelled")}</p>
+                    <div className="min-w-0">
+                      <p className="text-xl sm:text-2xl font-bold text-red-800">{cancelledOrders.length}</p>
+                      <p className="text-xs sm:text-sm text-red-700 font-medium truncate">{t("orders.cancelled")}</p>
                     </div>
                   </div>
                 </div>
@@ -142,29 +142,29 @@ const Orders = () => {
               <p className="text-gray-600 text-lg font-medium">{t("client.orders.loading")}</p>
             </div>
           ) : error ? (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 text-center">
-              <XCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-              <p className="text-red-800 text-lg font-semibold mb-2">{t("client.orders.error_title")}</p>
-              <p className="text-red-600 mb-4">{error}</p>
+            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 sm:p-8 text-center">
+              <XCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-600 mx-auto mb-3 sm:mb-4" />
+              <p className="text-red-800 text-base sm:text-lg font-semibold mb-2 px-2">{t("client.orders.error_title")}</p>
+              <p className="text-sm sm:text-base text-red-600 mb-4 px-2 break-words">{error}</p>
               <Button
                 onClick={() => window.location.reload()}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
               >
                 {t("common.try_again")}
               </Button>
             </div>
           ) : !hasOrders ? (
-            <div className="bg-white rounded-3xl shadow-lg border-2 border-gray-100 p-12 text-center">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-emerald-600" />
+            <div className="bg-white rounded-3xl shadow-lg border-2 border-gray-100 p-6 sm:p-8 md:p-12 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-emerald-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-3">{t("client.orders.no_orders_title")}</h2>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 px-2">{t("client.orders.no_orders_title")}</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto px-2">
                 {t("client.orders.no_orders_message")}
               </p>
               <Button
                 onClick={() => router.push("/client/home")}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full font-semibold shadow-md hover:shadow-lg transition-all"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
               >
                 {t("client.orders.explore_offers")}
               </Button>
@@ -172,19 +172,19 @@ const Orders = () => {
           ) : (
             <>
               {pendingOrders.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-yellow-700" />
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-700" />
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                      {t("client.orders.pending_orders")}
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex-1 min-w-0">
+                      <span className="break-words">{t("client.orders.pending_orders")}</span>
                     </h2>
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
+                    <span className="px-2 sm:px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs sm:text-sm font-semibold flex-shrink-0">
                       {pendingOrders.length}
                     </span>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {pendingOrders.map((order) => (
                       <div
                         key={order.id}
@@ -198,19 +198,19 @@ const Orders = () => {
               )}
 
               {confirmedOrders.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <CheckCircle className="w-5 h-5 text-emerald-700" />
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                      {t("client.orders.confirmed_orders")}
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex-1 min-w-0">
+                      <span className="break-words">{t("client.orders.confirmed_orders")}</span>
                     </h2>
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm font-semibold">
+                    <span className="px-2 sm:px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs sm:text-sm font-semibold flex-shrink-0">
                       {confirmedOrders.length}
                     </span>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {confirmedOrders.map((order) => (
                       <div
                         key={order.id}
@@ -224,19 +224,19 @@ const Orders = () => {
               )}
 
               {cancelledOrders.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                      <XCircle className="w-5 h-5 text-red-700" />
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-700" />
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                      {t("client.orders.cancelled_orders")}
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex-1 min-w-0">
+                      <span className="break-words">{t("client.orders.cancelled_orders")}</span>
                     </h2>
-                    <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                    <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs sm:text-sm font-semibold flex-shrink-0">
                       {cancelledOrders.length}
                     </span>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {cancelledOrders.map((order) => (
                       <div
                         key={order.id}

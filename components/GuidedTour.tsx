@@ -1,10 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Joyride, { Step, CallBackProps, STATUS, EVENTS } from "react-joyride";
+import dynamic from "next/dynamic";
+import { Step, CallBackProps, STATUS, EVENTS } from "react-joyride";
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+
+// Dynamically import Joyride with SSR disabled to prevent hydration issues
+const Joyride = dynamic(() => import("react-joyride").then((mod) => mod.default), {
+  ssr: false,
+});
 
 interface GuidedTourProps {
   steps: Step[];

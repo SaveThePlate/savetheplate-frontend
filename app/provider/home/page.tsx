@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -52,7 +52,14 @@ const ProviderHome = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
 
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -67,6 +74,8 @@ const ProviderHome = () => {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
+        if (!isMountedRef.current) return;
 
         // normalize images array - preserve URLs from different backends, only normalize relative paths
         const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
@@ -157,9 +166,13 @@ const ProviderHome = () => {
 
         setOffers(mappedOffers);
       } catch (err) {
-        setError(t("provider.home.fetch_offers_failed", { error: (err as Error).message }));
+        if (isMountedRef.current) {
+          setError(t("provider.home.fetch_offers_failed", { error: (err as Error).message }));
+        }
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
     };
 
@@ -168,6 +181,8 @@ const ProviderHome = () => {
 
   // Handle real-time offer updates
   const handleOfferUpdate = useCallback((data: { type: string; offer: any }) => {
+    if (!isMountedRef.current) return;
+    
     const { type, offer } = data;
     
     // Get current user ID to filter offers
@@ -269,6 +284,8 @@ const ProviderHome = () => {
       return { ...o, images };
     };
 
+    if (!isMountedRef.current) return;
+    
     setOffers((prevOffers) => {
       if (type === 'created') {
         // Add new offer at the beginning

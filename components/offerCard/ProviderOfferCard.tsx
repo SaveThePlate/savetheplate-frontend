@@ -1,10 +1,10 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { CancelTokenSource } from "axios";
 import { toast } from "react-toastify";
 import { ProviderOfferCardProps } from "./types";
 import { PriceBadge } from "./shared/PriceBadge";
@@ -55,6 +55,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Track mounted state to prevent state updates after unmount
+  const isMountedRef = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [localData, setLocalData] = useState({
     title,
     description,
@@ -82,8 +87,25 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [fallbacks, setFallbacks] = useState<string[]>([]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      // Clear any pending timeouts
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Sync localData with props when they change
   useEffect(() => {
+    if (!isMountedRef.current) return;
     setLocalData({
       title,
       description,
@@ -100,6 +122,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
   // Sync image display
   useEffect(() => {
+    if (!isMountedRef.current) return;
     if (imageSrc) {
       const imageFallbacks = getImageFallbacksForOffer(imageSrc);
       setFallbacks(imageFallbacks);
@@ -113,6 +136,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   }, [imageSrc]);
 
   const handleImageError = () => {
+    if (!isMountedRef.current) return;
     const nextIndex = fallbackIndex + 1;
     if (nextIndex < fallbacks.length) {
       setFallbackIndex(nextIndex);
@@ -145,13 +169,22 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
 
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) throw new Error("No authentication token");
 
       const response = await axiosInstance.post("/storage/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        signal: abortController.signal,
       });
+
+      if (!isMountedRef.current) {
+        throw new Error("Component unmounted");
+      }
 
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       const uploaded = Array.isArray(response.data) ? response.data : [response.data];
@@ -179,36 +212,59 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       });
       return mapped;
     } catch (err: any) {
+      // Don't show error if component unmounted or request was cancelled
+      if (err.name === 'AbortError' || !isMountedRef.current) {
+        throw err;
+      }
       console.error("Upload error", err?.response?.data || err.message || err);
       const errorMessage = err?.response?.data?.message || err?.message || "Failed to upload images";
       toast.error(errorMessage);
       throw err;
+    } finally {
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
   const handleImageUpload = async (files: File[] | null) => {
+    if (!isMountedRef.current) return;
+    
     if (!files || files.length === 0) {
-      setLocalFiles(null);
-      setUploadedImages([]);
+      if (isMountedRef.current) {
+        setLocalFiles(null);
+        setUploadedImages([]);
+      }
       return;
     }
     
-    setUploadingImages(true);
+    if (isMountedRef.current) {
+      setUploadingImages(true);
+    }
     try {
       const uploaded = await uploadFiles(files);
-      setUploadedImages(uploaded);
-      setLocalFiles(files);
-      toast.success(t("offer_card.upload_success", { count: uploaded.length }));
+      if (isMountedRef.current) {
+        setUploadedImages(uploaded);
+        setLocalFiles(files);
+        toast.success(t("offer_card.upload_success", { count: uploaded.length }));
+      }
     } catch (error: any) {
-      setLocalFiles(null);
-      setUploadedImages([]);
-      toast.error(t("offer_card.upload_failed"));
+      // Only update state and show error if component is still mounted and error is not from cancellation
+      if (isMountedRef.current && error.name !== 'AbortError' && error.message !== 'Component unmounted') {
+        setLocalFiles(null);
+        setUploadedImages([]);
+        toast.error(t("offer_card.upload_failed"));
+      }
     } finally {
-      setUploadingImages(false);
+      if (isMountedRef.current) {
+        setUploadingImages(false);
+      }
     }
   };
 
   const handleEdit = async () => {
+    if (!isMountedRef.current) return;
+    
     if (!localData.title || !localData.description) {
       toast.error(t("offer_card.fill_fields"));
       return;
@@ -230,36 +286,52 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       }
     }
 
-    setLoading(true);
+    if (isMountedRef.current) {
+      setLoading(true);
+    }
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
       return router.push("/signIn");
     }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
       // Upload images if new files were selected
       let finalImages = uploadedImages;
       if (localFiles && localFiles.length > 0) {
         // Always upload when localFiles are present (user has selected new files)
-        toast.info("Uploading images...");
+        if (isMountedRef.current) {
+          toast.info("Uploading images...");
+        }
         finalImages = await uploadFiles(localFiles);
-        setUploadedImages(finalImages);
+        if (isMountedRef.current) {
+          setUploadedImages(finalImages);
+        }
       }
 
       // Parse and validate price
       const priceValue = parseFloat(String(localData.price).trim());
       if (isNaN(priceValue) || priceValue <= 0) {
-        toast.error(t("offer_card.invalid_price"));
-        setLoading(false);
+        if (isMountedRef.current) {
+          toast.error(t("offer_card.invalid_price"));
+          setLoading(false);
+        }
         return;
       }
 
       // Parse and validate quantity
       const quantityValue = parseInt(String(localData.quantity).trim(), 10);
       if (isNaN(quantityValue) || quantityValue < 0) {
-        toast.error(t("offer_card.invalid_quantity"));
-        setLoading(false);
+        if (isMountedRef.current) {
+          toast.error(t("offer_card.invalid_quantity"));
+          setLoading(false);
+        }
         return;
       }
 
@@ -276,8 +348,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       // Validate expiration date
       const expirationDateValue = new Date(localData.expirationDate);
       if (isNaN(expirationDateValue.getTime())) {
-        toast.error(t("offer_card.invalid_date"));
-        setLoading(false);
+        if (isMountedRef.current) {
+          toast.error(t("offer_card.invalid_date"));
+          setLoading(false);
+        }
         return;
       }
 
@@ -318,7 +392,12 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
       const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
+        signal: abortController.signal,
       });
+      
+      if (!isMountedRef.current) {
+        return;
+      }
       
       console.log("✅ PUT response:", response.data);
       console.log("✅ Response images:", response.data?.images);
@@ -336,19 +415,39 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       // Pass the response data (updated offer) to onUpdate if available, otherwise use payload
       onUpdate?.(offerId, response.data || payload);
     } catch (err: any) {
+      // Don't show error if component unmounted or request was cancelled
+      if (err.name === 'AbortError' || !isMountedRef.current) {
+        return;
+      }
       console.error("Error updating offer:", err);
       const errorMessage = err?.response?.data?.message || err?.message || t("offer_card.update_failed");
       toast.error(errorMessage);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
   const handleDelete = async () => {
+    if (!isMountedRef.current) return;
+    
     setShowDeleteConfirm(false);
     setIsDeleting(true);
-    setTimeout(() => {
-      onDelete?.(offerId);
+    
+    // Clear any existing timeout
+    if (deleteTimeoutRef.current) {
+      clearTimeout(deleteTimeoutRef.current);
+    }
+    
+    deleteTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        onDelete?.(offerId);
+      }
+      deleteTimeoutRef.current = null;
     }, 250);
   };
 

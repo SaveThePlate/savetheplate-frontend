@@ -220,11 +220,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   if (loading) {
     return (
-      <div className="w-full bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-        <div className="animate-pulse flex gap-4">
-          <div className="w-24 h-24 bg-gray-200 rounded-xl"></div>
-          <div className="flex-1 space-y-3">
-            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+      <div className="w-full bg-white rounded-2xl shadow-md p-4 sm:p-6 border border-gray-200">
+        <div className="animate-pulse flex gap-3 sm:gap-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-lg flex-shrink-0"></div>
+          <div className="flex-1 space-y-3 min-w-0">
+            <div className="h-5 sm:h-6 bg-gray-200 rounded w-3/4"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2"></div>
             <div className="h-4 bg-gray-200 rounded w-2/3"></div>
           </div>
@@ -235,8 +235,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   if (error || !offer) {
     return (
-      <div className="w-full bg-red-50 rounded-2xl shadow-md p-6 border border-red-200">
-        <p className="text-red-600 text-center">{error || t("cart_order.load_details_failed")}</p>
+      <div className="w-full bg-red-50 rounded-2xl shadow-md p-4 sm:p-6 border border-red-200">
+        <p className="text-sm sm:text-base text-red-600 text-center break-words px-2">{error || t("cart_order.load_details_failed")}</p>
       </div>
     );
   }
@@ -268,16 +268,16 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         progressClassName="bg-white/80"
       />
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Header Section */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-3 sm:gap-4 mb-4 sm:mb-6">
           {/* Image */}
-          <div className="flex-shrink-0 w-28 h-28 sm:w-32 sm:h-32 relative rounded-xl overflow-hidden shadow-md border-2 border-gray-100">
+          <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 relative rounded-lg overflow-hidden shadow-md border-2 border-gray-100">
             <Image
               src={sanitizeImageUrl(imageSrc)}
               alt={offer.title}
               fill
-              sizes="(max-width: 640px) 112px, 128px"
+              sizes="(max-width: 640px) 64px, 80px"
               className="object-cover"
               priority
               unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(imageSrc))}
@@ -295,40 +295,38 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
           {/* Title and Status */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 flex-1">
-                {offer.title}
-              </h3>
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${statusConfig.badge} flex-shrink-0`}>
-                <StatusIcon className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-wide">
-                  {order.status}
-                </span>
-              </div>
+            <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 break-words">
+              {offer.title}
+            </h3>
+            <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border ${statusConfig.badge} mb-2 sm:mb-3`}>
+              <StatusIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="text-[10px] xs:text-xs font-bold uppercase tracking-wide whitespace-nowrap">
+                {order.status}
+              </span>
             </div>
-            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+            <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 sm:mb-3 break-words">
               {offer.description}
             </p>
-            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
-              <Package className="w-4 h-4" />
-              <span>{t("cart_order.quantity_label")} {order.quantity}</span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-emerald-700">
+              <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">{t("cart_order.quantity_label")} {order.quantity}</span>
             </div>
           </div>
         </div>
 
         {/* Information Grid - Collapsible for non-pending orders */}
         {shouldShowDetails && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 animate-in slide-in-from-top-2 duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6 animate-in slide-in-from-top-2 duration-300">
             {/* Pickup Location */}
-            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-emerald-700" />
+            <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                <p className="text-[10px] xs:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                   {t("cart_order.pickup_location")}
                 </p>
-                <p className="text-sm font-medium text-gray-900 mb-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1 break-words">
                   {offer.owner?.location || offer.pickupLocation}
                 </p>
                 {(offer.owner?.mapsLink || offer.mapsLink) && (
@@ -336,32 +334,32 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                     href={offer.owner?.mapsLink || offer.mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                    className="inline-flex items-center gap-1 text-[10px] xs:text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors break-all"
                   >
-                    <ExternalLink className="w-3 h-3" />
-                    {t("cart_order.open_in_maps")}
+                    <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                    <span className="break-words">{t("cart_order.open_in_maps")}</span>
                   </a>
                 )}
               </div>
             </div>
 
             {/* Expiration Date */}
-            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-amber-700" />
+            <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                <p className="text-[10px] xs:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                   {t("cart_order.pickup_deadline")}
                 </p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs sm:text-sm font-medium text-gray-900 break-words">
                   {formattedDate}
                 </p>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-[10px] xs:text-xs text-gray-600 mt-0.5 break-words">
                   {formattedTime ? (formattedTime.includes(" - ") ? `${t("common.between")} ${formattedTime}` : `${t("common.at")} ${formattedTime}`) : ""}
                 </p>
                 {isExpired && (
-                    <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                    <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] xs:text-xs font-semibold rounded-full">
                     {t("common.expired")}
                   </span>
                 )}
@@ -369,22 +367,22 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             </div>
 
             {/* Order Date */}
-            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-blue-700" />
+            <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 sm:col-span-2">
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                <p className="text-[10px] xs:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                   {t("cart_order.ordered_on")}
                 </p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs sm:text-sm font-medium text-gray-900">
                   {orderDate.toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
                   })}
                 </p>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-[10px] xs:text-xs text-gray-600 mt-0.5">
                   {orderDate.toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -397,20 +395,20 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
         {/* Toggle Details Button - Only for non-pending orders */}
         {!isPending && (
-          <div className="mb-4">
+          <div className="mb-3 sm:mb-4">
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
+              className="flex items-center justify-center gap-2 w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors text-sm sm:text-base"
             >
               {showDetails ? (
                 <>
-                  <ChevronUp className="w-4 h-4" />
-                  {t("cart_order.hide_details")}
+                  <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="break-words">{t("cart_order.hide_details")}</span>
                 </>
               ) : (
                 <>
-                  <ChevronDown className="w-4 h-4" />
-                  {t("cart_order.show_details")}
+                  <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="break-words">{t("cart_order.show_details")}</span>
                 </>
               )}
             </button>
@@ -419,18 +417,18 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
         {/* Actions Section - Only show for pending orders or when details are expanded */}
         {shouldShowDetails && (
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200">
             {order.status === "pending" && order.qrCodeToken && (
               <button
                 onClick={() => setShowQRCode(!showQRCode)}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
+                className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base min-w-0"
               >
-                <QrCode className="w-5 h-5" />
-                {showQRCode ? t("cart_order.hide_qr") : t("cart_order.show_qr")}
+                <QrCode className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="truncate">{showQRCode ? t("cart_order.hide_qr") : t("cart_order.show_qr")}</span>
                 {showQRCode ? (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 )}
               </button>
             )}
@@ -438,14 +436,14 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               <button
                 onClick={handleCancelOrder}
                 disabled={canceling}
-                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base min-w-0 ${
                   canceling
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg"
                 }`}
               >
-                <X className="w-5 h-5" />
-                {canceling ? t("cart_order.cancelling") : t("cart_order.cancel_order")}
+                <X className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="truncate">{canceling ? t("cart_order.cancelling") : t("cart_order.cancel_order")}</span>
               </button>
             )}
           </div>
@@ -453,7 +451,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
         {/* QR Code Section (Collapsible) */}
         {order.status === "pending" && order.qrCodeToken && showQRCode && (
-          <div className="mt-6 pt-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
             <OrderQRCode
               qrCodeToken={order.qrCodeToken}
               orderId={order.id}

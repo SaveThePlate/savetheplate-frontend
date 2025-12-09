@@ -13,25 +13,44 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { onOrderUpdate, onOfferUpdate, enabled = true } = options;
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const isMountedRef = useRef(true);
+  
+  // Store callbacks in refs to prevent effect re-runs when they change
+  const onOrderUpdateRef = useRef(onOrderUpdate);
+  const onOfferUpdateRef = useRef(onOfferUpdate);
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onOrderUpdateRef.current = onOrderUpdate;
+    onOfferUpdateRef.current = onOfferUpdate;
+  }, [onOrderUpdate, onOfferUpdate]);
 
   useEffect(() => {
-    if (!enabled) return;
+    isMountedRef.current = true;
+    
+    // Always return a cleanup function, even if we don't initialize
+    let socket: Socket | null = null;
+    
+    if (!enabled) {
+      return () => {
+        isMountedRef.current = false;
+      };
+    }
 
     const token = localStorage.getItem("accessToken");
     if (!token) {
       console.log("No access token, skipping WebSocket connection");
-      return;
+      return () => {
+        isMountedRef.current = false;
+      };
     }
 
     // Dynamically import socket.io-client to reduce initial bundle size
-    let socket: Socket | null = null;
-    let isMounted = true;
-
     const initSocket = async () => {
       try {
         const { io } = await import("socket.io-client");
         
-        if (!isMounted) return;
+        if (!isMountedRef.current) return;
 
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
         // Extract hostname and port from backend URL
@@ -53,7 +72,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           rememberUpgrade: false,
         });
 
-        if (!isMounted) {
+        if (!isMountedRef.current) {
           socket.disconnect();
           return;
         }
@@ -66,11 +85,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         socket.on("connect", () => {
           // Use socketRef.current to ensure we have the latest socket instance
           const currentSocket = socketRef.current;
-          if (!currentSocket) return;
+          if (!currentSocket || !isMountedRef.current) return;
           
           const transport = currentSocket.io.engine.transport.name;
           console.log(`✅ WebSocket connected to: ${wsUrl} (transport: ${transport})`);
-          setIsConnected(true);
+          if (isMountedRef.current) {
+            setIsConnected(true);
+          }
           
           // Subscribe to events
           currentSocket.emit("subscribe:orders");
@@ -80,7 +101,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
         socket.on("disconnect", (reason) => {
           console.log("WebSocket disconnected:", reason);
-          setIsConnected(false);
+          if (isMountedRef.current) {
+            setIsConnected(false);
+          }
         });
 
         socket.on("connect_error", (error) => {
@@ -88,7 +111,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           if (error.message && !error.message.includes("websocket")) {
             console.error("WebSocket connection error:", error);
           }
-          setIsConnected(false);
+          if (isMountedRef.current) {
+            setIsConnected(false);
+          }
         });
 
         // Listen for transport upgrades (websocket -> polling or vice versa)
@@ -98,29 +123,29 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           console.log("🔄 WebSocket transport upgraded to:", currentSocket.io.engine.transport.name);
         });
 
-        // Listen for order updates
-        if (onOrderUpdate) {
-          socket.on("order:update", (data) => {
-            console.log("📦 Order update received:", data);
-            onOrderUpdate(data);
-          });
-        }
+        // Listen for order updates - use ref to get latest callback
+        socket.on("order:update", (data) => {
+          if (!isMountedRef.current) return;
+          console.log("📦 Order update received:", data);
+          if (onOrderUpdateRef.current) {
+            onOrderUpdateRef.current(data);
+          }
+        });
 
-        // Listen for offer updates
-        if (onOfferUpdate) {
-          socket.on("offer:update", (data) => {
-            console.log("🛍️ Offer update received:", data);
-            console.log("📦 Offer type:", data.type, "Offer ID:", data.offer?.id);
+        // Listen for offer updates - use ref to get latest callback
+        socket.on("offer:update", (data) => {
+          if (!isMountedRef.current) return;
+          console.log("🛍️ Offer update received:", data);
+          console.log("📦 Offer type:", data.type, "Offer ID:", data.offer?.id);
+          if (onOfferUpdateRef.current) {
             try {
-              onOfferUpdate(data);
+              onOfferUpdateRef.current(data);
               console.log("✅ Offer update handler executed successfully");
             } catch (error) {
               console.error("❌ Error in offer update handler:", error);
             }
-          });
-        } else {
-          console.warn("⚠️ onOfferUpdate handler not provided, offer updates will be ignored");
-        }
+          }
+        });
       } catch (error) {
         console.error("Failed to initialize WebSocket:", error);
       }
@@ -129,19 +154,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     initSocket();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
       if (socket) {
-        if (onOrderUpdate) {
-          socket.off("order:update");
-        }
-        if (onOfferUpdate) {
-          socket.off("offer:update");
-        }
+        socket.off("order:update");
+        socket.off("offer:update");
         socket.disconnect();
         socketRef.current = null;
       }
     };
-  }, [enabled, onOrderUpdate, onOfferUpdate]);
+  }, [enabled]);
 
   return {
     socket: socketRef.current,

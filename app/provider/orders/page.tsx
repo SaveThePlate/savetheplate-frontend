@@ -1,14 +1,36 @@
 "use client";
-import React, { useEffect, useState, useCallback, Suspense } from "react";
+import React, { useEffect, useState, useCallback, Suspense, useMemo } from "react";
 import dynamic from "next/dynamic";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { QrCode, RefreshCw, CheckCircle } from "lucide-react";
+import { 
+  QrCode, 
+  RefreshCw, 
+  CheckCircle, 
+  Search, 
+  Phone, 
+  MapPin, 
+  Package, 
+  Clock, 
+  User as UserIcon,
+  ChevronDown,
+  ChevronUp,
+  ShoppingBag,
+  XCircle,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load QRScanner to reduce initial bundle size (includes html5-qrcode library)
 const QRScanner = dynamic(() => import("@/components/QRScanner"), {
@@ -68,6 +90,8 @@ const ProviderOrdersContent = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState<number | null>(null);
   const [alreadyConfirmed, setAlreadyConfirmed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
   const { t } = useLanguage();
 
   // Fetch orders function - can be called to refresh
@@ -178,89 +202,269 @@ const ProviderOrdersContent = () => {
   const pending = orders.filter((o) => o.status === "pending");
   const cancelled = orders.filter((o) => o.status === "cancelled");
 
+  // Filter and sort orders
+  const filteredOrders = useMemo(() => {
+    let filtered = orders;
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((order) => {
+        const offerTitle = order.offer?.title?.toLowerCase() || "";
+        const username = order.user?.username?.toLowerCase() || "";
+        const phone = order.user?.phoneNumber?.toString() || "";
+        const location = order.user?.location?.toLowerCase() || "";
+        return (
+          offerTitle.includes(query) ||
+          username.includes(query) ||
+          phone.includes(query) ||
+          location.includes(query) ||
+          order.id.toString().includes(query)
+        );
+      });
+    }
+
+    // Filter by status tab
+    if (activeTab !== "all") {
+      filtered = filtered.filter((o) => o.status === activeTab);
+    }
+
+    // Sort by date (newest first)
+    return filtered.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [orders, searchQuery, activeTab]);
+
   return (
-    <main className="bg-[#e8f4ee] min-h-screen pt-24 pb-20 flex flex-col items-center">
-        <ToastContainer
-          position="top-right"
-          autoClose={1000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnFocusLoss
-          draggable
-          limit={3}
-          toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-          bodyClassName="text-sm font-medium"
-          progressClassName="bg-white/80"
-        />
+    <main className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 min-h-screen pt-20 pb-24 sm:pt-24 sm:pb-28">
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        limit={3}
+        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+        bodyClassName="text-sm font-medium"
+        progressClassName="bg-white/80"
+      />
 
-      <div className="w-full max-w-6xl px-4">
-        <div className="w-full flex items-center justify-between mb-6 pt-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-            {t("provider.orders_title")}
-          </h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={fetchOrders}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all"
-              title="Refresh orders to see latest customer information"
-            >
-              <RefreshCw size={18} />
-              <span className="hidden sm:inline">{t("provider.refresh")}</span>
-            </button>
-            <button
-              onClick={() => setShowScanner(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
-            >
-              <QrCode size={20} />
-              {t("provider.scan_qr_code")}
-            </button>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="mb-6 flex flex-wrap gap-4">
-          {[
-            { label: t("provider.total_orders"), value: orders.length, bg: "bg-gray-100", text: "text-gray-900" },
-            { label: t("provider.confirmed_orders"), value: confirmed.length, bg: "bg-white", text: "text-emerald-700" },
-            { label: t("provider.pending_orders"), value: pending.length, bg: "bg-white", text: "text-yellow-800" },
-            { label: t("provider.cancelled_orders"), value: cancelled.length, bg: "bg-white", text: "text-red-700" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className={`flex-1 min-w-[120px] px-4 py-3 rounded-lg shadow-sm ${stat.bg} flex flex-col items-center`}
-            >
-              <p className="text-sm text-gray-600">{stat.label}</p>
-              <p className={`text-xl font-bold ${stat.text}`}>{stat.value}</p>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                {t("provider.orders_title")}
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Manage and track all orders for your offers
+              </p>
             </div>
-          ))}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                onClick={fetchOrders}
+                variant="outline"
+                size="default"
+                className="gap-2"
+                disabled={loading}
+              >
+                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+                <span className="hidden sm:inline">{t("provider.refresh")}</span>
+              </Button>
+              <Button
+                onClick={() => setShowScanner(true)}
+                className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                size="default"
+              >
+                <QrCode size={20} />
+                <span className="hidden sm:inline">{t("provider.scan_qr_code")}</span>
+                <span className="sm:hidden">Scan</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.total_orders")}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{orders.length}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-gray-100 rounded-lg">
+                    <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.pending_orders")}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-yellow-700">{pending.length}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-yellow-100 rounded-lg">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-700" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.confirmed_orders")}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-emerald-700">{confirmed.length}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-emerald-100 rounded-lg">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.cancelled_orders")}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-red-700">{cancelled.length}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-red-100 rounded-lg">
+                    <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-700" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Search by order ID, customer name, phone, or offer..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-6 sm:py-7 text-base border-2 border-gray-200 focus:border-emerald-500 rounded-xl shadow-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <XCircle size={20} />
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Tabs and Orders */}
         {loading ? (
-          <p className="text-center text-gray-600">{t("provider.loading_orders")}</p>
-        ) : orders.length === 0 ? (
-          <p className="text-center text-gray-600">{t("provider.no_orders")}</p>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {["pending", "confirmed", "cancelled"].map((status) => {
-              const list = orders.filter((o) => o.status === status);
-              if (!list.length) return null;
-              return (
-                <section key={status}>
-                  <h2 className="text-xl font-semibold text-gray-700 mb-3 capitalize">{t(`provider.status.${status}`)}</h2>
-                  <div className="flex flex-col gap-4">
-                    {list.map((order) => (
-                      <OrderCard 
-                        key={order.id} 
-                        order={order}
-                        onScanClick={() => setShowScanner(true)}
-                      />
-                    ))}
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="border-0 shadow-md">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                    <Skeleton className="h-8 w-20" />
                   </div>
-                </section>
-              );
-            })}
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        ) : orders.length === 0 ? (
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-12 sm:p-16 text-center">
+              <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {t("provider.no_orders")}
+              </h3>
+              <p className="text-gray-600">
+                Orders will appear here once customers place orders for your offers
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-6 bg-white shadow-sm border border-gray-200 rounded-xl p-1 h-auto">
+              <TabsTrigger 
+                value="all" 
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
+              >
+                All ({orders.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pending" 
+                className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
+              >
+                Pending ({pending.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="confirmed" 
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
+              >
+                Confirmed ({confirmed.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="cancelled" 
+                className="data-[state=active]:bg-red-500 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
+              >
+                Cancelled ({cancelled.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={activeTab} className="mt-0">
+              {filteredOrders.length === 0 ? (
+                <Card className="border-0 shadow-md">
+                  <CardContent className="p-12 sm:p-16 text-center">
+                    <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {searchQuery ? "No orders found" : `No ${activeTab === "all" ? "" : activeTab} orders`}
+                    </h3>
+                    <p className="text-gray-600">
+                      {searchQuery 
+                        ? "Try adjusting your search criteria"
+                        : activeTab === "all" 
+                          ? "No orders match your filters"
+                          : `You don't have any ${activeTab} orders at the moment`}
+                    </p>
+                    {searchQuery && (
+                      <Button
+                        onClick={() => setSearchQuery("")}
+                        variant="outline"
+                        className="mt-4"
+                      >
+                        Clear Search
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {filteredOrders.map((order) => (
+                    <OrderCard 
+                      key={order.id} 
+                      order={order}
+                      onScanClick={() => setShowScanner(true)}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 
@@ -284,31 +488,32 @@ const ProviderOrdersContent = () => {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="p-6 text-center">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                <CheckCircle size={40} className="text-emerald-600" />
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <Card className="w-full max-w-md border-0 shadow-2xl animate-in zoom-in-95 duration-200">
+            <CardContent className="p-6 sm:p-8 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
+                <CheckCircle size={48} className="text-emerald-600 animate-in zoom-in duration-300" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
                 {alreadyConfirmed ? t("orders.already_confirmed") : t("orders.confirmed_title")}
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-8 text-base sm:text-lg">
                 {alreadyConfirmed 
                   ? t("orders.already_confirmed_message")
                   : t("orders.confirmed_message", { orderId: confirmedOrderId })}
               </p>
-              <button
+              <Button
                 onClick={() => {
                   setShowSuccessModal(false);
                   setConfirmedOrderId(null);
                 }}
-                className="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 text-base"
+                size="lg"
               >
                 {t("common.close")}
-              </button>
-            </div>
-          </div>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
     </main>
@@ -322,6 +527,7 @@ const OrderCard: React.FC<{
   const { t } = useLanguage();
   const offer = order.offer;
   const user = order.user;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Parse and get the first image from the offer, handling various formats
   const getOfferImageSrc = React.useCallback(() => {
@@ -369,110 +575,239 @@ const OrderCard: React.FC<{
     setCurrentImageSrc(getOfferImageSrc());
   }, [getOfferImageSrc]);
 
-  const statusClass = (s: string) => {
+  const statusConfig = (s: string) => {
     switch (s) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return { 
+          bg: "bg-yellow-100", 
+          text: "text-yellow-800", 
+          border: "border-yellow-300",
+          icon: Clock,
+          label: t("provider.status.pending")
+        };
       case "confirmed":
-        return "bg-emerald-100 text-emerald-800";
+        return { 
+          bg: "bg-emerald-100", 
+          text: "text-emerald-800", 
+          border: "border-emerald-300",
+          icon: CheckCircle2,
+          label: t("provider.status.confirmed")
+        };
       case "cancelled":
-        return "bg-red-100 text-red-700";
+        return { 
+          bg: "bg-red-100", 
+          text: "text-red-800", 
+          border: "border-red-300",
+          icon: XCircle,
+          label: t("provider.status.cancelled")
+        };
       default:
-        return "bg-gray-100 text-gray-700";
+        return { 
+          bg: "bg-gray-100", 
+          text: "text-gray-800", 
+          border: "border-gray-300",
+          icon: AlertCircle,
+          label: s
+        };
+    }
+  };
+
+  const status = statusConfig(order.status);
+  const StatusIcon = status.icon;
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return `Today at ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return `Yesterday at ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    } else {
+      return date.toLocaleDateString([], { 
+        month: "short", 
+        day: "numeric", 
+        year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined
+      }) + ` at ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+  };
+
+  const handlePhoneClick = () => {
+    if (user?.phoneNumber) {
+      const phone = typeof user.phoneNumber === 'number' 
+        ? user.phoneNumber.toString() 
+        : user.phoneNumber;
+      window.location.href = `tel:${phone}`;
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 border border-gray-100 hover:shadow-lg transition">
-      <div className="w-20 h-20 rounded-lg overflow-hidden relative flex-shrink-0 bg-gray-100">
-        <Image
-          src={sanitizeImageUrl(currentImageSrc)}
-          alt={offer?.title || "Offer image"}
-          fill
-          sizes="80px"
-          className="object-cover"
-          unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImageSrc))}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            // Try fallbacks
-            let imageSource: any = null;
-            
-            // Parse images if needed
-            if (offer?.images) {
-              if (typeof offer.images === "string") {
-                try {
-                  const parsed = JSON.parse(offer.images);
-                  imageSource = Array.isArray(parsed) ? parsed[0] : parsed;
-                } catch {
-                  imageSource = offer.images;
-                }
-              } else if (Array.isArray(offer.images) && offer.images.length > 0) {
-                imageSource = offer.images[0];
-              }
-            }
-            
-            const fallbacks = getImageFallbacks(imageSource);
-            const currentIndex = fallbacks.indexOf(currentImageSrc);
-            if (currentIndex < fallbacks.length - 1) {
-              setCurrentImageSrc(fallbacks[currentIndex + 1]);
-            } else {
-              target.src = DEFAULT_IMAGE;
-              setCurrentImageSrc(DEFAULT_IMAGE);
-            }
-          }}
-        />
-      </div>
+    <Card className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+      <CardContent className="p-0">
+        <div className="p-4 sm:p-6">
+          <div className="flex items-start gap-4 sm:gap-6">
+            {/* Offer Image */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden relative flex-shrink-0 bg-gray-100 shadow-sm">
+              <Image
+                src={sanitizeImageUrl(currentImageSrc)}
+                alt={offer?.title || "Offer image"}
+                fill
+                sizes="96px"
+                className="object-cover"
+                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImageSrc))}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  let imageSource: any = null;
+                  
+                  if (offer?.images) {
+                    if (typeof offer.images === "string") {
+                      try {
+                        const parsed = JSON.parse(offer.images);
+                        imageSource = Array.isArray(parsed) ? parsed[0] : parsed;
+                      } catch {
+                        imageSource = offer.images;
+                      }
+                    } else if (Array.isArray(offer.images) && offer.images.length > 0) {
+                      imageSource = offer.images[0];
+                    }
+                  }
+                  
+                  const fallbacks = getImageFallbacks(imageSource);
+                  const currentIndex = fallbacks.indexOf(currentImageSrc);
+                  if (currentIndex < fallbacks.length - 1) {
+                    setCurrentImageSrc(fallbacks[currentIndex + 1]);
+                  } else {
+                    target.src = DEFAULT_IMAGE;
+                    setCurrentImageSrc(DEFAULT_IMAGE);
+                  }
+                }}
+              />
+            </div>
 
-      <div className="flex-1 min-w-0">
-        <h3 className="text-md font-semibold text-gray-900 truncate">{offer?.title || "Offer"}</h3>
-        <p className="text-sm text-gray-600">
-          {t("provider.ordered_by")}{" "}
-          <span className="font-medium text-gray-800">
-            {user?.username || `User ${order.userId}`}
-          </span>
-        </p>
-        <p className="text-sm text-gray-600">
-          {t("provider.phone")}{" "}
-          <span className="font-medium text-gray-800">
-            {user?.phoneNumber 
-              ? (typeof user.phoneNumber === 'number' ? user.phoneNumber.toString() : user.phoneNumber)
-              : 'N/A'}
-          </span>
-        </p>
-        {user?.location && (
-          <p className="text-sm text-gray-500">
-            {t("provider.location")} <span className="font-medium text-gray-700">{user.location}</span>
-          </p>
-        )}
-        <p className="text-sm text-gray-500">
-          {t("provider.quantity")} <span className="font-medium">{order.quantity}</span>
-        </p>
-        <p className="text-sm text-gray-500">
-          {t("provider.ordered_on")}{" "}
-        <span className="font-medium">
-          {new Date(order.createdAt).toLocaleDateString()}{" "}
-          {t("provider.at_time")} {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 truncate">
+                    {offer?.title || "Offer"}
+                  </h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge 
+                      variant="outline" 
+                      className={`${status.bg} ${status.text} ${status.border} border-2 flex items-center gap-1.5 px-3 py-1`}
+                    >
+                      <StatusIcon size={14} />
+                      <span className="font-semibold">{status.label}</span>
+                    </Badge>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      Order #{order.id}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-        </p>
-      </div>
+              {/* Customer Info */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-sm sm:text-base">
+                  <UserIcon size={16} className="text-gray-400 flex-shrink-0" />
+                  <span className="text-gray-600">{t("provider.ordered_by")}</span>
+                  <span className="font-semibold text-gray-900">
+                    {user?.username || `User ${order.userId}`}
+                  </span>
+                </div>
 
-      <div className="flex flex-col items-end gap-2">
-        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClass(order.status)}`}>
-          {order.status.toUpperCase()}
-        </span>
-        {order.status === "pending" && onScanClick && (
-          <button
-            onClick={onScanClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors"
-            title="Scan customer's QR code to confirm pickup"
-          >
-            <QrCode size={14} />
-            {t("provider.scan_qr")}
-          </button>
-        )}
-      </div>
-    </div>
+                {user?.phoneNumber && (
+                  <button
+                    onClick={handlePhoneClick}
+                    className="flex items-center gap-2 text-sm sm:text-base text-emerald-600 hover:text-emerald-700 transition-colors group"
+                  >
+                    <Phone size={16} className="text-gray-400 group-hover:text-emerald-600 transition-colors" />
+                    <span className="font-medium">
+                      {typeof user.phoneNumber === 'number' 
+                        ? user.phoneNumber.toString() 
+                        : user.phoneNumber}
+                    </span>
+                  </button>
+                )}
+
+                {user?.location && (
+                  <div className="flex items-center gap-2 text-sm sm:text-base text-gray-600">
+                    <MapPin size={16} className="text-gray-400 flex-shrink-0" />
+                    <span className="truncate">{user.location}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-4 text-sm sm:text-base text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Package size={16} className="text-gray-400" />
+                    <span>
+                      <span className="font-semibold text-gray-900">{order.quantity}</span> {order.quantity === 1 ? 'item' : 'items'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-gray-400" />
+                    <span className="text-xs sm:text-sm">{formatDate(order.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expandable Details */}
+              {isExpanded && (
+                <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-600">
+                  {offer?.pickupLocation && (
+                    <div className="flex items-start gap-2">
+                      <MapPin size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <span className="font-medium text-gray-700">Pickup Location: </span>
+                        <span>{offer.pickupLocation}</span>
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium text-gray-700">Order Date: </span>
+                    <span>{new Date(order.createdAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center justify-between gap-3 mt-4">
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                >
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp size={16} />
+                      <span>Show Less</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown size={16} />
+                      <span>Show Details</span>
+                    </>
+                  )}
+                </button>
+
+                {order.status === "pending" && onScanClick && (
+                  <Button
+                    onClick={onScanClick}
+                    size="sm"
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    <QrCode size={16} />
+                    <span className="hidden sm:inline">{t("provider.scan_qr")}</span>
+                    <span className="sm:hidden">Scan</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
