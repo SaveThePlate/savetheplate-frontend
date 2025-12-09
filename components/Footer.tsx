@@ -4,7 +4,7 @@ const Footer = () => {
 
   return (
     <footer className="w-full border-t border-gray-200 bg-white/80 backdrop-blur-sm">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 py-3 flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-500">
+      <div className="w-full mx-auto px-4 sm:px-6 py-3 flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-500">
         <Image
           src="/logoOnly.png"
           alt="Save the plate"

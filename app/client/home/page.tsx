@@ -95,8 +95,8 @@ const Home = () => {
   }, [fetchOffers]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center pt-24 pb-20 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 space-y-8 relative">
+    <main className="min-h-screen flex flex-col items-center pt-4 pb-4 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl space-y-6 sm:space-y-8 relative">
         {/* Decorative soft shapes */}
         <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
         <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
@@ -125,7 +125,7 @@ const Home = () => {
                   router.push("/client/orders");
                 }
               }}
-              className="bg-[#FFAE8A] hover:bg-[#ff9966] text-white rounded-xl px-5 py-2 transition-all duration-200"
+              className="bg-[#FFAE8A] hover:bg-[#ff9966] text-white rounded-xl px-5 py-2.5 sm:py-2 transition-all duration-200 min-h-[44px] sm:min-h-0"
             >
               {t("home.view_orders")}
             </Button>
@@ -133,12 +133,12 @@ const Home = () => {
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-center sm:text-left space-y-2 flex-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#344e41] tracking-tight">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
               {t("offers.available_offers")}
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base font-medium">
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
               {t("offers.discover_meals")}
             </p>
           </div>
@@ -146,7 +146,7 @@ const Home = () => {
             data-tour="refresh-button"
             onClick={() => fetchOffers(true)}
             disabled={refreshing || loading}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             title="Refresh offers to see latest available meals"
           >
             <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
@@ -155,7 +155,7 @@ const Home = () => {
         </div>
 
         {/* Offers List */}
-        <section data-tour="offers-section" className="relative min-h-[50vh] bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-3xl shadow-sm p-5 sm:p-8 transition-all duration-300 hover:shadow-md">
+        <section data-tour="offers-section" className="relative min-h-[50vh] bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8 transition-all duration-300 hover:shadow-md">
           {loading ? (
             <div className="flex justify-center items-center h-64 text-gray-500">
               <Loader2 className="animate-spin w-6 h-6 mr-2" />

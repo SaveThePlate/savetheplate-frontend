@@ -27,6 +27,11 @@ export default function RootLayout({
         <LanguageProvider>
           <html lang="en">
             <head>
+              {/* Mobile viewport optimization */}
+              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+              <meta name="mobile-web-app-capable" content="yes" />
+              <meta name="apple-mobile-web-app-capable" content="yes" />
+              <meta name="apple-mobile-web-app-status-bar-style" content="default" />
               {/* Resource hints for performance */}
               <link rel="preconnect" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space"} />
               <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space"} />
@@ -37,7 +42,7 @@ export default function RootLayout({
               <link rel="prefetch" href="/provider/home" />
               <link rel="prefetch" href="/signIn" />
             </head>
-            <body className="flex flex-col min-h-screen bg-white">
+            <body className="flex flex-col min-h-screen bg-white safe-area-inset">
             {/* Google Analytics - gtag.js */}
             <Script
               src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
@@ -58,7 +63,10 @@ export default function RootLayout({
                 <Footer />
             
 
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster 
+              position="top-center" 
+              reverseOrder={false}
+            />
             </body>
           </html>
         </LanguageProvider>

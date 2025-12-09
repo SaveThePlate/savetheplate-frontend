@@ -56,8 +56,8 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
   return (
     <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
-      <header className="w-full fixed top-0 left-0 z-30 bg-white shadow-sm border-b border-gray-200">
-        <nav className="max-w-[1440px] mx-auto flex items-center justify-between px-4 sm:px-8 lg:px-16 h-16">
+      <header className="w-full fixed top-0 left-0 z-30 bg-white shadow-sm border-b border-gray-200 safe-area-inset-top">
+        <nav className="w-full mx-auto flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
           {/* Logo */}
           <Link href={homeLink} className="flex items-center h-full">
             <Image
@@ -232,13 +232,13 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
       </header>
 
       {/* Main Content */}
-      <main className="w-full mx-auto">
+      <main className="w-full mx-auto pt-14 sm:pt-16 pb-20 sm:pb-24">
         {children}
       </main>
 
       {/* Bottom Navigation (mobile) */}
       {(isClient || isProvider) && (
-        <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 z-40 lg:hidden">
+        <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 pb-safe z-40 lg:hidden safe-area-inset-bottom">
           {isClient ? (
             <>
               <Link

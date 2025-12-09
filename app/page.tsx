@@ -128,8 +128,8 @@ const WelcomePage = () => {
         <div className="absolute bottom-20 right-[-4rem] w-64 h-64 bg-teal-200 rounded-full blur-3xl opacity-30 -z-10" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-20 -z-10" />
 
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
             {/* Left: Content */}
             <div className="text-center lg:text-left space-y-8">
               {/* Badge */}
@@ -227,8 +227,8 @@ const WelcomePage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div className="w-full mx-auto max-w-2xl lg:max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-[#1B4332] mb-4">
               {t("landing.why_choose")}
@@ -238,7 +238,7 @@ const WelcomePage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Feature 1 */}
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow">
               <div className="w-14 h-14 rounded-xl bg-emerald-100 flex items-center justify-center mb-4">
@@ -309,8 +309,8 @@ const WelcomePage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
+        <div className="w-full mx-auto max-w-2xl lg:max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-[#1B4332] mb-4">
               {t("landing.how_it_works")}
@@ -320,7 +320,7 @@ const WelcomePage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {/* Step 1 */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-200 text-center">
               <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
@@ -358,8 +358,8 @@ const WelcomePage = () => {
       </section>
 
       {/* For Providers Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="w-full mx-auto max-w-2xl lg:max-w-7xl">
           <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               <div>
@@ -406,8 +406,8 @@ const WelcomePage = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
+        <div className="w-full mx-auto max-w-2xl lg:max-w-4xl text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-[#1B4332] mb-4">
             {t("landing.ready_title")}
           </h2>

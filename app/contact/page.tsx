@@ -145,7 +145,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-4 pb-4 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] px-4 sm:px-6 lg:px-8">
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -160,10 +160,10 @@ const ContactPage = () => {
         progressClassName="bg-white/80"
       />
 
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full mx-auto max-w-2xl lg:max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-[#1B4332] mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1B4332] mb-3 sm:mb-4">
             {t("contact.title")}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -171,7 +171,7 @@ const ContactPage = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Contact Information Cards */}
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">

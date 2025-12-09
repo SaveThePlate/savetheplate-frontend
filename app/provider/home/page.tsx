@@ -318,7 +318,7 @@ const ProviderHome = () => {
   };
 
   return (
-    <main className="bg-[#F9FAF5] min-h-screen pt-24 pb-20 flex flex-col items-center">
+    <main className="bg-[#F9FAF5] min-h-screen pt-4 pb-4 flex flex-col items-center">
         <ToastContainer
   position="top-right"
   autoClose={1000}
@@ -332,7 +332,7 @@ const ProviderHome = () => {
   bodyClassName="text-sm font-medium"
   progressClassName="bg-white/80"
 />
-      <div className="w-full max-w-6xl px-4 sm:px-8 flex flex-col space-y-12">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl flex flex-col space-y-6 sm:space-y-8 md:space-y-12">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex flex-col gap-1 text-center sm:text-left">
@@ -346,7 +346,7 @@ const ProviderHome = () => {
           <button
             data-tour="publish-button"
             onClick={() => router.push("./publish")}
-            className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-800 font-semibold rounded-xl shadow-md hover:bg-green-600 hover:text-white transition duration-300 transform hover:scale-[1.02]"
+            className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-800 font-semibold rounded-xl shadow-md hover:bg-green-600 hover:text-white transition duration-300 transform hover:scale-[1.02] min-h-[44px] w-full sm:w-auto"
           >
             <PlusCircle size={22} />
             {t("provider.home.publish_offer")}
@@ -363,7 +363,7 @@ const ProviderHome = () => {
             {t("provider.home.no_offers")}
           </p>
         ) : (
-          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {offers.map((offer) => {
   // Handle images - might be array, JSON string, or undefined
   let imagesArray: any[] = [];
