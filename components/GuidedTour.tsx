@@ -106,6 +106,14 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
         hideCloseButton={true}
         disableOverlayClose={true}
         disableScrolling={false}
+        floaterProps={{
+          disableAnimation: false,
+          styles: {
+            floater: {
+              position: "fixed",
+            },
+          },
+        }}
         styles={{
           options: {
             primaryColor: "#A8DADC",
@@ -115,6 +123,13 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
             backgroundColor: "#FFFFFF",
             beaconSize: 36,
             zIndex: 10000,
+          },
+          overlay: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
           },
           tooltip: {
             borderRadius: 12,
@@ -174,10 +189,11 @@ const GuidedTour: React.FC<GuidedTourProps> = ({
       {mounted && (
         <button
           onClick={startTour}
-          className="flex items-center hover:text-green-600 transition-colors text-gray-700"
+          className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 hover:text-green-600 transition-all text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           title={t("tour.start_guide") || "Start guided tour"}
+          aria-label={t("tour.start_guide") || "Start guided tour"}
         >
-          <HelpCircle size={18} />
+          <HelpCircle size={18} className="shrink-0" />
         </button>
       )}
     </>

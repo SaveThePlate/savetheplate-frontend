@@ -59,7 +59,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
           {/* Desktop Menu */}
           <div data-tour="navigation-menu" className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <LanguageSwitcher variant="button" />
               <GuidedTour 
                 steps={getClientHomeTourSteps(t)} 
@@ -121,9 +121,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           </div>
 
           <nav className="flex flex-col p-6 space-y-4 text-gray-700 font-medium">
-            <div className="pb-2 border-b border-gray-200 flex items-center gap-4">
+            <div className="pb-2 border-b border-gray-200 flex items-center gap-2">
               <LanguageSwitcher variant="button" />
-              <div onClick={() => setMenuOpen(false)}>
+              <div onClick={() => setMenuOpen(false)} className="flex items-center">
                 <GuidedTour 
                   steps={getClientHomeTourSteps(t)} 
                   tourKey="client-home"
