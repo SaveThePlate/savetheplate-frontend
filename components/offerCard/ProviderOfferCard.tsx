@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import axios, { CancelTokenSource } from "axios";
 import { toast } from "react-toastify";
-import { ProviderOfferCardProps } from "./types";
+import { ProviderOfferCardProps, FoodType, Taste } from "./types";
 import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
@@ -45,6 +45,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   pickupEndTime,
   pickupLocation,
   mapsLink,
+  foodType,
+  taste,
   owner,
   onDelete,
   onUpdate,
@@ -69,8 +71,9 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     expirationDate: expirationDate || "",
     pickupStartTime: pickupStartTime || "",
     pickupEndTime: pickupEndTime || "",
-    pickupLocation: pickupLocation || "",
-    mapsLink: mapsLink || "",
+    // pickupLocation and mapsLink are managed from profile, not stored in local state
+    foodType: foodType || "other" as FoodType,
+    taste: taste || "neutral" as Taste,
   });
   
   // Image upload state
@@ -115,10 +118,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       expirationDate: expirationDate || "",
       pickupStartTime: pickupStartTime || "",
       pickupEndTime: pickupEndTime || "",
-      pickupLocation: pickupLocation || "",
-      mapsLink: mapsLink || "",
+      // pickupLocation and mapsLink are managed from profile, not synced
+      foodType: foodType || "other" as FoodType,
+      taste: taste || "neutral" as Taste,
     });
-  }, [title, description, price, originalPrice, quantity, expirationDate, pickupStartTime, pickupEndTime, pickupLocation, mapsLink, offerId]);
+  }, [title, description, price, originalPrice, quantity, expirationDate, pickupStartTime, pickupEndTime, foodType, taste, offerId]);
 
   // Sync image display
   useEffect(() => {
@@ -265,13 +269,13 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const handleEdit = async () => {
     if (!isMountedRef.current) return;
     
-    if (!localData.title || !localData.description) {
+    if (!localData.title) {
       toast.error(t("offer_card.fill_fields"));
       return;
     }
 
-    // Validate required fields
-    if (!localData.price || !localData.quantity || !localData.expirationDate || !localData.pickupLocation || !localData.pickupStartTime || !localData.pickupEndTime) {
+    // Validate required fields (pickupLocation is now from profile, not required)
+    if (!localData.price || !localData.quantity || !localData.expirationDate || !localData.pickupStartTime || !localData.pickupEndTime) {
       toast.error(t("offer_card.fill_fields"));
       return;
     }
@@ -368,16 +372,18 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         }));
       }
 
+      // Note: pickupLocation and mapsLink will be set from user's profile on the backend
       const payload: any = {
         title: String(localData.title).trim(),
-        description: String(localData.description).trim(),
+        description: String(localData.description || '').trim(), // Allow empty description
         price: priceValue,
         quantity: quantityValue,
         expirationDate: localData.expirationDate,
         pickupStartTime: localData.pickupStartTime,
         pickupEndTime: localData.pickupEndTime,
-        pickupLocation: String(localData.pickupLocation).trim(),
-        mapsLink: String(localData.mapsLink).trim(),
+        // mapsLink removed - always comes from user profile
+        foodType: localData.foodType,
+        taste: localData.taste,
       };
 
       // Only include originalPrice if it has a value (don't send undefined)
@@ -407,7 +413,6 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       setLocalData({
         ...localData,
         originalPrice: originalPriceValue !== undefined ? String(originalPriceValue) : "",
-        mapsLink: String(localData.mapsLink).trim(),
       });
       setLocalFiles(null);
       setUploadedImages([]);
@@ -458,11 +463,15 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   );
   const expired = isOfferExpired(expirationDate);
   const isRescuePack = title.toLowerCase().includes("rescue pack");
+  const isLowStock = !expired && quantity > 0 && quantity <= 5;
+  const isActive = !expired && quantity > 0;
 
   return (
-    <Card className={`flex flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm transition-all ${isDeleting ? "opacity-0 scale-95" : ""}`}>
+    <Card className={`flex flex-col bg-white rounded-2xl overflow-hidden border transition-all hover:shadow-lg ${
+      expired ? "border-gray-200 opacity-75" : isLowStock ? "border-amber-200" : "border-gray-100"
+    } ${isDeleting ? "opacity-0 scale-95" : ""}`}>
       {/* Image */}
-      <div className="relative w-full h-40 sm:h-44">
+      <div className="relative w-full h-48 sm:h-52">
         {currentImage ? (
           <Image
             src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
@@ -484,55 +493,74 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
         <PriceBadge price={price} originalPrice={originalPrice} />
         <QuantityBadge quantity={quantity} isExpired={expired} position="bottom-right" />
-        <ProviderOverlay owner={owner} pickupLocation={pickupLocation} />
+        <ProviderOverlay owner={owner} pickupLocation={owner?.location || pickupLocation} />
 
-        {expired && (
-          <div className="absolute top-2 left-2 bg-gray-800 text-white px-2 py-0.5 rounded-full text-xs font-medium shadow-md z-10">
-            {t("common.expired")}
-          </div>
-        )}
+        {/* Status Badge */}
+        <div className="absolute top-3 left-3 z-10">
+          {expired ? (
+            <div className="bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+              {t("common.expired")}
+            </div>
+          ) : isLowStock ? (
+            <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+              {t("provider.home.status.low_stock")}
+            </div>
+          ) : isActive ? (
+            <div className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+              {t("provider.home.status.active")}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-3">
-        <CardHeader className="p-0">
-          <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">
+      <div className="flex flex-col flex-1 p-4 sm:p-5">
+        <CardHeader className="p-0 mb-3">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2">
             {title}
           </CardTitle>
-          <CardDescription className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+          <CardDescription className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
             {description}
           </CardDescription>
-
-          <div className="flex flex-col gap-2 mt-2">
-            {mapsLink ? (
-              <a
-                href={mapsLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl text-left"
-              >
-                <span className="text-lg">📍</span>
-                <span className="truncate">{pickupLocation || "View on Map"}</span>
-              </a>
-            ) : (
-              <p className="text-gray-600 font-medium w-full">{pickupLocation || "Provider"}</p>
-            )}
-            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-              <span className="font-medium">🕐</span>
-              <span>
-                {formattedDate === "Today" ? t("common.today") : formattedDate}
-                {formattedTime && (
-                  <span className="font-semibold text-emerald-700 ml-1">
-                    {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
-                  </span>
-                )}
+          
+          {/* Category Badges */}
+          <div className="flex flex-wrap gap-2 mb-2">
+            {foodType && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800">
+                {foodType === "snack" && "🍪"}
+                {foodType === "meal" && "🍽️"}
+                {foodType === "beverage" && "🥤"}
+                {foodType === "other" && "📦"}
+                <span className="ml-1 capitalize">{foodType}</span>
               </span>
-            </div>
+            )}
+            {taste && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-100 text-purple-800">
+                {taste === "sweet" && "🍰"}
+                {taste === "salty" && "🧂"}
+                {taste === "both" && "🍬"}
+                {taste === "neutral" && "⚪"}
+                <span className="ml-1 capitalize">{taste}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Pickup Time */}
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 px-1">
+            <span>🕐</span>
+            <span>
+              {formattedDate === "Today" ? t("common.today") : formattedDate}
+              {formattedTime && (
+                <span className="font-semibold text-emerald-700 ml-1">
+                  {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+                </span>
+              )}
+            </span>
           </div>
         </CardHeader>
 
         {/* Footer Buttons */}
-        <CardFooter className="mt-4 flex w-full gap-3">
+        <CardFooter className="mt-auto pt-4 flex w-full gap-2 sm:gap-3 border-t border-gray-100">
           {/* Edit Modal */}
           <div className="flex-1">
             <Credenza 
@@ -550,8 +578,9 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         expirationDate: expirationDate || "",
                         pickupStartTime: pickupStartTime || "",
                         pickupEndTime: pickupEndTime || "",
-                        pickupLocation: pickupLocation || "",
-                        mapsLink: mapsLink || "",
+                        // pickupLocation and mapsLink are managed from profile
+                        foodType: foodType || "other" as FoodType,
+                        taste: taste || "neutral" as Taste,
                       });
                   setLocalFiles(null);
                   setUploadedImages([]);
@@ -562,23 +591,23 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
               <CredenzaTrigger asChild>
                 <button
                   disabled={loading}
-                  className="w-full bg-white border border-gray-300 text-gray-800 px-3 py-2 rounded-lg font-medium hover:bg-gray-50"
+                  className="w-full bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base shadow-sm"
                 >
                   {t("common.edit")}
                 </button>
               </CredenzaTrigger>
 
-              <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 max-w-lg mx-auto border border-gray-100">
-                <CredenzaHeader className="mb-3 sm:mb-4">
-                  <CredenzaTitle className="text-lg sm:text-xl font-bold text-gray-900">
+              <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 max-w-2xl mx-auto border border-gray-100 max-h-[90vh] overflow-y-auto">
+                <CredenzaHeader className="mb-4 sm:mb-6">
+                  <CredenzaTitle className="text-xl sm:text-2xl font-bold text-gray-900">
                     {t("offer_card.edit_offer")}
                   </CredenzaTitle>
-                  <CredenzaDescription className="text-xs sm:text-sm text-gray-500 mt-1">
+                  <CredenzaDescription className="text-sm text-gray-500 mt-2">
                     {t("offer_card.update_details")}
                   </CredenzaDescription>
                 </CredenzaHeader>
 
-                <CredenzaBody className="space-y-3 sm:space-y-4">
+                <CredenzaBody className="space-y-4 sm:space-y-5">
                   {/* Title */}
                   <div className="space-y-1.5">
                     <label htmlFor="edit-title" className="text-xs sm:text-sm font-semibold text-gray-700">
@@ -598,7 +627,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   {/* Description */}
                   <div className="space-y-1.5">
                     <label htmlFor="edit-description" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("offer_card.description_label")} <span className="text-red-500">*</span>
+                      {t("offer_card.description_label")} <span className="text-gray-400 font-normal text-xs">(Optional)</span>
                     </label>
                     <textarea
                       id="edit-description"
@@ -609,7 +638,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
                       disabled={loading}
                       placeholder={t("offer_card.description_label")}
+                      maxLength={500}
                     />
+                    <p className="text-xs text-gray-500">
+                      {localData.description?.length || 0}/500 characters. Optional - helps customers understand your offer better.
+                    </p>
                   </div>
 
                   {/* Price Fields */}
@@ -785,38 +818,64 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                     />
                   </div>
 
-                  {/* Pickup Location */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-pickupLocation" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("add_offer.pickup_location")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="edit-pickupLocation"
-                      name="pickupLocation"
-                      value={localData.pickupLocation}
-                      onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      placeholder={t("add_offer.pickup_location_placeholder")}
-                      required
-                    />
+                  {/* Pickup Location Info */}
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span className="text-emerald-600 text-lg">📍</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-emerald-900 mb-1">
+                          {t("add_offer.pickup_location")}
+                        </h3>
+                        <p className="text-xs text-emerald-700">
+                          Pickup location is set from your profile. Update your location in profile settings if needed.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Maps Link */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-mapsLink" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("onboarding.google_maps_link")}
-                    </label>
-                    <input
-                      id="edit-mapsLink"
-                      name="mapsLink"
-                      value={localData.mapsLink}
-                      onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      placeholder={t("onboarding.maps_placeholder")}
-                    />
-                    <p className="text-xs text-gray-500">{t("onboarding.maps_hint")}</p>
+                  {/* Category Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Food Type */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit-foodType" className="text-xs sm:text-sm font-semibold text-gray-700">
+                        {t("offer_card.food_type_label")}
+                      </label>
+                      <select
+                        id="edit-foodType"
+                        name="foodType"
+                        value={localData.foodType}
+                        onChange={(e) => setLocalData(prev => ({ ...prev, foodType: e.target.value as FoodType }))}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white"
+                        disabled={loading}
+                      >
+                        <option value="snack">{t("offer_card.food_type_snack")}</option>
+                        <option value="meal">{t("offer_card.food_type_meal")}</option>
+                        <option value="beverage">{t("offer_card.food_type_beverage")}</option>
+                        <option value="other">{t("offer_card.food_type_other")}</option>
+                      </select>
+                    </div>
+
+                    {/* Taste */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit-taste" className="text-xs sm:text-sm font-semibold text-gray-700">
+                        {t("offer_card.taste_label")}
+                      </label>
+                      <select
+                        id="edit-taste"
+                        name="taste"
+                        value={localData.taste}
+                        onChange={(e) => setLocalData(prev => ({ ...prev, taste: e.target.value as Taste }))}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white"
+                        disabled={loading}
+                      >
+                        <option value="sweet">{t("offer_card.taste_sweet")}</option>
+                        <option value="salty">{t("offer_card.taste_salty")}</option>
+                        <option value="both">{t("offer_card.taste_both")}</option>
+                        <option value="neutral">{t("offer_card.taste_neutral")}</option>
+                      </select>
+                    </div>
                   </div>
 
                   {/* Images Upload */}
@@ -880,7 +939,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   </div>
                 </CredenzaBody>
 
-                <CredenzaFooter className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white z-10">
+                <CredenzaFooter className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-6 border-t border-gray-200 sticky bottom-0 bg-white z-10">
                   <button 
                     onClick={() => {
                       setIsEditing(false);
@@ -894,14 +953,15 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         expirationDate: expirationDate || "",
                         pickupStartTime: pickupStartTime || "",
                         pickupEndTime: pickupEndTime || "",
-                        pickupLocation: pickupLocation || "",
-                        mapsLink: mapsLink || "",
+                        // pickupLocation and mapsLink are managed from profile
+                        foodType: foodType || "other" as FoodType,
+                        taste: taste || "neutral" as Taste,
                       });
                       setLocalFiles(null);
                       setUploadedImages([]);
                       setUploadingImages(false);
                     }}
-                    className="w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium hover:bg-gray-200 transition-colors"
+                    className="w-full sm:w-auto px-5 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-semibold hover:bg-gray-200 transition-colors"
                     disabled={loading}
                   >
                     {t("common.cancel")}
@@ -909,7 +969,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   <button
                     onClick={handleEdit}
                     disabled={loading || uploadingImages}
-                    className="w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-3 bg-emerald-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
                     {loading ? t("common.saving") : uploadingImages ? t("offer_card.uploading") : t("offer_card.save_changes")}
                   </button>
@@ -922,7 +982,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
           <div className="flex-1">
             <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
               <CredenzaTrigger asChild>
-                <button className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium hover:bg-red-600">
+                <button className="w-full bg-red-500 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-red-600 transition-colors text-sm sm:text-base shadow-sm">
                   {t("common.delete")}
                 </button>
               </CredenzaTrigger>

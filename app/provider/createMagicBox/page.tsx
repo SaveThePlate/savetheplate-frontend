@@ -30,7 +30,7 @@ const CreateMagicBoxPage = () => {
   const [pickupDate, setPickupDate] = useState<string>("");
   const [pickupStartTime, setPickupStartTime] = useState<string>("");
   const [pickupEndTime, setPickupEndTime] = useState<string>("");
-  const [pickupLocation, setPickupLocation] = useState<string>("");
+  // Pickup location is now taken from user's profile, no need for state
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [quantity, setQuantity] = useState("");
@@ -93,11 +93,7 @@ const CreateMagicBoxPage = () => {
       return;
     }
 
-    if (!pickupLocation.trim()) {
-      setError("Please enter a pickup location");
-      toast.error("Pickup location is required");
-      return;
-    }
+    // Pickup location will be taken from user's profile, no need to validate
 
     // Combine date and times
     const startDateTime = new Date(`${pickupDate}T${pickupStartTime}`);
@@ -151,7 +147,7 @@ const CreateMagicBoxPage = () => {
         expirationDate: endDateTime.toISOString(),
         pickupStartTime: startDateTime.toISOString(),
         pickupEndTime: endDateTime.toISOString(),
-        pickupLocation: pickupLocation.trim(),
+        // pickupLocation will be set from user's profile on the backend
         latitude: 0,
         longitude: 0,
         images: imagesPayload,
@@ -323,19 +319,21 @@ const CreateMagicBoxPage = () => {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="pickupLocation" className="block text-sm font-semibold text-gray-700 mb-2">
-              Pickup Location <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="pickupLocation"
-              value={pickupLocation}
-              onChange={(e) => setPickupLocation(e.target.value)}
-              placeholder="e.g., 123 Main Street, Tunis"
-              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">Where should customers pick up their order?</p>
+          {/* Pickup Location Info */}
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-emerald-600 text-lg">📍</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-emerald-900 mb-1">
+                  Pickup Location
+                </h3>
+                <p className="text-xs text-emerald-700">
+                  Orders will be picked up at your store location from your profile. Make sure your location is up to date in your profile settings.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -400,7 +398,7 @@ const CreateMagicBoxPage = () => {
         {/* Submit Button */}
         <Button
           onClick={handleCreateRescuePack}
-          disabled={loading || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime || !pickupLocation.trim()}
+          disabled={loading || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
           className="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01]"
         >
           {loading ? (

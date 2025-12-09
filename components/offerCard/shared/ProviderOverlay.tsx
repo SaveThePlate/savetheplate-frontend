@@ -33,7 +33,7 @@ export const ProviderOverlay: FC<ProviderOverlayProps> = ({
         />
       </div>
       <p className="text-xs font-semibold text-gray-800 truncate max-w-[100px]">
-        {owner.location || pickupLocation}
+        {owner.location || pickupLocation || "Location"}
       </p>
     </div>
   );

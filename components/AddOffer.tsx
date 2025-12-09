@@ -15,6 +15,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 type UploadedImage = {
   filename: string;
@@ -27,7 +28,11 @@ type UploadedImage = {
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
+type FoodType = "snack" | "meal" | "beverage" | "other";
+type Taste = "sweet" | "salty" | "both" | "neutral";
+
 const AddOffer: React.FC = () => {
+  const { t } = useLanguage();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -36,7 +41,9 @@ const AddOffer: React.FC = () => {
   const [pickupDate, setPickupDate] = useState("");
   const [pickupStartTime, setPickupStartTime] = useState("");
   const [pickupEndTime, setPickupEndTime] = useState("");
-  const [pickupLocation, setPickupLocation] = useState("");
+  // Pickup location is now taken from user's profile, no need for state
+  const [foodType, setFoodType] = useState<FoodType>("other");
+  const [taste, setTaste] = useState<Taste>("neutral");
   const [localFiles, setLocalFiles] = useState<File[] | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -163,15 +170,7 @@ const AddOffer: React.FC = () => {
       return;
     }
 
-    if (!description.trim()) {
-      toast.error("Please enter a description");
-      return;
-    }
-
-    if (description.trim().length < 10) {
-      toast.error("Description must be at least 10 characters");
-      return;
-    }
+    // Description is now optional, no validation needed
 
     const priceToFloat = parseFloat(price);
     if (isNaN(priceToFloat) || priceToFloat <= 0) {
@@ -214,10 +213,7 @@ const AddOffer: React.FC = () => {
       return;
     }
 
-    if (!pickupLocation.trim()) {
-      toast.error("Please enter a pickup location");
-      return;
-    }
+    // Pickup location will be taken from user's profile, no need to validate
 
     try {
       // Ensure images are uploaded before submitting
@@ -253,15 +249,17 @@ const AddOffer: React.FC = () => {
       }
 
       // Use end time as expiration date for backward compatibility
+      // Note: pickupLocation will be set from user's profile on the backend
       const payload: any = {
         title: title.trim(),
-        description: description.trim(),
+        description: description.trim() || '', // Allow empty description
         price: priceToFloat,
         quantity: quantityToFloat,
         expirationDate: endDateTime.toISOString(),
         pickupStartTime: startDateTime.toISOString(),
         pickupEndTime: endDateTime.toISOString(),
-        pickupLocation: pickupLocation.trim(),
+        foodType: foodType,
+        taste: taste,
         images: JSON.stringify(imagesPayload),
       };
 
@@ -284,7 +282,8 @@ const AddOffer: React.FC = () => {
       setPickupDate("");
       setPickupStartTime("");
       setPickupEndTime("");
-      setPickupLocation("");
+      setFoodType("other");
+      setTaste("neutral");
       setLocalFiles(null);
       setUploadedImages([]);
       
@@ -343,7 +342,7 @@ const AddOffer: React.FC = () => {
             htmlFor="description"
             className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Description <span className="text-red-500">*</span>
+            Description <span className="text-gray-400 font-normal text-xs">(Optional)</span>
           </label>
           <Textarea
             id="description"
@@ -351,12 +350,10 @@ const AddOffer: React.FC = () => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe what's included in this offer. Be specific about items, quantities, and any special details..."
             className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[120px] resize-none"
-            required
-            minLength={10}
             maxLength={500}
           />
           <p className="text-xs text-gray-500 mt-1">
-            {description.length}/500 characters. Minimum 10 characters required.
+            {description.length}/500 characters. Optional - helps customers understand your offer better.
           </p>
         </div>
 
@@ -449,23 +446,21 @@ const AddOffer: React.FC = () => {
           <p className="text-xs text-gray-500 mt-1">How many units are available?</p>
         </div>
 
-        {/* Pickup Location */}
-        <div>
-          <label
-            htmlFor="pickupLocation"
-            className="block text-sm font-semibold text-gray-700 mb-2"
-          >
-            Pickup Location <span className="text-red-500">*</span>
-          </label>
-          <Input
-            id="pickupLocation"
-            value={pickupLocation}
-            onChange={(e) => setPickupLocation(e.target.value)}
-            placeholder="e.g., 123 Main Street, Tunis"
-            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-            required
-          />
-          <p className="text-xs text-gray-500 mt-1">Where should customers pick up their order?</p>
+        {/* Pickup Location Info */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+              <span className="text-emerald-600 text-lg">📍</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-emerald-900 mb-1">
+                Pickup Location
+              </h3>
+              <p className="text-xs text-emerald-700">
+                Orders will be picked up at your store location from your profile. Make sure your location is up to date in your profile settings.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Pickup Date and Time Range */}
@@ -526,6 +521,53 @@ const AddOffer: React.FC = () => {
               />
               <p className="text-xs text-gray-500 mt-1">Latest pickup time</p>
             </div>
+          </div>
+        </div>
+
+        {/* Category Fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Food Type */}
+          <div>
+            <label
+              htmlFor="foodType"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              {t("add_offer.food_type_label")}
+            </label>
+            <select
+              id="foodType"
+              value={foodType}
+              onChange={(e) => setFoodType(e.target.value as FoodType)}
+              className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
+            >
+              <option value="snack">{t("add_offer.food_type_snack")}</option>
+              <option value="meal">{t("add_offer.food_type_meal")}</option>
+              <option value="beverage">{t("add_offer.food_type_beverage")}</option>
+              <option value="other">{t("add_offer.food_type_other")}</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">{t("add_offer.food_type_hint")}</p>
+          </div>
+
+          {/* Taste */}
+          <div>
+            <label
+              htmlFor="taste"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              {t("add_offer.taste_label")}
+            </label>
+            <select
+              id="taste"
+              value={taste}
+              onChange={(e) => setTaste(e.target.value as Taste)}
+              className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
+            >
+              <option value="sweet">{t("add_offer.taste_sweet")}</option>
+              <option value="salty">{t("add_offer.taste_salty")}</option>
+              <option value="both">{t("add_offer.taste_both")}</option>
+              <option value="neutral">{t("add_offer.taste_neutral")}</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">{t("add_offer.taste_hint")}</p>
           </div>
         </div>
 
@@ -635,7 +677,7 @@ const AddOffer: React.FC = () => {
         {/* Submit */}
         <Button
           type="submit"
-          disabled={!title.trim() || !description.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime || !pickupLocation.trim()}
+          disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
           className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01] mt-2"
         >
           Create Offer

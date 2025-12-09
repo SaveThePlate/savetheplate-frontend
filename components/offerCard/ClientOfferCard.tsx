@@ -36,6 +36,8 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   pickupLocation,
   mapsLink,
   reserveLink,
+  foodType,
+  taste,
   owner,
 }) => {
   const { t } = useLanguage();
@@ -78,9 +80,9 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   return (
     <Credenza open={isModalOpen} onOpenChange={setIsModalOpen}>
       <CredenzaTrigger asChild>
-        <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-xl hover:border-emerald-400 hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
       {/* Image */}
-      <div className="relative w-full h-48 sm:h-52">
+      <div className="relative w-full h-48 sm:h-52 md:h-56 overflow-hidden bg-gray-100">
         {currentImage ? (
           <Image
             src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
@@ -91,40 +93,59 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
             priority
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,..."
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
           />
         ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-            <span className="text-gray-400">No image</span>
+          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+            <span className="text-gray-400 text-sm">No image</span>
           </div>
         )}
+
+        {/* Gradient overlay for better badge visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
 
         <PriceBadge price={price} originalPrice={originalPrice} />
         <QuantityBadge quantity={quantity} isExpired={expired} />
         <ProviderOverlay owner={owner} pickupLocation={pickupLocation} />
 
         {expired && (
-          <div className="absolute top-2 left-2 bg-gray-800 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
+          <div className="absolute top-2 left-2 bg-gray-800/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
             {t("common.expired")}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-4">
-        <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2">
-          {title}
-        </h3>
-        <p className="text-sm font-medium text-gray-700 mb-1">
-          {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
-        </p>
-        <div className="flex items-center gap-2 text-xs text-gray-600 mb-3">
-          <span className="font-medium">🕐</span>
-          <span>
-            {formattedDate === "Today" ? t("common.today") : formattedDate}
+      <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-3">
+        <div>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors leading-tight">
+            {title}
+          </h3>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
+            </span>
+            {foodType && foodType !== "other" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                {t(`offers.food_type_${foodType}`) || foodType}
+              </span>
+            )}
+            {taste && taste !== "neutral" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                {t(`offers.taste_${taste}`) || taste}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mt-auto pt-2 border-t border-gray-100">
+          <span className="font-medium text-base">🕐</span>
+          <span className="flex-1">
+            <span className="font-medium text-gray-700">
+              {formattedDate === "Today" ? t("common.today") : formattedDate}
+            </span>
             {formattedTime && (
-              <span className="font-semibold text-emerald-700 ml-1">
+              <span className="font-semibold text-emerald-700 ml-1.5">
                 {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
               </span>
             )}
@@ -134,23 +155,23 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
       {/* Footer */}
       <CardFooter 
-        className="mt-4 flex flex-row gap-3 w-full items-center justify-between"
+        className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 flex flex-row gap-3 w-full items-center justify-between border-t border-gray-100"
         onClick={(e) => e.stopPropagation()} // Prevent card click when clicking footer
       >
         {expired ? (
-          <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
+          <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-500 rounded-xl font-semibold text-sm">
             {t("common.expired")}
           </div>
         ) : quantity > 0 ? (
           <Link
             href={reserveLink}
             onClick={(e) => e.stopPropagation()} // Prevent card click when clicking order button
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm hover:bg-teal-700 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl shadow-sm hover:bg-emerald-700 hover:shadow-md hover:scale-[1.02] transition-all duration-200 text-sm sm:text-base"
           >
             {t("common.order_now")}
           </Link>
         ) : (
-          <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium">
+          <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-500 rounded-xl font-semibold text-sm">
             {t("common.sold_out")}
           </div>
         )}
@@ -215,9 +236,21 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
           {/* Offer Details */}
           <div className="mb-4">
-            <p className="text-xs sm:text-sm text-gray-600 mb-2">
-              {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
+              </span>
+              {foodType && foodType !== "other" && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                  {t(`offers.food_type_${foodType}`) || foodType}
+                </span>
+              )}
+              {taste && taste !== "neutral" && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                  {t(`offers.taste_${taste}`) || taste}
+                </span>
+              )}
+            </div>
             <p className="text-sm sm:text-base text-gray-800 leading-relaxed">{description}</p>
           </div>
 

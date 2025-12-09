@@ -169,14 +169,16 @@ const Home = () => {
         </div>
 
         {/* Offers List */}
-        <section data-tour="offers-section" className="relative min-h-[50vh] bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8 transition-all duration-300 hover:shadow-md">
+        <section data-tour="offers-section" className="relative min-h-[50vh]">
           {loading ? (
-            <div className="flex justify-center items-center h-64 text-gray-500">
+            <div className="flex justify-center items-center h-64 text-gray-500 bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8">
               <Loader2 className="animate-spin w-6 h-6 mr-2" />
               {t("common.loading")}
             </div>
           ) : error ? (
-            <p className="text-center text-red-600">{error}</p>
+            <div className="bg-white/70 backdrop-blur-sm border border-red-200 rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8">
+              <p className="text-center text-red-600">{error}</p>
+            </div>
           ) : (
             <Offers />
           )}

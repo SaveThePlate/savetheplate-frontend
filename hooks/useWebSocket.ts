@@ -53,23 +53,26 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         if (!isMountedRef.current) return;
 
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
-        // Extract hostname and port from backend URL
-        const url = new URL(backendUrl);
-        const wsProtocol = url.protocol === "https:" ? "wss" : "ws";
-        const wsUrl = `${wsProtocol}://${url.host}`;
+        // Socket.IO client automatically handles protocol conversion (http -> ws, https -> wss)
+        // Use the full backend URL and explicitly set the path to match the server configuration
+        const wsUrl = backendUrl.replace(/\/$/, ""); // Remove trailing slash if present
 
         // Connect to WebSocket server
         socket = io(wsUrl, {
+          path: "/socket.io/", // Explicitly set path to match backend configuration
           auth: {
             token: token,
           },
-          transports: ["websocket", "polling"],
+          transports: ["websocket", "polling"], // Try websocket first, fallback to polling
           reconnection: true,
           reconnectionDelay: 1000,
-          reconnectionAttempts: 5,
+          reconnectionDelayMax: 5000,
+          reconnectionAttempts: Infinity, // Keep trying to reconnect
+          timeout: 20000, // Connection timeout
           // Suppress the initial websocket failure warning (it's expected - Socket.IO falls back to polling)
           upgrade: true,
           rememberUpgrade: false,
+          forceNew: false, // Reuse existing connection if available
         });
 
         if (!isMountedRef.current) {
@@ -88,7 +91,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           if (!currentSocket || !isMountedRef.current) return;
           
           const transport = currentSocket.io.engine.transport.name;
-          console.log(`✅ WebSocket connected to: ${wsUrl} (transport: ${transport})`);
+          const socketId = currentSocket.id;
+          console.log(`✅ WebSocket connected to: ${wsUrl}`);
+          console.log(`   Transport: ${transport}, Socket ID: ${socketId}`);
+          
           if (isMountedRef.current) {
             setIsConnected(true);
           }
@@ -106,11 +112,25 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           }
         });
 
-        socket.on("connect_error", (error) => {
-          // Only log if it's not the initial websocket upgrade failure (which is expected)
-          if (error.message && !error.message.includes("websocket")) {
-            console.error("WebSocket connection error:", error);
+        socket.on("connect_error", (error: any) => {
+          // Log connection errors for debugging
+          console.error("WebSocket connection error:", {
+            message: error.message,
+            type: error.type,
+            description: error.description,
+            context: error.context,
+            url: wsUrl,
+          });
+          
+          // Check for specific error types
+          if (error.message?.includes("xhr poll error") || error.message?.includes("websocket error")) {
+            console.warn("⚠️ WebSocket transport failed, Socket.IO will retry with polling");
+          } else if (error.message?.includes("timeout")) {
+            console.error("❌ WebSocket connection timeout - check server availability and network");
+          } else if (error.message?.includes("CORS")) {
+            console.error("❌ CORS error - check server CORS configuration");
           }
+          
           if (isMountedRef.current) {
             setIsConnected(false);
           }

@@ -1,15 +1,19 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProviderOfferCard } from "@/components/offerCard";
 import { useRouter } from "next/navigation";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Filter, Search, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { isOfferExpired } from "@/components/offerCard/utils";
+
+type FoodType = "snack" | "meal" | "beverage" | "other";
+type Taste = "sweet" | "salty" | "both" | "neutral";
 
 interface Offer {
   price: number;
@@ -34,6 +38,8 @@ interface Offer {
   pickupEndTime?: string;
   pickupLocation: string;
   mapsLink: string;
+  foodType?: FoodType;
+  taste?: Taste;
   owner?: {
     id: number;
     username: string;
@@ -46,12 +52,22 @@ interface Offer {
 
 const DEFAULT_PROFILE_IMAGE = "/defaultBag.png";
 
+type FilterType = "all" | "active" | "expired" | "low_stock";
+type SortType = "newest" | "oldest" | "price_low" | "price_high" | "quantity_low";
+type CategoryFilterType = "all" | FoodType;
+type TasteFilterType = "all" | Taste;
+
 const ProviderHome = () => {
   const router = useRouter();
   const { t } = useLanguage();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [sort, setSort] = useState<SortType>("newest");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilterType>("all");
+  const [tasteFilter, setTasteFilter] = useState<TasteFilterType>("all");
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -334,6 +350,76 @@ const ProviderHome = () => {
     }
   };
 
+  // Calculate stats
+  const stats = useMemo(() => {
+    const now = Date.now();
+    const active = offers.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0).length;
+    const expired = offers.filter(o => isOfferExpired(o.expirationDate)).length;
+    const lowStock = offers.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0 && o.quantity <= 5).length;
+    
+    return {
+      total: offers.length,
+      active,
+      expired,
+      lowStock,
+    };
+  }, [offers]);
+
+  // Filter and sort offers
+  const filteredAndSortedOffers = useMemo(() => {
+    let result = [...offers];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(offer =>
+        offer.title.toLowerCase().includes(query) ||
+        offer.description.toLowerCase().includes(query) ||
+        offer.pickupLocation.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply status filter
+    if (filter === "active") {
+      result = result.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0);
+    } else if (filter === "expired") {
+      result = result.filter(o => isOfferExpired(o.expirationDate));
+    } else if (filter === "low_stock") {
+      result = result.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0 && o.quantity <= 5);
+    }
+
+    // Apply category filter
+    if (categoryFilter !== "all") {
+      result = result.filter(o => o.foodType === categoryFilter);
+    }
+
+    // Apply taste filter
+    if (tasteFilter !== "all") {
+      result = result.filter(o => o.taste === tasteFilter || o.taste === "both");
+    }
+
+    // Apply sorting
+    switch (sort) {
+      case "newest":
+        result.sort((a, b) => new Date(b.expirationDate).getTime() - new Date(a.expirationDate).getTime());
+        break;
+      case "oldest":
+        result.sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
+        break;
+      case "price_low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price_high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "quantity_low":
+        result.sort((a, b) => a.quantity - b.quantity);
+        break;
+    }
+
+    return result;
+  }, [offers, searchQuery, filter, sort, categoryFilter, tasteFilter]);
+
   return (
     <main className="bg-[#F9FAF5] min-h-screen pt-4 pb-4 flex flex-col items-center">
         <ToastContainer
@@ -349,10 +435,10 @@ const ProviderHome = () => {
   bodyClassName="text-sm font-medium"
   progressClassName="bg-white/80"
 />
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl flex flex-col space-y-6 sm:space-y-8 md:space-y-12">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl flex flex-col space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col gap-1 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col gap-1">
             <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
               {t("provider.home.title")}
             </h1>
@@ -363,25 +449,161 @@ const ProviderHome = () => {
           <button
             data-tour="publish-button"
             onClick={() => router.push("./publish")}
-            className="flex items-center gap-2 px-5 py-3 bg-green-100 text-green-800 font-semibold rounded-xl shadow-md hover:bg-green-600 hover:text-white transition duration-300 transform hover:scale-[1.02] min-h-[44px] w-full sm:w-auto"
+            className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-[1.02] min-h-[48px] w-full sm:w-auto"
           >
             <PlusCircle size={22} />
             {t("provider.home.publish_offer")}
           </button>
         </div>
 
+        {/* Stats Section */}
+        {!loading && offers.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.total")}</span>
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.active")}</span>
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.active}</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-1">
+                <XCircle className="w-4 h-4 text-red-600" />
+                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.expired")}</span>
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-red-600">{stats.expired}</p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="w-4 h-4 text-amber-600" />
+                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.low_stock")}</span>
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-amber-600">{stats.lowStock}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Search and Filter Section */}
+        {!loading && offers.length > 0 && (
+          <div className="space-y-3">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder={t("provider.home.search_placeholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
+              />
+            </div>
+            
+            {/* Filters Row */}
+            <div className="flex flex-wrap gap-3">
+              {/* Status Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-gray-400" />
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as FilterType)}
+                  className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
+                >
+                  <option value="all">{t("provider.home.filter_all")}</option>
+                  <option value="active">{t("provider.home.filter_active")}</option>
+                  <option value="expired">{t("provider.home.filter_expired")}</option>
+                  <option value="low_stock">{t("provider.home.filter_low_stock")}</option>
+                </select>
+              </div>
+
+              {/* Category Filter */}
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterType)}
+                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
+              >
+                <option value="all">{t("provider.home.category_all")}</option>
+                <option value="snack">{t("provider.home.category_snack")}</option>
+                <option value="meal">{t("provider.home.category_meal")}</option>
+                <option value="beverage">{t("provider.home.category_beverage")}</option>
+                <option value="other">{t("provider.home.category_other")}</option>
+              </select>
+
+              {/* Taste Filter */}
+              <select
+                value={tasteFilter}
+                onChange={(e) => setTasteFilter(e.target.value as TasteFilterType)}
+                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
+              >
+                <option value="all">{t("provider.home.taste_all")}</option>
+                <option value="sweet">{t("provider.home.taste_sweet")}</option>
+                <option value="salty">{t("provider.home.taste_salty")}</option>
+                <option value="both">{t("provider.home.taste_both")}</option>
+                <option value="neutral">{t("provider.home.taste_neutral")}</option>
+              </select>
+
+              {/* Sort */}
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortType)}
+                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
+              >
+                <option value="newest">{t("provider.home.sort_newest")}</option>
+                <option value="oldest">{t("provider.home.sort_oldest")}</option>
+                <option value="price_low">{t("provider.home.sort_price_low")}</option>
+                <option value="price_high">{t("provider.home.sort_price_high")}</option>
+                <option value="quantity_low">{t("provider.home.sort_quantity_low")}</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {/* Offers Grid */}
         {loading ? (
-          <p className="text-gray-600 text-lg text-center mt-10">{t("provider.home.loading_offers")}</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
+            <p className="text-gray-600 text-lg">{t("provider.home.loading_offers")}</p>
+          </div>
         ) : error ? (
-          <p className="text-red-600 text-center mt-10">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+            <p className="text-red-600 font-medium">{error}</p>
+          </div>
         ) : offers.length === 0 ? (
-          <p className="text-gray-600 text-lg text-center mt-10">
-            {t("provider.home.no_offers")}
-          </p>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <PlusCircle className="w-10 h-10 text-emerald-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                {t("provider.home.empty_state_title")}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {t("provider.home.empty_state_description")}
+              </p>
+              <button
+                onClick={() => router.push("./publish")}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-[1.02]"
+              >
+                <PlusCircle size={20} />
+                {t("provider.home.publish_offer")}
+              </button>
+            </div>
+          </div>
+        ) : filteredAndSortedOffers.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <p className="text-gray-600 text-lg">
+              {t("provider.home.no_results")}
+            </p>
+          </div>
         ) : (
-          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {offers.map((offer) => {
+          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {filteredAndSortedOffers.map((offer) => {
   // Handle images - might be array, JSON string, or undefined
   let imagesArray: any[] = [];
   if (offer.images) {
@@ -419,8 +641,10 @@ const ProviderHome = () => {
         expirationDate={offer.expirationDate}
         pickupStartTime={offer.pickupStartTime}
         pickupEndTime={offer.pickupEndTime}
-        pickupLocation={currentLocation}
+        pickupLocation={offer.owner?.location || currentLocation}
         mapsLink={currentMapsLink}
+        foodType={offer.foodType}
+        taste={offer.taste}
         ownerId={offer.ownerId}
         onDelete={handleDeleteOffer}
         onUpdate={async (id, data) => {

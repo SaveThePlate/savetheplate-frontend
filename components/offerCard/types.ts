@@ -7,6 +7,9 @@ export interface OfferOwner {
   profileImage?: string;
 }
 
+export type FoodType = "snack" | "meal" | "beverage" | "other";
+export type Taste = "sweet" | "salty" | "both" | "neutral";
+
 export interface BaseOfferCardProps {
   offerId: number;
   imageSrc?: string;
@@ -21,6 +24,8 @@ export interface BaseOfferCardProps {
   pickupEndTime?: string;
   pickupLocation: string;
   mapsLink?: string;
+  foodType?: FoodType;
+  taste?: Taste;
   owner?: OfferOwner;
 }
 
