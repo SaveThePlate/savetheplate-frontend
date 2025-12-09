@@ -12,7 +12,6 @@ import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
-import { getImageFallbacks } from "@/utils/imageUtils";
 import {
   FileInput,
   FileUploader,
