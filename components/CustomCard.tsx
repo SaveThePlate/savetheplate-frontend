@@ -27,6 +27,7 @@ import {
   CredenzaFooter,
   CredenzaClose,
 } from "@/components/ui/credenza";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 
 // Small utility to generate a tiny SVG blur placeholder data URL.
 const getBlurDataURL = (color = "#eaeaea") => {
@@ -490,7 +491,13 @@ const CustomCard: FC<CustomCardProps> = ({
             <div className="absolute inset-0" />
           </CredenzaTrigger>
 
-          <CredenzaContent className="bg-white rounded-3xl shadow-xl max-w-lg mx-auto border border-gray-100 p-0 overflow-hidden">
+          <CredenzaContent className="bg-white rounded-3xl shadow-xl max-w-lg border border-gray-100 p-0 overflow-hidden">
+            {/* Accessibility: DialogTitle and Description for screen readers */}
+            <VisuallyHidden>
+              <CredenzaTitle>{localData.title}</CredenzaTitle>
+              <CredenzaDescription>{localData.description}</CredenzaDescription>
+            </VisuallyHidden>
+            
             {/* Large Image at Top */}
             <div className="relative w-full h-64">
               {currentImage ? (
@@ -498,7 +505,7 @@ const CustomCard: FC<CustomCardProps> = ({
               src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
               alt={localData.title}
               fill
-              sizes="100vw"
+              sizes="(max-width: 640px) calc(100vw - 2rem), 512px"
               className="object-cover"
               unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
               onError={handleImageError}

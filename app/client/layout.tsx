@@ -33,7 +33,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <RouteGuard allowedRoles={["CLIENT"]} redirectTo="/signIn">
-      <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
+      <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden" style={{ isolation: 'isolate' }}>
       {/* 🌿 Header */}
       <header className="w-full fixed top-0 left-0 z-30 bg-white shadow-sm border-b border-gray-200 safe-area-inset-top">
         <nav className="w-full mx-auto flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
@@ -192,7 +192,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </main>
 
       {/* 📱 Bottom Navigation */}
-      <nav data-tour="bottom-nav" className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 pb-safe z-40 lg:hidden safe-area-inset-bottom">
+      <nav data-tour="bottom-nav" className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 pb-safe z-[50] lg:hidden safe-area-inset-bottom">
         <Link
           href="/client/home"
           className="flex flex-col items-center text-gray-700 hover:text-green-600"

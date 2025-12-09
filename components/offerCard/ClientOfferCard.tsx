@@ -20,6 +20,7 @@ import {
   CredenzaBody,
   CredenzaClose,
 } from "@/components/ui/credenza";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -182,11 +183,17 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
     </CredenzaTrigger>
 
       {/* Details Modal */}
-      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl max-w-lg w-[calc(100vw-2rem)] sm:w-full mx-auto border border-gray-100 p-0 overflow-hidden relative max-h-[90vh] sm:max-h-[95vh] flex flex-col">
+      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg border border-gray-100 p-0 overflow-hidden max-h-[90vh] sm:max-h-[95vh] flex flex-col">
+        {/* Accessibility: DialogTitle and Description for screen readers */}
+        <VisuallyHidden>
+          <CredenzaTitle>{title}</CredenzaTitle>
+          <CredenzaDescription>{description}</CredenzaDescription>
+        </VisuallyHidden>
+        
         {/* Close Button */}
         <button
           onClick={() => setIsModalOpen(false)}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 rounded-full bg-white/90 backdrop-blur-sm p-2 shadow-lg hover:bg-white transition-colors border border-gray-200 flex items-center justify-center cursor-pointer"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-[110] rounded-full bg-white/90 backdrop-blur-sm p-2 shadow-lg hover:bg-white transition-colors border border-gray-200 flex items-center justify-center cursor-pointer"
           aria-label="Close"
           type="button"
         >
@@ -202,7 +209,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                 src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
                 alt={title}
                 fill
-                sizes="100vw"
+                sizes="(max-width: 640px) calc(100vw - 2rem), 512px"
                 className="object-cover"
                 unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
                 onError={handleImageError}

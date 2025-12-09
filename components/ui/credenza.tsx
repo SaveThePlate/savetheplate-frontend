@@ -62,10 +62,12 @@ const Credenza = ({ children, open, onOpenChange, ...props }: RootCredenzaProps)
     }
   }, [isDesktop, open])
 
-  // For mobile Drawer, prevent closing when swiping down (only close via close button)
-  // This prevents the drawer from closing when scrolling inside
+  // Allow both Dialog and Drawer to close on overlay click
+  // For mobile, we keep dismissible: true to allow overlay clicks
+  // (swipe-to-dismiss can still be prevented if needed, but overlay clicks should work)
   const drawerProps = !isDesktop ? { 
-    dismissible: false
+    dismissible: true,
+    shouldScaleBackground: true
   } : {}
 
   return (

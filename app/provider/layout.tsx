@@ -182,7 +182,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
       </main>
 
       {/* 📱 Bottom Navigation (mobile) */}
-      <nav data-tour="bottom-nav" className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 pb-safe z-40 lg:hidden safe-area-inset-bottom">
+      <nav data-tour="bottom-nav" className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-md flex justify-around items-center py-2 pb-safe z-[50] lg:hidden safe-area-inset-bottom">
         <Link
           href="/provider/home"
           className="flex flex-col items-center text-gray-700 hover:text-green-600"

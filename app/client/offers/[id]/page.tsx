@@ -212,7 +212,7 @@ const Offers = () => {
               src={sanitizeImageUrl(imageSrc)}
               alt={offer.title}
               fill
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 896px, 1152px"
               priority
               className="object-cover"
               unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(imageSrc))}
