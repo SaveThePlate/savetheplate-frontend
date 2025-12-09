@@ -18,7 +18,9 @@ import {
   CredenzaHeader,
   CredenzaTitle,
   CredenzaBody,
+  CredenzaClose,
 } from "@/components/ui/credenza";
+import { X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
@@ -180,27 +182,39 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
     </CredenzaTrigger>
 
       {/* Details Modal */}
-      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl max-w-lg mx-auto border border-gray-100 p-0 overflow-hidden">
-        {/* Large Image at Top */}
-        <div className="relative w-full h-48 sm:h-64">
-          {currentImage ? (
-            <Image
-              src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
-              alt={title}
-              fill
-              sizes="100vw"
-              className="object-cover"
-              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
-              onError={handleImageError}
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-400">No image</span>
-            </div>
-          )}
-        </div>
+      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl max-w-lg w-[calc(100vw-2rem)] sm:w-full mx-auto border border-gray-100 p-0 overflow-hidden relative max-h-[90vh] sm:max-h-[95vh] flex flex-col">
+        {/* Close Button */}
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 rounded-full bg-white/90 backdrop-blur-sm p-2 shadow-lg hover:bg-white transition-colors border border-gray-200 flex items-center justify-center cursor-pointer"
+          aria-label="Close"
+          type="button"
+        >
+          <X className="h-4 w-4 text-gray-700" />
+        </button>
+        
+        {/* Scrollable Content Container */}
+        <div className="overflow-y-auto flex-1 min-h-0">
+          {/* Large Image at Top */}
+          <div className="relative w-full h-48 sm:h-64 flex-shrink-0">
+            {currentImage ? (
+              <Image
+                src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
+                alt={title}
+                fill
+                sizes="100vw"
+                className="object-cover"
+                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+                onError={handleImageError}
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-400">No image</span>
+              </div>
+            )}
+          </div>
 
-        <div className="p-4 sm:p-6">
+          <div className="p-4 sm:p-6">
           {/* Store Information */}
           <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0 mb-4">
             <div className="flex items-center gap-3">
@@ -300,6 +314,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                 {t("common.sold_out")}
               </div>
             )}
+          </div>
           </div>
         </div>
       </CredenzaContent>
