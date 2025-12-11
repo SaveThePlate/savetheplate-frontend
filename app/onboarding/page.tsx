@@ -40,8 +40,19 @@ const OnboardingPage = () => {
       if (role === "PROVIDER") router.push("/onboarding/fillDetails");
       else router.push("/client/home");
     } catch (error: any) {
-      console.error("Error setting role:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to set role. Please try again.";
+      console.error("Error setting role:", {
+        error,
+        response: error?.response,
+        data: error?.response?.data,
+        status: error?.response?.status,
+        message: error?.message,
+        stack: error?.stack,
+      });
+      const errorMessage = 
+        error?.response?.data?.message || 
+        error?.response?.data?.error || 
+        error?.message || 
+        "Failed to set role. Please try again.";
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);
