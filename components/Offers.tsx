@@ -604,7 +604,7 @@ const OffersPage = () => {
                 )}
                 {searchQuery && (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-medium">
-                    <span>🔍 "{searchQuery}"</span>
+                    <span>🔍 &ldquo;{searchQuery}&rdquo;</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
