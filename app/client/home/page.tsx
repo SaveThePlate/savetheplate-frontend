@@ -41,8 +41,20 @@ const Home = () => {
       }
 
       const headers = { Authorization: `Bearer ${token}` };
-      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-      const userId = tokenPayload.id;
+      let userId: string | undefined;
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        userId = tokenPayload?.id;
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        // Try to get userId from API if token parsing fails
+        try {
+          const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+          userId = userResponse.data?.id;
+        } catch (apiError) {
+          console.error("Error fetching user info:", apiError);
+        }
+      }
 
       // Add cache-busting timestamp to ensure fresh data
       const timestamp = Date.now();
@@ -133,8 +145,13 @@ const Home = () => {
                 const token = localStorage.getItem("accessToken");
                 if (!token) return router.push("/signIn");
                 try {
-                  const uid = JSON.parse(atob(token.split(".")[1])).id;
-                  router.push(`/client/orders/${uid}`);
+                  const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+                  const uid = tokenPayload?.id;
+                  if (uid) {
+                    router.push(`/client/orders/${uid}`);
+                  } else {
+                    router.push("/client/orders");
+                  }
                 } catch {
                   router.push("/client/orders");
                 }

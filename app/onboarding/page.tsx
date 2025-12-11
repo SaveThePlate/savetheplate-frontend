@@ -20,16 +20,29 @@ const OnboardingPage = () => {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.post(
+      if (!token) {
+        console.error("No access token found");
+        router.push("/signIn");
+        return;
+      }
+
+      const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/set-role`,
         { role },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          } 
+        }
       );
 
       if (role === "PROVIDER") router.push("/onboarding/fillDetails");
       else router.push("/client/home");
-    } catch (error) {
-      console.error("Error:", error);
+    } catch (error: any) {
+      console.error("Error setting role:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to set role. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

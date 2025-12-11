@@ -74,8 +74,30 @@ const useProviderProfile = () => {
         return;
       }
 
-      const userId = JSON.parse(atob(token.split(".")[1])).id;
       const headers = { Authorization: `Bearer ${token}` };
+      let userId: string | number | undefined;
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        userId = tokenPayload?.id;
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        // Try to get userId from API if token parsing fails
+        try {
+          const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+          userId = userResponse.data?.id;
+        } catch (apiError) {
+          console.error("Error fetching user info:", apiError);
+          setError("Could not fetch user information");
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (!userId) {
+        setError("Could not determine user ID");
+        setLoading(false);
+        return;
+      }
 
       // Fetch profile, offers, and orders in parallel for faster loading
       const [profileRes, offersRes, ordersRes] = await Promise.all([

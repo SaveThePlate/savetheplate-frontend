@@ -24,10 +24,17 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         router.push("/signIn");
         return;
       }
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      if (payload?.id) setUserId(String(payload.id));
-    } catch {
-      console.warn("Invalid token");
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload?.id) {
+          setUserId(String(payload.id));
+        }
+      } catch (parseError) {
+        console.warn("Error parsing token:", parseError);
+        // Token parsing failed, but don't redirect - let RouteGuard handle it
+      }
+    } catch (error) {
+      console.warn("Error accessing token:", error);
     }
   }, [router]);
 

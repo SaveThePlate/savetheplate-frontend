@@ -83,12 +83,31 @@ const ProviderHome = () => {
         const token = localStorage.getItem("accessToken");
         if (!token) return router.push("/signIn");
 
-        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        const id = tokenPayload.id;
+        const headers = { Authorization: `Bearer ${token}` };
+        let id: string | number | undefined;
+        try {
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+          id = tokenPayload?.id;
+        } catch (error) {
+          console.error("Error parsing token:", error);
+          // Try to get userId from API if token parsing fails
+          try {
+            const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+            id = userResponse.data?.id;
+          } catch (apiError) {
+            console.error("Error fetching user info:", apiError);
+            return;
+          }
+        }
+
+        if (!id) {
+          console.error("Could not determine user ID");
+          return;
+        }
 
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers }
         );
 
         if (!isMountedRef.current) return;
@@ -205,8 +224,18 @@ const ProviderHome = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
     
-    const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-    const currentUserId = tokenPayload.id;
+    let currentUserId: string | number | undefined;
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      currentUserId = tokenPayload?.id;
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      return;
+    }
+    
+    if (!currentUserId) {
+      return;
+    }
     
     // Only process offers that belong to this provider
     if (offer.ownerId !== currentUserId) {
@@ -341,12 +370,37 @@ const ProviderHome = () => {
       toast.error(err?.response?.data?.message || t("provider.home.delete_failed"));
       // refetch if failed
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${JSON.parse(atob(token.split(".")[1])).id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setOffers(response.data);
-      setLoading(false);
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        let userId: string | number | undefined;
+        try {
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+          userId = tokenPayload?.id;
+        } catch (parseError) {
+          console.error("Error parsing token:", parseError);
+          // Try to get userId from API if token parsing fails
+          try {
+            const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+            userId = userResponse.data?.id;
+          } catch (apiError) {
+            console.error("Error fetching user info:", apiError);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        if (userId) {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${userId}`,
+            { headers }
+          );
+          setOffers(response.data);
+        }
+      } catch (refetchError) {
+        console.error("Error refetching offers:", refetchError);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

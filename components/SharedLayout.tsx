@@ -23,8 +23,26 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
         if (!token) {
           return;
         }
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        if (payload?.id) setUserId(String(payload.id));
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          if (payload?.id) {
+            setUserId(String(payload.id));
+          }
+        } catch (parseError) {
+          console.warn("Error parsing token:", parseError);
+          // Try to get userId from API if token parsing fails
+          try {
+            const userResponse = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (userResponse.data?.id) {
+              setUserId(String(userResponse.data.id));
+            }
+          } catch (apiError) {
+            console.error("Error fetching user info:", apiError);
+          }
+        }
 
         try {
           const response = await axios.get(
@@ -37,8 +55,8 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
         } catch (err) {
           console.error("Error fetching role:", err);
         }
-      } catch {
-        console.warn("Invalid token");
+      } catch (error) {
+        console.warn("Error in fetchUserInfo:", error);
       }
     };
     fetchUserInfo();
