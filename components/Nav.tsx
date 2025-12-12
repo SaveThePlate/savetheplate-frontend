@@ -39,22 +39,26 @@ const Nav = () => {
     <header className='w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16'>
       <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full'>
         <Link href="/" className='flex items-center h-full'>
-          <Image
-            src="/fullname1.png"
-            alt="Logo"
-            width={250} 
-            height={100} 
-            priority
-            className="object-contain lg:block md:block hidden h-full"
-            style={{ width: 'auto' }}
-          />
-          <Image
-            src="/logoOnly.png"
-            alt="Logo"
-            width={150} 
-            height={150} 
-            className="object-contain block lg:hidden md:hidden h-full"
-          />
+          <div className="relative lg:block md:block hidden h-full" style={{ width: '250px', minWidth: '200px' }}>
+            <Image
+              src="/fullname1.png"
+              alt="Logo"
+              fill
+              priority
+              sizes="250px"
+              className="object-contain"
+            />
+          </div>
+          <div className="relative block lg:hidden md:hidden h-full" style={{ width: '60px', minWidth: '50px' }}>
+            <Image
+              src="/logoOnly.png"
+              alt="Logo"
+              fill
+              priority
+              sizes="60px"
+              className="object-contain"
+            />
+          </div>
         </Link>
 
         <div className="flex items-center gap-3 h-full">

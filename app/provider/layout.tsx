@@ -23,24 +23,26 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
         <nav className="w-full mx-auto flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
           {/* Logo */}
           <Link href="/provider/home" className="flex items-center h-full">
-            <Image
-              src="/fullname1.png"
-              alt="Logo"
-              width={220}
-              height={80}
-              priority
-              className="object-contain hidden md:block h-full"
-              style={{ width: "auto" }}
-            />
-            <Image
-              src="/fullname1.png"
-              alt="Logo"
-              width={120}
-              height={120}
-              priority
-              className="object-contain block md:hidden h-full"
-              style={{ width: "auto" }}
-            />
+            <div className="relative hidden md:block h-full" style={{ width: '220px', minWidth: '150px' }}>
+              <Image
+                src="/fullname1.png"
+                alt="Logo"
+                fill
+                priority
+                sizes="220px"
+                className="object-contain"
+              />
+            </div>
+            <div className="relative block md:hidden h-full" style={{ width: '120px', minWidth: '100px' }}>
+              <Image
+                src="/fullname1.png"
+                alt="Logo"
+                fill
+                priority
+                sizes="120px"
+                className="object-contain"
+              />
+            </div>
           </Link>
 
           {/* Desktop Menu */}
