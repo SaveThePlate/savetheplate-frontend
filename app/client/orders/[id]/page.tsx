@@ -17,6 +17,7 @@ type Order = {
   status: string;
   mapsLink?: string;
   qrCodeToken?: string;
+  collectedAt?: string;
 };
 
 const Orders = () => {

@@ -657,6 +657,7 @@
     "open_in_maps": "Open in Maps",
     "pickup_deadline": "Pickup Deadline",
     "ordered_on": "Ordered On",
+    "picked_up_at": "Picked Up At",
     "hide_details": "Hide Details",
     "show_details": "Show Details",
     "hide_qr": "Hide QR Code",

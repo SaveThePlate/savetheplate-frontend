@@ -34,6 +34,7 @@ interface CartOrderProps {
     status: string;
     mapsLink?: string;
     qrCodeToken?: string;
+    collectedAt?: string;
   };
 }
 
@@ -242,6 +243,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   }
 
   const orderDate = new Date(order.createdAt);
+  const collectedDate = order.collectedAt ? new Date(order.collectedAt) : null;
   const { date: formattedDate, time: formattedTime } = formatDateTimeRange(
     offer.pickupStartTime,
     offer.pickupEndTime,
@@ -366,8 +368,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
               </div>
             </div>
 
-            {/* Order Date */}
-            <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 sm:col-span-2">
+            {/* Order Date and Picked Up At - Side by side when both exist */}
+            <div className={`flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 ${order.status === "confirmed" && collectedDate ? "" : "sm:col-span-2"}`}>
               <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />
               </div>
@@ -390,6 +392,33 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                 </p>
               </div>
             </div>
+
+            {/* Picked Up At - Only show for confirmed orders with collectedAt */}
+            {order.status === "confirmed" && collectedDate && (
+              <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] xs:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                    {t("cart_order.picked_up_at")}
+                  </p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-900">
+                    {collectedDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p className="text-[10px] xs:text-xs text-gray-600 mt-0.5">
+                    {collectedDate.toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
