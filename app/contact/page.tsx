@@ -145,7 +145,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-4 pb-4 px-4 sm:px-6 lg:px-8">
+    <>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -160,7 +160,7 @@ const ContactPage = () => {
         progressClassName="bg-white/80"
       />
 
-      <div className="w-full mx-auto max-w-2xl lg:max-w-6xl">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl lg:max-w-6xl pt-6 sm:pt-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1B4332] mb-3 sm:mb-4">
@@ -354,7 +354,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -707,7 +707,7 @@ export default function ProviderProfile() {
   };
 
   return (
-    <main className="min-h-screen pt-4 pb-4 flex flex-col items-center px-4">
+    <main className="w-full mx-auto px-4 sm:px-6 max-w-6xl py-6 sm:py-8">
       <ToastContainer
         position="top-right"
         autoClose={1000}
@@ -723,7 +723,7 @@ export default function ProviderProfile() {
       />
 
       {/* Profile Card */}
-      <div className="w-full mx-auto max-w-2xl lg:max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="w-full mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Profile Header Section */}
         <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 px-6 md:px-8 py-6 md:py-8 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
@@ -852,7 +852,7 @@ export default function ProviderProfile() {
       </div>
 
       {/* Environmental Impact Section */}
-      <div className="w-full max-w-2xl mt-8">
+      <div className="w-full max-w-2xl mx-auto mt-8">
         <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 shadow-sm">
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-4">

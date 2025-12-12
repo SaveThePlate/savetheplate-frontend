@@ -6,7 +6,7 @@ import axios from "axios";
 import { ArrowLeft, Leaf, Droplet, Cloud, TreePine, Calculator, Info, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import SharedLayout from "@/components/SharedLayout";
 import RouteGuard from "@/components/RouteGuard";
 
 const ImpactPage = () => {
@@ -40,26 +40,8 @@ const ImpactPage = () => {
 
   return (
     <RouteGuard allowedRoles={["CLIENT", "PROVIDER"]} redirectTo="/signIn">
-      <div className="min-h-screen pb-20">
-      {/* Language Switcher - Fixed Position */}
-      <div className="fixed top-4 right-4 z-[60]">
-        <LanguageSwitcher variant="button" />
-      </div>
-
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">{t("impact.title")}</h1>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <SharedLayout>
+        <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-4">
@@ -310,7 +292,7 @@ const ImpactPage = () => {
           </div>
         </div>
       </div>
-    </div>
+      </SharedLayout>
     </RouteGuard>
   );
 };

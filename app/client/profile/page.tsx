@@ -194,7 +194,7 @@ const ProfilePage = () => {
   const confirmedCount = orders.filter((o) => o.status === "confirmed").length;
 
   return (
-    <main className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6 lg:px-16">
+    <main className="w-full mx-auto px-4 sm:px-6 max-w-6xl py-6 sm:py-8">
         <ToastContainer
           position="top-right"
           autoClose={1000}
@@ -210,7 +210,7 @@ const ProfilePage = () => {
         />
 
       {/* Minimal Profile Section */}
-      <div className="w-full max-w-2xl mx-auto mb-6">
+      <div className="w-full max-w-2xl mx-auto mb-8">
         {pendingCount > 0 && (
           <div className="mb-4 px-4 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-xs text-center">
             {pendingCount} {pendingCount === 1 ? t("client.profile.pending_order") : t("client.profile.pending_orders")}
@@ -280,7 +280,7 @@ const ProfilePage = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="w-full max-w-6xl mx-auto px-4 space-y-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         {/* Financial & Order Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Total Savings Card */}
