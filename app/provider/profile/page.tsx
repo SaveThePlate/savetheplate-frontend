@@ -23,6 +23,7 @@ import {
 import { useRouter } from "next/navigation";
 import { resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 interface ProfileData {
   username: string;
@@ -172,8 +173,12 @@ const useProviderProfile = () => {
       });
     } catch (err: any) {
       console.error("Failed to fetch data:", err);
-      setError(err?.response?.data?.message || "Failed to fetch data");
-      toast.error(t("provider.profile.fetch_failed"));
+      const errorMsg = sanitizeErrorMessage(err, {
+        action: "load profile",
+        defaultMessage: t("provider.profile.fetch_failed") || "Unable to load profile. Please try again later."
+      });
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -396,7 +401,11 @@ const EditProfileDialog: React.FC<{
     } catch (error: any) {
       console.error("Error uploading image:", error);
       console.error("Error response:", error?.response?.data);
-      toast.error(error?.response?.data?.message || error?.message || "Failed to upload profile image");
+      const errorMsg = sanitizeErrorMessage(error, {
+        action: "upload profile image",
+        defaultMessage: "Unable to upload image. Please check the file and try again."
+      });
+      toast.error(errorMsg);
       setLocalFile(null);
       setProfileImage(null);
     } finally {
@@ -696,12 +705,11 @@ export default function ProviderProfile() {
     } catch (err: any) {
       console.error("Failed to update profile:", err);
       console.error("Error response:", err?.response?.data);
-      const errorMessage =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        t("provider.profile.edit_dialog.update_failed");
-      toast.error(errorMessage);
+      const errorMsg = sanitizeErrorMessage(err, {
+        action: "update profile",
+        defaultMessage: t("provider.profile.edit_dialog.update_failed") || "Unable to update profile. Please try again."
+      });
+      toast.error(errorMsg);
       throw err;
     }
   };

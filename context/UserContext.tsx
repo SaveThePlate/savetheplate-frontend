@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { sanitizeErrorMessage } from '@/utils/errorUtils';
 interface UserContextType {
   userRole: string | null;
   loading: boolean;
@@ -39,12 +40,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserRole(response.data.role);
       } else {
         console.error('Failed to fetch user role:', response.data.message);
-        setError(response.data.message);
+        const errorMsg = sanitizeErrorMessage({ response: { data: { message: response.data.message } } }, {
+          action: "load user information",
+          defaultMessage: "Unable to load user information. Please try again later."
+        });
+        setError(errorMsg);
         setUserRole(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user role:', error);
-      setError('Could not fetch user role. Please try again later.');
+      const errorMsg = sanitizeErrorMessage(error, {
+        action: "load user information",
+        defaultMessage: "Unable to load user information. Please try again later."
+      });
+      setError(errorMsg);
       setUserRole(null);
     } finally {
       setLoading(false);

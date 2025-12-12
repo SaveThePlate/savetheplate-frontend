@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "./offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import {
   FileInput,
   FileUploader,
@@ -214,7 +215,10 @@ const CustomCard: FC<CustomCardProps> = ({
       return mapped;
     } catch (err: any) {
       console.error("Upload error", err?.response?.data || err.message || err);
-      const errorMessage = err?.response?.data?.message || err?.message || "Failed to upload images";
+      const errorMessage = sanitizeErrorMessage(err, {
+        action: "upload images",
+        defaultMessage: "Unable to upload images. Please check the files and try again."
+      });
       toast.error(errorMessage);
       throw err;
     }
@@ -353,7 +357,10 @@ const CustomCard: FC<CustomCardProps> = ({
       onUpdate?.(offerId, response.data || payload);
     } catch (err: any) {
       console.error("Error updating offer:", err);
-      const errorMessage = err?.response?.data?.message || err?.message || t("custom_card.update_failed") || "Failed to update offer";
+      const errorMessage = sanitizeErrorMessage(err, {
+        action: "update offer",
+        defaultMessage: t("custom_card.update_failed") || "Unable to update offer. Please try again."
+      });
       toast.error(errorMessage);
     } finally {
       setLoading(false);

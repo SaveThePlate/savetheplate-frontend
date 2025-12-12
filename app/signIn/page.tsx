@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 export default function SignIn() {
   const { t } = useLanguage();
@@ -116,11 +117,10 @@ export default function SignIn() {
       }
       // Check if it's an API error with response data
       else if (err?.response?.data || err?.data) {
-        const errorData = err.response?.data || err.data;
-        console.error("API error details:", errorData);
-        if (typeof errorData === 'object' && errorData.message) {
-          userMessage = errorData.message;
-        }
+        userMessage = sanitizeErrorMessage(err, {
+          action: "send magic link",
+          defaultMessage: "There was an error sending the magic link. Please try again."
+        });
       }
       
       setErrorMessage(userMessage);

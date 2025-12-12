@@ -10,6 +10,7 @@ import OrderQRCode from "./OrderQRCode";
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { 
   MapPin, 
   Calendar, 
@@ -210,9 +211,13 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
       );
       toast.success(t("cart_order.order_cancelled"));
       window.location.reload();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error(t("cart_order.cancel_failed"));
+      const errorMsg = sanitizeErrorMessage(err, {
+        action: "cancel order",
+        defaultMessage: t("cart_order.cancel_failed") || "Unable to cancel order. Please try again."
+      });
+      toast.error(errorMsg);
     } finally {
       setCanceling(false);
     }

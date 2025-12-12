@@ -116,7 +116,10 @@ const AddOffer: React.FC = () => {
       return mapped;
     } catch (err: any) {
       console.error("Upload error", err?.response?.data || err.message || err);
-      const errorMessage = err?.response?.data?.message || err?.message || "Failed to upload images";
+      const errorMessage = sanitizeErrorMessage(err, {
+        action: "upload images",
+        defaultMessage: "Unable to upload images. Please check the files and try again."
+      });
       toast.error(errorMessage);
       throw err;
     }
@@ -132,7 +135,10 @@ const AddOffer: React.FC = () => {
       setLocalFiles(files);
       toast.success(`${uploaded.length} image(s) uploaded successfully!`);
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error?.message || "Error uploading files";
+      const errorMessage = sanitizeErrorMessage(error, {
+        action: "upload images",
+        defaultMessage: "Unable to upload images. Please check the files and try again."
+      });
       toast.error(errorMessage);
       // Clear files on error
       setLocalFiles(null);
@@ -293,7 +299,10 @@ const AddOffer: React.FC = () => {
       }, 1500);
     } catch (error: any) {
       console.error("Error submitting offer:", error);
-      const errorMessage = error?.response?.data?.message || "Failed to create offer";
+      const errorMessage = sanitizeErrorMessage(error, {
+        action: "create offer",
+        defaultMessage: "Unable to create offer. Please check your input and try again."
+      });
       toast.error(errorMessage);
     }
   };

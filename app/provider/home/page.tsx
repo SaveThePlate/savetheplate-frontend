@@ -11,6 +11,7 @@ import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { isOfferExpired } from "@/components/offerCard/utils";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 type FoodType = "snack" | "meal" | "beverage" | "other";
 type Taste = "sweet" | "salty" | "both" | "neutral";
@@ -200,9 +201,19 @@ const ProviderHome = () => {
         });
 
         setOffers(mappedOffers);
-      } catch (err) {
+      } catch (err: any) {
         if (isMountedRef.current) {
-          setError(t("provider.home.fetch_offers_failed", { error: (err as Error).message }));
+          // Provide user-friendly error message without technical details
+          let userMessage = t("provider.home.fetch_offers_failed") || "Unable to load your offers. Please try again.";
+          
+          if (err?.response?.status === 401 || err?.response?.status === 403) {
+            userMessage = t("provider.home.error_auth") || "Your session has expired. Please sign in again.";
+            router.push("/signIn");
+          } else if (err?.response?.status === 500) {
+            userMessage = t("provider.home.error_server") || "Server error. Please try again in a moment.";
+          }
+          
+          setError(userMessage);
         }
       } finally {
         if (isMountedRef.current) {
@@ -367,7 +378,11 @@ const ProviderHome = () => {
       });
       toast.success(t("provider.home.offer_deleted"));
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || t("provider.home.delete_failed"));
+      const errorMsg = sanitizeErrorMessage(err, {
+        action: "delete offer",
+        defaultMessage: t("provider.home.delete_failed") || "Unable to delete offer. Please try again."
+      });
+      toast.error(errorMsg);
       // refetch if failed
       setLoading(true);
       try {

@@ -31,7 +31,7 @@ const Orders = () => {
     const fetchOrders = async () => {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        setError(t("client.orders.loading"));
+        setError(t("client.orders.error_auth") || "Please sign in to view your orders.");
         router.push("/signIn");
         return;
       }
@@ -46,9 +46,15 @@ const Orders = () => {
         );
 
         setOrders(response.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch orders:", err);
-        setError(t("client.orders.loading"));
+        // Provide user-friendly error message
+        if (err?.response?.status === 401 || err?.response?.status === 403) {
+          setError(t("client.orders.error_auth") || "Your session has expired. Please sign in again.");
+          router.push("/signIn");
+        } else {
+          setError(t("client.orders.error_fetch") || "Unable to load your orders. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }

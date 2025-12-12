@@ -79,7 +79,7 @@ const OffersPage = () => {
         setUserRole(response.data.role);
       } catch (err) {
         console.error("Error fetching user role:", err);
-        setError(t("offers.loading"));
+        // Don't set error for role fetch failure - it's non-critical
       }
     };
 
@@ -197,9 +197,15 @@ const OffersPage = () => {
         });
 
         setOffers(mappedOffers);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch offers:", err);
-        setError(t("offers.loading"));
+        // Provide user-friendly error message
+        if (err?.message?.includes("401") || err?.message?.includes("403")) {
+          setError(t("offers.error_auth") || "Your session has expired. Please sign in again.");
+          router.push("/signIn");
+        } else {
+          setError(t("offers.error_fetch") || "Unable to load offers. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
@@ -207,7 +213,7 @@ const OffersPage = () => {
 
     Promise.all([fetchUserRole(), fetchOffers()]).catch((err) => {
       console.error("Error during data fetching:", err);
-      setError(t("offers.error_generic"));
+      setError(t("offers.error_generic") || "Unable to load offers. Please refresh the page.");
       setLoading(false);
     });
   }, [router, t]);

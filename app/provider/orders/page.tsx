@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,9 +120,13 @@ const ProviderOrdersContent = () => {
         }
       );
       setOrders(res.data || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error(t("provider.fetch_failed"));
+      const errorMsg = sanitizeErrorMessage(err, {
+        action: "load orders",
+        defaultMessage: t("provider.fetch_failed") || "Unable to load orders. Please try again later."
+      });
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

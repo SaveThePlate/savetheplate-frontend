@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Mail, Phone, MapPin, Send, MessageSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 const ContactPage = () => {
   const router = useRouter();
@@ -135,10 +136,11 @@ const ContactPage = () => {
       }
     } catch (error: any) {
       console.error("Error sending message:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          t("contact.send_failed")
-      );
+      const errorMsg = sanitizeErrorMessage(error, {
+        action: "send message",
+        defaultMessage: t("contact.send_failed") || "Unable to send message. Please try again or email us directly."
+      });
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

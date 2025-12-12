@@ -30,6 +30,7 @@ import {
   CredenzaClose,
 } from "@/components/ui/credenza";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   offerId,
@@ -221,7 +222,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         throw err;
       }
       console.error("Upload error", err?.response?.data || err.message || err);
-      const errorMessage = err?.response?.data?.message || err?.message || "Failed to upload images";
+      const errorMessage = sanitizeErrorMessage(err, {
+        action: "upload images",
+        defaultMessage: "Unable to upload images. Please check the files and try again."
+      });
       toast.error(errorMessage);
       throw err;
     } finally {
@@ -425,7 +429,10 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         return;
       }
       console.error("Error updating offer:", err);
-      const errorMessage = err?.response?.data?.message || err?.message || t("offer_card.update_failed");
+      const errorMessage = sanitizeErrorMessage(err, {
+        action: "update offer",
+        defaultMessage: t("offer_card.update_failed") || "Unable to update offer. Please try again."
+      });
       toast.error(errorMessage);
     } finally {
       if (isMountedRef.current) {

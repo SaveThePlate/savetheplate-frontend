@@ -10,6 +10,7 @@ import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeI
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { ArrowLeft, MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 interface Offer {
   id: number;
@@ -150,7 +151,11 @@ const Offers = () => {
       setInCart(true);
       toast.success(t("client.offers.detail.order_success"));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || t("client.offers.detail.order_failed"));
+      const errorMsg = sanitizeErrorMessage(err, {
+        action: "place order",
+        defaultMessage: t("client.offers.detail.order_failed") || "Unable to place order. Please try again."
+      });
+      toast.error(errorMsg);
     }
   };
 

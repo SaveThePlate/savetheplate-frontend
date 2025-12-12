@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Gift } from "lucide-react";
 import Image from "next/image";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 type RescuePackSize = "small" | "medium" | "large";
 
@@ -173,9 +174,12 @@ const CreateMagicBoxPage = () => {
       }, 1500);
     } catch (error: any) {
       console.error(error);
-      const errorMessage = error?.response?.data?.message || "Failed to create rescue pack";
-      toast.error(errorMessage);
-      setError(errorMessage);
+      const errorMsg = sanitizeErrorMessage(error, {
+        action: "create rescue pack",
+        defaultMessage: "Unable to create rescue pack. Please check your input and try again."
+      });
+      toast.error(errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

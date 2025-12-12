@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -88,7 +89,11 @@ const Home = () => {
       } else {
         console.error("Failed to fetch offers:", offersResponse.reason);
         if (!isRefresh && isMountedRef.current) {
-          setError(t("client.home.fetch_offers_failed"));
+          const errorMsg = sanitizeErrorMessage(offersResponse.reason, {
+            action: "load offers",
+            defaultMessage: t("client.home.fetch_offers_failed") || "Unable to load offers. Please try again later."
+          });
+          setError(errorMsg);
         }
       }
 
@@ -106,7 +111,11 @@ const Home = () => {
     } catch (fetchError) {
       console.error("Failed to fetch data:", fetchError);
       if (!isRefresh && isMountedRef.current) {
-        setError("Failed to fetch offers. Please try again later.");
+        const errorMsg = sanitizeErrorMessage(fetchError, {
+          action: "load offers",
+          defaultMessage: "Unable to load offers. Please check your connection and try again."
+        });
+        setError(errorMsg);
       }
     } finally {
       if (isMountedRef.current) {

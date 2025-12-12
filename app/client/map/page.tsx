@@ -30,10 +30,17 @@ const Map = () => {
 
     const fetchOffers = async () => {
       try {
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers");
+        const token = localStorage.getItem("accessToken");
+        const headers: any = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers", { headers });
         setOffers(response.data);
-      } catch (fetchError) {
-        console.error(fetchError);
+      } catch (fetchError: any) {
+        console.error("Failed to fetch offers for map:", fetchError);
+        // Silently fail - map will still show with default location
+        // Users can still interact with the map even if offers fail to load
       } 
     };
 

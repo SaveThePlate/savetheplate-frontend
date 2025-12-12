@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 const OnboardingPage = () => {
   const router = useRouter();
@@ -48,12 +50,19 @@ const OnboardingPage = () => {
         message: error?.message,
         stack: error?.stack,
       });
-      const errorMessage = 
-        error?.response?.data?.message || 
-        error?.response?.data?.error || 
-        error?.message || 
-        "Failed to set role. Please try again.";
-      alert(errorMessage);
+      // Use sanitizeErrorMessage to get user-friendly error message
+      const userMessage = sanitizeErrorMessage(error, {
+        action: "save your role selection",
+        defaultMessage: t("onboarding.error_generic") || "Unable to save your choice. Please try again."
+      });
+      
+      // Redirect to sign in if authentication error
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        router.push("/signIn");
+      }
+      
+      // Use toast for better UX instead of alert
+      toast.error(userMessage);
     } finally {
       setIsSubmitting(false);
     }
