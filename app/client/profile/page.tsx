@@ -328,7 +328,21 @@ const ProfilePage = () => {
               <div>
                 <p className="text-sm text-amber-700 font-medium">{t("client.profile.my_orders")}</p>
                 <Button
-                  onClick={() => router.push("/client/orders")}
+                  onClick={() => {
+                    const token = localStorage.getItem("accessToken");
+                    if (!token) return router.push("/signIn");
+                    try {
+                      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+                      const uid = tokenPayload?.id;
+                      if (uid) {
+                        router.push(`/client/orders/${uid}`);
+                      } else {
+                        router.push("/client/orders");
+                      }
+                    } catch {
+                      router.push("/client/orders");
+                    }
+                  }}
                   className="mt-2 bg-amber-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-amber-700 text-sm"
                 >
                   {t("client.profile.view_all")}
