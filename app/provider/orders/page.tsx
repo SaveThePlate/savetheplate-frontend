@@ -240,7 +240,7 @@ const ProviderOrdersContent = () => {
   }, [orders, searchQuery, activeTab]);
 
   return (
-    <main className="min-h-screen pt-20 pb-24 sm:pt-24 sm:pb-28">
+    <main className="w-full">
       <ToastContainer
         position="top-right"
         autoClose={1000}
@@ -255,7 +255,7 @@ const ProviderOrdersContent = () => {
         progressClassName="bg-white/80"
       />
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

@@ -65,8 +65,8 @@ const Orders = () => {
   const totalOrders = orders.length;
 
   return (
-    <main className="min-h-screen pt-20 sm:pt-24 pb-20">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+    <main className="w-full">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
         {/* Header Section */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">

@@ -176,7 +176,7 @@ const Offers = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="w-full">
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -192,8 +192,8 @@ const Offers = () => {
       />
 
       {/* Header with Back Button */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-14 sm:top-16 z-50 bg-white border-b border-gray-200 shadow-sm -mx-4 sm:-mx-6 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto py-3 flex items-center gap-3">
           <button
             onClick={() => router.back()}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -204,7 +204,7 @@ const Offers = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl pt-4 sm:pt-6">
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200">
           {/* Hero Image */}
           <div className="relative w-full h-80 sm:h-96 bg-gray-100">

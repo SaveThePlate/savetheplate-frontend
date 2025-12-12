@@ -194,7 +194,7 @@ const ProfilePage = () => {
   const confirmedCount = orders.filter((o) => o.status === "confirmed").length;
 
   return (
-    <main className="w-full mx-auto px-4 sm:px-6 max-w-6xl py-6 sm:py-8">
+    <main className="w-full mx-auto px-4 sm:px-6 max-w-6xl pt-4 sm:pt-6">
         <ToastContainer
           position="top-right"
           autoClose={1000}

@@ -19,7 +19,7 @@ const SelectOfferTypePage = () => {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16">
+    <div className="w-full mx-auto px-4 sm:px-6 max-w-lg pt-4 sm:pt-6 flex items-center justify-center min-h-[60vh]">
       <main className="relative w-full max-w-lg bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-8 sm:p-10 flex flex-col items-center transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
         {/* Back Button */}
         <Button

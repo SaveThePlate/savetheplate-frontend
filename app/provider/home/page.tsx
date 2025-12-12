@@ -475,7 +475,7 @@ const ProviderHome = () => {
   }, [offers, searchQuery, filter, sort, categoryFilter, tasteFilter]);
 
   return (
-    <main className="pt-4 pb-4 flex flex-col items-center w-full">
+    <main className="flex flex-col items-center w-full">
         <ToastContainer
   position="top-right"
   autoClose={1000}
@@ -489,9 +489,9 @@ const ProviderHome = () => {
   bodyClassName="text-sm font-medium"
   progressClassName="bg-white/80"
 />
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl flex flex-col space-y-6 sm:space-y-8">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl pt-4 sm:pt-6 flex flex-col space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4 sm:mt-6">
           <div className="flex flex-col gap-1">
             <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
               {t("provider.home.title")}

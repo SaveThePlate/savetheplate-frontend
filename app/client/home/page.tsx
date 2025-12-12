@@ -121,8 +121,8 @@ const Home = () => {
   }, [fetchOffers]);
 
   return (
-    <main className="flex flex-col items-center pt-4 pb-4 w-full">
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl space-y-6 sm:space-y-8 relative">
+    <main className="flex flex-col items-center w-full">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
         {/* Decorative soft shapes */}
         <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
         <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />

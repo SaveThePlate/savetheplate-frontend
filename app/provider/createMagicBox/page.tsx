@@ -182,7 +182,7 @@ const CreateMagicBoxPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-20 flex flex-col items-center">
+    <div className="w-full mx-auto px-4 sm:px-6 max-w-xl pt-4 sm:pt-6 flex flex-col items-center">
       <ToastContainer
         position="top-right"
         autoClose={1000}

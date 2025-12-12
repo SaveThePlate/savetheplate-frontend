@@ -41,7 +41,7 @@ const ImpactPage = () => {
   return (
     <RouteGuard allowedRoles={["CLIENT", "PROVIDER"]} redirectTo="/signIn">
       <SharedLayout>
-        <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl">
+        <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl pt-4 sm:pt-6">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-4">

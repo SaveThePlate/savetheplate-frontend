@@ -41,8 +41,7 @@ const Map = () => {
   }, []);
 
   return (
-
-    <main className="sm:pt-16 p-6 bg-[#cdeddf] min-h-screen flex flex-col items-center">
+    <main className="w-full p-6 flex flex-col items-center">
         <div className="w-full flex-grow">
           <MapComponent
             markers={offers.filter(offer => offer.latitude !== null && offer.longitude !== null)}
