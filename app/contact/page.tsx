@@ -145,7 +145,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-4 pb-4 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-4 pb-4 px-4 sm:px-6 lg:px-8">
       <ToastContainer
         position="top-right"
         autoClose={3000}

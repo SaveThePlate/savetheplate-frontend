@@ -65,7 +65,7 @@ const Orders = () => {
   const totalOrders = orders.length;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#F9FAF5] pt-20 sm:pt-24 pb-20">
+    <main className="min-h-screen pt-20 sm:pt-24 pb-20">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Header Section */}
         <div className="mb-6 sm:mb-8">

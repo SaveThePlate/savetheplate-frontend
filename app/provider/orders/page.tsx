@@ -236,7 +236,7 @@ const ProviderOrdersContent = () => {
   }, [orders, searchQuery, activeTab]);
 
   return (
-    <main className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 min-h-screen pt-20 pb-24 sm:pt-24 sm:pb-28">
+    <main className="min-h-screen pt-20 pb-24 sm:pt-24 sm:pb-28">
       <ToastContainer
         position="top-right"
         autoClose={1000}

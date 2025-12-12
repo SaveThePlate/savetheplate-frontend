@@ -707,7 +707,7 @@ export default function ProviderProfile() {
   };
 
   return (
-    <main className="bg-[#F9FAF5] min-h-screen pt-4 pb-4 flex flex-col items-center px-4">
+    <main className="min-h-screen pt-4 pb-4 flex flex-col items-center px-4">
       <ToastContainer
         position="top-right"
         autoClose={1000}
