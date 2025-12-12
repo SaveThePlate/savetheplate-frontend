@@ -194,8 +194,12 @@ const ProviderOrdersContent = () => {
     setShowScanner(false);
     // Refresh orders to get updated data
     fetchOrders();
-    // Ensure we stay on the orders page (redirect if needed)
-    router.push("/provider/orders");
+    // Redirect to provider orders page after successful scan
+    // Use replace to avoid adding to history stack
+    // Small delay to ensure scanner is closed before redirect
+    setTimeout(() => {
+      router.replace("/provider/orders");
+    }, 300);
   };
 
   const confirmed = orders.filter((o) => o.status === "confirmed");

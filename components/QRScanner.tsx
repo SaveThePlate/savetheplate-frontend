@@ -102,6 +102,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
         if (scannerRef.current) {
           scannerRef.current.stop();
         }
+        setScanningOrder(false); // Reset scanning state
         onScanSuccess(qrCodeToken);
       }, 2000);
     } catch (err: any) {
