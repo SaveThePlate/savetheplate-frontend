@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 type UploadedImage = {
   filename: string;
