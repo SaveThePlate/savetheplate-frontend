@@ -17,7 +17,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
 
   return (
     <RouteGuard allowedRoles={["PROVIDER"]} redirectTo="/signIn">
-      <section className="relative flex flex-col min-h-screen bg-gray-50 overflow-x-hidden">
+      <section className="relative flex flex-col min-h-screen bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] overflow-x-hidden">
       {/* Header */}
       <header className="w-full fixed top-0 left-0 z-30 bg-white shadow-sm border-b border-gray-200 safe-area-inset-top">
         <nav className="w-full mx-auto flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">

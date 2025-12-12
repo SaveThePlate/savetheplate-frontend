@@ -475,7 +475,7 @@ const ProviderHome = () => {
   }, [offers, searchQuery, filter, sort, categoryFilter, tasteFilter]);
 
   return (
-    <main className="bg-[#F9FAF5] min-h-screen pt-4 pb-4 flex flex-col items-center">
+    <main className="pt-4 pb-4 flex flex-col items-center w-full">
         <ToastContainer
   position="top-right"
   autoClose={1000}
