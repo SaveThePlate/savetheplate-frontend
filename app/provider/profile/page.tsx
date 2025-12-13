@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { compressImage, shouldCompress } from "@/utils/imageCompression";
 
 interface ProfileData {
   username: string;
@@ -334,6 +335,7 @@ const EditProfileDialog: React.FC<{
     }
 
     const file = files[0];
+    // Set local file immediately to show preview right away
     setLocalFile(file);
     setUploadingImage(true);
 
@@ -342,6 +344,24 @@ const EditProfileDialog: React.FC<{
       if (!token) {
         toast.error(t("client.offers.detail.login_required"));
         return;
+      }
+
+      // Compress image client-side before upload for faster transfer
+      let fileToUpload = file;
+      if (shouldCompress(file, 1)) {
+        try {
+          toast.info(t("provider.profile.edit_dialog.compressing") || "Compressing image...");
+          fileToUpload = await compressImage(file, {
+            maxWidth: 1500,
+            maxHeight: 1500,
+            quality: 0.85,
+            maxSizeMB: 1,
+          });
+          console.log("Profile image compressed:", `${fileToUpload.name}: ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
+        } catch (error) {
+          console.error("Compression error, uploading original:", error);
+          fileToUpload = file;
+        }
       }
 
       // Create axios instance with baseURL and auth interceptor (same as AddOffer)
@@ -359,11 +379,12 @@ const EditProfileDialog: React.FC<{
       });
 
       const fd = new FormData();
-      fd.append("files", file);
+      fd.append("files", fileToUpload);
 
-      // Use same upload method as AddOffer
+      // Use same upload method as AddOffer with timeout
       const res = await axiosInstance.post("/storage/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 30000, // 30 second timeout
       });
 
       console.log("Upload response:", res.data);
@@ -527,21 +548,61 @@ const EditProfileDialog: React.FC<{
                 </div>
               </FileInput>
               <FileUploaderContent>
-                {localFile && (
-                  <FileUploaderItem
-                    index={0}
-                    className="size-24 p-0 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
-                  >
-                    <Image
-                      src={URL.createObjectURL(localFile)}
-                      alt="Profile"
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover rounded-xl"
-                      unoptimized={true}
-                    />
-                  </FileUploaderItem>
-                )}
+                {localFile && (() => {
+                  // Determine image source - prefer uploaded image URL, fallback to local file preview
+                  let imageSrc: string;
+                  if (profileImage && typeof profileImage === 'string') {
+                    // Use uploaded image URL
+                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                    if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
+                      imageSrc = profileImage;
+                    } else if (profileImage.startsWith("/storage/") && backendUrl) {
+                      imageSrc = `${backendUrl}${profileImage}`;
+                    } else if (backendUrl) {
+                      imageSrc = `${backendUrl}/storage/${profileImage.replace(/^\/storage\//, '')}`;
+                    } else {
+                      imageSrc = profileImage;
+                    }
+                    // Add cache buster
+                    if (!imageSrc.includes("?") && !imageSrc.includes("#")) {
+                      imageSrc += `?t=${Date.now()}`;
+                    }
+                  } else {
+                    // Use local file preview
+                    imageSrc = URL.createObjectURL(localFile);
+                  }
+                  
+                  const isUploaded = !!profileImage;
+                  
+                  return (
+                    <FileUploaderItem
+                      index={0}
+                      className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
+                        isUploaded ? "border-emerald-600" : "border-yellow-400"
+                      }`}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Image
+                          src={imageSrc}
+                          alt="Profile"
+                          width={96}
+                          height={96}
+                          className="w-full h-full object-cover rounded-xl"
+                          unoptimized={true}
+                        />
+                      </div>
+                      <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                        isUploaded 
+                          ? "bg-emerald-600" 
+                          : uploadingImage 
+                          ? "bg-yellow-500" 
+                          : "bg-yellow-400"
+                      }`}>
+                        {isUploaded ? "✓" : uploadingImage ? "⏳" : "📤"}
+                      </div>
+                    </FileUploaderItem>
+                  );
+                })()}
               </FileUploaderContent>
             </FileUploader>
             <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.upload_logo")}</p>

@@ -213,6 +213,7 @@
         "location_auto": "Will be auto-filled from Google Maps link",
         "location_hint": "This location will be extracted automatically",
         "uploading": "Uploading...",
+        "compressing": "Compressing image...",
         "image_ready": "Image ready",
         "click_to_upload": "Click to upload",
         "profile_updated": "Profile updated successfully!",
@@ -483,7 +484,8 @@
     "success_created": "Offer created successfully! 🎉",
     "error_create_failed": "Failed to create offer",
     "images_uploaded_success": "{count} image(s) uploaded successfully!",
-    "images_uploaded": "✓ {count} image{plural} uploaded"
+    "images_uploaded": "✓ {count} image{plural} uploaded",
+    "compressing_images": "Compressing images for faster upload..."
   },
   "publish": {
     "title": "Create New Offer",
@@ -524,6 +526,7 @@
     "images_label": "Images",
     "images_uploaded": "{count} uploaded",
     "uploading": "Uploading...",
+    "compressing": "Compressing images...",
     "images_ready": "{count} image(s) ready",
     "click_upload": "Click to upload or drag and drop",
     "up_to_5": "1 image, max 5MB (optional)",

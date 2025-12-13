@@ -17,6 +17,7 @@ import { DropzoneOptions } from "react-dropzone";
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { compressImages, shouldCompress } from "@/utils/imageCompression";
 
 type UploadedImage = {
   filename: string;
@@ -76,8 +77,29 @@ const AddOffer: React.FC = () => {
   async function uploadFiles(files: File[]): Promise<UploadedImage[]> {
     if (!files || files.length === 0) return [];
 
+    // Compress images client-side before upload for faster transfer
+    let filesToUpload = files;
+    const needsCompression = files.some((f) => shouldCompress(f, 1));
+    
+    if (needsCompression) {
+      try {
+        toast.info(t("add_offer.compressing_images") || "Compressing images...");
+        filesToUpload = await compressImages(files, {
+          maxWidth: 1500,
+          maxHeight: 1500,
+          quality: 0.85,
+          maxSizeMB: 1,
+        });
+        console.log("Images compressed:", filesToUpload.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(2)}MB`));
+      } catch (error) {
+        console.error("Compression error, uploading originals:", error);
+        // Continue with original files if compression fails
+        filesToUpload = files;
+      }
+    }
+
     const fd = new FormData();
-    files.forEach((f) => fd.append("files", f));
+    filesToUpload.forEach((f) => fd.append("files", f));
 
     try {
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");

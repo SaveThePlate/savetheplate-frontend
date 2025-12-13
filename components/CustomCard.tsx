@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
+import { compressImages, shouldCompress } from "@/utils/imageCompression";
 import { formatDateTimeRange } from "./offerCard/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
@@ -179,8 +180,28 @@ const CustomCard: FC<CustomCardProps> = ({
   }>> => {
     if (!files || files.length === 0) return [];
 
+    // Compress images client-side before upload for faster transfer
+    let filesToUpload = files;
+    const needsCompression = files.some((f) => shouldCompress(f, 1));
+    
+    if (needsCompression) {
+      try {
+        toast.info("Compressing images...");
+        filesToUpload = await compressImages(files, {
+          maxWidth: 1500,
+          maxHeight: 1500,
+          quality: 0.85,
+          maxSizeMB: 1,
+        });
+        console.log("Images compressed:", filesToUpload.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(2)}MB`));
+      } catch (error) {
+        console.error("Compression error, uploading originals:", error);
+        filesToUpload = files;
+      }
+    }
+
     const fd = new FormData();
-    files.forEach((f) => fd.append("files", f));
+    filesToUpload.forEach((f) => fd.append("files", f));
 
     try {
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");

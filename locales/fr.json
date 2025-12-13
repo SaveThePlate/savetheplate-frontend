@@ -213,6 +213,7 @@
         "location_auto": "Sera rempli automatiquement depuis le lien Google Maps",
         "location_hint": "Cet emplacement sera extrait automatiquement",
         "uploading": "Téléchargement...",
+        "compressing": "Compression de l'image...",
         "image_ready": "Image prête",
         "click_to_upload": "Cliquez pour télécharger",
         "profile_updated": "Profil mis à jour avec succès !",
@@ -486,7 +487,8 @@
     "success_created": "Offre créée avec succès ! 🎉",
     "error_create_failed": "Échec de la création de l'offre",
     "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !",
-    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}"
+    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}",
+    "compressing_images": "Compression des images pour un téléchargement plus rapide..."
   },
   "publish": {
     "title": "Créer une Nouvelle Offre",
@@ -578,6 +580,7 @@
     "images_label": "Images",
     "images_uploaded": "{count} téléchargées",
     "uploading": "Téléchargement...",
+    "compressing": "Compression des images...",
     "images_ready": "{count} image(s) prête(s)",
     "click_upload": "Cliquez pour télécharger ou glissez-déposez",
     "up_to_5": "1 image, max 5 Mo (optionnel)",

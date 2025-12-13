@@ -12,6 +12,7 @@ import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
+import { compressImages, shouldCompress } from "@/utils/imageCompression";
 import {
   FileInput,
   FileUploader,
@@ -171,8 +172,30 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   });
 
   const uploadFiles = async (files: File[]): Promise<Array<{ filename: string; url: string; absoluteUrl: string }>> => {
+    // Compress images client-side before upload for faster transfer
+    let filesToUpload = files;
+    const needsCompression = files.some((f) => shouldCompress(f, 1));
+    
+    if (needsCompression) {
+      try {
+        if (isMountedRef.current) {
+          toast.info(t("offer_card.compressing") || "Compressing images...");
+        }
+        filesToUpload = await compressImages(files, {
+          maxWidth: 1500,
+          maxHeight: 1500,
+          quality: 0.85,
+          maxSizeMB: 1,
+        });
+        console.log("Images compressed:", filesToUpload.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(2)}MB`));
+      } catch (error) {
+        console.error("Compression error, uploading originals:", error);
+        filesToUpload = files;
+      }
+    }
+
     const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
+    filesToUpload.forEach((file) => formData.append("files", file));
 
     // Create new AbortController for this request
     const abortController = new AbortController();
