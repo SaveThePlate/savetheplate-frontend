@@ -4,7 +4,8 @@ import axios from "axios";
 import { ClientOfferCard } from "./offerCard";
 import { useRouter } from "next/navigation";
 import { resolveImageSource } from "@/utils/imageUtils";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// WEBSOCKET INTEGRATION TEMPORARILY DISABLED
+// import { useWebSocket } from "@/hooks/useWebSocket";
 import { useLanguage } from "@/context/LanguageContext";
 import { Search, Filter, X, Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -252,149 +253,150 @@ const OffersPage = () => {
     });
   }, [router, t]);
 
+  // WEBSOCKET INTEGRATION TEMPORARILY DISABLED - Using manual refresh instead
   // Handle real-time offer updates
-  const handleOfferUpdate = useCallback((data: { type: string; offer: any }) => {
-    const { type, offer } = data;
-    console.log("🔄 handleOfferUpdate called with:", { type, offerId: offer?.id });
-    
-    if (!offer) {
-      console.warn("⚠️ Received offer update without offer data");
-      return;
-    }
-    
-    // Normalize the offer data to match our format
-    const normalizeOffer = (o: any): Offer => {
-      const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-      
-      // Parse images if they're stored as JSON string (old offers)
-      let imagesArray: any[] = [];
-      if (o.images) {
-        if (typeof o.images === 'string') {
-          try {
-            const parsed = JSON.parse(o.images);
-            imagesArray = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
-          } catch {
-            // If parsing fails, try to use as single image URL
-            imagesArray = o.images ? [{ url: o.images, absoluteUrl: o.images }] : [];
-          }
-        } else if (Array.isArray(o.images)) {
-          imagesArray = o.images;
-        }
-      }
-      
-      const images = imagesArray.map((img: any) => {
-        if (!img) return img;
-        
-        // Normalize absoluteUrl - preserve URLs from different backends
-        if (typeof img.absoluteUrl === "string") {
-          if (/^https?:\/\//i.test(img.absoluteUrl)) {
-            try {
-              const urlObj = new URL(img.absoluteUrl);
-              const urlHost = urlObj.hostname;
-              
-              let currentBackendHost = "";
-              if (backendOrigin) {
-                try {
-                  const backendUrlObj = new URL(backendOrigin);
-                  currentBackendHost = backendUrlObj.hostname;
-                } catch {
-                  const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
-                  if (match) currentBackendHost = match[1];
-                }
-              }
-              
-              // If URL is from a different backend, keep it as-is
-              if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
-                return img; // Keep original URL from different backend
-              }
-              
-              // Same backend - normalize
-              const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
-              if (match && backendOrigin) {
-                return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
-              }
-            } catch {
-              const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
-              if (match && backendOrigin) {
-                return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
-              }
-            }
-          }
-          else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
-            return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
-          }
-        }
-        
-        // Normalize url field if it exists - same logic
-        if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
-          try {
-            const urlObj = new URL(img.url);
-            const urlHost = urlObj.hostname;
-            
-            let currentBackendHost = "";
-            if (backendOrigin) {
-              try {
-                const backendUrlObj = new URL(backendOrigin);
-                currentBackendHost = backendUrlObj.hostname;
-              } catch {
-                const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
-                if (match) currentBackendHost = match[1];
-              }
-            }
-            
-            // If from different backend, keep original
-            if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
-              return { ...img, absoluteUrl: img.absoluteUrl || img.url };
-            }
-            
-            // Same backend - normalize
-            const match = img.url.match(/\/(storage\/.+)$/);
-            if (match && backendOrigin) {
-              return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
-            }
-          } catch {
-            const match = img.url.match(/\/(storage\/.+)$/);
-            if (match && backendOrigin) {
-              return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
-            }
-          }
-        }
-        
-        return img;
-      });
-      
-      return { ...o, images };
-    };
+  // const handleOfferUpdate = useCallback((data: { type: string; offer: any }) => {
+  //   const { type, offer } = data;
+  //   console.log("🔄 handleOfferUpdate called with:", { type, offerId: offer?.id });
+  //   
+  //   if (!offer) {
+  //     console.warn("⚠️ Received offer update without offer data");
+  //     return;
+  //   }
+  //   
+  //   // Normalize the offer data to match our format
+  //   const normalizeOffer = (o: any): Offer => {
+  //     const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+  //     
+  //     // Parse images if they're stored as JSON string (old offers)
+  //     let imagesArray: any[] = [];
+  //     if (o.images) {
+  //       if (typeof o.images === 'string') {
+  //         try {
+  //           const parsed = JSON.parse(o.images);
+  //           imagesArray = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
+  //         } catch {
+  //           // If parsing fails, try to use as single image URL
+  //           imagesArray = o.images ? [{ url: o.images, absoluteUrl: o.images }] : [];
+  //         }
+  //       } else if (Array.isArray(o.images)) {
+  //         imagesArray = o.images;
+  //       }
+  //     }
+  //     
+  //     const images = imagesArray.map((img: any) => {
+  //       if (!img) return img;
+  //       
+  //       // Normalize absoluteUrl - preserve URLs from different backends
+  //       if (typeof img.absoluteUrl === "string") {
+  //         if (/^https?:\/\//i.test(img.absoluteUrl)) {
+  //           try {
+  //             const urlObj = new URL(img.absoluteUrl);
+  //             const urlHost = urlObj.hostname;
+  //             
+  //             let currentBackendHost = "";
+  //             if (backendOrigin) {
+  //               try {
+  //                 const backendUrlObj = new URL(backendOrigin);
+  //                 currentBackendHost = backendUrlObj.hostname;
+  //               } catch {
+  //                 const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+  //                 if (match) currentBackendHost = match[1];
+  //               }
+  //             }
+  //             
+  //             // If URL is from a different backend, keep it as-is
+  //             if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+  //               return img; // Keep original URL from different backend
+  //             }
+  //             
+  //             // Same backend - normalize
+  //             const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+  //             if (match && backendOrigin) {
+  //               return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+  //             }
+  //           } catch {
+  //             const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+  //             if (match && backendOrigin) {
+  //               return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+  //             }
+  //           }
+  //         }
+  //         else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+  //           return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+  //         }
+  //       }
+  //       
+  //       // Normalize url field if it exists - same logic
+  //       if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
+  //         try {
+  //           const urlObj = new URL(img.url);
+  //           const urlHost = urlObj.hostname;
+  //           
+  //           let currentBackendHost = "";
+  //           if (backendOrigin) {
+  //             try {
+  //               const backendUrlObj = new URL(backendOrigin);
+  //               currentBackendHost = backendUrlObj.hostname;
+  //             } catch {
+  //               const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+  //               if (match) currentBackendHost = match[1];
+  //             }
+  //           }
+  //           
+  //           // If from different backend, keep original
+  //           if (currentBackendHost && urlHost !== currentBackendHost && urlHost !== 'localhost' && urlHost !== '127.0.0.1') {
+  //             return { ...img, absoluteUrl: img.absoluteUrl || img.url };
+  //           }
+  //           
+  //           // Same backend - normalize
+  //           const match = img.url.match(/\/(storage\/.+)$/);
+  //           if (match && backendOrigin) {
+  //             return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+  //           }
+  //         } catch {
+  //           const match = img.url.match(/\/(storage\/.+)$/);
+  //           if (match && backendOrigin) {
+  //             return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
+  //           }
+  //         }
+  //       }
+  //       
+  //       return img;
+  //     });
+  //     
+  //     return { ...o, images };
+  //   };
 
-    setOffers((prevOffers) => {
-      console.log(`📊 Current offers count: ${prevOffers.length}`);
-      if (type === 'created') {
-        // Add new offer at the beginning
-        const normalized = normalizeOffer(offer);
-        console.log(`➕ Adding new offer: ${normalized.id} - ${normalized.title}`);
-        const newOffers = [normalized, ...prevOffers];
-        console.log(`📊 New offers count: ${newOffers.length}`);
-        return newOffers;
-      } else if (type === 'updated') {
-        // Update existing offer
-        const normalized = normalizeOffer(offer);
-        console.log(`🔄 Updating offer: ${normalized.id}`);
-        return prevOffers.map((o) => (o.id === offer.id ? normalized : o));
-      } else if (type === 'deleted') {
-        // Remove deleted offer
-        console.log(`🗑️ Removing offer: ${offer.id}`);
-        return prevOffers.filter((o) => o.id !== offer.id);
-      }
-      console.warn(`⚠️ Unknown offer update type: ${type}`);
-      return prevOffers;
-    });
-  }, []);
+  //   setOffers((prevOffers) => {
+  //     console.log(`📊 Current offers count: ${prevOffers.length}`);
+  //     if (type === 'created') {
+  //       // Add new offer at the beginning
+  //       const normalized = normalizeOffer(offer);
+  //       console.log(`➕ Adding new offer: ${normalized.id} - ${normalized.title}`);
+  //       const newOffers = [normalized, ...prevOffers];
+  //       console.log(`📊 New offers count: ${newOffers.length}`);
+  //       return newOffers;
+  //     } else if (type === 'updated') {
+  //       // Update existing offer
+  //       const normalized = normalizeOffer(offer);
+  //       console.log(`🔄 Updating offer: ${normalized.id}`);
+  //       return prevOffers.map((o) => (o.id === offer.id ? normalized : o));
+  //     } else if (type === 'deleted') {
+  //       // Remove deleted offer
+  //       console.log(`🗑️ Removing offer: ${offer.id}`);
+  //       return prevOffers.filter((o) => o.id !== offer.id);
+  //     }
+  //     console.warn(`⚠️ Unknown offer update type: ${type}`);
+  //     return prevOffers;
+  //   });
+  // }, []);
 
   // Connect to WebSocket for real-time updates
-  useWebSocket({
-    onOfferUpdate: handleOfferUpdate,
-    enabled: true,
-  });
+  // useWebSocket({
+  //   onOfferUpdate: handleOfferUpdate,
+  //   enabled: true,
+  // });
 
   // Filter and sort offers
   const filteredAndSortedOffers = useMemo(() => {

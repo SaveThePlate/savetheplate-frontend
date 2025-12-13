@@ -24,7 +24,8 @@ import {
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// WEBSOCKET INTEGRATION TEMPORARILY DISABLED
+// import { useWebSocket } from "@/hooks/useWebSocket";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -189,46 +190,47 @@ const ProviderOrdersContent = () => {
     }
   }, [searchParams, router, t]);
 
+  // WEBSOCKET INTEGRATION TEMPORARILY DISABLED - Using manual refresh instead
   // Handle real-time order updates
-  const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
-    const { type, order } = data;
-    
-    setOrders((prevOrders) => {
-      // Ensure prevOrders is always an array
-      const safePrevOrders = Array.isArray(prevOrders) ? prevOrders : [];
-      
-      if (type === 'created') {
-        // Add new order if it's for this provider's offers
-        const offerIds = safePrevOrders.map(o => o.offerId);
-        if (order.offerId && offerIds.includes(order.offerId)) {
-          return [order, ...safePrevOrders];
-        }
-        // Or check if order is for provider's offer
-        if (order.offer?.ownerId === providerId) {
-          return [order, ...safePrevOrders];
-        }
-        return safePrevOrders;
-      } else if (type === 'updated') {
-        // Update existing order
-        return safePrevOrders.map((o) => (o.id === order.id ? order : o));
-      } else if (type === 'deleted') {
-        // Remove deleted order
-        return safePrevOrders.filter((o) => o.id !== order.id);
-      }
-      return safePrevOrders;
-    });
+  // const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
+  //   const { type, order } = data;
+  //   
+  //   setOrders((prevOrders) => {
+  //     // Ensure prevOrders is always an array
+  //     const safePrevOrders = Array.isArray(prevOrders) ? prevOrders : [];
+  //     
+  //     if (type === 'created') {
+  //       // Add new order if it's for this provider's offers
+  //       const offerIds = safePrevOrders.map(o => o.offerId);
+  //       if (order.offerId && offerIds.includes(order.offerId)) {
+  //         return [order, ...safePrevOrders];
+  //       }
+  //       // Or check if order is for provider's offer
+  //       if (order.offer?.ownerId === providerId) {
+  //         return [order, ...safePrevOrders];
+  //       }
+  //       return safePrevOrders;
+  //     } else if (type === 'updated') {
+  //       // Update existing order
+  //       return safePrevOrders.map((o) => (o.id === order.id ? order : o));
+  //     } else if (type === 'deleted') {
+  //       // Remove deleted order
+  //       return safePrevOrders.filter((o) => o.id !== order.id);
+  //     }
+  //     return safePrevOrders;
+  //   });
 
-    // Show toast notification
-    if (type === 'updated' && order.status === 'confirmed') {
-      toast.success(t("provider.order_confirmed_toast", { orderId: order.id }));
-    }
-  }, [providerId, t]);
+  //   // Show toast notification
+  //   if (type === 'updated' && order.status === 'confirmed') {
+  //     toast.success(t("provider.order_confirmed_toast", { orderId: order.id }));
+  //   }
+  // }, [providerId, t]);
 
   // Connect to WebSocket for real-time updates
-  useWebSocket({
-    onOrderUpdate: handleOrderUpdate,
-    enabled: !!providerId,
-  });
+  // useWebSocket({
+  //   onOrderUpdate: handleOrderUpdate,
+  //   enabled: !!providerId,
+  // });
 
   const handleScanSuccess = (qrCodeToken: string) => {
     // Close scanner immediately

@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { Package, Clock, CheckCircle, XCircle, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// WEBSOCKET INTEGRATION TEMPORARILY DISABLED
+// import { useWebSocket } from "@/hooks/useWebSocket";
 import { toast, ToastContainer } from "react-toastify";
 
 type Order = {
@@ -68,61 +69,62 @@ const Orders = () => {
     fetchOrders();
   }, [fetchOrders]);
 
+  // WEBSOCKET INTEGRATION TEMPORARILY DISABLED - Using manual refresh instead
   // Handle real-time order updates
-  const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
-    const { type, order } = data;
-    
-    // Only process updates for orders that belong to this user
-    if (userId && order.userId !== userId) {
-      console.log(`📦 Order update ignored: order.userId (${order.userId}) !== current userId (${userId})`);
-      return;
-    }
-    
-    console.log(`📦 Order update received:`, { type, orderId: order.id, status: order.status, orderUserId: order.userId, currentUserId: userId });
-    
-    setOrders((prevOrders) => {
-      // Ensure prevOrders is always an array
-      const safePrevOrders = Array.isArray(prevOrders) ? prevOrders : [];
-      
-      if (type === 'created') {
-        // Add new order if it belongs to this user
-        if (order.userId === userId) {
-          console.log(`➕ Adding new order: ${order.id}`);
-          return [order, ...safePrevOrders];
-        }
-        return safePrevOrders;
-      } else if (type === 'updated') {
-        // Update existing order only if it exists in the list
-        const orderExists = safePrevOrders.some((o) => o.id === order.id);
-        if (orderExists) {
-          console.log(`🔄 Updating order: ${order.id} from ${safePrevOrders.find(o => o.id === order.id)?.status} to ${order.status}`);
-          return safePrevOrders.map((o) => (o.id === order.id ? order : o));
-        } else if (order.userId === userId) {
-          // If order doesn't exist but belongs to user, add it
-          console.log(`➕ Adding missing order: ${order.id}`);
-          return [order, ...safePrevOrders];
-        }
-        return safePrevOrders;
-      } else if (type === 'deleted') {
-        // Remove deleted order
-        console.log(`🗑️ Removing order: ${order.id}`);
-        return safePrevOrders.filter((o) => o.id !== order.id);
-      }
-      return safePrevOrders;
-    });
+  // const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
+  //   const { type, order } = data;
+  //   
+  //   // Only process updates for orders that belong to this user
+  //   if (userId && order.userId !== userId) {
+  //     console.log(`📦 Order update ignored: order.userId (${order.userId}) !== current userId (${userId})`);
+  //     return;
+  //   }
+  //   
+  //   console.log(`📦 Order update received:`, { type, orderId: order.id, status: order.status, orderUserId: order.userId, currentUserId: userId });
+  //   
+  //   setOrders((prevOrders) => {
+  //     // Ensure prevOrders is always an array
+  //     const safePrevOrders = Array.isArray(prevOrders) ? prevOrders : [];
+  //     
+  //     if (type === 'created') {
+  //       // Add new order if it belongs to this user
+  //       if (order.userId === userId) {
+  //         console.log(`➕ Adding new order: ${order.id}`);
+  //         return [order, ...safePrevOrders];
+  //       }
+  //       return safePrevOrders;
+  //     } else if (type === 'updated') {
+  //       // Update existing order only if it exists in the list
+  //       const orderExists = safePrevOrders.some((o) => o.id === order.id);
+  //       if (orderExists) {
+  //         console.log(`🔄 Updating order: ${order.id} from ${safePrevOrders.find(o => o.id === order.id)?.status} to ${order.status}`);
+  //         return safePrevOrders.map((o) => (o.id === order.id ? order : o));
+  //       } else if (order.userId === userId) {
+  //         // If order doesn't exist but belongs to user, add it
+  //         console.log(`➕ Adding missing order: ${order.id}`);
+  //         return [order, ...safePrevOrders];
+  //       }
+  //       return safePrevOrders;
+  //     } else if (type === 'deleted') {
+  //       // Remove deleted order
+  //       console.log(`🗑️ Removing order: ${order.id}`);
+  //       return safePrevOrders.filter((o) => o.id !== order.id);
+  //     }
+  //     return safePrevOrders;
+  //   });
 
-    // Show toast notification when order is confirmed
-    if (type === 'updated' && order.status === 'confirmed') {
-      console.log(`✅ Order confirmed: ${order.id}`);
-      toast.success(t("orders.confirmed") || "Order confirmed successfully!");
-    }
-  }, [userId, t]);
+  //   // Show toast notification when order is confirmed
+  //   if (type === 'updated' && order.status === 'confirmed') {
+  //     console.log(`✅ Order confirmed: ${order.id}`);
+  //     toast.success(t("orders.confirmed") || "Order confirmed successfully!");
+  //   }
+  // }, [userId, t]);
 
   // Connect to WebSocket for real-time updates
-  useWebSocket({
-    onOrderUpdate: handleOrderUpdate,
-    enabled: true,
-  });
+  // useWebSocket({
+  //   onOrderUpdate: handleOrderUpdate,
+  //   enabled: true,
+  // });
 
   const pendingOrders = orders.filter((o) => o.status === "pending");
   const confirmedOrders = orders.filter((o) => o.status === "confirmed");
