@@ -280,14 +280,13 @@ const EditProfileDialog: React.FC<{
   // Extract location from Google Maps link
   const fetchLocationName = async (url: string) => {
     if (!url.trim()) {
-      setLocation("");
+      // Don't clear location if user has manually edited it
       return;
     }
 
     // Clean the URL first
     const cleanedUrl = cleanGoogleMapsUrl(url);
     if (!cleanedUrl) {
-      setLocation("");
       return;
     }
 
@@ -300,10 +299,13 @@ const EditProfileDialog: React.FC<{
       );
 
       const { locationName } = response.data;
-      setLocation(locationName || "");
+      // Only update if we got a location name and user hasn't manually edited
+      if (locationName) {
+        setLocation(locationName);
+      }
     } catch (error) {
       console.error("Error extracting location name:", error);
-      setLocation("");
+      // Don't clear location on error - preserve user's manual edits
     }
   };
 
@@ -644,17 +646,15 @@ const EditProfileDialog: React.FC<{
             </p>
           </div>
 
-          {/* Detected Location */}
+          {/* Location Name */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              {t("provider.profile.edit_dialog.detected_location")}
+              {t("provider.profile.edit_dialog.location_name")}
             </label>
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="bg-gray-50 text-gray-600"
               placeholder={t("provider.profile.edit_dialog.location_auto")}
-              disabled
             />
             <p className="text-xs text-gray-500 mt-1">
               {t("provider.profile.edit_dialog.location_hint")}

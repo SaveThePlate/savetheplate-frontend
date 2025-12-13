@@ -65,14 +65,13 @@ const FillDetails = () => {
     }
 
     if (!url.trim()) {
-      setLocation("");
+      // Don't clear location if user has manually edited it
       return;
     }
 
     // Clean the URL first
     const cleanedUrl = cleanGoogleMapsUrl(url);
     if (!cleanedUrl) {
-      setLocation("");
       return;
     }
 
@@ -95,14 +94,17 @@ const FillDetails = () => {
       if (abortController.signal.aborted) return;
 
       const { locationName } = response.data;
-      setLocation(locationName || "");
+      // Only update if we got a location name
+      if (locationName) {
+        setLocation(locationName);
+      }
     } catch (error: any) {
       // Ignore abort errors
       if (error.name === 'AbortError' || error.name === 'CanceledError') {
         return;
       }
       console.error("Error extracting location name:", error);
-      setLocation("");
+      // Don't clear location on error - preserve user's manual edits
     }
   }, []);
 
@@ -159,10 +161,15 @@ const FillDetails = () => {
         return;
       }
 
-      const data = {
+      const data: any = {
         phoneNumber: normalizedPhone,
         mapsLink: mapsLink.trim(),
       };
+
+      // Include location if user has set it (either extracted or manually edited)
+      if (location && location.trim()) {
+        data.location = location.trim();
+      }
 
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -267,16 +274,18 @@ const FillDetails = () => {
                 htmlFor="location"
                 className="block text-sm font-medium text-gray-700"
               >
-                {t("onboarding.detected_place")}
+                {t("onboarding.location_name")}
               </label>
               <Input
                 id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#A8DADC] focus:border-[#A8DADC]"
                 placeholder={t("onboarding.detected_placeholder")}
-                disabled
               />
+              <p className="text-xs text-gray-500">
+                {t("onboarding.location_hint")}
+              </p>
             </div>
 
             <Button
