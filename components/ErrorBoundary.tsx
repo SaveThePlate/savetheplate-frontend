@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import axios from "axios";
 
 interface Props {
   children: ReactNode;
@@ -27,6 +28,50 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
+
+  getHomePath = async (): Promise<string> => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        return "/signIn";
+      }
+
+      // Try to get user role from token payload first (faster)
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        // Note: role might not be in token, so we'll fall back to API call
+      } catch {
+        // Token parsing failed, will try API
+      }
+
+      // Fetch role from API
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const role = response?.data?.role;
+      if (role === "PROVIDER") {
+        return "/provider/home";
+      } else if (role === "CLIENT") {
+        return "/client/home";
+      } else {
+        return "/signIn";
+      }
+    } catch (error) {
+      // If we can't determine role, go to sign in
+      console.error("Error determining user role for redirect:", error);
+      return "/signIn";
+    }
+  };
+
+  handleGoHome = async () => {
+    this.setState({ hasError: false, error: null });
+    const homePath = await this.getHomePath();
+    window.location.href = homePath;
+  };
 
   render() {
     if (this.state.hasError) {
@@ -57,10 +102,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 Reload Page
               </Button>
               <Button
-                onClick={() => {
-                  this.setState({ hasError: false, error: null });
-                  window.location.href = "/";
-                }}
+                onClick={this.handleGoHome}
                 variant="outline"
                 className="w-full"
               >

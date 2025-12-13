@@ -121,12 +121,26 @@ const ProviderOrdersContent = () => {
       );
       setOrders(res.data || []);
     } catch (err: any) {
-      console.error(err);
+      console.error("Error fetching orders:", err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        const errorMsg = t("provider.error_auth") || "Your session has expired. Please sign in again.";
+        toast.error(errorMsg);
+        // Don't redirect immediately, let user see the error
+        // They can manually sign in if needed
+        return;
+      }
+      
+      // Handle other errors gracefully
       const errorMsg = sanitizeErrorMessage(err, {
         action: "load orders",
         defaultMessage: t("provider.fetch_failed") || "Unable to load orders. Please try again later."
       });
       toast.error(errorMsg);
+      
+      // Don't throw - just show error toast and keep existing orders
+      // This prevents the error from bubbling up to ErrorBoundary
     } finally {
       setLoading(false);
     }
@@ -198,13 +212,14 @@ const ProviderOrdersContent = () => {
     toast.success(t("orders.confirmed"));
     setShowScanner(false);
     // Refresh orders to get updated data
-    fetchOrders();
-    // Redirect to provider orders page after successful scan
-    // Use replace to avoid adding to history stack
-    // Small delay to ensure scanner is closed before redirect
+    // Use setTimeout to ensure scanner is fully closed before fetching
     setTimeout(() => {
-      router.replace("/provider/orders");
-    }, 300);
+      fetchOrders().catch((err) => {
+        // Silently handle errors in fetchOrders - it already shows toast
+        console.error("Error refreshing orders after scan:", err);
+      });
+    }, 100);
+    // No need to redirect - we're already on the orders page
   };
 
   const confirmed = orders.filter((o) => o.status === "confirmed");
