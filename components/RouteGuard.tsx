@@ -76,6 +76,27 @@ export default function RouteGuard({
         return;
       }
 
+      // For PROVIDER role, check if they have completed location details
+      if (currentRole === "PROVIDER" && allowedRoles.includes("PROVIDER")) {
+        try {
+          const userDetails = await axios.get(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const { phoneNumber, mapsLink } = userDetails.data || {};
+          // If location details are missing, redirect to fillDetails page
+          if (!phoneNumber || !mapsLink) {
+            router.push("/onboarding/fillDetails");
+            return;
+          }
+        } catch (error) {
+          // If we can't fetch user details, redirect to fillDetails to be safe
+          console.error("Error fetching user details in RouteGuard:", error);
+          router.push("/onboarding/fillDetails");
+          return;
+        }
+      }
+
       // Access granted
       setIsChecking(false);
     };

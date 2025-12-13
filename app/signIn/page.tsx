@@ -46,8 +46,25 @@ export default function SignIn() {
 
         const userRole = response?.data?.role;
         if (userRole === 'PROVIDER') {
-          // Redirect to provider home
-          router.push("/provider/home");
+          // Check if provider has submitted location details
+          // If not, redirect to fillDetails page to complete their information
+          try {
+            const userDetails = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const { phoneNumber, mapsLink } = userDetails.data || {};
+            // If location details are missing, redirect to fillDetails page to complete them
+            if (!phoneNumber || !mapsLink) {
+              router.push("/onboarding/fillDetails");
+            } else {
+              router.push("/provider/home");
+            }
+          } catch (error) {
+            // If we can't fetch user details, redirect to fillDetails to be safe
+            console.error("Error fetching user details:", error);
+            router.push("/onboarding/fillDetails");
+          }
         } else if (userRole === 'CLIENT') {
           // Redirect to client home
           router.push("/client/home");

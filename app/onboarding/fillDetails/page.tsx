@@ -15,6 +15,41 @@ const FillDetails = () => {
   const [location, setLocation] = useState(""); // extracted restaurant name
   const [phoneNumber, setPhoneNumber] = useState("");
   const [mapsLink, setMapsLink] = useState("");
+  const [checkingRole, setCheckingRole] = useState(true);
+
+  // Check if user has PROVIDER role, if not redirect to onboarding
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          router.push("/signIn");
+          return;
+        }
+
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const userRole = response?.data?.role;
+        // If user doesn't have PROVIDER role, redirect to onboarding (role setting page)
+        if (userRole !== 'PROVIDER') {
+          router.push("/onboarding");
+          return;
+        }
+
+        setCheckingRole(false);
+      } catch (error) {
+        console.error("Error checking role:", error);
+        router.push("/onboarding");
+      }
+    };
+
+    checkRole();
+  }, [router]);
 
   // Clean and extract Google Maps URL from pasted text
   const cleanGoogleMapsUrl = (text: string): string => {
@@ -190,6 +225,18 @@ const FillDetails = () => {
       toast.error(t("onboarding.details_error"));
     }
   };
+
+  // Show loading state while checking role
+  if (checkingRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 text-sm">{t("common.loading")}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6">

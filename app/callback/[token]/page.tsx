@@ -68,7 +68,25 @@ function AuthCallback() {
         
         // If user has a valid role, determine redirect
         if (role === 'PROVIDER') {
-          redirectTo = '/provider/home';
+          // Check if provider has submitted location details
+          // If not, redirect to fillDetails page to complete their information
+          try {
+            const userDetails = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+              { headers: { Authorization: `Bearer ${resp.data.accessToken}` } }
+            );
+            const { phoneNumber, mapsLink } = userDetails.data || {};
+            // If location details are missing, redirect to fillDetails page to complete them
+            if (!phoneNumber || !mapsLink) {
+              redirectTo = '/onboarding/fillDetails';
+            } else {
+              redirectTo = '/provider/home';
+            }
+          } catch (error) {
+            // If we can't fetch user details, redirect to fillDetails to be safe
+            console.error("Error fetching user details:", error);
+            redirectTo = '/onboarding/fillDetails';
+          }
         } else if (role === 'PENDING_PROVIDER') {
           redirectTo = '/onboarding/thank-you';
         } else if (role === 'CLIENT') {
