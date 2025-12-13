@@ -1,18 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const OnboardingPage = () => {
   const router = useRouter();
   const { t } = useLanguage();
   const [role, setRole] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Check if user already has a role and pre-select it
+  useEffect(() => {
+    const checkCurrentRole = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const userRole = response?.data?.role;
+        // Pre-select the role if user already has one (PROVIDER, CLIENT, or PENDING_PROVIDER)
+        if (userRole && userRole !== 'NONE') {
+          // Map PENDING_PROVIDER to PROVIDER for selection
+          setRole(userRole === 'PENDING_PROVIDER' ? 'PROVIDER' : userRole);
+        }
+      } catch (error) {
+        console.error("Error checking current role:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkCurrentRole();
+  }, []);
 
   const handleRoleSelect = (selectedRole: string) => setRole(selectedRole);
 
@@ -68,11 +104,35 @@ const OnboardingPage = () => {
     }
   };
 
+  // Show loading state while checking current role
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 text-sm">{t("common.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4">
       {/* Language Switcher - Fixed Position */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher variant="button" />
+      </div>
+
+      {/* Back Button - Fixed Position */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/")}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm">{t("common.back")}</span>
+        </Button>
       </div>
 
       <div className="relative w-full max-w-2xl">

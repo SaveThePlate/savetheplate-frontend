@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { ArrowLeft } from "lucide-react";
 
 const FillDetails = () => {
   const router = useRouter();
@@ -243,6 +244,18 @@ const FillDetails = () => {
       {/* Language Switcher - Fixed Position */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher variant="button" />
+      </div>
+
+      {/* Back Button - Fixed Position */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/onboarding")}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm">{t("common.back")}</span>
+        </Button>
       </div>
 
       <div className="relative w-full max-w-2xl">

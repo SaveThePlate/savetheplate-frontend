@@ -21,8 +21,6 @@ import {
 const WelcomePage = () => {
   const router = useRouter();
   const { t } = useLanguage();
-  const [role, setRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Check if user is already authenticated on page load
@@ -45,23 +43,25 @@ const WelcomePage = () => {
         const userRole = response?.data?.role;
         if (userRole === 'PROVIDER') {
           // Check if provider has submitted location details
-          // If not, redirect to fillDetails page to complete their information
+          // If they have details, redirect to provider home
+          // If not, allow them to stay on landing page (they can navigate to onboarding manually)
           try {
             const userDetails = await axios.get(
               `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             const { phoneNumber, mapsLink } = userDetails.data || {};
-            // If location details are missing, redirect to fillDetails page to complete them
-            if (!phoneNumber || !mapsLink) {
-              router.push("/onboarding/fillDetails");
-            } else {
+            // Only redirect to provider home if they have completed details
+            if (phoneNumber && mapsLink) {
               router.push("/provider/home");
+            } else {
+              // Allow them to stay on landing page - they can navigate to onboarding manually
+              setCheckingAuth(false);
             }
           } catch (error) {
-            // If we can't fetch user details, redirect to fillDetails to be safe
+            // If we can't fetch user details, allow them to stay on landing page
             console.error("Error fetching user details:", error);
-            router.push("/onboarding/fillDetails");
+            setCheckingAuth(false);
           }
         } else if (userRole === 'CLIENT') {
           router.push("/client/home");
@@ -78,63 +78,18 @@ const WelcomePage = () => {
     checkAuth();
   }, [router]);
 
-  const handleGetStarted = async () => {
-    setLoading(true);
-    const token = localStorage.getItem("accessToken");
-
-    if (!token) {
-      router.push("/signIn");
-      return;
-    }
-
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const userRole = response?.data?.role;
-      if (userRole) {
-        setRole(userRole);
-        if (userRole === "PROVIDER") {
-          // Check if provider has submitted location details
-          // If not, redirect to fillDetails page to complete their information
-          try {
-            const userDetails = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            // If location details are missing, redirect to fillDetails page to complete them
-            if (!phoneNumber || !mapsLink) {
-              router.push("/onboarding/fillDetails");
-            } else {
-              router.push("/provider/home");
-            }
-          } catch (error) {
-            // If we can't fetch user details, redirect to fillDetails to be safe
-            console.error("Error fetching user details:", error);
-            router.push("/onboarding/fillDetails");
-          }
-        } else if (userRole === "CLIENT") {
-          router.push("/client/home");
-        } else {
-          router.push("/signIn");
-        }
-      } else {
-        router.push("/signIn");
-      }
-    } catch (error) {
-      console.error("Error fetching role:", error);
-      router.push("/signIn");
-    } finally {
-      setLoading(false);
-    }
+  const handleGetStarted = () => {
+    // Clear all tokens and localStorage to start fresh onboarding
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refresh-token");
+    localStorage.removeItem("remember");
+    // Redirect to signIn page to start the onboarding process from the beginning
+    router.push("/signIn");
   };
 
   const handleSignIn = () => {
+    // Keep existing session and redirect to signIn
+    // The signIn page will handle redirecting users based on their current state
     router.push("/signIn");
   };
 
@@ -191,29 +146,17 @@ const WelcomePage = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
                   onClick={handleGetStarted}
-                  disabled={loading}
-                  className="group px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      {t("common.loading")}
-                    </>
-                  ) : (
-                    <>
-                      {t("landing.get_started")}
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
+                  {t("landing.get_started")}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                {!role && (
-                  <button
-                    onClick={handleSignIn}
-                    className="px-8 py-4 bg-white hover:bg-gray-50 text-emerald-700 font-bold rounded-xl border-2 border-emerald-600 shadow-md hover:shadow-lg transition-all duration-300"
-                  >
-                    {t("landing.sign_in")}
-                  </button>
-                )}
+                <button
+                  onClick={handleSignIn}
+                  className="px-8 py-4 bg-white hover:bg-gray-50 text-emerald-700 font-bold rounded-xl border-2 border-emerald-600 shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  {t("landing.sign_in")}
+                </button>
               </div>
 
               {/* Stats */}
@@ -425,10 +368,9 @@ const WelcomePage = () => {
                 </ul>
                 <button
                   onClick={handleGetStarted}
-                  disabled={loading}
-                  className="px-6 py-3 bg-white text-emerald-700 font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-white text-emerald-700 font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
                 >
-                  {loading ? t("common.loading") : t("landing.start_listing")}
+                  {t("landing.start_listing")}
                 </button>
               </div>
               <div className="hidden lg:block">
@@ -452,20 +394,10 @@ const WelcomePage = () => {
           </p>
           <button
             onClick={handleGetStarted}
-            disabled={loading}
-            className="px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto"
           >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                {t("common.loading")}
-              </>
-            ) : (
-              <>
-                {t("landing.get_started_now")}
-                <ArrowRight className="w-5 h-5" />
-              </>
-            )}
+            {t("landing.get_started_now")}
+            <ArrowRight className="w-5 h-5" />
           </button>
         </div>
       </section>
