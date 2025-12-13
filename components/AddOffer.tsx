@@ -119,7 +119,7 @@ const AddOffer: React.FC = () => {
       console.error("Upload error", err?.response?.data || err.message || err);
       const errorMessage = sanitizeErrorMessage(err, {
         action: "upload images",
-        defaultMessage: "Unable to upload images. Please check the files and try again."
+        defaultMessage: t("add_offer.error_upload_failed")
       });
       toast.error(errorMessage);
       throw err;
@@ -134,11 +134,11 @@ const AddOffer: React.FC = () => {
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
       setLocalFiles(files);
-      toast.success(`${uploaded.length} image(s) uploaded successfully!`);
+      toast.success(t("add_offer.images_uploaded_success", { count: uploaded.length }));
     } catch (error: any) {
       const errorMessage = sanitizeErrorMessage(error, {
         action: "upload images",
-        defaultMessage: "Unable to upload images. Please check the files and try again."
+        defaultMessage: t("add_offer.error_upload_failed")
       });
       toast.error(errorMessage);
       // Clear files on error
@@ -173,7 +173,7 @@ const AddOffer: React.FC = () => {
 
     // Validation
     if (!title.trim()) {
-      toast.error("Please enter a title");
+      toast.error(t("add_offer.error_title_required"));
       return;
     }
 
@@ -181,28 +181,28 @@ const AddOffer: React.FC = () => {
 
     const priceToFloat = parseFloat(price);
     if (isNaN(priceToFloat) || priceToFloat <= 0) {
-      toast.error("Please enter a valid price");
+      toast.error(t("add_offer.error_price_required"));
       return;
     }
 
     const quantityToFloat = parseFloat(quantity);
     if (isNaN(quantityToFloat) || quantityToFloat <= 0) {
-      toast.error("Please enter a valid quantity");
+      toast.error(t("add_offer.error_quantity_required"));
       return;
     }
 
     if (!pickupDate) {
-      toast.error("Please select a pickup date");
+      toast.error(t("add_offer.error_date_required"));
       return;
     }
 
     if (!pickupStartTime) {
-      toast.error("Please select a start time");
+      toast.error(t("add_offer.error_start_time_required"));
       return;
     }
 
     if (!pickupEndTime) {
-      toast.error("Please select an end time");
+      toast.error(t("add_offer.error_end_time_required"));
       return;
     }
 
@@ -211,12 +211,12 @@ const AddOffer: React.FC = () => {
     const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
 
     if (startDateTime >= endDateTime) {
-      toast.error("End time must be after start time");
+      toast.error(t("add_offer.error_time_order"));
       return;
     }
 
     if (endDateTime <= new Date()) {
-      toast.error("Pickup time must be in the future");
+      toast.error(t("add_offer.error_future_time"));
       return;
     }
 
@@ -225,7 +225,7 @@ const AddOffer: React.FC = () => {
     try {
       // Ensure images are uploaded before submitting
       if (localFiles && localFiles.length > 0 && uploadedImages.length === 0) {
-        toast.info("Uploading images before submitting...");
+        toast.info(t("add_offer.info_uploading"));
         const uploaded = await uploadFiles(localFiles);
         setUploadedImages(uploaded);
       }
@@ -278,7 +278,7 @@ const AddOffer: React.FC = () => {
       console.log("Sending payload:", payload); // Debug log
 
       await axiosInstance.post("/offers", payload);
-      toast.success("Offer created successfully! 🎉");
+      toast.success(t("add_offer.success_created"));
 
       // Reset form
       setTitle("");
@@ -302,7 +302,7 @@ const AddOffer: React.FC = () => {
       console.error("Error submitting offer:", error);
       const errorMessage = sanitizeErrorMessage(error, {
         action: "create offer",
-        defaultMessage: "Unable to create offer. Please check your input and try again."
+        defaultMessage: t("add_offer.error_create_failed")
       });
       toast.error(errorMessage);
     }
@@ -332,18 +332,18 @@ const AddOffer: React.FC = () => {
             htmlFor="title"
             className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Offer Title <span className="text-red-500">*</span>
+            {t("add_offer.offer_title")} <span className="text-red-500">*</span>
           </label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., Fresh Pastries Bundle"
+            placeholder={t("add_offer.title_placeholder")}
             className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
             required
             maxLength={100}
           />
-          <p className="text-xs text-gray-500 mt-1">A clear, descriptive title helps customers find your offer</p>
+          <p className="text-xs text-gray-500 mt-1">{t("add_offer.title_hint")}</p>
         </div>
 
         {/* Description */}
@@ -352,18 +352,18 @@ const AddOffer: React.FC = () => {
             htmlFor="description"
             className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Description <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+            {t("add_offer.description")} <span className="text-gray-400 font-normal text-xs">({t("common.optional") || "Optional"})</span>
           </label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe what's included in this offer. Be specific about items, quantities, and any special details..."
+            placeholder={t("add_offer.description_placeholder")}
             className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[120px] resize-none"
             maxLength={500}
           />
           <p className="text-xs text-gray-500 mt-1">
-            {description.length}/500 characters. Optional - helps customers understand your offer better.
+            {t("add_offer.description_hint", { count: description.length })}
           </p>
         </div>
 
@@ -375,7 +375,7 @@ const AddOffer: React.FC = () => {
               htmlFor="originalPrice"
               className="block text-sm font-semibold text-gray-700 mb-2"
             >
-              Original Price (TND) <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+              {t("add_offer.original_price")} <span className="text-gray-400 font-normal text-xs">{t("add_offer.original_price_optional")}</span>
             </label>
             <div className="relative">
               <Input
@@ -388,12 +388,12 @@ const AddOffer: React.FC = () => {
                   const value = e.target.value;
                   if (/^\d*\.?\d*$/.test(value)) setOriginalPrice(value);
                 }}
-                placeholder="0.00"
+                placeholder={t("add_offer.original_price_placeholder")}
                 className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">What was the original price? (if applicable)</p>
+            <p className="text-xs text-gray-500 mt-1">{t("add_offer.original_price_hint")}</p>
           </div>
 
           {/* Current Price */}
@@ -402,7 +402,7 @@ const AddOffer: React.FC = () => {
               htmlFor="price"
               className="block text-sm font-semibold text-gray-700 mb-2"
             >
-              Your Price (TND) <span className="text-red-500">*</span>
+              {t("add_offer.your_price")} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Input
@@ -415,7 +415,7 @@ const AddOffer: React.FC = () => {
                   const value = e.target.value;
                   if (/^\d*\.?\d*$/.test(value)) setPrice(value);
                 }}
-                placeholder="0.00"
+                placeholder={t("add_offer.price_placeholder")}
                 className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
                 required
               />
@@ -424,10 +424,10 @@ const AddOffer: React.FC = () => {
             <p className="text-xs text-gray-500 mt-1">
               {originalPrice && parseFloat(originalPrice) > parseFloat(price || "0") && (
                 <span className="text-emerald-600 font-semibold">
-                  Save {((1 - parseFloat(price || "0") / parseFloat(originalPrice)) * 100).toFixed(0)}%!
+                  {t("add_offer.save_percentage", { percentage: ((1 - parseFloat(price || "0") / parseFloat(originalPrice)) * 100).toFixed(0) })}
                 </span>
               )}
-              {(!originalPrice || parseFloat(originalPrice) <= parseFloat(price || "0")) && "Set your selling price"}
+              {(!originalPrice || parseFloat(originalPrice) <= parseFloat(price || "0")) && t("add_offer.price_hint")}
             </p>
           </div>
         </div>
@@ -438,7 +438,7 @@ const AddOffer: React.FC = () => {
             htmlFor="quantity"
             className="block text-sm font-semibold text-gray-700 mb-2"
           >
-            Available Quantity <span className="text-red-500">*</span>
+            {t("add_offer.available_quantity")} <span className="text-red-500">*</span>
           </label>
           <Input
             id="quantity"
@@ -449,11 +449,11 @@ const AddOffer: React.FC = () => {
               const value = e.target.value;
               if (/^\d*$/.test(value)) setQuantity(value);
             }}
-            placeholder="1"
+            placeholder={t("add_offer.quantity_placeholder")}
             className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">How many units are available?</p>
+          <p className="text-xs text-gray-500 mt-1">{t("add_offer.quantity_hint")}</p>
         </div>
 
         {/* Pickup Location Info */}
@@ -464,10 +464,10 @@ const AddOffer: React.FC = () => {
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-emerald-900 mb-1">
-                Pickup Location
+                {t("add_offer.pickup_location")}
               </h3>
               <p className="text-xs text-emerald-700">
-                Orders will be picked up at your store location from your profile. Make sure your location is up to date in your profile settings.
+                {t("add_offer.pickup_location_hint")}
               </p>
             </div>
           </div>
@@ -480,7 +480,7 @@ const AddOffer: React.FC = () => {
               htmlFor="pickupDate"
               className="block text-sm font-semibold text-gray-700 mb-2"
             >
-              Pickup Date <span className="text-red-500">*</span>
+              {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
             </label>
             <Input
               id="pickupDate"
@@ -491,7 +491,7 @@ const AddOffer: React.FC = () => {
               className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Select the pickup date</p>
+            <p className="text-xs text-gray-500 mt-1">{t("add_offer.pickup_date_hint")}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -500,7 +500,7 @@ const AddOffer: React.FC = () => {
                 htmlFor="pickupStartTime"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Start Time <span className="text-red-500">*</span>
+                {t("add_offer.start_time")} <span className="text-red-500">*</span>
               </label>
               <Input
                 id="pickupStartTime"
@@ -510,7 +510,7 @@ const AddOffer: React.FC = () => {
                 className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">Earliest pickup time</p>
+              <p className="text-xs text-gray-500 mt-1">{t("add_offer.start_time_hint")}</p>
             </div>
 
             <div>
@@ -518,7 +518,7 @@ const AddOffer: React.FC = () => {
                 htmlFor="pickupEndTime"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                End Time <span className="text-red-500">*</span>
+                {t("add_offer.end_time")} <span className="text-red-500">*</span>
               </label>
               <Input
                 id="pickupEndTime"
@@ -529,7 +529,7 @@ const AddOffer: React.FC = () => {
                 className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">Latest pickup time</p>
+              <p className="text-xs text-gray-500 mt-1">{t("add_offer.end_time_hint")}</p>
             </div>
           </div>
         </div>
@@ -584,7 +584,7 @@ const AddOffer: React.FC = () => {
         {/* Image Upload */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Photos <span className="text-gray-400 font-normal">(Optional)</span>
+            {t("add_offer.photos")} <span className="text-gray-400 font-normal">{t("add_offer.photos_optional")}</span>
           </label>
           <FileUploader
             value={localFiles || []}
@@ -600,13 +600,13 @@ const AddOffer: React.FC = () => {
                 {uploading ? (
                   <>
                     <div className="animate-spin text-4xl mb-2">⏳</div>
-                    <p className="text-gray-600 font-medium">Uploading images...</p>
+                    <p className="text-gray-600 font-medium">{t("add_offer.uploading_images")}</p>
                   </>
                 ) : (
                   <>
                     <div className="text-4xl mb-2">📸</div>
-                    <p className="text-gray-600 font-medium">Click or drag to upload photos</p>
-                    <p className="text-xs text-gray-400 mt-1">Up to 5 images, max 5MB each</p>
+                    <p className="text-gray-600 font-medium">{t("add_offer.click_upload")}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t("add_offer.upload_hint")}</p>
                   </>
                 )}
               </div>
@@ -670,16 +670,16 @@ const AddOffer: React.FC = () => {
           <div className="mt-2 flex items-center gap-2 text-xs">
             {uploadedImages.length > 0 && (
               <span className="text-emerald-600 font-medium">
-                ✓ {uploadedImages.length} image{uploadedImages.length > 1 ? "s" : ""} uploaded
+                {t("add_offer.images_uploaded", { count: uploadedImages.length, plural: uploadedImages.length > 1 ? "s" : "" })}
               </span>
             )}
             {localFiles && localFiles.length > uploadedImages.length && (
               <span className="text-yellow-600 font-medium">
-                ⏳ {localFiles.length - uploadedImages.length} pending upload
+                {t("add_offer.pending_upload", { count: localFiles.length - uploadedImages.length })}
               </span>
             )}
             {uploadedImages.length === 0 && localFiles?.length === 0 && (
-              <span className="text-gray-500">Good photos help attract more customers!</span>
+              <span className="text-gray-500">{t("add_offer.photos_tip")}</span>
             )}
           </div>
         </div>
@@ -690,7 +690,7 @@ const AddOffer: React.FC = () => {
           disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
           className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01] mt-2"
         >
-          Create Offer
+          {t("add_offer.create_button")}
         </Button>
       </form>
     </div>

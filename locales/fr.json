@@ -280,6 +280,8 @@
       "orders": "Commandes",
       "loading": "Chargement de vos commandes...",
       "error_title": "Erreur de Chargement des Commandes",
+      "error_auth": "Veuillez vous connecter pour voir vos commandes.",
+      "error_fetch": "Impossible de charger vos commandes. Veuillez réessayer plus tard.",
       "no_orders_title": "Aucune Commande Pour le Moment",
       "no_orders_message": "Commencez à sauver de la nourriture et à sauver la planète ! Parcourez les offres disponibles et passez votre première commande.",
       "explore_offers": "Explorer les Offres",
@@ -363,10 +365,16 @@
     "opening_email": "Ouverture de votre client email...",
     "send_failed": "Échec de l'envoi du message. Veuillez réessayer ou nous envoyer un email directement."
   },
+  "map": {
+    "title": "Carte",
+    "subtitle": "Voir toutes les offres disponibles sur la carte"
+  },
   "impact": {
     "title": "Impact Environnemental",
     "understanding": "Comprendre Votre Impact",
     "description": "Chaque repas que vous sauvez du gaspillage fait une vraie différence. Découvrez comment nous calculons votre impact environnemental et le changement positif que vous créez.",
+    "how_calculated": "Comment c'est calculé :",
+    "real_world_equivalent": "💡 Équivalent réel :",
     "problem_title": "Le Problème du Gaspillage Alimentaire",
     "problem_intro": "Le gaspillage alimentaire est l'un des plus grands défis environnementaux de notre époque. Lorsque la nourriture est gaspillée :",
     "problem_1": "Elle se décompose dans les décharges, produisant du méthane - un gaz à effet de serre 25 fois plus puissant que le CO₂",
@@ -402,7 +410,10 @@
     "ready_title": "Prêt à Faire une Différence ?",
     "ready_description": "Chaque repas compte. Commencez à sauver de la nourriture aujourd'hui et regardez votre impact environnemental grandir !",
     "browse_offers": "Parcourir les Offres",
-    "list_surplus": "Lister Vos Surplus"
+    "list_surplus": "Lister Vos Surplus",
+    "ripple_100": "Repas sauvés = 150 kg de CO₂ évités",
+    "ripple_1000": "Repas sauvés = 1 500 kg de CO₂ évités",
+    "ripple_10000": "Repas sauvés = 15 000 kg de CO₂ évités"
   },
   "add_offer": {
     "title": "Créer une Offre Personnalisée",
@@ -456,6 +467,8 @@
     "error_future_time": "L'heure de ramassage doit être dans le futur",
     "error_location_required": "Veuillez entrer un lieu de ramassage",
     "error_upload_failed": "Échec du téléchargement des images",
+    "error_create_failed": "Échec de la création de l'offre",
+    "info_uploading": "Téléchargement des images avant l'envoi...",
     "food_type_label": "Type d'Aliment",
     "food_type_snack": "🍪 Collation",
     "food_type_meal": "🍽️ Repas",
@@ -472,7 +485,8 @@
     "info_uploading": "Téléchargement des images avant l'envoi...",
     "success_created": "Offre créée avec succès ! 🎉",
     "error_create_failed": "Échec de la création de l'offre",
-    "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !"
+    "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !",
+    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}"
   },
   "publish": {
     "title": "Créer une Nouvelle Offre",
@@ -480,7 +494,7 @@
     "custom_offer": "Offre Personnalisée",
     "quick_rescue": "Panier Anti-Gaspi Rapide",
     "rescue_pack_title": "Qu'est-ce qu'un Panier Anti-Gaspi ?",
-    "rescue_pack_description": "Un Panier Anti-Gaspi est un lot préconfiguré d'articles alimentaires sauvés. Choisissez parmi les tailles petite, moyenne ou grande avec des prix prédéfinis. Parfait pour les listages rapides lorsque vous avez des surplus mixtes ! 🍞🥐🍓",
+    "rescue_pack_description": "Un Panier Anti-Gaspi est une boîte où vous pouvez rassembler un mélange d'articles invendus. Choisissez parmi les tailles petite, moyenne ou grande avec des prix recommandés. Les prix affichés ne sont que des recommandations - vous pouvez les modifier s'ils ne correspondent pas à votre offre ! Parfait pour les listages rapides lorsque vous avez des surplus mixtes ! 🍞🥐🍓",
     "footer": "Sauvons ensemble de la bonne nourriture 💚"
   },
   "create_magic_box": {
@@ -505,7 +519,7 @@
     "save_percentage": "Économisez {percentage}% !",
     "pickup_location": "Lieu de Ramassage",
     "pickup_location_placeholder": "ex. : 123 Rue Principale, Tunis",
-    "pickup_location_hint": "Où les clients doivent-ils récupérer leur commande ?",
+    "pickup_location_hint": "Les commandes seront récupérées à l'emplacement de votre magasin depuis votre profil. Assurez-vous que votre emplacement est à jour dans les paramètres de votre profil.",
     "pickup_date": "Date de Ramassage",
     "pickup_date_hint": "Sélectionnez la date de ramassage",
     "start_time": "Heure de Début",

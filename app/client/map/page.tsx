@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MapComponent from "@/components/MapComponent";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Map = () => {
+  const { t } = useLanguage();
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
     lat: 36.806389,
     lng: 10.181667,
@@ -58,10 +60,10 @@ const Map = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="text-left space-y-1 sm:space-y-2 flex-1">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
-              Map
+              {t("map.title")}
             </h1>
             <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
-              View all available offers on the map
+              {t("map.subtitle")}
             </p>
           </div>
         </div>

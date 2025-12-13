@@ -100,7 +100,7 @@ const ImpactPage = () => {
                   {t("impact.meals_saved_description")}
                 </p>
                 <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
-                  <p className="text-sm font-semibold text-orange-900 mb-1">How it&apos;s calculated:</p>
+                  <p className="text-sm font-semibold text-orange-900 mb-1">{t("impact.how_calculated")}</p>
                   <p className="text-sm text-orange-800">
                     {t("impact.meals_calculation")}
                   </p>
@@ -121,7 +121,7 @@ const ImpactPage = () => {
                   {t("impact.co2_description")}
                 </p>
                 <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <p className="text-sm font-semibold text-blue-900 mb-1">How it&apos;s calculated:</p>
+                  <p className="text-sm font-semibold text-blue-900 mb-1">{t("impact.how_calculated")}</p>
                   <p className="text-sm text-blue-800 mb-2">
                     {t("impact.co2_calculation")}
                   </p>
@@ -130,7 +130,7 @@ const ImpactPage = () => {
                   </p>
                 </div>
                 <div className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <p className="text-sm font-semibold text-gray-900 mb-2">💡 Real-world equivalent:</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-2">{t("impact.real_world_equivalent")}</p>
                   <p className="text-sm text-gray-700">
                     {t("impact.co2_equivalent")}
                   </p>
@@ -151,7 +151,7 @@ const ImpactPage = () => {
                   {t("impact.water_description")}
                 </p>
                 <div className="bg-cyan-50 rounded-xl p-4 border border-cyan-200">
-                  <p className="text-sm font-semibold text-cyan-900 mb-1">How it&apos;s calculated:</p>
+                  <p className="text-sm font-semibold text-cyan-900 mb-1">{t("impact.how_calculated")}</p>
                   <p className="text-sm text-cyan-800 mb-2">
                     {t("impact.water_calculation")}
                   </p>
@@ -232,15 +232,15 @@ const ImpactPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
             <div className="bg-white rounded-xl p-4 border border-purple-200">
               <p className="text-3xl font-bold text-purple-600 mb-1">100</p>
-              <p className="text-sm text-purple-700">Meals saved = 150 kg CO₂ prevented</p>
+              <p className="text-sm text-purple-700">{t("impact.ripple_100")}</p>
             </div>
             <div className="bg-white rounded-xl p-4 border border-purple-200">
               <p className="text-3xl font-bold text-purple-600 mb-1">1,000</p>
-              <p className="text-sm text-purple-700">Meals saved = 1,500 kg CO₂ prevented</p>
+              <p className="text-sm text-purple-700">{t("impact.ripple_1000")}</p>
             </div>
             <div className="bg-white rounded-xl p-4 border border-purple-200">
               <p className="text-3xl font-bold text-purple-600 mb-1">10,000</p>
-              <p className="text-sm text-purple-700">Meals saved = 15,000 kg CO₂ prevented</p>
+              <p className="text-sm text-purple-700">{t("impact.ripple_10000")}</p>
             </div>
           </div>
           </div>

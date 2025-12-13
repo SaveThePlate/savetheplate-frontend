@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Gift } from "lucide-react";
 import Image from "next/image";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { useLanguage } from "@/context/LanguageContext";
 
 type RescuePackSize = "small" | "medium" | "large";
 
@@ -27,6 +28,7 @@ const smallSurpriseBag = "/smallsurprisebag.png";
 
 const CreateMagicBoxPage = () => {
   const router = useRouter();
+  const { t } = useLanguage();
   const [selectedSize, setSelectedSize] = useState<RescuePackSize>("small");
   const [pickupDate, setPickupDate] = useState<string>("");
   const [pickupStartTime, setPickupStartTime] = useState<string>("");
@@ -45,21 +47,21 @@ const CreateMagicBoxPage = () => {
   const rescuePackOptions: Record<RescuePackSize, RescuePackOption> = {
     small: { 
       price: 5, 
-      description: "Perfect for individuals - a curated mix of rescued items", 
+      description: t("create_magic_box.size_small_desc"), 
       images: smallSurpriseBag,
-      items: "2-3 items"
+      items: t("create_magic_box.size_small_items")
     },
     medium: { 
       price: 7, 
-      description: "Great for small families - more variety and value", 
+      description: t("create_magic_box.size_medium_desc"), 
       images: mediumSurpriseBag,
-      items: "4-5 items"
+      items: t("create_magic_box.size_medium_items")
     },
     large: { 
       price: 10, 
-      description: "Ideal for larger groups - maximum variety and savings", 
+      description: t("create_magic_box.size_large_desc"), 
       images: largeSurpriseBag,
-      items: "6+ items"
+      items: t("create_magic_box.size_large_items")
     },
   };
 
@@ -71,26 +73,26 @@ const CreateMagicBoxPage = () => {
   const handleCreateRescuePack = async () => {
     // Validation
     if (!quantity || parseFloat(quantity) <= 0) {
-      setError("Please enter a valid quantity");
-      toast.error("Quantity is required");
+      setError(t("create_magic_box.error_quantity_required"));
+      toast.error(t("create_magic_box.error_quantity_toast"));
       return;
     }
 
     if (!pickupDate) {
-      setError("Please select a pickup date");
-      toast.error("Pickup date is required");
+      setError(t("create_magic_box.error_date_required"));
+      toast.error(t("create_magic_box.error_date_toast"));
       return;
     }
 
     if (!pickupStartTime) {
-      setError("Please select a start time");
-      toast.error("Start time is required");
+      setError(t("create_magic_box.error_start_time_required"));
+      toast.error(t("create_magic_box.error_start_time_toast"));
       return;
     }
 
     if (!pickupEndTime) {
-      setError("Please select an end time");
-      toast.error("End time is required");
+      setError(t("create_magic_box.error_end_time_required"));
+      toast.error(t("create_magic_box.error_end_time_toast"));
       return;
     }
 
@@ -101,14 +103,14 @@ const CreateMagicBoxPage = () => {
     const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
 
     if (startDateTime >= endDateTime) {
-      setError("End time must be after start time");
-      toast.error("End time must be after start time");
+      setError(t("create_magic_box.error_time_order"));
+      toast.error(t("create_magic_box.error_time_order_toast"));
       return;
     }
 
     if (endDateTime <= new Date()) {
-      setError("Pickup time must be in the future");
-      toast.error("Please select a future time");
+      setError(t("create_magic_box.error_future_time"));
+      toast.error(t("create_magic_box.error_future_time_toast"));
       return;
     }
 
@@ -168,7 +170,7 @@ const CreateMagicBoxPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Rescue Pack created successfully! 🎉");
+      toast.success(t("create_magic_box.success_created"));
       setTimeout(() => {
         router.push("/provider/home");
       }, 1500);
@@ -176,7 +178,7 @@ const CreateMagicBoxPage = () => {
       console.error(error);
       const errorMsg = sanitizeErrorMessage(error, {
         action: "create rescue pack",
-        defaultMessage: "Unable to create rescue pack. Please check your input and try again."
+        defaultMessage: t("create_magic_box.error_create_failed")
       });
       toast.error(errorMsg);
       setError(errorMsg);
@@ -209,7 +211,7 @@ const CreateMagicBoxPage = () => {
           className="absolute top-5 left-5 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="hidden sm:inline">Back</span>
+          <span className="hidden sm:inline">{t("common.back")}</span>
         </Button>
 
         {/* Header */}
@@ -218,10 +220,10 @@ const CreateMagicBoxPage = () => {
             <Gift className="w-10 h-10 text-emerald-700" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
-            Create Rescue Pack
+            {t("create_magic_box.title")}
           </h1>
           <p className="text-gray-600 text-base mt-2 max-w-sm">
-            Quick setup with preset sizes and prices. Perfect for mixed surplus items! 💚
+            {t("create_magic_box.subtitle")}
           </p>
         </div>
 
@@ -240,14 +242,14 @@ const CreateMagicBoxPage = () => {
               <div className="flex items-center justify-center mb-3">
                 <Image
                   src={images || DEFAULT_IMAGE}
-                  alt={`${size} rescue pack`}
+                  alt={t("create_magic_box.rescue_pack_image_alt", { size: t(`create_magic_box.size_${size}`) })}
                   width={90}
                   height={90}
                   className="object-contain mx-auto"
                 />
               </div>
               <h2 className="text-lg font-bold text-gray-900 capitalize mb-1">
-                {size}
+                {t(`create_magic_box.size_${size}`)}
               </h2>
               <p className="text-xs text-emerald-700 font-medium mb-2">
                 {items}
@@ -272,7 +274,7 @@ const CreateMagicBoxPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-2">
-                Available Quantity <span className="text-red-500">*</span>
+                {t("create_magic_box.available_quantity")} <span className="text-red-500">*</span>
               </label>
               <Input
                 id="quantity"
@@ -283,16 +285,16 @@ const CreateMagicBoxPage = () => {
                   const value = e.target.value;
                   if (/^\d*$/.test(value)) setQuantity(value);
                 }}
-                placeholder="How many packs?"
+                placeholder={t("create_magic_box.quantity_placeholder")}
                 className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">Number of {selectedSize} packs available</p>
+              <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.quantity_hint", { size: t(`create_magic_box.size_${selectedSize}`) })}</p>
             </div>
 
             <div>
               <label htmlFor="originalPrice" className="block text-sm font-semibold text-gray-700 mb-2">
-                Original Price (TND) <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+                {t("create_magic_box.original_price")} <span className="text-gray-400 font-normal text-xs">{t("create_magic_box.original_price_optional")}</span>
               </label>
               <div className="relative">
                 <Input
@@ -307,7 +309,7 @@ const CreateMagicBoxPage = () => {
                       setOriginalPrice(prev => ({ ...prev, [selectedSize]: value }));
                     }
                   }}
-                  placeholder="0.00"
+                  placeholder={t("create_magic_box.original_price_placeholder")}
                   className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12 text-base"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
@@ -315,10 +317,10 @@ const CreateMagicBoxPage = () => {
               <p className="text-xs text-gray-500 mt-1">
                 {originalPrice[selectedSize] && parseFloat(originalPrice[selectedSize]) > rescuePackOptions[selectedSize].price && (
                   <span className="text-emerald-600 font-semibold">
-                    Save {((1 - rescuePackOptions[selectedSize].price / parseFloat(originalPrice[selectedSize])) * 100).toFixed(0)}%!
+                    {t("create_magic_box.save_percentage", { percentage: ((1 - rescuePackOptions[selectedSize].price / parseFloat(originalPrice[selectedSize])) * 100).toFixed(0) })}
                   </span>
                 )}
-                {(!originalPrice[selectedSize] || parseFloat(originalPrice[selectedSize]) <= rescuePackOptions[selectedSize].price) && "What was the original value?"}
+                {(!originalPrice[selectedSize] || parseFloat(originalPrice[selectedSize]) <= rescuePackOptions[selectedSize].price) && t("create_magic_box.original_price_hint")}
               </p>
             </div>
           </div>
@@ -331,10 +333,10 @@ const CreateMagicBoxPage = () => {
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-emerald-900 mb-1">
-                  Pickup Location
+                  {t("create_magic_box.pickup_location")}
                 </h3>
                 <p className="text-xs text-emerald-700">
-                  Orders will be picked up at your store location from your profile. Make sure your location is up to date in your profile settings.
+                  {t("create_magic_box.pickup_location_hint")}
                 </p>
               </div>
             </div>
@@ -343,7 +345,7 @@ const CreateMagicBoxPage = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="pickupDate" className="block text-sm font-semibold text-gray-700 mb-2">
-                Pickup Date <span className="text-red-500">*</span>
+                {t("create_magic_box.pickup_date")} <span className="text-red-500">*</span>
               </label>
               <Input
                 id="pickupDate"
@@ -354,13 +356,13 @@ const CreateMagicBoxPage = () => {
                 className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">Select the pickup date</p>
+              <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.pickup_date_hint")}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="pickupStartTime" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Start Time <span className="text-red-500">*</span>
+                  {t("create_magic_box.start_time")} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="pickupStartTime"
@@ -370,12 +372,12 @@ const CreateMagicBoxPage = () => {
                   className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Earliest pickup time</p>
+                <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.start_time_hint")}</p>
               </div>
 
               <div>
                 <label htmlFor="pickupEndTime" className="block text-sm font-semibold text-gray-700 mb-2">
-                  End Time <span className="text-red-500">*</span>
+                  {t("create_magic_box.end_time")} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="pickupEndTime"
@@ -386,7 +388,7 @@ const CreateMagicBoxPage = () => {
                   className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Latest pickup time</p>
+                <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.end_time_hint")}</p>
               </div>
             </div>
           </div>
@@ -407,16 +409,16 @@ const CreateMagicBoxPage = () => {
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="animate-spin">⏳</span> Creating Rescue Pack...
+              <span className="animate-spin">⏳</span> {t("create_magic_box.creating")}
             </span>
           ) : (
-            `Create ${selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1)} Rescue Pack`
+            t("create_magic_box.create_button", { size: t(`create_magic_box.size_${selectedSize}`) })
           )}
         </Button>
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-gray-400">
-          Every rescue pack helps reduce food waste and supports your community 🌍
+          {t("create_magic_box.footer")}
         </p>
       </main>
     </div>

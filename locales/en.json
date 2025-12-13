@@ -277,6 +277,8 @@
       "orders": "Orders",
       "loading": "Loading your orders...",
       "error_title": "Error Loading Orders",
+      "error_auth": "Please sign in to view your orders.",
+      "error_fetch": "Unable to load your orders. Please try again later.",
       "no_orders_title": "No Orders Yet",
       "no_orders_message": "Start rescuing food and saving the planet! Browse available offers and place your first order.",
       "explore_offers": "Explore Offers",
@@ -360,10 +362,16 @@
     "opening_email": "Opening your email client...",
     "send_failed": "Failed to send message. Please try again or email us directly."
   },
+  "map": {
+    "title": "Map",
+    "subtitle": "View all available offers on the map"
+  },
   "impact": {
     "title": "Environmental Impact",
     "understanding": "Understanding Your Impact",
     "description": "Every meal you save from waste makes a real difference. Learn how we calculate your environmental impact and the positive change you're creating.",
+    "how_calculated": "How it's calculated:",
+    "real_world_equivalent": "💡 Real-world equivalent:",
     "problem_title": "The Food Waste Problem",
     "problem_intro": "Food waste is one of the biggest environmental challenges of our time. When food goes to waste:",
     "problem_1": "It decomposes in landfills, producing methane gas - a greenhouse gas 25 times more potent than CO₂",
@@ -399,7 +407,10 @@
     "ready_title": "Ready to Make a Difference?",
     "ready_description": "Every meal counts. Start rescuing food today and watch your environmental impact grow!",
     "browse_offers": "Browse Offers",
-    "list_surplus": "List Your Surplus"
+    "list_surplus": "List Your Surplus",
+    "ripple_100": "Meals saved = 150 kg CO₂ prevented",
+    "ripple_1000": "Meals saved = 1,500 kg CO₂ prevented",
+    "ripple_10000": "Meals saved = 15,000 kg CO₂ prevented"
   },
   "add_offer": {
     "title": "Create Custom Offer",
@@ -453,6 +464,8 @@
     "error_future_time": "Pickup time must be in the future",
     "error_location_required": "Please enter a pickup location",
     "error_upload_failed": "Failed to upload images",
+    "error_create_failed": "Failed to create offer",
+    "info_uploading": "Uploading images before submitting...",
     "food_type_label": "Food Type",
     "food_type_snack": "🍪 Snack",
     "food_type_meal": "🍽️ Meal",
@@ -469,7 +482,8 @@
     "info_uploading": "Uploading images before submitting...",
     "success_created": "Offer created successfully! 🎉",
     "error_create_failed": "Failed to create offer",
-    "images_uploaded_success": "{count} image(s) uploaded successfully!"
+    "images_uploaded_success": "{count} image(s) uploaded successfully!",
+    "images_uploaded": "✓ {count} image{plural} uploaded"
   },
   "publish": {
     "title": "Create New Offer",
@@ -477,7 +491,7 @@
     "custom_offer": "Custom Offer",
     "quick_rescue": "Quick Rescue Pack",
     "rescue_pack_title": "What is a Rescue Pack?",
-    "rescue_pack_description": "A Rescue Pack is a pre-configured bundle of rescued food items. Choose from small, medium, or large sizes with preset prices. Perfect for quick listings when you have mixed surplus items! 🍞🥐🍓",
+    "rescue_pack_description": "A Rescue Pack is a box where you can gather a mix of unsold items together. Choose from small, medium, or large sizes with recommended prices. The prices shown are just recommendations - you can change them if they don't suit your offer! Perfect for quick listings when you have mixed surplus items! 🍞🥐🍓",
     "footer": "Let's save good food together 💚"
   },
   "offer_card": {
@@ -590,7 +604,7 @@
     "save_percentage": "Save {percentage}%!",
     "pickup_location": "Pickup Location",
     "pickup_location_placeholder": "e.g., 123 Main Street, Tunis",
-    "pickup_location_hint": "Where should customers pick up their order?",
+    "pickup_location_hint": "Orders will be picked up at your store location from your profile. Make sure your location is up to date in your profile settings.",
     "pickup_date": "Pickup Date",
     "pickup_date_hint": "Select the pickup date",
     "start_time": "Start Time",
