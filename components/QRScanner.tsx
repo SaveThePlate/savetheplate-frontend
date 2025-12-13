@@ -79,6 +79,8 @@ const QRScanner: React.FC<QRScannerProps> = ({
       }
       setScanningOrder(false); // Reset scanning state
       onScanSuccess(qrCodeToken);
+      // Close the modal immediately after successful scan
+      onClose();
     } catch (err: any) {
       console.error("Error scanning QR code:", err);
       setError(
@@ -88,7 +90,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
       );
       setScanningOrder(false);
     }
-  }, [onScanSuccess, scanningOrder, t]);
+  }, [onScanSuccess, onClose, scanningOrder, t]);
 
   useEffect(() => {
     if (!useCamera || showManualEntry) return;
