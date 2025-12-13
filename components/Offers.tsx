@@ -46,7 +46,7 @@ interface Offer {
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
-type FilterType = "all" | "available" | "sold_out" | "expired";
+type FilterType = "all" | "available" | "low_stock";
 type SortType = "newest" | "price_low" | "price_high" | "pickup_time";
 type FoodTypeFilter = "all" | "snack" | "meal" | "beverage" | "other";
 type TasteFilter = "all" | "sweet" | "salty" | "both" | "neutral";
@@ -362,10 +362,8 @@ const OffersPage = () => {
     // Apply status filter
     if (filter === "available") {
       result = result.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0);
-    } else if (filter === "sold_out") {
-      result = result.filter(o => o.quantity === 0 && !isOfferExpired(o.expirationDate));
-    } else if (filter === "expired") {
-      result = result.filter(o => isOfferExpired(o.expirationDate));
+    } else if (filter === "low_stock") {
+      result = result.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0 && o.quantity <= 5);
     }
 
     // Apply food type filter
@@ -477,8 +475,7 @@ const OffersPage = () => {
                 {[
                   { value: "all", label: t("offers.filter_all") || "All Offers", icon: "✨" },
                   { value: "available", label: t("offers.filter_available") || "Available", icon: "✅" },
-                  { value: "sold_out", label: t("offers.filter_sold_out") || "Sold Out", icon: "⛔" },
-                  { value: "expired", label: t("offers.filter_expired") || "Expired", icon: "⏰" },
+                  { value: "low_stock", label: t("offers.filter_low_stock") || "Low Stock", icon: "⚠️" },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -568,7 +565,7 @@ const OffersPage = () => {
                 <span className="text-xs font-medium text-gray-500">Active filters:</span>
                 {filter !== "all" && (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
-                    <span>{filter === "available" ? "✅ Available" : filter === "sold_out" ? "⛔ Sold Out" : "⏰ Expired"}</span>
+                    <span>{filter === "available" ? "✅ Available" : "⚠️ Low Stock"}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
