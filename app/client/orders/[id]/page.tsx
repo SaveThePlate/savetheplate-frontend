@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import CartOrder from "@/components/cartOrder";
 import { useRouter } from "next/navigation";
 import { Package, Clock, CheckCircle, XCircle, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { toast, ToastContainer } from "react-toastify";
 
 type Order = {
   id: number;
@@ -27,41 +29,78 @@ const Orders = () => {
   const router = useRouter();
   const { t } = useLanguage();
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
+  // Fetch orders function - can be called to refresh
+  const fetchOrders = useCallback(async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setError(t("client.orders.error_auth"));
+      router.push("/signIn");
+      return;
+    }
+
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.id;
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setOrders(response.data);
+    } catch (err: any) {
+      console.error("Failed to fetch orders:", err);
+      // Provide user-friendly error message
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
         setError(t("client.orders.error_auth"));
         router.push("/signIn");
-        return;
+      } else {
+        setError(t("client.orders.error_fetch"));
       }
-
-      try {
-        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        const userId = tokenPayload.id;
-
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        setOrders(response.data);
-      } catch (err: any) {
-        console.error("Failed to fetch orders:", err);
-        // Provide user-friendly error message
-        if (err?.response?.status === 401 || err?.response?.status === 403) {
-          setError(t("client.orders.error_auth"));
-          router.push("/signIn");
-        } else {
-          setError(t("client.orders.error_fetch"));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
+    } finally {
+      setLoading(false);
+    }
   }, [router, t]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // Handle real-time order updates
+  const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
+    const { type, order } = data;
+    
+    setOrders((prevOrders) => {
+      // Ensure prevOrders is always an array
+      const safePrevOrders = Array.isArray(prevOrders) ? prevOrders : [];
+      
+      if (type === 'created') {
+        // Add new order if it belongs to this user
+        if (order.userId) {
+          return [order, ...safePrevOrders];
+        }
+        return safePrevOrders;
+      } else if (type === 'updated') {
+        // Update existing order
+        return safePrevOrders.map((o) => (o.id === order.id ? order : o));
+      } else if (type === 'deleted') {
+        // Remove deleted order
+        return safePrevOrders.filter((o) => o.id !== order.id);
+      }
+      return safePrevOrders;
+    });
+
+    // Show toast notification when order is confirmed
+    if (type === 'updated' && order.status === 'confirmed') {
+      toast.success(t("orders.confirmed") || "Order confirmed successfully!");
+    }
+  }, [t]);
+
+  // Connect to WebSocket for real-time updates
+  useWebSocket({
+    onOrderUpdate: handleOrderUpdate,
+    enabled: true,
+  });
 
   const pendingOrders = orders.filter((o) => o.status === "pending");
   const confirmedOrders = orders.filter((o) => o.status === "confirmed");
@@ -72,6 +111,19 @@ const Orders = () => {
 
   return (
     <main className="flex flex-col items-center w-full">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        limit={3}
+        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
+        bodyClassName="text-sm font-medium"
+        progressClassName="bg-white/80"
+      />
       <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
         {/* Decorative soft shapes */}
         <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
