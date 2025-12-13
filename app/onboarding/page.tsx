@@ -75,8 +75,25 @@ const OnboardingPage = () => {
         }
       );
 
-      if (role === "PROVIDER") router.push("/onboarding/fillDetails");
-      else router.push("/client/home");
+      // Use the backend's redirectTo if provided, otherwise use default logic
+      const redirectTo = response?.data?.redirectTo;
+      if (redirectTo) {
+        // For CLIENT role, use window.location.href to force a full page reload
+        // This ensures UserContext and other cached state is refreshed
+        if (role === "CLIENT") {
+          window.location.href = redirectTo;
+        } else {
+          router.push(redirectTo);
+        }
+      } else {
+        // Fallback to default redirects
+        if (role === "PROVIDER") {
+          router.push("/onboarding/fillDetails");
+        } else if (role === "CLIENT") {
+          // Force full page reload for CLIENT to clear cached state
+          window.location.href = "/client/home";
+        }
+      }
     } catch (error: any) {
       console.error("Error setting role:", {
         error,
