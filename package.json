@@ -9,7 +9,8 @@
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
     "gen-apis": "npx openapi-typescript http://localhost:3001/api-yaml -o ./generated/api/schema.d.ts -t --additional-properties --empty-objects-unknown",
-    "gen-types": "npx @kalissaac/prisma-typegen ./generated/types/prismaTypes.ts ../leftover-backend/prisma/schema.prisma"
+    "gen-types": "npx @kalissaac/prisma-typegen ./generated/types/prismaTypes.ts ../leftover-backend/prisma/schema.prisma",
+    "test:websocket": "node test-websocket.js"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.8",

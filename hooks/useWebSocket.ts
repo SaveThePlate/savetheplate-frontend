@@ -95,6 +95,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           const socketId = currentSocket.id;
           console.log(`✅ WebSocket connected to: ${wsUrl}`);
           console.log(`   Transport: ${transport}, Socket ID: ${socketId}`);
+          if (transport === 'polling') {
+            console.log(`   ℹ️ Using polling transport (websocket upgrade may fail behind proxies - this is normal)`);
+          }
           
           if (isMountedRef.current) {
             setIsConnected(true);
@@ -120,6 +123,28 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
             error.message?.includes("xhr poll error") ||
             error.type === "TransportError";
           
+          // Check for CORS or 502 errors (backend/proxy issues)
+          const isCorsError = error.message?.includes("CORS") || 
+                             error.message?.includes("Access-Control-Allow-Origin") ||
+                             error.description?.includes("CORS");
+          const is502Error = error.message?.includes("502") || 
+                            error.message?.includes("Bad Gateway") ||
+                            error.description?.includes("502");
+          
+          if (isCorsError || is502Error) {
+            console.warn("⚠️ Backend connection issue:", {
+              message: error.message,
+              type: error.type,
+              description: error.description,
+              url: wsUrl,
+              note: is502Error 
+                ? "Backend server may be down or proxy misconfigured" 
+                : "CORS configuration may need adjustment"
+            });
+            // Don't set disconnected - Socket.IO will keep retrying
+            return;
+          }
+          
           if (!isTransportError) {
             // Log non-transport errors for debugging
             console.error("WebSocket connection error:", {
@@ -134,15 +159,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           // Check for specific error types
           if (error.message?.includes("timeout")) {
             console.warn("⏱️ WebSocket connection timeout - Socket.IO will retry");
-          } else if (error.message?.includes("CORS")) {
-            console.error("❌ CORS error - check server CORS configuration");
           } else if (isTransportError) {
             // Transport errors are expected - Socket.IO will automatically try other transports
             // Don't log these as errors, they're handled by Socket.IO's fallback mechanism
           }
           
           // Don't set disconnected state on transport errors - Socket.IO is still trying
-          if (!isTransportError && isMountedRef.current) {
+          if (!isTransportError && !isCorsError && !is502Error && isMountedRef.current) {
             setIsConnected(false);
           }
         });
