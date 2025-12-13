@@ -10,6 +10,7 @@ import { Search, Filter, X, Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isOfferExpired } from "./offerCard/utils";
+import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
 
 interface Offer {
   id: number;
@@ -31,6 +32,8 @@ interface Offer {
   pickupEndTime?: string;
   pickupLocation: string;
   mapsLink: string;
+  latitude?: number | null;
+  longitude?: number | null;
   foodType?: "snack" | "meal" | "beverage" | "other";
   taste?: "sweet" | "salty" | "both" | "neutral";
   owner?: {
@@ -40,6 +43,8 @@ interface Offer {
     phoneNumber?: number;
     mapsLink?: string;
     profileImage?: string;
+    latitude?: number | null;
+    longitude?: number | null;
   };
   user?: { username: string }; // Legacy field
 }
@@ -47,7 +52,7 @@ interface Offer {
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
 type FilterType = "all" | "available" | "low_stock";
-type SortType = "newest" | "price_low" | "price_high" | "pickup_time";
+type SortType = "newest" | "price_low" | "price_high" | "earliest_pickup" | "distance";
 type FoodTypeFilter = "all" | "snack" | "meal" | "beverage" | "other";
 type TasteFilter = "all" | "sweet" | "salty" | "both" | "neutral";
 
@@ -61,8 +66,37 @@ const OffersPage = () => {
   const [sort, setSort] = useState<SortType>("newest");
   const [foodTypeFilter, setFoodTypeFilter] = useState<FoodTypeFilter>("all");
   const [tasteFilter, setTasteFilter] = useState<TasteFilter>("all");
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const router = useRouter();
   const { t } = useLanguage();
+
+  // Get user's location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationError(null);
+        },
+        (error) => {
+          console.log("Geolocation error:", error);
+          setLocationError(error.message);
+          // Don't show error to user - distance sorting just won't be available
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000, // Cache for 5 minutes
+        }
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -385,12 +419,35 @@ const OffersPage = () => {
       case "price_high":
         result.sort((a, b) => b.price - a.price);
         break;
-      case "pickup_time":
+      case "earliest_pickup":
+        // Sort by earliest pickup time (pickupStartTime), or expiration date if no pickup time
         result.sort((a, b) => {
           const aTime = a.pickupStartTime ? new Date(a.pickupStartTime).getTime() : new Date(a.expirationDate).getTime();
           const bTime = b.pickupStartTime ? new Date(b.pickupStartTime).getTime() : new Date(b.expirationDate).getTime();
           return aTime - bTime;
         });
+        break;
+      case "distance":
+        if (userLocation) {
+          result.sort((a, b) => {
+            // Get coordinates from offer or owner
+            const aLat = a.latitude ?? a.owner?.latitude ?? null;
+            const aLng = a.longitude ?? a.owner?.longitude ?? null;
+            const bLat = b.latitude ?? b.owner?.latitude ?? null;
+            const bLng = b.longitude ?? b.owner?.longitude ?? null;
+
+            // Calculate distances
+            const aDistance = aLat && aLng
+              ? calculateDistance(userLocation.lat, userLocation.lng, aLat, aLng)
+              : Infinity;
+            const bDistance = bLat && bLng
+              ? calculateDistance(userLocation.lat, userLocation.lng, bLat, bLng)
+              : Infinity;
+
+            return aDistance - bDistance;
+          });
+        }
+        // If no user location, fall through to newest
         break;
       case "newest":
       default:
@@ -407,7 +464,7 @@ const OffersPage = () => {
     }
 
     return result;
-  }, [offers, searchQuery, filter, sort, foodTypeFilter, tasteFilter]);
+  }, [offers, searchQuery, filter, sort, foodTypeFilter, tasteFilter, userLocation]);
 
   if (loading)
     return (
@@ -552,7 +609,10 @@ const OffersPage = () => {
                     <option value="newest">{t("offers.sort_newest") || "Newest First"}</option>
                     <option value="price_low">{t("offers.sort_price_low") || "Price: Low to High"}</option>
                     <option value="price_high">{t("offers.sort_price_high") || "Price: High to Low"}</option>
-                    <option value="pickup_time">{t("offers.sort_pickup_time") || "Pickup Time"}</option>
+                    <option value="earliest_pickup">{t("offers.sort_earliest_pickup") || "Earliest Pickup"}</option>
+                    {userLocation && (
+                      <option value="distance">{t("offers.sort_distance") || "Distance: Nearest First"}</option>
+                    )}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
