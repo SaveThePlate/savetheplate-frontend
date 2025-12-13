@@ -58,21 +58,24 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         const wsUrl = backendUrl.replace(/\/$/, ""); // Remove trailing slash if present
 
         // Connect to WebSocket server
+        // Use polling first for better compatibility with proxies/load balancers
+        // Socket.IO will automatically upgrade to websocket if available
         socket = io(wsUrl, {
           path: "/socket.io/", // Explicitly set path to match backend configuration
           auth: {
             token: token,
           },
-          transports: ["websocket", "polling"], // Try websocket first, fallback to polling
+          transports: ["polling", "websocket"], // Try polling first (more reliable), then upgrade to websocket
           reconnection: true,
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
           reconnectionAttempts: Infinity, // Keep trying to reconnect
           timeout: 20000, // Connection timeout
-          // Suppress the initial websocket failure warning (it's expected - Socket.IO falls back to polling)
-          upgrade: true,
-          rememberUpgrade: false,
+          upgrade: true, // Allow automatic upgrade from polling to websocket
+          rememberUpgrade: true, // Remember successful websocket upgrades
           forceNew: false, // Reuse existing connection if available
+          // Reduce connection timeout for faster fallback
+          upgradeTimeout: 10000,
         });
 
         if (!isMountedRef.current) {
@@ -113,34 +116,57 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         });
 
         socket.on("connect_error", (error: any) => {
-          // Log connection errors for debugging
-          console.error("WebSocket connection error:", {
-            message: error.message,
-            type: error.type,
-            description: error.description,
-            context: error.context,
-            url: wsUrl,
-          });
+          // Only log non-transport errors (transport errors are expected and handled automatically)
+          const isTransportError = 
+            error.message?.includes("websocket error") ||
+            error.message?.includes("xhr poll error") ||
+            error.type === "TransportError";
           
-          // Check for specific error types
-          if (error.message?.includes("xhr poll error") || error.message?.includes("websocket error")) {
-            console.warn("⚠️ WebSocket transport failed, Socket.IO will retry with polling");
-          } else if (error.message?.includes("timeout")) {
-            console.error("❌ WebSocket connection timeout - check server availability and network");
-          } else if (error.message?.includes("CORS")) {
-            console.error("❌ CORS error - check server CORS configuration");
+          if (!isTransportError) {
+            // Log non-transport errors for debugging
+            console.error("WebSocket connection error:", {
+              message: error.message,
+              type: error.type,
+              description: error.description,
+              context: error.context,
+              url: wsUrl,
+            });
           }
           
-          if (isMountedRef.current) {
+          // Check for specific error types
+          if (error.message?.includes("timeout")) {
+            console.warn("⏱️ WebSocket connection timeout - Socket.IO will retry");
+          } else if (error.message?.includes("CORS")) {
+            console.error("❌ CORS error - check server CORS configuration");
+          } else if (isTransportError) {
+            // Transport errors are expected - Socket.IO will automatically try other transports
+            // Don't log these as errors, they're handled by Socket.IO's fallback mechanism
+          }
+          
+          // Don't set disconnected state on transport errors - Socket.IO is still trying
+          if (!isTransportError && isMountedRef.current) {
             setIsConnected(false);
           }
         });
 
-        // Listen for transport upgrades (websocket -> polling or vice versa)
+        // Listen for transport upgrades (polling -> websocket or vice versa)
         socket.io.engine.on("upgrade", () => {
           const currentSocket = socketRef.current;
           if (!currentSocket) return;
-          console.log("🔄 WebSocket transport upgraded to:", currentSocket.io.engine.transport.name);
+          const transport = currentSocket.io.engine.transport.name;
+          console.log(`🔄 Transport upgraded to: ${transport}`);
+          if (isMountedRef.current) {
+            setIsConnected(true);
+          }
+        });
+
+        // Listen for transport downgrades (websocket -> polling)
+        socket.io.engine.on("downgrade", () => {
+          const currentSocket = socketRef.current;
+          if (!currentSocket) return;
+          const transport = currentSocket.io.engine.transport.name;
+          console.log(`🔄 Transport downgraded to: ${transport} (connection still active)`);
+          // Don't set disconnected - connection is still active, just using different transport
         });
 
         // Listen for order updates - use ref to get latest callback
