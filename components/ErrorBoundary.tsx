@@ -100,18 +100,6 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
             <div className="flex flex-col gap-3">
               <Button
-                onClick={() => {
-                  this.setState({ hasError: false, error: null });
-                  // Use window.location.reload() but preserve the current path
-                  // This prevents session loss
-                  const currentPath = window.location.pathname;
-                  window.location.href = currentPath;
-                }}
-                className="w-full"
-              >
-                Reload Page
-              </Button>
-              <Button
                 onClick={this.handleGoHome}
                 variant="outline"
                 className="w-full"

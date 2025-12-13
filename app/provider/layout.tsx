@@ -66,10 +66,10 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             <Link href="/provider/orders" className="hover:text-green-600 transition-colors">
               {t("nav.orders")}
             </Link>
-            <Link href="/impact" className="hover:text-green-600 transition-colors">
+            <Link href="/provider/impact" className="hover:text-green-600 transition-colors">
               {t("nav.impact")}
             </Link>
-            <Link href="/contact" className="hover:text-green-600 transition-colors">
+            <Link href="/provider/contact" className="hover:text-green-600 transition-colors">
               {t("nav.contact")}
             </Link>
             <Link
@@ -146,14 +146,14 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
               {t("nav.orders")}
             </Link>
             <Link
-              href="/impact"
+              href="/provider/impact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
               {t("nav.impact")}
             </Link>
             <Link
-              href="/contact"
+              href="/provider/contact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >

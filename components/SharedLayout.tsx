@@ -101,7 +101,7 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center space-x-4 text-[15px] font-medium text-gray-700">
+          <div className="hidden lg:flex items-center space-x-8 text-[15px] font-medium text-gray-700">
             <LanguageSwitcher variant="button" />
             <Link href={homeLink} className="hover:text-green-600 transition-colors">
               {t("nav.home")}

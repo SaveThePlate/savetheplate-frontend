@@ -89,10 +89,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <Link href="/client/profile" className="hover:text-green-600 transition-colors">
               {t("nav.profile")}
             </Link>
-            <Link href="/impact" className="hover:text-green-600 transition-colors">
+            <Link href="/client/impact" className="hover:text-green-600 transition-colors">
               {t("nav.impact")}
             </Link>
-            <Link href="/contact" className="hover:text-green-600 transition-colors">
+            <Link href="/client/contact" className="hover:text-green-600 transition-colors">
               {t("nav.contact")}
             </Link>
             <Link
@@ -163,14 +163,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               {t("nav.profile")}
             </Link>
             <Link
-              href="/impact"
+              href="/client/impact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
               {t("nav.impact")}
             </Link>
             <Link
-              href="/contact"
+              href="/client/contact"
               onClick={() => setMenuOpen(false)}
               className="hover:text-green-600"
             >
