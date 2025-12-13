@@ -155,7 +155,9 @@ const AddOffer: React.FC = () => {
       setUploadedImages([]);
       return;
     }
-    // Upload images immediately when selected
+    // Set local files immediately to show preview right away
+    setLocalFiles(newFiles);
+    // Upload images in the background
     await handleImage(newFiles);
   };
 
@@ -613,54 +615,46 @@ const AddOffer: React.FC = () => {
             </FileInput>
 
             <FileUploaderContent className="flex items-center flex-row gap-3 mt-3 flex-wrap">
-              {/* Show uploaded images from backend if available */}
-              {uploadedImages.length > 0 && uploadedImages.map((img, i) => (
-                <div
-                  key={`uploaded-${i}`}
-                  className="relative size-24 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
-                >
-                  <Image
-                    src={img.absoluteUrl || img.url || DEFAULT_BAG_IMAGE}
-                    alt={img.filename}
-                    height={96}
-                    width={96}
-                    className="size-24 object-cover rounded-xl"
-                    unoptimized
-                  />
-                  <div className="absolute top-1 right-1 bg-emerald-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    ✓
-                  </div>
-                </div>
-              ))}
-              {/* Show local files that haven't been uploaded yet */}
-              {localFiles?.map((file, i) => {
-                // Check if this file corresponds to an uploaded image
-                const uploadedIndex = uploadedImages.findIndex(img => {
-                  // Try to match by filename or by index
-                  return img.filename === file.name || 
-                         (uploadedImages.length > i && uploadedImages[i]?.filename);
-                });
-                
-                // If uploaded, don't show as pending
-                if (uploadedIndex >= 0) return null;
+              {/* Show preview - prefer uploaded version, fallback to local file */}
+              {localFiles && localFiles.length > 0 && localFiles.map((file, i) => {
+                // Check if this file has been uploaded
+                const uploadedImage = uploadedImages.length > 0 && uploadedImages[i];
+                const isUploaded = !!uploadedImage;
+                const imageSrc = isUploaded && uploadedImage
+                  ? (uploadedImage.absoluteUrl || uploadedImage.url || DEFAULT_BAG_IMAGE)
+                  : (URL.createObjectURL(file) || DEFAULT_BAG_IMAGE);
                 
                 return (
                   <FileUploaderItem
-                    key={i}
+                    key={`preview-${i}`}
                     index={i}
-                    className="size-24 p-0 rounded-xl overflow-hidden border-2 border-yellow-200 shadow-sm relative"
+                    className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
+                      isUploaded ? "border-emerald-600" : "border-yellow-400"
+                    }`}
                     aria-roledescription={`File ${i + 1} containing ${file.name}`}
                   >
-                    <Image
-                      src={URL.createObjectURL(file) || DEFAULT_BAG_IMAGE}
-                      alt={file.name}
-                      height={96}
-                      width={96}
-                      className="w-full h-full object-cover rounded-xl"
-                      unoptimized={true}
-                    />
-                    <div className="absolute top-1 right-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                      ⏳
+                    <div className="w-full h-full flex items-center justify-center">
+                      <img
+                        src={imageSrc}
+                        alt={file.name}
+                        className="w-full h-full object-cover rounded-xl"
+                        onError={(e) => {
+                          // Fallback to default image if upload fails
+                          const target = e.target as HTMLImageElement;
+                          if (target.src !== DEFAULT_BAG_IMAGE) {
+                            target.src = DEFAULT_BAG_IMAGE;
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                      isUploaded 
+                        ? "bg-emerald-600" 
+                        : uploading 
+                        ? "bg-yellow-500" 
+                        : "bg-yellow-400"
+                    }`}>
+                      {isUploaded ? "✓" : uploading ? "⏳" : "📤"}
                     </div>
                   </FileUploaderItem>
                 );
