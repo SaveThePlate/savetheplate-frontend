@@ -159,7 +159,7 @@ const ProviderOrdersContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [router, t]);
+  }, [t]);
 
   // Fetch orders when component mounts
   useEffect(() => {
@@ -243,7 +243,7 @@ const ProviderOrdersContent = () => {
   };
 
   // Ensure orders is always an array to prevent errors
-  const safeOrders = Array.isArray(orders) ? orders : [];
+  const safeOrders = useMemo(() => Array.isArray(orders) ? orders : [], [orders]);
   const confirmed = safeOrders.filter((o) => o.status === "confirmed");
   const pending = safeOrders.filter((o) => o.status === "pending");
   const cancelled = safeOrders.filter((o) => o.status === "cancelled");
