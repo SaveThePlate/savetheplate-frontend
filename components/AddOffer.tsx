@@ -664,26 +664,13 @@ const AddOffer: React.FC = () => {
                     aria-roledescription={`File ${i + 1} containing ${file.name}`}
                   >
                     <div className="w-full h-full flex items-center justify-center">
-                      <img
+                      <Image
                         src={imageSrc || DEFAULT_BAG_IMAGE}
                         alt={file.name}
+                        width={96}
+                        height={96}
                         className="w-full h-full object-cover rounded-xl"
-                        onError={(e) => {
-                          // Only fallback to default if it's not already the default
-                          const target = e.target as HTMLImageElement;
-                          const currentSrc = target.src;
-                          const defaultSrc = new URL(DEFAULT_BAG_IMAGE, window.location.origin).href;
-                          
-                          console.error("Image failed to load:", currentSrc); // Debug log
-                          
-                          // Only fallback if we're not already showing the default
-                          if (!currentSrc.includes("defaultBag.png")) {
-                            target.src = DEFAULT_BAG_IMAGE;
-                          }
-                        }}
-                        onLoad={() => {
-                          console.log("Image loaded successfully:", imageSrc); // Debug log
-                        }}
+                        unoptimized={true}
                       />
                     </div>
                     <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${

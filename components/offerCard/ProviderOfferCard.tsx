@@ -970,25 +970,13 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                               }`}
                             >
                               <div className="w-full h-full flex items-center justify-center">
-                                <img
+                                <Image
                                   src={imageSrc || "/defaultBag.png"}
                                   alt={`Preview ${index + 1}`}
+                                  width={96}
+                                  height={96}
                                   className="w-full h-full object-cover rounded-lg sm:rounded-xl"
-                                  onError={(e) => {
-                                    // Only fallback to default if it's not already the default
-                                    const target = e.target as HTMLImageElement;
-                                    const currentSrc = target.src;
-                                    
-                                    console.error("Image failed to load:", currentSrc); // Debug log
-                                    
-                                    // Only fallback if we're not already showing the default
-                                    if (!currentSrc.includes("defaultBag.png")) {
-                                      target.src = "/defaultBag.png";
-                                    }
-                                  }}
-                                  onLoad={() => {
-                                    console.log("Image loaded successfully:", imageSrc); // Debug log
-                                  }}
+                                  unoptimized={true}
                                 />
                               </div>
                               <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
