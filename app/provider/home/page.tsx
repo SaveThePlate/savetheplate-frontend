@@ -390,16 +390,29 @@ const ProviderHome = () => {
     setOffers(prev => prev.filter(o => o.id !== id));
 
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
+      const response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      // Success - show success toast
       toast.success(t("provider.home.offer_deleted"));
     } catch (err: any) {
+      // Check if the response status indicates success (some backends might return 2xx but axios throws)
+      // This handles cases where deletion succeeds but response handling causes an error
+      const status = err?.response?.status;
+      if (status >= 200 && status < 300) {
+        // Success status code - treat as success, don't show error
+        toast.success(t("provider.home.offer_deleted"));
+        return;
+      }
+      
+      // Only show error and refetch if it's actually an error (4xx or 5xx)
       const errorMsg = sanitizeErrorMessage(err, {
         action: "delete offer",
         defaultMessage: t("provider.home.delete_failed") || "Unable to delete offer. Please try again."
       });
       toast.error(errorMsg);
+      
       // refetch if failed
       setLoading(true);
       try {
