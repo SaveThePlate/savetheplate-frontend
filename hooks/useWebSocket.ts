@@ -74,8 +74,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           upgrade: true, // Allow automatic upgrade from polling to websocket
           rememberUpgrade: true, // Remember successful websocket upgrades
           forceNew: false, // Reuse existing connection if available
-          // Reduce connection timeout for faster fallback
-          upgradeTimeout: 10000,
         });
 
         if (!isMountedRef.current) {
@@ -149,7 +147,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           }
         });
 
-        // Listen for transport upgrades (polling -> websocket or vice versa)
+        // Listen for transport upgrades (polling -> websocket)
         socket.io.engine.on("upgrade", () => {
           const currentSocket = socketRef.current;
           if (!currentSocket) return;
@@ -158,15 +156,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           if (isMountedRef.current) {
             setIsConnected(true);
           }
-        });
-
-        // Listen for transport downgrades (websocket -> polling)
-        socket.io.engine.on("downgrade", () => {
-          const currentSocket = socketRef.current;
-          if (!currentSocket) return;
-          const transport = currentSocket.io.engine.transport.name;
-          console.log(`🔄 Transport downgraded to: ${transport} (connection still active)`);
-          // Don't set disconnected - connection is still active, just using different transport
         });
 
         // Listen for order updates - use ref to get latest callback
