@@ -70,7 +70,14 @@ export class ErrorBoundary extends Component<Props, State> {
   handleGoHome = async () => {
     this.setState({ hasError: false, error: null });
     const homePath = await this.getHomePath();
-    window.location.href = homePath;
+    // Use router navigation instead of window.location to preserve session
+    if (homePath === "/signIn") {
+      // Only redirect to sign in if we can't determine role
+      window.location.href = homePath;
+    } else {
+      // For provider/client home, use router to preserve session
+      window.location.href = homePath;
+    }
   };
 
   render() {
@@ -95,7 +102,10 @@ export class ErrorBoundary extends Component<Props, State> {
               <Button
                 onClick={() => {
                   this.setState({ hasError: false, error: null });
-                  window.location.reload();
+                  // Use window.location.reload() but preserve the current path
+                  // This prevents session loss
+                  const currentPath = window.location.pathname;
+                  window.location.href = currentPath;
                 }}
                 className="w-full"
               >

@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { 
   QrCode, 
   RefreshCw, 
-  CheckCircle, 
   Search, 
   Phone, 
   MapPin, 
@@ -88,9 +87,6 @@ const ProviderOrdersContent = () => {
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [providerId, setProviderId] = useState<number | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [confirmedOrderId, setConfirmedOrderId] = useState<number | null>(null);
-  const [alreadyConfirmed, setAlreadyConfirmed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const { t } = useLanguage();
@@ -100,7 +96,8 @@ const ProviderOrdersContent = () => {
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        router.push("/signIn");
+        // Don't redirect immediately - let the RouteGuard handle it
+        setLoading(false);
         return;
       }
 
@@ -108,8 +105,9 @@ const ProviderOrdersContent = () => {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         setProviderId(payload.id);
-      } catch {
-        console.error("Failed to parse token");
+      } catch (parseError) {
+        console.error("Failed to parse token:", parseError);
+        // Don't throw - just continue without setting providerId
       }
 
       // Add cache-busting timestamp to ensure fresh data
@@ -119,7 +117,13 @@ const ProviderOrdersContent = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setOrders(res.data || []);
+      
+      // Safely set orders - ensure it's an array
+      if (Array.isArray(res.data)) {
+        setOrders(res.data);
+      } else {
+        setOrders([]);
+      }
     } catch (err: any) {
       console.error("Error fetching orders:", err);
       
@@ -129,6 +133,15 @@ const ProviderOrdersContent = () => {
         toast.error(errorMsg);
         // Don't redirect immediately, let user see the error
         // They can manually sign in if needed
+        setLoading(false);
+        return;
+      }
+      
+      // Handle network errors
+      if (err?.code === 'ECONNABORTED' || err?.message === 'Network Error') {
+        const errorMsg = t("provider.network_error") || "Network error. Please check your connection and try again.";
+        toast.error(errorMsg);
+        setLoading(false);
         return;
       }
       
@@ -141,6 +154,8 @@ const ProviderOrdersContent = () => {
       
       // Don't throw - just show error toast and keep existing orders
       // This prevents the error from bubbling up to ErrorBoundary
+      // Ensure orders is always an array even on error
+      setOrders((prevOrders) => Array.isArray(prevOrders) ? prevOrders : []);
     } finally {
       setLoading(false);
     }
@@ -148,52 +163,59 @@ const ProviderOrdersContent = () => {
 
   // Fetch orders when component mounts
   useEffect(() => {
-    fetchOrders();
+    // Wrap in try-catch to prevent any errors from bubbling up
+    try {
+      fetchOrders().catch((err) => {
+        // fetchOrders already handles errors internally, but add extra safety
+        console.error("Unhandled error in fetchOrders:", err);
+      });
+    } catch (err) {
+      // Catch any synchronous errors
+      console.error("Error in fetchOrders useEffect:", err);
+      setLoading(false);
+    }
   }, [fetchOrders]);
 
-  // Check for success query parameters and show modal
+  // Check for error query parameter (from backend redirects)
   useEffect(() => {
-    const confirmed = searchParams.get('confirmed');
-    const orderId = searchParams.get('orderId');
-    const alreadyConfirmedParam = searchParams.get('alreadyConfirmed');
+    const error = searchParams.get('error');
 
-    if (confirmed === 'true' && orderId) {
-      setConfirmedOrderId(parseInt(orderId, 10));
-      setAlreadyConfirmed(alreadyConfirmedParam === 'true');
-      setShowSuccessModal(true);
-      
-      // Refresh orders to get updated data
-      fetchOrders();
-
-      // Remove query parameters from URL
+    // Handle error query parameter
+    if (error) {
+      const errorMessage = decodeURIComponent(error);
+      toast.error(errorMessage || t("provider.error_scanning") || "An error occurred while scanning the QR code");
+      // Remove error parameter from URL
       router.replace('/provider/orders', { scroll: false });
     }
-  }, [searchParams, router, fetchOrders]);
+  }, [searchParams, router, t]);
 
   // Handle real-time order updates
   const handleOrderUpdate = useCallback((data: { type: string; order: any }) => {
     const { type, order } = data;
     
     setOrders((prevOrders) => {
+      // Ensure prevOrders is always an array
+      const safePrevOrders = Array.isArray(prevOrders) ? prevOrders : [];
+      
       if (type === 'created') {
         // Add new order if it's for this provider's offers
-        const offerIds = prevOrders.map(o => o.offerId);
+        const offerIds = safePrevOrders.map(o => o.offerId);
         if (order.offerId && offerIds.includes(order.offerId)) {
-          return [order, ...prevOrders];
+          return [order, ...safePrevOrders];
         }
         // Or check if order is for provider's offer
         if (order.offer?.ownerId === providerId) {
-          return [order, ...prevOrders];
+          return [order, ...safePrevOrders];
         }
-        return prevOrders;
+        return safePrevOrders;
       } else if (type === 'updated') {
         // Update existing order
-        return prevOrders.map((o) => (o.id === order.id ? order : o));
+        return safePrevOrders.map((o) => (o.id === order.id ? order : o));
       } else if (type === 'deleted') {
         // Remove deleted order
-        return prevOrders.filter((o) => o.id !== order.id);
+        return safePrevOrders.filter((o) => o.id !== order.id);
       }
-      return prevOrders;
+      return safePrevOrders;
     });
 
     // Show toast notification
@@ -209,26 +231,26 @@ const ProviderOrdersContent = () => {
   });
 
   const handleScanSuccess = (qrCodeToken: string) => {
-    toast.success(t("orders.confirmed"));
+    // Close scanner immediately
     setShowScanner(false);
-    // Refresh orders to get updated data
-    // Use setTimeout to ensure scanner is fully closed before fetching
-    setTimeout(() => {
-      fetchOrders().catch((err) => {
-        // Silently handle errors in fetchOrders - it already shows toast
-        console.error("Error refreshing orders after scan:", err);
-      });
-    }, 100);
-    // No need to redirect - we're already on the orders page
+    // Show success toast
+    toast.success(t("orders.confirmed") || "Order confirmed successfully");
+    // Refresh orders to get updated data (WebSocket should also update, but refetch to be sure)
+    fetchOrders().catch((err) => {
+      // Silently handle errors in fetchOrders - it already shows toast
+      console.error("Error refreshing orders after scan:", err);
+    });
   };
 
-  const confirmed = orders.filter((o) => o.status === "confirmed");
-  const pending = orders.filter((o) => o.status === "pending");
-  const cancelled = orders.filter((o) => o.status === "cancelled");
+  // Ensure orders is always an array to prevent errors
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const confirmed = safeOrders.filter((o) => o.status === "confirmed");
+  const pending = safeOrders.filter((o) => o.status === "pending");
+  const cancelled = safeOrders.filter((o) => o.status === "cancelled");
 
   // Filter and sort orders
   const filteredOrders = useMemo(() => {
-    let filtered = orders;
+    let filtered = safeOrders;
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -257,7 +279,7 @@ const ProviderOrdersContent = () => {
     return filtered.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [orders, searchQuery, activeTab]);
+  }, [safeOrders, searchQuery, activeTab]);
 
   return (
     <main className="w-full">
@@ -317,7 +339,7 @@ const ProviderOrdersContent = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.total_orders")}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{orders.length}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{safeOrders.length}</p>
                   </div>
                   <div className="p-2 sm:p-3 bg-gray-100 rounded-lg">
                     <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
@@ -409,7 +431,7 @@ const ProviderOrdersContent = () => {
               </Card>
             ))}
           </div>
-        ) : orders.length === 0 ? (
+        ) : safeOrders.length === 0 ? (
           <Card className="border-0 shadow-md">
             <CardContent className="p-12 sm:p-16 text-center">
               <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -428,7 +450,7 @@ const ProviderOrdersContent = () => {
                 value="all" 
                 className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
               >
-                All ({orders.length})
+                All ({safeOrders.length})
               </TabsTrigger>
               <TabsTrigger 
                 value="pending" 
@@ -510,36 +532,6 @@ const ProviderOrdersContent = () => {
         </Suspense>
       )}
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <Card className="w-full max-w-md border-0 shadow-2xl animate-in zoom-in-95 duration-200">
-            <CardContent className="p-6 sm:p-8 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                <CheckCircle size={48} className="text-emerald-600 animate-in zoom-in duration-300" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-                {alreadyConfirmed ? t("orders.already_confirmed") : t("orders.confirmed_title")}
-              </h2>
-              <p className="text-gray-600 mb-8 text-base sm:text-lg">
-                {alreadyConfirmed 
-                  ? t("orders.already_confirmed_message")
-                  : t("orders.confirmed_message", { orderId: confirmedOrderId })}
-              </p>
-              <Button
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  setConfirmedOrderId(null);
-                }}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 text-base"
-                size="lg"
-              >
-                {t("common.close")}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </main>
   );
 };

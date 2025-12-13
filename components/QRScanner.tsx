@@ -66,45 +66,19 @@ const QRScanner: React.FC<QRScannerProps> = ({
         return;
       }
 
-      // First, preview the order
-      const previewResponse = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/qr/${qrCodeToken}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const order = previewResponse.data;
-
-      // Confirm the order
+      // Confirm the order directly (this endpoint confirms and returns the order)
       const confirmResponse = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/scan`,
         { qrCodeToken },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (confirmResponse.data.alreadyConfirmed) {
-        setSuccess(
-          t("qr_scanner.order_already_confirmed", { 
-            orderId: order.id, 
-            username: order.user?.username || "N/A" 
-          })
-        );
-      } else {
-        setSuccess(
-          t("qr_scanner.order_confirmed_success", { 
-            orderId: order.id, 
-            username: order.user?.username || "N/A" 
-          })
-        );
+      // Stop scanning immediately and call success callback
+      if (scannerRef.current) {
+        scannerRef.current.stop();
       }
-
-      // Stop scanning and call success callback
-      setTimeout(() => {
-        if (scannerRef.current) {
-          scannerRef.current.stop();
-        }
-        setScanningOrder(false); // Reset scanning state
-        onScanSuccess(qrCodeToken);
-      }, 2000);
+      setScanningOrder(false); // Reset scanning state
+      onScanSuccess(qrCodeToken);
     } catch (err: any) {
       console.error("Error scanning QR code:", err);
       setError(
