@@ -83,7 +83,7 @@ const AddOffer: React.FC = () => {
     
     if (needsCompression) {
       try {
-        toast.info(t("add_offer.compressing_images") || "Compressing images...");
+        // Removed info toast - compression happens automatically in background
         filesToUpload = await compressImages(files, {
           maxWidth: 1500,
           maxHeight: 1500,
@@ -163,7 +163,7 @@ const AddOffer: React.FC = () => {
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
       setLocalFiles(files);
-      toast.success(t("add_offer.images_uploaded_success", { count: uploaded.length }));
+      // Removed success toast - user can see uploaded images in preview
     } catch (error: any) {
       const errorMessage = sanitizeErrorMessage(error, {
         action: "upload images",
@@ -256,7 +256,7 @@ const AddOffer: React.FC = () => {
     try {
       // Ensure images are uploaded before submitting
       if (localFiles && localFiles.length > 0 && uploadedImages.length === 0) {
-        toast.info(t("add_offer.info_uploading"));
+        // Removed info toast - user can see upload status in UI
         const uploaded = await uploadFiles(localFiles);
         setUploadedImages(uploaded);
       }

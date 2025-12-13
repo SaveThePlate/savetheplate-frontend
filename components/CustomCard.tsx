@@ -186,7 +186,7 @@ const CustomCard: FC<CustomCardProps> = ({
     
     if (needsCompression) {
       try {
-        toast.info("Compressing images...");
+        // Removed info toast - compression happens automatically in background
         filesToUpload = await compressImages(files, {
           maxWidth: 1500,
           maxHeight: 1500,
@@ -266,7 +266,7 @@ const CustomCard: FC<CustomCardProps> = ({
     try {
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
-      toast.success(`${uploaded.length} image(s) uploaded successfully!`);
+      // Removed success toast - user can see uploaded images in preview
     } catch (error: any) {
       setLocalFiles(null);
       setUploadedImages([]);
@@ -299,7 +299,7 @@ const CustomCard: FC<CustomCardProps> = ({
       let finalImages = uploadedImages;
       if (localFiles && localFiles.length > 0) {
         // Always upload when localFiles are present (user has selected new files)
-        toast.info(t("custom_card.uploading_images"));
+        // Removed info toast - user can see upload status in UI
         finalImages = await uploadFiles(localFiles);
         setUploadedImages(finalImages);
       }

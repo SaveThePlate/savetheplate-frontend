@@ -178,9 +178,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     
     if (needsCompression) {
       try {
-        if (isMountedRef.current) {
-          toast.info(t("offer_card.compressing") || "Compressing images...");
-        }
+        // Removed info toast - compression happens automatically in background
         filesToUpload = await compressImages(files, {
           maxWidth: 1500,
           maxHeight: 1500,
@@ -285,7 +283,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       const uploaded = await uploadFiles(files);
       if (isMountedRef.current) {
         setUploadedImages(uploaded);
-        toast.success(t("offer_card.upload_success", { count: uploaded.length }));
+        // Removed success toast - user can see uploaded images in preview
       }
     } catch (error: any) {
       // Only update state and show error if component is still mounted and error is not from cancellation
@@ -345,9 +343,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       let finalImages = uploadedImages;
       if (localFiles && localFiles.length > 0) {
         // Always upload when localFiles are present (user has selected new files)
-        if (isMountedRef.current) {
-          toast.info("Uploading images...");
-        }
+        // Removed info toast - user can see upload status in UI
         finalImages = await uploadFiles(localFiles);
         if (isMountedRef.current) {
           setUploadedImages(finalImages);

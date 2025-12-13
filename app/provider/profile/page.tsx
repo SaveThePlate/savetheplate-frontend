@@ -352,7 +352,7 @@ const EditProfileDialog: React.FC<{
       let fileToUpload = file;
       if (shouldCompress(file, 1)) {
         try {
-          toast.info(t("provider.profile.edit_dialog.compressing") || "Compressing image...");
+          // Removed info toast - compression happens automatically in background
           fileToUpload = await compressImage(file, {
             maxWidth: 1500,
             maxHeight: 1500,
@@ -420,7 +420,7 @@ const EditProfileDialog: React.FC<{
       console.log("✅ Upload successful! Setting profile image to:", filename);
       console.log("✅ Upload response full:", uploaded);
       setProfileImage(filename);
-      toast.success(t("provider.profile.edit_dialog.image_ready"));
+      // Removed success toast - user can see the image in preview
     } catch (error: any) {
       console.error("Error uploading image:", error);
       console.error("Error response:", error?.response?.data);
