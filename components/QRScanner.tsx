@@ -70,17 +70,32 @@ const QRScanner: React.FC<QRScannerProps> = ({
       const confirmResponse = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/scan`,
         { qrCodeToken },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          } 
+        }
       );
+
+      console.log('✅ QR scan successful:', confirmResponse.data);
 
       // Stop scanning immediately and call success callback
       if (scannerRef.current) {
-        scannerRef.current.stop();
+        scannerRef.current.stop().catch((err) => {
+          console.warn('Error stopping scanner:', err);
+        });
       }
       setScanningOrder(false); // Reset scanning state
-      onScanSuccess(qrCodeToken);
-      // Close the modal immediately after successful scan
+      
+      // Close the modal immediately after successful scan (before calling onScanSuccess)
       onClose();
+      
+      // Call success callback after a brief delay to ensure modal is closed
+      setTimeout(() => {
+        onScanSuccess(qrCodeToken);
+      }, 100);
     } catch (err: any) {
       console.error("Error scanning QR code:", err);
       setError(
