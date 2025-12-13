@@ -186,9 +186,12 @@ const CustomCard: FC<CustomCardProps> = ({
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       const res = await axiosInstance.post("/storage/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 30000, // 30 second timeout
       });
 
       const data = res.data as any[];
+      console.log("Upload response data:", data); // Debug log
+      
       const mapped = data.map((item) => {
         const filename = item.filename || item.path || "";
         const url = item.url || `/storage/${filename}`;
@@ -205,6 +208,8 @@ const CustomCard: FC<CustomCardProps> = ({
             absoluteUrl = url;
           }
         }
+
+        console.log("Constructed image URL:", { filename, url, absoluteUrl }); // Debug log
 
         return {
           filename: filename,
@@ -232,11 +237,14 @@ const CustomCard: FC<CustomCardProps> = ({
       return;
     }
     
+    // Set local files immediately to show preview right away
+    setLocalFiles(files);
     setUploadingImages(true);
+    
+    // Upload images in the background
     try {
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
-      setLocalFiles(files);
       toast.success(`${uploaded.length} image(s) uploaded successfully!`);
     } catch (error: any) {
       setLocalFiles(null);
@@ -941,8 +949,8 @@ const CustomCard: FC<CustomCardProps> = ({
                         onValueChange={handleImageUpload}
                         dropzoneOptions={{
                           accept: { "image/*": [".jpg", ".jpeg", ".png"] },
-                          multiple: true,
-                          maxFiles: 5,
+                          multiple: false,
+                          maxFiles: 1,
                           maxSize: 5 * 1024 * 1024,
                         }}
                       >
@@ -962,28 +970,85 @@ const CustomCard: FC<CustomCardProps> = ({
                               <>
                                 <div className="text-2xl mb-2">📸</div>
                                 <p className="text-gray-600 text-sm">Click to upload or drag and drop</p>
-                                <p className="text-xs text-gray-500 mt-1">Up to 5 images (optional)</p>
+                                <p className="text-xs text-gray-500 mt-1">1 image, max 5MB (optional)</p>
                               </>
                             )}
                           </div>
                         </FileInput>
                         <FileUploaderContent>
-                          {localFiles && localFiles.map((file, index) => (
-                            <FileUploaderItem
-                              key={index}
-                              index={index}
-                              className="size-24 p-0 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
-                            >
-                              <Image
-                                src={sanitizeImageUrl(URL.createObjectURL(file))}
-                                alt={`Preview ${index + 1}`}
-                                width={96}
-                                height={96}
-                                className="w-full h-full object-cover rounded-xl"
-                                unoptimized={true}
-                              />
-                            </FileUploaderItem>
-                          ))}
+                          {localFiles && localFiles.length > 0 && localFiles.map((file, index) => {
+                            // Check if this file has been uploaded
+                            const uploadedImage = uploadedImages.length > 0 && uploadedImages[index];
+                            const isUploaded = !!uploadedImage;
+                            
+                            // Determine image source - prioritize uploaded image URL
+                            let imageSrc: string;
+                            if (isUploaded && uploadedImage) {
+                              // Use the uploaded image URL
+                              imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
+                              
+                              // If we have a relative URL, construct absolute URL
+                              if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                                const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                imageSrc = `${backendUrl}/storage/${imageSrc}`;
+                              } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                                const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                imageSrc = `${backendUrl}${imageSrc}`;
+                              }
+                              
+                              // Add cache buster to ensure fresh image
+                              if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
+                                imageSrc += `?t=${Date.now()}`;
+                              }
+                              
+                              console.log("Using uploaded image URL:", imageSrc); // Debug log
+                            } else {
+                              // Use local file preview
+                              imageSrc = URL.createObjectURL(file) || "";
+                            }
+                            
+                            return (
+                              <FileUploaderItem
+                                key={`preview-${index}`}
+                                index={index}
+                                className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
+                                  isUploaded ? "border-emerald-600" : "border-yellow-400"
+                                }`}
+                              >
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <img
+                                    src={sanitizeImageUrl(imageSrc) || "/defaultBag.png"}
+                                    alt={`Preview ${index + 1}`}
+                                    className="w-full h-full object-cover rounded-xl"
+                                    onError={(e) => {
+                                      // Only fallback to default if it's not already the default
+                                      const target = e.target as HTMLImageElement;
+                                      const currentSrc = target.src;
+                                      
+                                      console.error("Image failed to load:", currentSrc); // Debug log
+                                      
+                                      // Only fallback if we're not already showing the default
+                                      if (!currentSrc.includes("defaultBag.png")) {
+                                        target.src = "/defaultBag.png";
+                                      }
+                                    }}
+                                    onLoad={() => {
+                                      console.log("Image loaded successfully:", imageSrc); // Debug log
+                                    }}
+                                  />
+                                </div>
+                                <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                                  isUploaded 
+                                    ? "bg-emerald-600" 
+                                    : uploadingImages 
+                                    ? "bg-yellow-500" 
+                                    : "bg-yellow-400"
+                                }`}>
+                                  {isUploaded ? "✓" : uploadingImages ? "⏳" : "📤"}
+                                </div>
+                              </FileUploaderItem>
+                            );
+                          })}
                         </FileUploaderContent>
                       </FileUploader>
                       <p className="text-xs text-gray-500">

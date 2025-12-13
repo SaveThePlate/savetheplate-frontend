@@ -81,11 +81,16 @@ const AddOffer: React.FC = () => {
 
     try {
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      
+      // Add timeout for upload (30 seconds)
       const res = await axiosInstance.post("/storage/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 30000, // 30 second timeout
       });
 
       const data = res.data as any[];
+      console.log("Upload response data:", data); // Debug log
+      
       const mapped: UploadedImage[] = data.map((item) => {
         // Construct proper URLs
         const filename = item.filename || item.path || "";
@@ -104,6 +109,8 @@ const AddOffer: React.FC = () => {
             absoluteUrl = url;
           }
         }
+
+        console.log("Constructed image URL:", { filename, url, absoluteUrl }); // Debug log
 
         return {
           filename: filename,
@@ -620,9 +627,32 @@ const AddOffer: React.FC = () => {
                 // Check if this file has been uploaded
                 const uploadedImage = uploadedImages.length > 0 && uploadedImages[i];
                 const isUploaded = !!uploadedImage;
-                const imageSrc = isUploaded && uploadedImage
-                  ? (uploadedImage.absoluteUrl || uploadedImage.url || DEFAULT_BAG_IMAGE)
-                  : (URL.createObjectURL(file) || DEFAULT_BAG_IMAGE);
+                
+                // Determine image source - prioritize uploaded image URL
+                let imageSrc: string;
+                if (isUploaded && uploadedImage) {
+                  // Use the uploaded image URL
+                  imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
+                  
+                  // If we have a relative URL, construct absolute URL
+                  if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                    imageSrc = `${backendUrl}/storage/${imageSrc}`;
+                  } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                    imageSrc = `${backendUrl}${imageSrc}`;
+                  }
+                  
+                  // Add cache buster to ensure fresh image
+                  if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
+                    imageSrc += `?t=${Date.now()}`;
+                  }
+                  
+                  console.log("Using uploaded image URL:", imageSrc); // Debug log
+                } else {
+                  // Use local file preview
+                  imageSrc = URL.createObjectURL(file) || DEFAULT_BAG_IMAGE;
+                }
                 
                 return (
                   <FileUploaderItem
@@ -635,15 +665,24 @@ const AddOffer: React.FC = () => {
                   >
                     <div className="w-full h-full flex items-center justify-center">
                       <img
-                        src={imageSrc}
+                        src={imageSrc || DEFAULT_BAG_IMAGE}
                         alt={file.name}
                         className="w-full h-full object-cover rounded-xl"
                         onError={(e) => {
-                          // Fallback to default image if upload fails
+                          // Only fallback to default if it's not already the default
                           const target = e.target as HTMLImageElement;
-                          if (target.src !== DEFAULT_BAG_IMAGE) {
+                          const currentSrc = target.src;
+                          const defaultSrc = new URL(DEFAULT_BAG_IMAGE, window.location.origin).href;
+                          
+                          console.error("Image failed to load:", currentSrc); // Debug log
+                          
+                          // Only fallback if we're not already showing the default
+                          if (!currentSrc.includes("defaultBag.png")) {
                             target.src = DEFAULT_BAG_IMAGE;
                           }
+                        }}
+                        onLoad={() => {
+                          console.log("Image loaded successfully:", imageSrc); // Debug log
                         }}
                       />
                     </div>

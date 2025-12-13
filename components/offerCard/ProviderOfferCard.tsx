@@ -185,6 +185,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       const response = await axiosInstance.post("/storage/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         signal: abortController.signal,
+        timeout: 30000, // 30 second timeout
       });
 
       if (!isMountedRef.current) {
@@ -193,6 +194,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       const uploaded = Array.isArray(response.data) ? response.data : [response.data];
+      
+      console.log("Upload response data:", uploaded); // Debug log
 
       const mapped = uploaded.map((item: any) => {
         const filename = item.filename || item.path || item.url || item.absoluteUrl || "";
@@ -208,6 +211,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         } else {
           absoluteUrl = url;
         }
+
+        console.log("Constructed image URL:", { filename, url, absoluteUrl }); // Debug log
 
         return {
           filename: filename,
@@ -246,14 +251,17 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       return;
     }
     
+    // Set local files immediately to show preview right away
     if (isMountedRef.current) {
+      setLocalFiles(files);
       setUploadingImages(true);
     }
+    
+    // Upload images in the background
     try {
       const uploaded = await uploadFiles(files);
       if (isMountedRef.current) {
         setUploadedImages(uploaded);
-        setLocalFiles(files);
         toast.success(t("offer_card.upload_success", { count: uploaded.length }));
       }
     } catch (error: any) {
@@ -895,8 +903,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       onValueChange={handleImageUpload}
                       dropzoneOptions={{
                         accept: { "image/*": [".jpg", ".jpeg", ".png"] },
-                        multiple: true,
-                        maxFiles: 5,
+                        multiple: false,
+                        maxFiles: 1,
                         maxSize: 5 * 1024 * 1024,
                       }}
                     >
@@ -922,22 +930,79 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         </div>
                       </FileInput>
                       <FileUploaderContent>
-                        {localFiles && localFiles.map((file, index) => (
-                          <FileUploaderItem
-                            key={index}
-                            index={index}
-                            className="size-20 sm:size-24 p-0 rounded-lg sm:rounded-xl overflow-hidden border-2 border-emerald-200 shadow-sm"
-                          >
-                            <Image
-                              src={URL.createObjectURL(file)}
-                              alt={`Preview ${index + 1}`}
-                              width={96}
-                              height={96}
-                              className="w-full h-full object-cover rounded-lg sm:rounded-xl"
-                              unoptimized={true}
-                            />
-                          </FileUploaderItem>
-                        ))}
+                        {localFiles && localFiles.length > 0 && localFiles.map((file, index) => {
+                          // Check if this file has been uploaded
+                          const uploadedImage = uploadedImages.length > 0 && uploadedImages[index];
+                          const isUploaded = !!uploadedImage;
+                          
+                          // Determine image source - prioritize uploaded image URL
+                          let imageSrc: string;
+                          if (isUploaded && uploadedImage) {
+                            // Use the uploaded image URL
+                            imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
+                            
+                            // If we have a relative URL, construct absolute URL
+                            if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                              imageSrc = `${backendUrl}/storage/${imageSrc}`;
+                            } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                              imageSrc = `${backendUrl}${imageSrc}`;
+                            }
+                            
+                            // Add cache buster to ensure fresh image
+                            if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
+                              imageSrc += `?t=${Date.now()}`;
+                            }
+                            
+                            console.log("Using uploaded image URL:", imageSrc); // Debug log
+                          } else {
+                            // Use local file preview
+                            imageSrc = URL.createObjectURL(file) || "";
+                          }
+                          
+                          return (
+                            <FileUploaderItem
+                              key={`preview-${index}`}
+                              index={index}
+                              className={`size-20 sm:size-24 p-0 rounded-lg sm:rounded-xl overflow-hidden border-2 shadow-sm relative ${
+                                isUploaded ? "border-emerald-600" : "border-yellow-400"
+                              }`}
+                            >
+                              <div className="w-full h-full flex items-center justify-center">
+                                <img
+                                  src={imageSrc || "/defaultBag.png"}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-full object-cover rounded-lg sm:rounded-xl"
+                                  onError={(e) => {
+                                    // Only fallback to default if it's not already the default
+                                    const target = e.target as HTMLImageElement;
+                                    const currentSrc = target.src;
+                                    
+                                    console.error("Image failed to load:", currentSrc); // Debug log
+                                    
+                                    // Only fallback if we're not already showing the default
+                                    if (!currentSrc.includes("defaultBag.png")) {
+                                      target.src = "/defaultBag.png";
+                                    }
+                                  }}
+                                  onLoad={() => {
+                                    console.log("Image loaded successfully:", imageSrc); // Debug log
+                                  }}
+                                />
+                              </div>
+                              <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                                isUploaded 
+                                  ? "bg-emerald-600" 
+                                  : uploadingImages 
+                                  ? "bg-yellow-500" 
+                                  : "bg-yellow-400"
+                              }`}>
+                                {isUploaded ? "✓" : uploadingImages ? "⏳" : "📤"}
+                              </div>
+                            </FileUploaderItem>
+                          );
+                        })}
                       </FileUploaderContent>
                     </FileUploader>
                     <p className="text-xs text-gray-500">
