@@ -265,7 +265,24 @@ const OffersPage = () => {
     // Normalize the offer data to match our format
     const normalizeOffer = (o: any): Offer => {
       const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-      const images = Array.isArray(o.images) ? o.images.map((img: any) => {
+      
+      // Parse images if they're stored as JSON string (old offers)
+      let imagesArray: any[] = [];
+      if (o.images) {
+        if (typeof o.images === 'string') {
+          try {
+            const parsed = JSON.parse(o.images);
+            imagesArray = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
+          } catch {
+            // If parsing fails, try to use as single image URL
+            imagesArray = o.images ? [{ url: o.images, absoluteUrl: o.images }] : [];
+          }
+        } else if (Array.isArray(o.images)) {
+          imagesArray = o.images;
+        }
+      }
+      
+      const images = imagesArray.map((img: any) => {
         if (!img) return img;
         
         // Normalize absoluteUrl - preserve URLs from different backends
@@ -344,7 +361,7 @@ const OffersPage = () => {
         }
         
         return img;
-      }) : [];
+      });
       
       return { ...o, images };
     };
