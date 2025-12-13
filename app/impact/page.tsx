@@ -41,22 +41,26 @@ const ImpactPage = () => {
   return (
     <RouteGuard allowedRoles={["CLIENT", "PROVIDER"]} redirectTo="/signIn">
       <SharedLayout>
-        <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl pt-4 sm:pt-6">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-4">
-            <Leaf className="w-10 h-10 text-emerald-600" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {t("impact.understanding")}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {t("impact.description")}
-          </p>
-        </div>
+        <main className="flex flex-col items-center w-full">
+          <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+            {/* Decorative soft shapes */}
+            <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+            <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
 
-        {/* The Problem Section */}
-        <div className="bg-white rounded-3xl p-8 mb-8 shadow-sm border border-gray-200">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="text-left space-y-1 sm:space-y-2 flex-1">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+                  {t("impact.title")}
+                </h1>
+                <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
+                  {t("impact.description")}
+                </p>
+              </div>
+            </div>
+
+            {/* The Problem Section */}
+            <div className="bg-white rounded-3xl p-8 mb-8 shadow-sm border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Info className="w-6 h-6 text-red-500" />
             {t("impact.problem_title")}
@@ -74,11 +78,11 @@ const ImpactPage = () => {
             <p className="pt-2">
               {t("impact.problem_conclusion")}
             </p>
+            </div>
           </div>
-        </div>
 
-        {/* Metrics Explanation */}
-        <div className="space-y-6 mb-8">
+          {/* Metrics Explanation */}
+          <div className="space-y-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <Calculator className="w-6 h-6 text-emerald-600" />
             {t("impact.calculation_title")}
@@ -160,8 +164,8 @@ const ImpactPage = () => {
           </div>
         </div>
 
-        {/* Your Role Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Your Role Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* For Clients */}
           <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border-2 border-emerald-200">
             <div className="flex items-center gap-3 mb-4">
@@ -187,10 +191,10 @@ const ImpactPage = () => {
                 <span>{t("impact.customer_3")}</span>
               </li>
             </ul>
-          </div>
+            </div>
 
-          {/* For Providers */}
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-200">
+            {/* For Providers */}
+            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
                 <TreePine className="w-5 h-5 text-teal-600" />
@@ -217,8 +221,8 @@ const ImpactPage = () => {
           </div>
         </div>
 
-        {/* Impact Multiplier */}
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-purple-200 mb-8">
+          {/* Impact Multiplier */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-purple-200 mb-8">
           <h2 className="text-2xl font-bold text-purple-900 mb-4 text-center">
             {t("impact.ripple_effect")}
           </h2>
@@ -239,10 +243,10 @@ const ImpactPage = () => {
               <p className="text-sm text-purple-700">Meals saved = 15,000 kg CO₂ prevented</p>
             </div>
           </div>
-        </div>
+          </div>
 
-        {/* Call to Action */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 text-center">
+          {/* Call to Action */}
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             {t("impact.ready_title")}
           </h2>
@@ -290,8 +294,9 @@ const ImpactPage = () => {
               <div className="px-6 py-3 text-gray-500">{t("common.loading")}</div>
             )}
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+        </main>
       </SharedLayout>
     </RouteGuard>
   );

@@ -71,33 +71,35 @@ const Orders = () => {
   const totalOrders = orders.length;
 
   return (
-    <main className="w-full">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-6">
-        {/* Header Section */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-[#1B4332] mb-2 flex items-center gap-2 sm:gap-3 flex-wrap">
-                <ShoppingBag className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-emerald-600 flex-shrink-0" />
-                <span className="break-words">{t("client.orders.my_orders")}</span>
-              </h1>
-              <p className="text-gray-600 text-sm xs:text-base sm:text-lg">
-                {t("client.orders.track_orders")}
-              </p>
-            </div>
-            {hasOrders && (
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200 flex-shrink-0 self-start sm:self-auto">
-                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">
-                  {totalOrders} {totalOrders === 1 ? t("client.orders.order") : t("client.orders.orders")}
-                </span>
-              </div>
-            )}
-          </div>
+    <main className="flex flex-col items-center w-full">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
 
-          {/* Stats Cards */}
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+              {t("client.orders.my_orders")}
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
+              {t("client.orders.track_orders")}
+            </p>
+          </div>
           {hasOrders && (
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200 flex-shrink-0">
+              <Package className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">
+                {totalOrders} {totalOrders === 1 ? t("client.orders.order") : t("client.orders.orders")}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Stats Cards */}
+        {hasOrders && (
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               {pendingOrders.length > 0 && (
                 <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-2xl p-3 sm:p-4 shadow-sm">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -137,12 +139,11 @@ const Orders = () => {
                   </div>
                 </div>
               )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Orders List */}
-        <section className="space-y-8">
+        <section className="relative min-h-[50vh] space-y-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>

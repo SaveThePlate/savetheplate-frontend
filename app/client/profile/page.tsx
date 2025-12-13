@@ -194,7 +194,7 @@ const ProfilePage = () => {
   const confirmedCount = orders.filter((o) => o.status === "confirmed").length;
 
   return (
-    <main className="w-full mx-auto px-4 sm:px-6 max-w-6xl pt-4 sm:pt-6">
+    <main className="flex flex-col items-center w-full">
         <ToastContainer
           position="top-right"
           autoClose={1000}
@@ -208,6 +208,11 @@ const ProfilePage = () => {
           bodyClassName="text-sm font-medium"
           progressClassName="bg-white/80"
         />
+
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
 
       {/* Minimal Profile Section */}
       <div className="w-full max-w-2xl mx-auto mb-8">
@@ -446,7 +451,7 @@ const ProfilePage = () => {
           )}
         </div>
       </div>
-
+      </div>
     </main>
   );
 };

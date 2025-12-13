@@ -147,7 +147,7 @@ const ContactPage = () => {
   };
 
   return (
-    <>
+    <main className="flex flex-col items-center w-full">
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -162,15 +162,21 @@ const ContactPage = () => {
         progressClassName="bg-white/80"
       />
 
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
+
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1B4332] mb-3 sm:mb-4">
-            {t("contact.title")}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {t("contact.subtitle")}
-          </p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+              {t("contact.title")}
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
+              {t("contact.subtitle")}
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -339,7 +345,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
-    </>
+    </main>
   );
 };
 

@@ -209,7 +209,23 @@ const Offers = () => {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl pt-4 sm:pt-6">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+              {t("client.offers.detail.title")}
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
+              View offer details and place your order
+            </p>
+          </div>
+        </div>
+
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200">
           {/* Hero Image */}
           <div className="relative w-full h-80 sm:h-96 bg-gray-100">

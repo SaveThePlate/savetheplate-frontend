@@ -282,7 +282,7 @@ const ProviderOrdersContent = () => {
   }, [safeOrders, searchQuery, activeTab]);
 
   return (
-    <main className="w-full">
+    <main className="flex flex-col items-center w-full">
       <ToastContainer
         position="top-right"
         autoClose={1000}
@@ -297,18 +297,21 @@ const ProviderOrdersContent = () => {
         progressClassName="bg-white/80"
       />
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                {t("provider.orders_title")}
-              </h1>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Manage and track all orders for your offers
-              </p>
-            </div>
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+              {t("provider.orders_title")}
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
+              Manage and track all orders for your offers
+            </p>
+          </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 onClick={fetchOrders}
@@ -330,10 +333,10 @@ const ProviderOrdersContent = () => {
                 <span className="sm:hidden">Scan</span>
               </Button>
             </div>
-          </div>
+        </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
@@ -389,10 +392,10 @@ const ProviderOrdersContent = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+        </div>
 
-          {/* Search Bar */}
-          <div className="relative mb-6">
+        {/* Search Bar */}
+        <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
@@ -409,7 +412,6 @@ const ProviderOrdersContent = () => {
                 <XCircle size={20} />
               </button>
             )}
-          </div>
         </div>
 
         {/* Tabs and Orders */}

@@ -715,7 +715,7 @@ export default function ProviderProfile() {
   };
 
   return (
-    <main className="w-full mx-auto px-4 sm:px-6 max-w-6xl pt-4 sm:pt-6">
+    <main className="flex flex-col items-center w-full">
       <ToastContainer
         position="top-right"
         autoClose={1000}
@@ -729,6 +729,11 @@ export default function ProviderProfile() {
         bodyClassName="text-sm font-medium"
         progressClassName="bg-white/80"
       />
+
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
 
       {/* Profile Card */}
       <div className="w-full mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
@@ -950,6 +955,7 @@ export default function ProviderProfile() {
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Edit Profile Dialog */}

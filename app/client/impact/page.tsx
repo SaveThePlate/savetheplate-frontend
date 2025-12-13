@@ -37,18 +37,22 @@ const ImpactPage = () => {
   }, []);
 
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 max-w-4xl pt-4 sm:pt-6">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-4">
-            <Leaf className="w-10 h-10 text-emerald-600" />
+    <main className="flex flex-col items-center w-full">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+              {t("impact.title")}
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
+              {t("impact.description")}
+            </p>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {t("impact.understanding")}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {t("impact.description")}
-          </p>
         </div>
 
         {/* The Problem Section */}
@@ -288,6 +292,7 @@ const ImpactPage = () => {
           </div>
         </div>
       </div>
+    </main>
   );
 };
 

@@ -504,14 +504,18 @@ const ProviderHome = () => {
   bodyClassName="text-sm font-medium"
   progressClassName="bg-white/80"
 />
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl pt-4 sm:pt-6 flex flex-col space-y-6 sm:space-y-8">
+      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
+        {/* Decorative soft shapes */}
+        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
+        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4 sm:mt-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-3xl sm:text-4xl font-bold text-green-900">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-left space-y-1 sm:space-y-2 flex-1">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
               {t("provider.home.title")}
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
               {t("provider.home.subtitle")}
             </p>
           </div>
