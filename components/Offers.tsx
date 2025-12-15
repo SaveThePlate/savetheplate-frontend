@@ -144,7 +144,7 @@ const OffersPage = () => {
         const data = await response.json();
 
         // Fetch ratings for all providers in parallel
-        const providerIds = [...new Set(data.map((o: any) => o.ownerId).filter(Boolean))];
+        const providerIds = Array.from(new Set(data.map((o: any) => o.ownerId).filter(Boolean))) as number[];
         const ratingPromises = providerIds.map(async (providerId: number) => {
           try {
             const ratingResponse = await fetch(
