@@ -18,7 +18,10 @@ const QRScanner: React.FC<QRScannerProps> = ({
   providerId,
 }) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isScannerStartedRef = useRef<boolean>(false); // Track if scanner was successfully started
+  const isMountedRef = useRef<boolean>(true); // Track if component is mounted
   const [scanning, setScanning] = useState(false);
+  const [isScannerRunning, setIsScannerRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [scanningOrder, setScanningOrder] = useState(false);
@@ -26,6 +29,67 @@ const QRScanner: React.FC<QRScannerProps> = ({
   const [manualCode, setManualCode] = useState("");
   const [useCamera, setUseCamera] = useState(true);
   const { t } = useLanguage();
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Safe stop function that checks if scanner is running
+  const safeStopScanner = useCallback(async () => {
+    // Only try to stop if scanner exists AND was successfully started
+    if (!scannerRef.current || !isScannerStartedRef.current) {
+      setIsScannerRunning(false);
+      isScannerStartedRef.current = false;
+      return;
+    }
+
+    try {
+      // Stop the scanner and release camera immediately
+      await scannerRef.current.stop();
+      
+      // Also manually stop any remaining media tracks to ensure camera is fully released
+      try {
+        const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
+        if (videoElement && videoElement.srcObject) {
+          const stream = videoElement.srcObject as MediaStream;
+          stream.getTracks().forEach(track => {
+            track.stop();
+          });
+          videoElement.srcObject = null;
+        }
+      } catch (trackErr) {
+        // Ignore errors when stopping tracks - camera might already be stopped
+      }
+      
+      // Update state immediately to reflect that camera is stopped
+      setIsScannerRunning(false);
+      isScannerStartedRef.current = false;
+      setScanning(false);
+    } catch (err: any) {
+      // Ignore errors if scanner is already stopped or not running
+      const errorMessage = err?.message || String(err || '');
+      if (
+        errorMessage.includes("not running") || 
+        errorMessage.includes("not paused") ||
+        errorMessage.includes("Cannot stop")
+      ) {
+        // Scanner is already stopped, just update state
+        setIsScannerRunning(false);
+        isScannerStartedRef.current = false;
+        setScanning(false);
+      } else {
+        // Log other errors but don't throw
+        console.warn("Error stopping scanner:", err);
+        setIsScannerRunning(false);
+        isScannerStartedRef.current = false;
+        setScanning(false);
+      }
+    }
+  }, []);
 
   const handleScanResult = useCallback(async (decodedText: string) => {
     if (scanningOrder) return; // Prevent multiple scans
@@ -81,18 +145,14 @@ const QRScanner: React.FC<QRScannerProps> = ({
 
       console.log('✅ QR scan successful:', confirmResponse.data);
 
-      // Stop scanning immediately and call success callback
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch((err) => {
-          console.warn('Error stopping scanner:', err);
-        });
-      }
+      // Stop scanning immediately - this releases the camera
+      await safeStopScanner();
       setScanningOrder(false); // Reset scanning state
       
       // Close the modal immediately after successful scan (before calling onScanSuccess)
       onClose();
       
-      // Call success callback after a brief delay to ensure modal is closed
+      // Call success callback after a brief delay to ensure modal is closed and camera is released
       setTimeout(() => {
         onScanSuccess(qrCodeToken);
       }, 100);
@@ -105,13 +165,26 @@ const QRScanner: React.FC<QRScannerProps> = ({
       );
       setScanningOrder(false);
     }
-  }, [onScanSuccess, onClose, scanningOrder, t]);
+  }, [onScanSuccess, onClose, scanningOrder, t, safeStopScanner]);
 
   useEffect(() => {
     if (!useCamera || showManualEntry) return;
 
     const startScanning = async () => {
       try {
+        // Check if the DOM element exists before creating scanner
+        const element = document.getElementById("qr-reader");
+        if (!element) {
+          console.warn("QR reader element not found, will retry...");
+          // Retry after a short delay
+          setTimeout(() => {
+            if (useCamera && !showManualEntry) {
+              startScanning();
+            }
+          }, 100);
+          return;
+        }
+
         const html5QrCode = new Html5Qrcode("qr-reader");
         scannerRef.current = html5QrCode;
 
@@ -129,31 +202,86 @@ const QRScanner: React.FC<QRScannerProps> = ({
           }
         );
 
-        setScanning(true);
-        setError(null);
+        // Only mark as started if start() succeeded and component is still mounted
+        if (isMountedRef.current) {
+          isScannerStartedRef.current = true;
+          setScanning(true);
+          setIsScannerRunning(true);
+          setError(null);
+        } else {
+          // Component unmounted during initialization, stop the scanner safely
+          try {
+            await html5QrCode.stop();
+          } catch (stopErr: any) {
+            // Ignore stop errors - scanner might not be fully started
+            const errorMessage = stopErr?.message || String(stopErr || '');
+            if (
+              !errorMessage.includes("not running") && 
+              !errorMessage.includes("not paused") &&
+              !errorMessage.includes("Cannot stop")
+            ) {
+              console.warn("Error stopping scanner after unmount:", stopErr);
+            }
+          }
+          scannerRef.current = null;
+          isScannerStartedRef.current = false;
+        }
       } catch (err: any) {
         console.error("Error starting scanner:", err);
-        setError(
-          err.message || t("qr_scanner.camera_failed")
-        );
-        // If camera fails, suggest manual entry
-        setShowManualEntry(true);
-        setUseCamera(false);
+        // Only update state if component is still mounted
+        if (isMountedRef.current) {
+          setError(
+            err.message || t("qr_scanner.camera_failed")
+          );
+          // If camera fails, suggest manual entry
+          setShowManualEntry(true);
+          setUseCamera(false);
+          setIsScannerRunning(false);
+        }
+        isScannerStartedRef.current = false;
+        scannerRef.current = null;
       }
     };
 
     startScanning();
 
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current
-          .stop()
-          .then(() => {
-            scannerRef.current = null;
-          })
-          .catch((err) => {
-            console.error("Error stopping scanner:", err);
-          });
+      // Cleanup: only try to stop if scanner was successfully started
+      const scanner = scannerRef.current;
+      const wasStarted = isScannerStartedRef.current;
+      
+      // Clear refs immediately to prevent any other operations
+      scannerRef.current = null;
+      isScannerStartedRef.current = false;
+      setIsScannerRunning(false);
+      
+      // Only try to stop if scanner exists and was actually started
+      if (scanner && wasStarted) {
+        scanner.stop().catch((err: any) => {
+          // Ignore errors if scanner is already stopped
+          const errorMessage = err?.message || String(err || '');
+          if (
+            !errorMessage.includes("not running") && 
+            !errorMessage.includes("not paused") &&
+            !errorMessage.includes("Cannot stop")
+          ) {
+            console.warn("Error stopping scanner during cleanup:", err);
+          }
+        }).finally(() => {
+          // Also manually stop any remaining media tracks
+          try {
+            const videoElement = document.querySelector('#qr-reader video') as HTMLVideoElement;
+            if (videoElement && videoElement.srcObject) {
+              const stream = videoElement.srcObject as MediaStream;
+              stream.getTracks().forEach(track => {
+                track.stop();
+              });
+              videoElement.srcObject = null;
+            }
+          } catch (trackErr) {
+            // Ignore errors when stopping tracks
+          }
+        });
       }
     };
   }, [useCamera, showManualEntry, handleScanResult, t]);
@@ -167,21 +295,14 @@ const QRScanner: React.FC<QRScannerProps> = ({
     await handleScanResult(manualCode.trim());
   };
 
-  const handleClose = () => {
-    if (scannerRef.current) {
-      scannerRef.current
-        .stop()
-        .then(() => {
-          scannerRef.current = null;
-          onClose();
-        })
-        .catch((err) => {
-          console.error("Error stopping scanner:", err);
-          onClose();
-        });
-    } else {
-      onClose();
-    }
+  const handleClose = async () => {
+    // Stop scanner and release camera before closing
+    await safeStopScanner();
+    scannerRef.current = null;
+    isScannerStartedRef.current = false;
+    setIsScannerRunning(false);
+    setScanning(false);
+    onClose();
   };
 
   return (
@@ -255,10 +376,8 @@ const QRScanner: React.FC<QRScannerProps> = ({
           {/* Toggle Button */}
           {!showManualEntry && useCamera && (
             <button
-              onClick={() => {
-                if (scannerRef.current) {
-                  scannerRef.current.stop();
-                }
+              onClick={async () => {
+                await safeStopScanner();
                 setShowManualEntry(true);
                 setUseCamera(false);
               }}
