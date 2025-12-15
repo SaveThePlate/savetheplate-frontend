@@ -67,6 +67,13 @@ export function sanitizeErrorMessage(
       case 403:
         return `You don't have permission to ${action}.`;
       case 404:
+        // Try to get more specific error message from backend
+        if (error?.response?.data?.message) {
+          const backendMsg = error.response.data.message;
+          if (backendMsg.includes('Order') || backendMsg.includes('Offer') || backendMsg.includes('Rating')) {
+            return backendMsg;
+          }
+        }
         return `The requested item was not found.`;
       case 409:
         return `This action conflicts with current data. Please refresh and try again.`;

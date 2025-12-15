@@ -94,10 +94,27 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
       handleClose();
     } catch (err: any) {
       console.error("Failed to submit rating:", err);
-      const errorMsg = sanitizeErrorMessage(err, {
-        action: "submit rating",
-        defaultMessage: t("rating.submit_failed") || "Failed to submit rating. Please try again.",
-      });
+      // Check for specific error messages from backend
+      let errorMsg = t("rating.submit_failed") || "Failed to submit rating. Please try again.";
+      
+      if (err?.response?.data?.message) {
+        const backendMsg = err.response.data.message;
+        // Use backend message if it's user-friendly
+        if (backendMsg && !backendMsg.includes('Error') && !backendMsg.includes('Exception')) {
+          errorMsg = backendMsg;
+        } else {
+          errorMsg = sanitizeErrorMessage(err, {
+            action: "submit rating",
+            defaultMessage: errorMsg,
+          });
+        }
+      } else {
+        errorMsg = sanitizeErrorMessage(err, {
+          action: "submit rating",
+          defaultMessage: errorMsg,
+        });
+      }
+      
       toast.error(errorMsg);
     } finally {
       setSubmitting(false);
