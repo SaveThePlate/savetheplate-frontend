@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ClientOfferCardProps } from "./types";
 import { QuantityBadge } from "./shared/QuantityBadge";
+import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import {
@@ -108,42 +109,25 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
           </div>
         )}
 
-        {/* Provider Logo in bottom-left corner of image (like Too Good To Go) */}
-        {owner && (
-          <div className="absolute bottom-2 left-2 z-10">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white border-2 border-white shadow-lg overflow-hidden flex-shrink-0">
-              <Image
-                src={sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
-                alt={owner.username || providerName}
-                width={48}
-                height={48}
-                className="object-cover w-full h-full"
-                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/logo.png";
-                }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Quantity Badge - top right */}
         <QuantityBadge quantity={quantity} isExpired={expired} />
 
         {/* Expired Badge */}
         {expired && (
-          <div className="absolute top-2 left-2 bg-gray-800/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
+          <div className="absolute top-3 right-3 bg-gray-800/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
             {t("common.expired")}
           </div>
         )}
+
+        {/* Provider Overlay - Same as ProviderOfferCard */}
+        <ProviderOverlay owner={owner} pickupLocation={pickupLocation} />
       </div>
 
       {/* Lower Section - Textual Information (Too Good To Go style) */}
       <div className="flex flex-col flex-1 bg-gray-50 p-4 sm:p-5">
-        {/* Provider Name - Dark Teal, Prominent */}
-        <h3 className="text-lg sm:text-xl font-bold text-teal-800 mb-1.5 line-clamp-1">
-          {providerName}
+        {/* Offer Title - Dark Teal, Prominent (replaces provider name) */}
+        <h3 className="text-lg sm:text-xl font-bold text-teal-800 mb-1.5 line-clamp-2">
+          {title}
         </h3>
 
         {/* Offer Type - Lighter Teal */}

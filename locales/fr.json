@@ -343,6 +343,7 @@
     "filter_all": "Toutes les Offres",
     "filter_available": "Disponibles",
     "filter_low_stock": "Stock Faible",
+    "sort_by": "Trier par",
     "sort_newest": "Plus Récentes",
     "sort_price_low": "Prix: Croissant",
     "sort_price_high": "Prix: Décroissant",
@@ -364,7 +365,12 @@
     "taste_neutral": "Neutre",
     "try_adjusting_filters": "Essayez d'ajuster votre recherche ou vos filtres pour voir plus de résultats.",
     "check_back_later": "Revenez plus tard pour de nouvelles offres !",
-    "no_rating": "Nouveau"
+    "no_rating": "Nouveau",
+    "your_location": "Votre Emplacement",
+    "location_not_available": "Emplacement non disponible",
+    "within_distance": "À moins de {distance} km",
+    "distance_filter": "Distance Maximale",
+    "search_placeholder_extended": "Pâtisserie, restaurant, magasin..."
   },
   "contact": {
     "title": "Contactez-nous",
