@@ -5,9 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/comp
 import Image from "next/image";
 import Link from "next/link";
 import { ClientOfferCardProps } from "./types";
-import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
-import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import {
@@ -21,7 +19,7 @@ import {
   CredenzaClose,
 } from "@/components/ui/credenza";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
@@ -42,6 +40,8 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   foodType,
   taste,
   owner,
+  averageRating,
+  totalRatings,
 }) => {
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,11 +80,14 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   const expired = isOfferExpired(expirationDate);
   const isRescuePack = title.toLowerCase().includes("rescue pack");
 
+  const providerName = owner?.location || owner?.username || pickupLocation;
+  const displayRating = averageRating && averageRating > 0 ? averageRating.toFixed(1) : null;
+
   return (
     <Credenza open={isModalOpen} onOpenChange={setIsModalOpen}>
       <CredenzaTrigger asChild>
         <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-xl hover:border-emerald-400 hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
-      {/* Image */}
+      {/* Image Section - Similar to Too Good To Go */}
       <div className="relative w-full h-48 sm:h-52 md:h-56 overflow-hidden bg-gray-100">
         {currentImage ? (
           <Image
@@ -105,13 +108,30 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
           </div>
         )}
 
-        {/* Gradient overlay for better badge visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+        {/* Provider Logo in bottom-left corner of image (like Too Good To Go) */}
+        {owner && (
+          <div className="absolute bottom-2 left-2 z-10">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white border-2 border-white shadow-lg overflow-hidden flex-shrink-0">
+              <Image
+                src={sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
+                alt={owner.username || providerName}
+                width={48}
+                height={48}
+                className="object-cover w-full h-full"
+                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/logo.png";
+                }}
+              />
+            </div>
+          </div>
+        )}
 
-        <PriceBadge price={price} originalPrice={originalPrice} />
+        {/* Quantity Badge - top right */}
         <QuantityBadge quantity={quantity} isExpired={expired} />
-        <ProviderOverlay owner={owner} pickupLocation={pickupLocation} />
 
+        {/* Expired Badge */}
         {expired && (
           <div className="absolute top-2 left-2 bg-gray-800/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
             {t("common.expired")}
@@ -119,47 +139,60 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-3">
-        <div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors leading-tight">
-            {title}
-          </h3>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-              {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
-            </span>
-            {foodType && foodType !== "other" && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {t(`offers.food_type_${foodType}`) || foodType}
+      {/* Lower Section - Textual Information (Too Good To Go style) */}
+      <div className="flex flex-col flex-1 bg-gray-50 p-4 sm:p-5">
+        {/* Provider Name - Dark Teal, Prominent */}
+        <h3 className="text-lg sm:text-xl font-bold text-teal-800 mb-1.5 line-clamp-1">
+          {providerName}
+        </h3>
+
+        {/* Offer Type - Lighter Teal */}
+        <p className="text-sm sm:text-base text-teal-600 mb-4 font-medium">
+          {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
+        </p>
+
+        {/* Bottom Row: Rating (left) and Pricing (right) */}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200">
+          {/* Rating - Bottom Left (Light Green Star + Number) */}
+          {displayRating ? (
+            <div className="flex items-center gap-1.5">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-emerald-400 text-emerald-400" />
+              <span className="text-sm sm:text-base font-semibold text-emerald-600">
+                {displayRating}
               </span>
-            )}
-            {taste && taste !== "neutral" && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                {t(`offers.taste_${taste}`) || taste}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-gray-300 text-gray-300" />
+              <span className="text-sm sm:text-base font-medium text-gray-400">
+                {t("offers.no_rating") || "New"}
+              </span>
+            </div>
+          )}
+
+          {/* Pricing - Bottom Right (Original price strikethrough + Discounted price bold) */}
+          <div className="flex flex-col items-end">
+            {originalPrice && originalPrice > price ? (
+              <>
+                <span className="text-xs sm:text-sm text-gray-400 line-through">
+                  {originalPrice.toFixed(2)} dt
+                </span>
+                <span className="text-lg sm:text-xl font-bold text-teal-800">
+                  {price.toFixed(2)} dt
+                </span>
+              </>
+            ) : (
+              <span className="text-lg sm:text-xl font-bold text-teal-800">
+                {price.toFixed(2)} dt
               </span>
             )}
           </div>
-
-        </div>
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mt-auto pt-2 border-t border-gray-100">
-          <span className="font-medium text-base">🕐</span>
-          <span className="flex-1">
-            <span className="font-medium text-gray-700">
-              {formattedDate === "Today" ? t("common.today") : formattedDate}
-            </span>
-            {formattedTime && (
-              <span className="font-semibold text-emerald-700 ml-1.5">
-                {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
-              </span>
-            )}
-          </span>
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - Order Button */}
       <CardFooter 
-        className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 flex flex-row gap-3 w-full items-center justify-between border-t border-gray-100"
+        className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 flex flex-row gap-3 w-full items-center justify-between border-t border-gray-200 bg-white"
         onClick={(e) => e.stopPropagation()} // Prevent card click when clicking footer
       >
         {expired ? (

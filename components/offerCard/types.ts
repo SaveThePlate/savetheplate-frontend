@@ -27,6 +27,8 @@ export interface BaseOfferCardProps {
   foodType?: FoodType;
   taste?: Taste;
   owner?: OfferOwner;
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 export interface ClientOfferCardProps extends BaseOfferCardProps {

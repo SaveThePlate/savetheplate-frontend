@@ -363,7 +363,8 @@
     "taste_both": "Les deux",
     "taste_neutral": "Neutre",
     "try_adjusting_filters": "Essayez d'ajuster votre recherche ou vos filtres pour voir plus de résultats.",
-    "check_back_later": "Revenez plus tard pour de nouvelles offres !"
+    "check_back_later": "Revenez plus tard pour de nouvelles offres !",
+    "no_rating": "Nouveau"
   },
   "contact": {
     "title": "Contactez-nous",
@@ -701,7 +702,39 @@
     "hide_qr": "Masquer le Code QR",
     "show_qr": "Afficher le Code QR",
     "cancelling": "Annulation...",
-    "cancel_order": "Annuler la Commande"
+    "cancel_order": "Annuler la Commande",
+    "rate_experience": "Évaluer l'Expérience",
+    "rated": "Merci pour votre évaluation !"
+  },
+  "rating": {
+    "title": "Évaluez Votre Expérience",
+    "description": "Comment s'est passée votre expérience avec ce fournisseur alimentaire ?",
+    "description_with_name": "Comment s'est passée votre expérience avec {name} ?",
+    "select_rating": "Veuillez sélectionner une note",
+    "login_required": "Veuillez vous connecter pour soumettre une évaluation",
+    "submitted_success": "Merci pour votre évaluation !",
+    "submit_failed": "Échec de l'envoi de l'évaluation. Veuillez réessayer.",
+    "excellent": "Excellent ! ⭐⭐⭐⭐⭐",
+    "very_good": "Très Bien ! ⭐⭐⭐⭐",
+    "good": "Bien ! ⭐⭐⭐",
+    "fair": "Moyen ⭐⭐",
+    "poor": "Médiocre ⭐",
+    "quick_feedback": "Qu'avez-vous aimé ? (Optionnel)",
+    "comment_label": "Commentaires supplémentaires (Optionnel)",
+    "comment_placeholder": "Partagez votre expérience... (ex. qualité de la nourriture, service, emballage)",
+    "characters": "caractères",
+    "skip": "Passer",
+    "submit": "Soumettre l'Évaluation",
+    "submitting": "Envoi...",
+    "tag": {
+      "great_value": "Excellent Rapport Qualité-Prix",
+      "fresh_food": "Nourriture Fraîche",
+      "friendly_staff": "Personnel Amical",
+      "good_quantity": "Bonne Quantité",
+      "excellent_quality": "Excellente Qualité",
+      "fast_pickup": "Ramassage Rapide",
+      "well_packaged": "Bien Emballé"
+    }
   },
   "custom_card": {
     "fill_all_fields": "Veuillez remplir tous les champs",

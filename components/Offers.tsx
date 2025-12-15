@@ -48,6 +48,8 @@ interface Offer {
     longitude?: number | null;
   };
   user?: { username: string }; // Legacy field
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
@@ -139,9 +141,45 @@ const OffersPage = () => {
 
         const data = await response.json();
 
+        // Fetch ratings for all providers in parallel
+        const providerIds = [...new Set(data.map((o: any) => o.ownerId).filter(Boolean))];
+        const ratingPromises = providerIds.map(async (providerId: number) => {
+          try {
+            const ratingResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/ratings/provider/${providerId}/average`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            if (ratingResponse.ok) {
+              const ratingData = await ratingResponse.json();
+              return { providerId, ...ratingData };
+            }
+          } catch (err) {
+            // Silently fail - ratings are optional
+            console.warn(`Failed to fetch rating for provider ${providerId}:`, err);
+          }
+          return { providerId, averageRating: 0, totalRatings: 0 };
+        });
+
+        const ratingsMap = new Map<number, { averageRating: number; totalRatings: number }>();
+        const ratingsResults = await Promise.allSettled(ratingPromises);
+        ratingsResults.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            ratingsMap.set(result.value.providerId, {
+              averageRating: result.value.averageRating || 0,
+              totalRatings: result.value.totalRatings || 0,
+            });
+          }
+        });
+
         // normalize images array - preserve URLs from different backends, only normalize relative paths
         const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
         const mappedOffers: Offer[] = data.map((o: any) => {
+          const rating = o.ownerId ? ratingsMap.get(o.ownerId) : null;
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
             if (!img) return img;
             
@@ -228,7 +266,12 @@ const OffersPage = () => {
             return img;
           }) : [];
 
-          return { ...o, images };
+          return { 
+            ...o, 
+            images,
+            averageRating: rating?.averageRating,
+            totalRatings: rating?.totalRatings,
+          };
         });
 
         setOffers(mappedOffers);
@@ -803,6 +846,8 @@ const OffersPage = () => {
                 mapsLink: offer.owner.mapsLink,
                 profileImage: offer.owner.profileImage,
               } : undefined}
+              averageRating={offer.averageRating}
+              totalRatings={offer.totalRatings}
             />
           );
         })}

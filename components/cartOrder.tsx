@@ -22,8 +22,10 @@ import {
   CheckCircle2,
   XCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Star
 } from "lucide-react";
+import RatingDialog from "./RatingDialog";
 
 interface CartOrderProps {
   order: {
@@ -73,7 +75,36 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_IMAGE]);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showDetails, setShowDetails] = useState(false); // For confirmed/cancelled orders
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
   const { t } = useLanguage();
+
+  // Check if order has been rated
+  useEffect(() => {
+    const checkRating = async () => {
+      if (order.status !== "confirmed" || !order.collectedAt) return;
+      
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+
+      try {
+        const ratingRes = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/ratings/order/${order.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (ratingRes.data) {
+          setHasRated(true);
+        }
+      } catch (err: any) {
+        // Rating doesn't exist yet or endpoint doesn't exist - that's okay
+        if (err?.response?.status !== 404) {
+          console.error("Failed to check rating:", err);
+        }
+      }
+    };
+
+    checkRating();
+  }, [order.id, order.status, order.collectedAt]);
 
   useEffect(() => {
     const run = async () => {
@@ -483,6 +514,26 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           </div>
         )}
 
+        {/* Rate Experience Section - Always visible for confirmed orders with pickup */}
+        {order.status === "confirmed" && order.collectedAt && (
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+            {!hasRated ? (
+              <button
+                onClick={() => setShowRatingDialog(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
+              >
+                <Star className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 fill-current" />
+                <span>{t("cart_order.rate_experience") || "Rate Your Experience"}</span>
+              </button>
+            ) : (
+              <div className="w-full flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3.5 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 rounded-xl font-semibold text-sm sm:text-base">
+                <Star className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 fill-current" />
+                <span>{t("cart_order.rated") || "Thank you for your rating!"}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* QR Code Section (Collapsible) */}
         {order.status === "pending" && order.qrCodeToken && showQRCode && (
           <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
@@ -494,6 +545,24 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
           </div>
         )}
       </div>
+
+      {/* Rating Dialog */}
+      {offer && offer.owner && (
+        <RatingDialog
+          open={showRatingDialog}
+          onOpenChange={setShowRatingDialog}
+          orderId={order.id}
+          providerId={offer.owner.id}
+          providerName={offer.owner.username}
+          onRatingSubmitted={() => {
+            setHasRated(true);
+            // Optionally refresh the page or update order data
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }}
+        />
+      )}
     </div>
   );
 };

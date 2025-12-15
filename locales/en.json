@@ -363,7 +363,8 @@
     "taste_both": "Both",
     "taste_neutral": "Neutral",
     "try_adjusting_filters": "Try adjusting your search or filters to see more results.",
-    "check_back_later": "Check back later for new offers!"
+    "check_back_later": "Check back later for new offers!",
+    "no_rating": "New"
   },
   "contact": {
     "title": "Contact Us",
@@ -706,7 +707,39 @@
     "hide_qr": "Hide QR Code",
     "show_qr": "Show QR Code",
     "cancelling": "Cancelling...",
-    "cancel_order": "Cancel Order"
+    "cancel_order": "Cancel Order",
+    "rate_experience": "Rate Experience",
+    "rated": "Thank you for your rating!"
+  },
+  "rating": {
+    "title": "Rate Your Experience",
+    "description": "How was your experience with this food provider?",
+    "description_with_name": "How was your experience with {name}?",
+    "select_rating": "Please select a rating",
+    "login_required": "Please log in to submit a rating",
+    "submitted_success": "Thank you for your rating!",
+    "submit_failed": "Failed to submit rating. Please try again.",
+    "excellent": "Excellent! ⭐⭐⭐⭐⭐",
+    "very_good": "Very Good! ⭐⭐⭐⭐",
+    "good": "Good! ⭐⭐⭐",
+    "fair": "Fair ⭐⭐",
+    "poor": "Poor ⭐",
+    "quick_feedback": "What did you like? (Optional)",
+    "comment_label": "Additional comments (Optional)",
+    "comment_placeholder": "Share your experience... (e.g., food quality, service, packaging)",
+    "characters": "characters",
+    "skip": "Skip",
+    "submit": "Submit Rating",
+    "submitting": "Submitting...",
+    "tag": {
+      "great_value": "Great Value",
+      "fresh_food": "Fresh Food",
+      "friendly_staff": "Friendly Staff",
+      "good_quantity": "Good Quantity",
+      "excellent_quality": "Excellent Quality",
+      "fast_pickup": "Fast Pickup",
+      "well_packaged": "Well Packaged"
+    }
   },
   "custom_card": {
     "fill_all_fields": "Please fill out all fields",
