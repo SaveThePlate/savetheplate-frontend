@@ -1,0 +1,101 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 2rem;
+  margin: 2rem;
+  border-radius: 2rem;
+  box-shadow: 0 4px 12px rgba(182, 31, 31, 0.1);
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  -webkit-text-stroke: 0.5px #000000;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 2px 3px rgb(201, 201, 201);
+  color: #ffbe98;
+  text-shadow: '4px 4px 6px rgba(0, 0, 0, 0.15)';
+  font-family: Arial, Helvetica, sans-serif;
+
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4a5568; 
+  margin-bottom: 2rem;
+}
+
+.roleSelection {
+  font-weight: bold;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.roleBox {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #edf2f7;
+  border-radius: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.3s;
+  font-size: 1rem;
+  color: #2d3748;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20%;
+}
+
+.roleBox:hover {
+  background-color: #065844d3;
+  transform: scale(1.05);
+}
+
+.selected {
+  background-color: #06584370; 
+  color: white;
+  transform: scale(1.05);
+}
+
+.confirmation {
+  margin-top: 2rem;
+}
+
+.submitButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #f0b000d3; 
+  color: rgb(0, 0, 0);
+  font-weight: bold;
+  border: 1px solid #000000;
+  border-radius: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s, transform 0.3s;
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: #f0b000d3; 
+  transform: scale(1.05);
+}
+
+.submitButton:disabled {
+  background-color: #fffc5ed3; 
+  cursor: not-allowed;
+}
+
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom , #98cca8, #98cca8);
+}
