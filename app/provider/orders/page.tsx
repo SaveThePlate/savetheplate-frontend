@@ -24,6 +24,7 @@ import {
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { formatDateTimeRange, isDateToday } from "@/components/offerCard/utils";
 // WEBSOCKET INTEGRATION TEMPORARILY DISABLED
 // import { useWebSocket } from "@/hooks/useWebSocket";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -66,6 +67,9 @@ interface Offer {
     original?: { url?: string };
   }[];
   pickupLocation?: string;
+  expirationDate?: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
 }
 
 interface Order {
@@ -311,7 +315,7 @@ const ProviderOrdersContent = () => {
               {t("provider.orders_title")}
             </h1>
             <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
-              Manage and track all orders for your offers
+              {t("provider.orders_subtitle")}
             </p>
           </div>
             <div className="flex items-center gap-2 sm:gap-3">
@@ -332,7 +336,7 @@ const ProviderOrdersContent = () => {
               >
                 <QrCode size={20} />
                 <span className="hidden sm:inline">{t("provider.scan_qr_code")}</span>
-                <span className="sm:hidden">Scan</span>
+                <span className="sm:hidden">{t("provider.scan_mobile")}</span>
               </Button>
             </div>
         </div>
@@ -401,7 +405,7 @@ const ProviderOrdersContent = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
-              placeholder="Search by order ID, customer name, phone, or offer..."
+              placeholder={t("provider.search_placeholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-6 sm:py-7 text-base border-2 border-gray-200 focus:border-emerald-500 rounded-xl shadow-sm"
@@ -443,7 +447,7 @@ const ProviderOrdersContent = () => {
                 {t("provider.no_orders")}
               </h3>
               <p className="text-gray-600">
-                Orders will appear here once customers place orders for your offers
+                {t("provider.no_orders_message")}
               </p>
             </CardContent>
           </Card>
@@ -454,25 +458,25 @@ const ProviderOrdersContent = () => {
                 value="all" 
                 className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
               >
-                All ({safeOrders.length})
+                {t("provider.tab_all")} ({safeOrders.length})
               </TabsTrigger>
               <TabsTrigger 
                 value="pending" 
                 className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
               >
-                Pending ({pending.length})
+                {t("provider.tab_pending")} ({pending.length})
               </TabsTrigger>
               <TabsTrigger 
                 value="confirmed" 
                 className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
               >
-                Confirmed ({confirmed.length})
+                {t("provider.tab_confirmed")} ({confirmed.length})
               </TabsTrigger>
               <TabsTrigger 
                 value="cancelled" 
                 className="data-[state=active]:bg-red-500 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
               >
-                Cancelled ({cancelled.length})
+                {t("provider.tab_cancelled")} ({cancelled.length})
               </TabsTrigger>
             </TabsList>
 
@@ -482,14 +486,18 @@ const ProviderOrdersContent = () => {
                   <CardContent className="p-12 sm:p-16 text-center">
                     <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {searchQuery ? "No orders found" : `No ${activeTab === "all" ? "" : activeTab} orders`}
+                      {searchQuery 
+                        ? t("provider.no_orders_found")
+                        : activeTab === "all"
+                          ? t("provider.no_orders_found")
+                          : t("provider.no_orders_for_status", { status: t(`provider.status.${activeTab}`).toLowerCase() })}
                     </h3>
                     <p className="text-gray-600">
                       {searchQuery 
-                        ? "Try adjusting your search criteria"
+                        ? t("provider.try_adjusting_search")
                         : activeTab === "all" 
-                          ? "No orders match your filters"
-                          : `You don't have any ${activeTab} orders at the moment`}
+                          ? t("provider.no_orders_match_filters")
+                          : t("provider.no_orders_for_status_message", { status: t(`provider.status.${activeTab}`).toLowerCase() })}
                     </p>
                     {searchQuery && (
                       <Button
@@ -497,7 +505,7 @@ const ProviderOrdersContent = () => {
                         variant="outline"
                         className="mt-4"
                       >
-                        Clear Search
+                        {t("provider.clear_search")}
                       </Button>
                     )}
                   </CardContent>
@@ -548,6 +556,12 @@ const OrderCard: React.FC<{
   const offer = order.offer;
   const user = order.user;
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Format pickup deadline
+  const pickupDeadline = offer?.expirationDate 
+    ? formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate)
+    : null;
+  const isPickupToday = offer?.expirationDate ? isDateToday(offer.expirationDate) : false;
 
   // Parse and get the first image from the offer, handling various formats
   const getOfferImageSrc = React.useCallback(() => {
@@ -711,7 +725,7 @@ const OrderCard: React.FC<{
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 truncate">
-                    {offer?.title || "Offer"}
+                    {offer?.title || t("provider.offer_fallback")}
                   </h3>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge 
@@ -721,9 +735,6 @@ const OrderCard: React.FC<{
                       <StatusIcon size={14} />
                       <span className="font-semibold">{status.label}</span>
                     </Badge>
-                    <span className="text-xs sm:text-sm text-gray-500">
-                      Order #{order.id}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -759,16 +770,18 @@ const OrderCard: React.FC<{
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 text-sm sm:text-base text-gray-600">
+                <div className="flex items-center gap-4 text-sm sm:text-base text-gray-600 flex-wrap">
                   <div className="flex items-center gap-2">
                     <Package size={16} className="text-gray-400" />
                     <span>
-                      <span className="font-semibold text-gray-900">{order.quantity}</span> {order.quantity === 1 ? 'item' : 'items'}
+                      <span className="font-semibold text-gray-900">{order.quantity}</span> {order.quantity === 1 ? t("provider.item") : t("provider.items")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-gray-400" />
-                    <span className="text-xs sm:text-sm">{formatDate(order.createdAt)}</span>
+                    <span className="text-xs sm:text-sm">
+                      <span className="font-medium">{t("provider.ordered_on")}</span> {formatDate(order.createdAt)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -776,19 +789,30 @@ const OrderCard: React.FC<{
               {/* Expandable Details */}
               {isExpanded && (
                 <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-600">
+                  <div>
+                    <span className="font-medium text-gray-700">{t("provider.order_number")}</span>
+                    <span className="ml-1">{order.id}</span>
+                  </div>
+                  {pickupDeadline && (
+                    <div>
+                      <span className="font-medium text-gray-700">{t("provider.pickup_deadline_label")} </span>
+                      <span>
+                        {isPickupToday ? t("common.today") : pickupDeadline.date}
+                        {pickupDeadline.time && (pickupDeadline.time.includes(" - ") 
+                          ? ` ${t("common.between")} ${pickupDeadline.time}` 
+                          : ` ${t("common.at")} ${pickupDeadline.time}`)}
+                      </span>
+                    </div>
+                  )}
                   {offer?.pickupLocation && (
                     <div className="flex items-start gap-2">
                       <MapPin size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="font-medium text-gray-700">Pickup Location: </span>
+                        <span className="font-medium text-gray-700">{t("provider.pickup_location_label")} </span>
                         <span>{offer.pickupLocation}</span>
                       </div>
                     </div>
                   )}
-                  <div>
-                    <span className="font-medium text-gray-700">Order Date: </span>
-                    <span>{new Date(order.createdAt).toLocaleString()}</span>
-                  </div>
                 </div>
               )}
 
@@ -801,12 +825,12 @@ const OrderCard: React.FC<{
                   {isExpanded ? (
                     <>
                       <ChevronUp size={16} />
-                      <span>Show Less</span>
+                      <span>{t("provider.show_less")}</span>
                     </>
                   ) : (
                     <>
                       <ChevronDown size={16} />
-                      <span>Show Details</span>
+                      <span>{t("provider.show_details")}</span>
                     </>
                   )}
                 </button>
@@ -819,7 +843,7 @@ const OrderCard: React.FC<{
                   >
                     <QrCode size={16} />
                     <span className="hidden sm:inline">{t("provider.scan_qr")}</span>
-                    <span className="sm:hidden">Scan</span>
+                    <span className="sm:hidden">{t("provider.scan_mobile")}</span>
                   </Button>
                 )}
               </div>

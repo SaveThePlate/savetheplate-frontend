@@ -96,7 +96,12 @@
     "sign_in_email": "Se connecter avec l'email",
     "sending": "Envoi...",
     "footer_new": "Vérifiez votre boîte de réception pour compléter votre inscription 💌",
-    "footer_back": "Nous avons envoyé votre lien magique — vérifiez votre email ✉️"
+    "footer_back": "Nous avons envoyé votre lien magique — vérifiez votre email ✉️",
+    "error_sending_link": "Une erreur s'est produite lors de l'envoi du lien magique. Veuillez réessayer.",
+    "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
+    "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",
+    "email_placeholder": "nom@exemple.com",
+    "checking_auth": "Vérification de l'authentification..."
   },
   "home": {
     "pending_orders_single": "Vous avez {count} commande en attente.",
@@ -146,15 +151,12 @@
       "taste_sweet": "🍰 Sucré",
       "taste_salty": "🧂 Salé",
       "taste_both": "🍬 Les Deux",
-      "taste_neutral": "⚪ Neutre",
-      "error_auth": "Votre session a expiré. Veuillez vous reconnecter.",
-      "error_server": "Erreur du serveur. Veuillez réessayer dans un instant."
+      "taste_neutral": "⚪ Neutre"
     },
     "fetch_failed": "Échec du chargement des commandes du fournisseur",
-    "orders_title": "Vos Commandes",
-    "orders_subtitle": "Gérez et suivez toutes les commandes pour vos offres",
+    "orders_title": "Commandes pour vos offres",
     "loading_orders": "Chargement des commandes...",
-    "no_orders": "Aucune commande pour le moment.",
+    "no_orders": "Aucune commande pour vos offres pour le moment.",
     "total_orders": "Total des commandes",
     "pending_orders": "Commandes en attente",
     "confirmed_orders": "Commandes confirmées",
@@ -169,33 +171,41 @@
     "ordered_on": "Commandé le :",
     "at_time": "à",
     "order_confirmed_toast": "Commande #{orderId} confirmée !",
+    "error_auth": "Votre session a expiré. Veuillez vous reconnecter.",
+    "network_error": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
+    "error_scanning": "Une erreur s'est produite lors du scan du code QR",
+    "orders": {
+      "manage_track": "Gérez et suivez toutes les commandes pour vos offres",
+      "search_placeholder": "Rechercher par ID de commande, nom du client, téléphone ou offre...",
+      "no_orders_found": "Aucune commande trouvée",
+      "no_orders_tab": "Aucune commande {tab}",
+      "try_adjusting_search": "Essayez d'ajuster vos critères de recherche",
+      "no_orders_match_filters": "Aucune commande ne correspond à vos filtres",
+      "no_orders_tab_moment": "Vous n'avez aucune commande {tab} pour le moment",
+      "clear_search": "Effacer la recherche",
+      "all": "Toutes",
+      "pending": "En attente",
+      "confirmed": "Confirmées",
+      "cancelled": "Annulées",
+      "order_number": "Commande #{orderId}",
+      "item": "article",
+      "items": "articles",
+      "today_at": "Aujourd'hui à {time}",
+      "yesterday_at": "Hier à {time}",
+      "pickup_location_label": "Lieu de Ramassage : ",
+      "order_date_label": "Date de Commande : ",
+      "show_less": "Afficher moins",
+      "show_details": "Afficher les détails",
+      "scan": "Scanner",
+      "offer_image": "Image de l'offre",
+      "loading": "Chargement...",
+      "orders_will_appear": "Les commandes apparaîtront ici une fois que les clients auront passé des commandes pour vos offres"
+    },
     "status": {
       "pending": "En attente",
       "confirmed": "Confirmée",
       "cancelled": "Annulée"
     },
-    "search_placeholder": "Rechercher par ID de commande, nom du client, téléphone ou offre...",
-    "tab_all": "Toutes",
-    "tab_pending": "En attente",
-    "tab_confirmed": "Confirmées",
-    "tab_cancelled": "Annulées",
-    "no_orders_message": "Les commandes apparaîtront ici une fois que les clients passeront des commandes pour vos offres",
-    "no_orders_found": "Aucune commande trouvée",
-    "no_orders_for_status": "Aucune commande {status}",
-    "try_adjusting_search": "Essayez d'ajuster vos critères de recherche",
-    "no_orders_match_filters": "Aucune commande ne correspond à vos filtres",
-    "no_orders_for_status_message": "Vous n'avez aucune commande {status} pour le moment",
-    "clear_search": "Effacer la recherche",
-    "scan_mobile": "Scanner",
-    "order_number": "Commande #",
-    "item": "article",
-    "items": "articles",
-    "pickup_location_label": "Lieu de ramassage :",
-    "pickup_deadline_label": "Date limite de ramassage :",
-    "order_date_label": "Date de commande :",
-    "show_less": "Afficher moins",
-    "show_details": "Afficher les détails",
-    "offer_fallback": "Offre",
     "profile": {
       "your_store": "Votre Magasin",
       "location": "Emplacement",
@@ -245,7 +255,13 @@
         "update_failed": "Échec de la mise à jour du profil",
         "fetch_data_failed": "Échec du chargement des données",
         "upload_image_failed": "Échec du téléchargement de l'image de profil"
-      }
+      },
+      "could_not_fetch_user": "Impossible de récupérer les informations utilisateur",
+      "could_not_determine_user_id": "Impossible de déterminer l'ID utilisateur",
+      "phone_number_placeholder": "Numéro de téléphone",
+      "unable_to_upload_image": "Impossible de télécharger l'image. Veuillez vérifier le fichier et réessayer.",
+      "store_logo": "Logo du magasin",
+      "loading_ellipsis": "..."
     }
   },
   "client": {
@@ -296,6 +312,9 @@
       "phone_number": "Numéro de téléphone",
       "fetch_failed": "Échec du chargement du profil ou des commandes"
     },
+    "home": {
+      "fetch_offers_failed": "Échec du chargement des offres. Veuillez réessayer plus tard."
+    },
     "orders": {
       "my_orders": "Mes Commandes",
       "track_orders": "Suivez et gérez vos commandes de sauvetage alimentaire",
@@ -337,8 +356,6 @@
     "pick_up": "Ramasser {date}{time}",
     "pickup_details": "Détails de Ramassage",
     "error_generic": "Une erreur s'est produite. Veuillez réessayer plus tard.",
-    "error_auth": "Votre session a expiré. Veuillez vous reconnecter.",
-    "error_fetch": "Impossible de charger les offres. Veuillez réessayer plus tard.",
     "search_placeholder": "Rechercher des offres...",
     "filter_all": "Toutes les Offres",
     "filter_available": "Disponibles",
@@ -507,8 +524,11 @@
     "taste_neutral": "⚪ Neutre",
     "taste_hint": "Quel est le profil de goût ?",
     "error_upload_files": "Erreur lors du téléchargement des fichiers",
+    "info_uploading": "Téléchargement des images avant l'envoi...",
     "success_created": "Offre créée avec succès ! 🎉",
+    "error_create_failed": "Échec de la création de l'offre",
     "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !",
+    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}",
     "compressing_images": "Compression des images pour un téléchargement plus rapide..."
   },
   "publish": {
@@ -778,6 +798,29 @@
     "location": "Emplacement",
     "failed_to_fetch_data": "Échec du chargement des données",
     "failed_to_upload_profile_image": "Échec du téléchargement de l'image de profil"
+  },
+  "toasts": {
+    "check_email": "Vérifiez votre email",
+    "login_link_sent": "Nous vous avons envoyé un lien de connexion. N'oubliez pas de vérifier vos spams également.",
+    "error": "Erreur",
+    "error_generic": "Une erreur s'est produite, veuillez réessayer."
+  },
+  "error_boundary": {
+    "title": "Une erreur s'est produite",
+    "message": "Nous sommes désolés, mais quelque chose d'inattendu s'est produit. Veuillez essayer de rafraîchir la page.",
+    "go_home": "Retour à l'accueil",
+    "error_details": "Détails de l'erreur (Développement uniquement)"
+  },
+  "footer": {
+    "app_name": "Save the plate",
+    "copyright": "© {year}"
+  },
+  "signin": {
+    "error_sending_link": "Une erreur s'est produite lors de l'envoi du lien magique. Veuillez réessayer.",
+    "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
+    "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",
+    "email_placeholder": "nom@exemple.com",
+    "checking_auth": "Vérification de l'authentification..."
   },
   "callback": {
     "verifying": "Vérification de votre lien magique...",

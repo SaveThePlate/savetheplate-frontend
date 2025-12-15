@@ -146,13 +146,10 @@
       "taste_sweet": "🍰 Sweet",
       "taste_salty": "🧂 Salty",
       "taste_both": "🍬 Both",
-      "taste_neutral": "⚪ Neutral",
-      "error_auth": "Your session has expired. Please sign in again.",
-      "error_server": "Server error. Please try again in a moment."
+      "taste_neutral": "⚪ Neutral"
     },
     "fetch_failed": "Failed to fetch provider orders",
     "orders_title": "Orders for your offers",
-    "orders_subtitle": "Manage and track all orders for your offers",
     "loading_orders": "Loading orders...",
     "no_orders": "No orders for your offers yet.",
     "total_orders": "Total orders",
@@ -169,33 +166,41 @@
     "ordered_on": "Ordered on:",
     "at_time": "at",
     "order_confirmed_toast": "Order #{orderId} confirmed!",
+    "error_auth": "Your session has expired. Please sign in again.",
+    "network_error": "Network error. Please check your connection and try again.",
+    "error_scanning": "An error occurred while scanning the QR code",
+    "orders": {
+      "manage_track": "Manage and track all orders for your offers",
+      "search_placeholder": "Search by order ID, customer name, phone, or offer...",
+      "no_orders_found": "No orders found",
+      "no_orders_tab": "No {tab} orders",
+      "try_adjusting_search": "Try adjusting your search criteria",
+      "no_orders_match_filters": "No orders match your filters",
+      "no_orders_tab_moment": "You don't have any {tab} orders at the moment",
+      "clear_search": "Clear Search",
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "order_number": "Order #{orderId}",
+      "item": "item",
+      "items": "items",
+      "today_at": "Today at {time}",
+      "yesterday_at": "Yesterday at {time}",
+      "pickup_location_label": "Pickup Location: ",
+      "order_date_label": "Order Date: ",
+      "show_less": "Show Less",
+      "show_details": "Show Details",
+      "scan": "Scan",
+      "offer_image": "Offer image",
+      "loading": "Loading...",
+      "orders_will_appear": "Orders will appear here once customers place orders for your offers"
+    },
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled"
     },
-    "search_placeholder": "Search by order ID, customer name, phone, or offer...",
-    "tab_all": "All",
-    "tab_pending": "Pending",
-    "tab_confirmed": "Confirmed",
-    "tab_cancelled": "Cancelled",
-    "no_orders_message": "Orders will appear here once customers place orders for your offers",
-    "no_orders_found": "No orders found",
-    "no_orders_for_status": "No {status} orders",
-    "try_adjusting_search": "Try adjusting your search criteria",
-    "no_orders_match_filters": "No orders match your filters",
-    "no_orders_for_status_message": "You don't have any {status} orders at the moment",
-    "clear_search": "Clear Search",
-    "scan_mobile": "Scan",
-    "order_number": "Order #",
-    "item": "item",
-    "items": "items",
-    "pickup_location_label": "Pickup Location:",
-    "pickup_deadline_label": "Pickup Deadline:",
-    "order_date_label": "Order Date:",
-    "show_less": "Show Less",
-    "show_details": "Show Details",
-    "offer_fallback": "Offer",
     "profile": {
       "your_store": "Your Store",
       "location": "Location",
@@ -243,9 +248,15 @@
         "click_to_upload": "Click to upload",
         "profile_updated": "Profile updated successfully!",
         "update_failed": "Failed to update profile",
-      "fetch_data_failed": "Failed to fetch data",
-      "upload_image_failed": "Failed to upload profile image"
-      }
+        "fetch_data_failed": "Failed to fetch data",
+        "upload_image_failed": "Failed to upload profile image"
+      },
+      "could_not_fetch_user": "Could not fetch user information",
+      "could_not_determine_user_id": "Could not determine user ID",
+      "phone_number_placeholder": "Phone number",
+      "unable_to_upload_image": "Unable to upload image. Please check the file and try again.",
+      "store_logo": "Store Logo",
+      "loading_ellipsis": "..."
     }
   },
   "client": {
@@ -337,8 +348,6 @@
     "pick_up": "Pick up {date}{time}",
     "pickup_details": "Pickup Details",
     "error_generic": "Something went wrong. Please try again later.",
-    "error_auth": "Your session has expired. Please sign in again.",
-    "error_fetch": "Unable to load offers. Please try again later.",
     "search_placeholder": "Search offers...",
     "filter_all": "All Offers",
     "filter_available": "Available",
@@ -507,8 +516,11 @@
     "taste_neutral": "⚪ Neutral",
     "taste_hint": "What's the taste profile?",
     "error_upload_files": "Error uploading files",
+    "info_uploading": "Uploading images before submitting...",
     "success_created": "Offer created successfully! 🎉",
+    "error_create_failed": "Failed to create offer",
     "images_uploaded_success": "{count} image(s) uploaded successfully!",
+    "images_uploaded": "✓ {count} image{plural} uploaded",
     "compressing_images": "Compressing images for faster upload..."
   },
   "publish": {
@@ -783,6 +795,29 @@
     "location": "Location",
     "failed_to_fetch_data": "Failed to fetch data",
     "failed_to_upload_profile_image": "Failed to upload profile image"
+  },
+  "toasts": {
+    "check_email": "Check your email",
+    "login_link_sent": "We sent you a login link. Be sure to check your spam too.",
+    "error": "Error",
+    "error_generic": "There was an error, please try again."
+  },
+  "error_boundary": {
+    "title": "Something went wrong",
+    "message": "We're sorry, but something unexpected happened. Please try refreshing the page.",
+    "go_home": "Go to Home",
+    "error_details": "Error Details (Development Only)"
+  },
+  "footer": {
+    "app_name": "Save the plate",
+    "copyright": "© {year}"
+  },
+  "signin": {
+    "error_sending_link": "There was an error sending the magic link. Please try again.",
+    "server_unavailable": "Server is temporarily unavailable. Please try again in a few moments.",
+    "connection_error": "Unable to connect to the server. Please check your connection and try again.",
+    "email_placeholder": "name@example.com",
+    "checking_auth": "Checking authentication..."
   },
   "tour": {
     "back": "Back",

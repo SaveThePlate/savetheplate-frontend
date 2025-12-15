@@ -140,6 +140,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
               </span>
             )}
           </div>
+
         </div>
         <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mt-auto pt-2 border-t border-gray-100">
           <span className="font-medium text-base">🕐</span>
@@ -331,3 +332,4 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
 // Memoize component to prevent unnecessary re-renders
 export const ClientOfferCard = memo(ClientOfferCardComponent);
+
