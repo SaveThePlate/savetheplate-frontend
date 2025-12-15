@@ -6,7 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProviderOfferCard } from "@/components/offerCard";
 import { useRouter } from "next/navigation";
-import { PlusCircle, Filter, Search, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react";
+import { PlusCircle, Filter, Search, TrendingUp, Clock, CheckCircle, XCircle, SlidersHorizontal, ChevronDown, X } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 // WEBSOCKET INTEGRATION TEMPORARILY DISABLED
@@ -70,6 +70,7 @@ const ProviderHome = () => {
   const [sort, setSort] = useState<SortType>("newest");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilterType>("all");
   const [tasteFilter, setTasteFilter] = useState<TasteFilterType>("all");
+  const [showFilters, setShowFilters] = useState(false);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -595,76 +596,132 @@ const ProviderHome = () => {
           </div>
         )}
 
-        {/* Search and Filter Section */}
+        {/* Search Bar - White (Too Good To Go style) */}
         {!loading && offers.length > 0 && (
-          <div className="space-y-3">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder={t("provider.home.search_placeholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
-              />
-            </div>
-            
-            {/* Filters Row */}
-            <div className="flex flex-wrap gap-3">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+            <input
+              type="text"
+              placeholder={t("provider.home.search_placeholder") || "Search offers..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-14 py-3.5 sm:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm sm:text-base shadow-md transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Filters Section - Collapsible */}
+        {!loading && offers.length > 0 && showFilters && (
+          <div className="space-y-4 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+            {/* Filters Section */}
+            <div className="space-y-3">
               {/* Status Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-gray-400" />
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as FilterType)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
-                >
-                  <option value="all">{t("provider.home.filter_all")}</option>
-                  <option value="active">{t("provider.home.filter_active")}</option>
-                  <option value="expired">{t("provider.home.filter_expired")}</option>
-                  <option value="low_stock">{t("provider.home.filter_low_stock")}</option>
-                </select>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 min-w-[100px]">
+                  <Filter className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("provider.home.status_label") || "Status"}:</span>
+                </div>
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {[
+                    { value: "all", label: t("provider.home.filter_all") || "All" },
+                    { value: "active", label: t("provider.home.filter_active") || "Active" },
+                    { value: "expired", label: t("provider.home.filter_expired") || "Expired" },
+                    { value: "low_stock", label: t("provider.home.filter_low_stock") || "Low Stock" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setFilter(option.value as FilterType)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        filter === option.value
+                          ? "bg-emerald-600 text-white shadow-md scale-105"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Category Filter */}
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterType)}
-                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
-              >
-                <option value="all">{t("provider.home.category_all")}</option>
-                <option value="snack">{t("provider.home.category_snack")}</option>
-                <option value="meal">{t("provider.home.category_meal")}</option>
-                <option value="beverage">{t("provider.home.category_beverage")}</option>
-                <option value="other">{t("provider.home.category_other")}</option>
-              </select>
+              {/* Category and Taste Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Category Filter */}
+                <div className="relative">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    {t("provider.home.category") || "Category"}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterType)}
+                      className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
+                    >
+                      <option value="all">{t("provider.home.category_all") || "All Categories"}</option>
+                      <option value="snack">🍪 {t("provider.home.category_snack") || "Snack"}</option>
+                      <option value="meal">🍽️ {t("provider.home.category_meal") || "Meal"}</option>
+                      <option value="beverage">🥤 {t("provider.home.category_beverage") || "Beverage"}</option>
+                      <option value="other">📦 {t("provider.home.category_other") || "Other"}</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
 
-              {/* Taste Filter */}
-              <select
-                value={tasteFilter}
-                onChange={(e) => setTasteFilter(e.target.value as TasteFilterType)}
-                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
-              >
-                <option value="all">{t("provider.home.taste_all")}</option>
-                <option value="sweet">{t("provider.home.taste_sweet")}</option>
-                <option value="salty">{t("provider.home.taste_salty")}</option>
-                <option value="both">{t("provider.home.taste_both")}</option>
-                <option value="neutral">{t("provider.home.taste_neutral")}</option>
-              </select>
+                {/* Taste Filter */}
+                <div className="relative">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    {t("provider.home.taste") || "Taste"}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={tasteFilter}
+                      onChange={(e) => setTasteFilter(e.target.value as TasteFilterType)}
+                      className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
+                    >
+                      <option value="all">{t("provider.home.taste_all") || "All Tastes"}</option>
+                      <option value="sweet">🍰 {t("provider.home.taste_sweet") || "Sweet"}</option>
+                      <option value="salty">🧂 {t("provider.home.taste_salty") || "Salty"}</option>
+                      <option value="both">🍬 {t("provider.home.taste_both") || "Both"}</option>
+                      <option value="neutral">⚪ {t("provider.home.taste_neutral") || "Neutral"}</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
 
-              {/* Sort */}
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortType)}
-                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white"
-              >
-                <option value="newest">{t("provider.home.sort_newest")}</option>
-                <option value="oldest">{t("provider.home.sort_oldest")}</option>
-                <option value="price_low">{t("provider.home.sort_price_low")}</option>
-                <option value="price_high">{t("provider.home.sort_price_high")}</option>
-                <option value="quantity_low">{t("provider.home.sort_quantity_low")}</option>
-              </select>
+                {/* Sort Filter */}
+                <div className="relative">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    {t("provider.home.sort_by") || "Sort by"}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={sort}
+                      onChange={(e) => setSort(e.target.value as SortType)}
+                      className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
+                    >
+                      <option value="newest">{t("provider.home.sort_newest") || "Newest First"}</option>
+                      <option value="oldest">{t("provider.home.sort_oldest") || "Oldest First"}</option>
+                      <option value="price_low">{t("provider.home.sort_price_low") || "Price: Low to High"}</option>
+                      <option value="price_high">{t("provider.home.sort_price_high") || "Price: High to Low"}</option>
+                      <option value="quantity_low">{t("provider.home.sort_quantity_low") || "Quantity: Low to High"}</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

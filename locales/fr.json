@@ -133,6 +133,10 @@
       "no_results": "Aucune offre ne correspond à vos critères de recherche. Essayez d'ajuster vos filtres.",
       "empty_state_title": "Vous n'avez pas encore d'offres publiées. Commencez par en créer une !",
       "empty_state_description": "Commencez par créer votre première offre pour atteindre plus de clients !",
+      "status_label": "Statut",
+      "category": "Catégorie",
+      "taste": "Goût",
+      "sort_by": "Trier par",
       "status": {
         "active": "Active",
         "low_stock": "Stock Faible"
