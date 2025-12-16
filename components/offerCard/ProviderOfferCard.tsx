@@ -701,6 +701,14 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm">dt</span>
                       </div>
+                      {localData.price && !isNaN(parseFloat(localData.price as any)) && parseFloat(localData.price as any) > 0 && (
+                        <p className="text-xs text-blue-600 mt-1 bg-blue-50 p-2 rounded border border-blue-200">
+                          {t("offer_card.commission_notice", { 
+                            price: parseFloat(localData.price as any).toFixed(2), 
+                            finalPrice: (parseFloat(localData.price as any) + 1).toFixed(2) 
+                          })}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">

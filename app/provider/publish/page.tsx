@@ -16,6 +16,8 @@ const SelectOfferTypePage = () => {
       router.push("/signIn");
       return;
     }
+    // Redirect directly to addOffer page
+    router.push("/provider/addOffer");
   }, [router]);
 
   return (
@@ -54,17 +56,18 @@ const SelectOfferTypePage = () => {
             {t("publish.custom_offer")}
           </button>
 
-          <button
+          {/* Panier Anti-Gaspi temporairement désactivé */}
+          {/* <button
             className="w-full flex items-center justify-center gap-3 font-semibold py-4 rounded-2xl bg-[#EAF7ED] text-[#1B4332] border-2 border-emerald-200 shadow-sm hover:bg-[#d5f2e0] hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
             onClick={() => router.push("/provider/createMagicBox")}
           >
             <Gift className="w-5 h-5" />
             {t("publish.quick_rescue")}
-          </button>
+          </button> */}
         </div>
 
-        {/* Rescue Pack Info Section */}
-        <section className="mt-10 w-full bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 shadow-sm">
+        {/* Rescue Pack Info Section - temporairement désactivé */}
+        {/* <section className="mt-10 w-full bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
               <Gift className="w-5 h-5 text-amber-700" />
@@ -78,7 +81,7 @@ const SelectOfferTypePage = () => {
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-gray-400">

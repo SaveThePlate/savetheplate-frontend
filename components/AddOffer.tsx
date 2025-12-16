@@ -18,6 +18,7 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImages, shouldCompress } from "@/utils/imageCompression";
+import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 
 type UploadedImage = {
   filename: string;
@@ -35,6 +36,9 @@ type Taste = "sweet" | "salty" | "both" | "neutral";
 
 const AddOffer: React.FC = () => {
   const { t } = useLanguage();
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
+  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -72,6 +76,78 @@ const AddOffer: React.FC = () => {
       setUploadedImages([]);
     }
   }, [localFiles, uploadedImages.length]);
+
+  // Quick time presets
+  const applyTimePreset = (preset: string) => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const formatTime = (hours: number, minutes: number = 0) => 
+      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+    switch (preset) {
+      case 'today-afternoon':
+        setPickupDate(formatDate(today));
+        setPickupStartTime(formatTime(14, 0)); // 2:00 PM
+        setPickupEndTime(formatTime(18, 0)); // 6:00 PM
+        break;
+      case 'today-evening':
+        setPickupDate(formatDate(today));
+        setPickupStartTime(formatTime(17, 0)); // 5:00 PM
+        setPickupEndTime(formatTime(20, 0)); // 8:00 PM
+        break;
+      case 'tomorrow-morning':
+        setPickupDate(formatDate(tomorrow));
+        setPickupStartTime(formatTime(10, 0)); // 10:00 AM
+        setPickupEndTime(formatTime(14, 0)); // 2:00 PM
+        break;
+      case 'tomorrow-afternoon':
+        setPickupDate(formatDate(tomorrow));
+        setPickupStartTime(formatTime(14, 0)); // 2:00 PM
+        setPickupEndTime(formatTime(18, 0)); // 6:00 PM
+        break;
+    }
+  };
+
+  // Step validation
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1: // Basic Info
+        return title.trim().length > 0;
+      case 2: // Pricing
+        const priceToFloat = parseFloat(price);
+        const quantityToFloat = parseFloat(quantity);
+        return !isNaN(priceToFloat) && priceToFloat > 0 && 
+               !isNaN(quantityToFloat) && quantityToFloat > 0;
+      case 3: // Availability
+        if (!pickupDate || !pickupStartTime || !pickupEndTime) return false;
+        const startDateTime = new Date(`${pickupDate}T${pickupStartTime}`);
+        const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
+        return startDateTime < endDateTime && endDateTime > new Date();
+      case 4: // Categories (always valid, optional fields)
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const canProceedToNextStep = (): boolean => {
+    return validateStep(currentStep);
+  };
+
+  const handleNext = () => {
+    if (canProceedToNextStep() && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
   // ✅ Upload files
   async function uploadFiles(files: File[]): Promise<UploadedImage[]> {
@@ -356,136 +432,375 @@ const AddOffer: React.FC = () => {
         progressClassName="bg-white/80"
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-semibold text-gray-700 mb-2"
-          >
-            {t("add_offer.offer_title")} <span className="text-red-500">*</span>
-          </label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={t("add_offer.title_placeholder")}
-            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-            required
-            maxLength={100}
-          />
-          <p className="text-xs text-gray-500 mt-1">{t("add_offer.title_hint")}</p>
+      {/* Progress Indicator */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          {[1, 2, 3, 4].map((step) => (
+            <React.Fragment key={step}>
+              <div className="flex items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                    step < currentStep
+                      ? "bg-emerald-600 text-white"
+                      : step === currentStep
+                      ? "bg-emerald-500 text-white ring-4 ring-emerald-200"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
+                  {step < currentStep ? <Check className="w-5 h-5" /> : step}
+                </div>
+                {step < totalSteps && (
+                  <div
+                    className={`h-1 w-12 sm:w-16 mx-2 transition-all ${
+                      step < currentStep ? "bg-emerald-600" : "bg-gray-200"
+                    }`}
+                  />
+                )}
+              </div>
+            </React.Fragment>
+          ))}
         </div>
-
-        {/* Description */}
-        <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-semibold text-gray-700 mb-2"
-          >
-            {t("add_offer.description")} <span className="text-gray-400 font-normal text-xs">({t("common.optional") || "Optional"})</span>
-          </label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t("add_offer.description_placeholder")}
-            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[120px] resize-none"
-            maxLength={500}
-          />
+        <div className="text-center">
+          <p className="text-sm font-medium text-gray-700">
+            {currentStep === 1 && t("add_offer.step_basic_info")}
+            {currentStep === 2 && t("add_offer.step_pricing")}
+            {currentStep === 3 && t("add_offer.step_availability")}
+            {currentStep === 4 && t("add_offer.step_categories")}
+          </p>
           <p className="text-xs text-gray-500 mt-1">
-            {t("add_offer.description_hint", { count: description.length })}
+            {t("add_offer.step_progress", { current: currentStep, total: totalSteps })}
           </p>
         </div>
+      </div>
 
-        {/* Price and Quantity Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Original Price (Optional) */}
-          <div>
-            <label
-              htmlFor="originalPrice"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              {t("add_offer.original_price")} <span className="text-gray-400 font-normal text-xs">{t("add_offer.original_price_optional")}</span>
-            </label>
-            <div className="relative">
-              <Input
-                id="originalPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                value={originalPrice}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*\.?\d*$/.test(value)) setOriginalPrice(value);
-                }}
-                placeholder={t("add_offer.original_price_placeholder")}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Step 1: Basic Info */}
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-emerald-800">
+                💡 {t("add_offer.step1_tip")}
+              </p>
             </div>
-            <p className="text-xs text-gray-500 mt-1">{t("add_offer.original_price_hint")}</p>
-          </div>
 
-          {/* Current Price */}
-          <div>
-            <label
-              htmlFor="price"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              {t("add_offer.your_price")} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
+            {/* Title */}
+            <div>
+              <label
+                htmlFor="title"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                {t("add_offer.offer_title")} <span className="text-red-500">*</span>
+              </label>
               <Input
-                id="price"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={t("add_offer.title_placeholder")}
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-lg"
+                required
+                maxLength={100}
+                autoFocus
+              />
+              <p className="text-xs text-gray-500 mt-1">{t("add_offer.title_hint")}</p>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label
+                htmlFor="description"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                {t("add_offer.description")} <span className="text-gray-400 font-normal text-xs">({t("common.optional") || "Optional"})</span>
+              </label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("add_offer.description_placeholder")}
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[120px] resize-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {description.length > 0 && `${description.length} characters`}
+                {description.length === 0 && t("add_offer.description_hint_no_limit")}
+              </p>
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {t("add_offer.photos")} <span className="text-gray-400 font-normal">{t("add_offer.photos_optional")}</span>
+              </label>
+              <FileUploader
+                value={localFiles || []}
+                onValueChange={handleImageUpload}
+                dropzoneOptions={dropzone}
+              >
+                <FileInput>
+                  <div className={`flex flex-col items-center justify-center h-40 w-full border-2 border-dashed rounded-xl transition-colors ${
+                    uploading 
+                      ? "border-yellow-300 bg-yellow-50 cursor-wait" 
+                      : "border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                  }`}>
+                    {uploading ? (
+                      <>
+                        <div className="animate-spin text-4xl mb-2">⏳</div>
+                        <p className="text-gray-600 font-medium">{t("add_offer.uploading_images")}</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-4xl mb-2">📸</div>
+                        <p className="text-gray-600 font-medium">{t("add_offer.click_upload")}</p>
+                        <p className="text-xs text-gray-400 mt-1">{t("add_offer.upload_hint")}</p>
+                      </>
+                    )}
+                  </div>
+                </FileInput>
+
+                <FileUploaderContent className="flex items-center flex-row gap-3 mt-3 flex-wrap">
+                  {localFiles && localFiles.length > 0 && localFiles.map((file, i) => {
+                    const uploadedImage = uploadedImages.length > 0 && uploadedImages[i];
+                    const isUploaded = !!uploadedImage;
+                    
+                    let imageSrc: string;
+                    if (isUploaded && uploadedImage) {
+                      imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
+                      
+                      if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                        imageSrc = `${backendUrl}/storage/${imageSrc}`;
+                      } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                        imageSrc = `${backendUrl}${imageSrc}`;
+                      }
+                      
+                      if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
+                        imageSrc += `?t=${Date.now()}`;
+                      }
+                    } else {
+                      imageSrc = URL.createObjectURL(file) || DEFAULT_BAG_IMAGE;
+                    }
+                    
+                    return (
+                      <FileUploaderItem
+                        key={`preview-${i}`}
+                        index={i}
+                        className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
+                          isUploaded ? "border-emerald-600" : "border-yellow-400"
+                        }`}
+                        aria-roledescription={`File ${i + 1} containing ${file.name}`}
+                      >
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Image
+                            src={imageSrc || DEFAULT_BAG_IMAGE}
+                            alt={file.name}
+                            width={96}
+                            height={96}
+                            className="w-full h-full object-cover rounded-xl"
+                            unoptimized={true}
+                          />
+                        </div>
+                        <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                          isUploaded 
+                            ? "bg-emerald-600" 
+                            : uploading 
+                            ? "bg-yellow-500" 
+                            : "bg-yellow-400"
+                        }`}>
+                          {isUploaded ? "✓" : uploading ? "⏳" : "📤"}
+                        </div>
+                      </FileUploaderItem>
+                    );
+                  })}
+                </FileUploaderContent>
+              </FileUploader>
+              <div className="mt-2 flex items-center gap-2 text-xs">
+                {uploadedImages.length > 0 && (
+                  <span className="text-emerald-600 font-medium">
+                    {t("add_offer.images_uploaded", { count: uploadedImages.length, plural: uploadedImages.length > 1 ? "s" : "" })}
+                  </span>
+                )}
+                {localFiles && localFiles.length > uploadedImages.length && (
+                  <span className="text-yellow-600 font-medium">
+                    {t("add_offer.pending_upload", { count: localFiles.length - uploadedImages.length })}
+                  </span>
+                )}
+                {uploadedImages.length === 0 && localFiles?.length === 0 && (
+                  <span className="text-gray-500">{t("add_offer.photos_tip")}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Pricing */}
+        {currentStep === 2 && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-blue-800">
+                💰 {t("add_offer.step2_tip")}
+              </p>
+            </div>
+
+            {/* Current Price */}
+            <div>
+              <label
+                htmlFor="price"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                {t("add_offer.your_price")} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Input
+                  id="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*\.?\d*$/.test(value)) setPrice(value);
+                  }}
+                  placeholder={t("add_offer.price_placeholder")}
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12 text-lg"
+                  required
+                  autoFocus
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+              </div>
+              {price && !isNaN(parseFloat(price)) && parseFloat(price) > 0 && (
+                <p className="text-xs text-blue-600 mt-1 bg-blue-50 p-2 rounded border border-blue-200">
+                  {t("add_offer.commission_notice", { 
+                    price: parseFloat(price).toFixed(2), 
+                    finalPrice: (parseFloat(price) + 1).toFixed(2) 
+                  })}
+                </p>
+              )}
+            </div>
+
+            {/* Original Price (Optional) */}
+            <div>
+              <label
+                htmlFor="originalPrice"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                {t("add_offer.original_price")} <span className="text-gray-400 font-normal text-xs">{t("add_offer.original_price_optional")}</span>
+              </label>
+              <div className="relative">
+                <Input
+                  id="originalPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={originalPrice}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*\.?\d*$/.test(value)) setOriginalPrice(value);
+                  }}
+                  placeholder={t("add_offer.original_price_placeholder")}
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+              </div>
+              {originalPrice && parseFloat(originalPrice) > parseFloat(price || "0") && (
+                <p className="text-xs text-emerald-600 font-semibold mt-1">
+                  {t("add_offer.save_percentage", { percentage: ((1 - parseFloat(price || "0") / parseFloat(originalPrice)) * 100).toFixed(0) })}
+                </p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">{t("add_offer.original_price_hint")}</p>
+            </div>
+
+            {/* Quantity */}
+            <div>
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                {t("add_offer.available_quantity")} <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="quantity"
                 type="number"
-                min="0"
-                step="0.01"
-                value={price}
+                min="1"
+                value={quantity}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (/^\d*\.?\d*$/.test(value)) setPrice(value);
+                  if (/^\d*$/.test(value)) setQuantity(value);
                 }}
-                placeholder={t("add_offer.price_placeholder")}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
+                placeholder={t("add_offer.quantity_placeholder")}
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-lg"
                 required
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+              <p className="text-xs text-gray-500 mt-1">{t("add_offer.quantity_hint")}</p>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {originalPrice && parseFloat(originalPrice) > parseFloat(price || "0") && (
-                <span className="text-emerald-600 font-semibold">
-                  {t("add_offer.save_percentage", { percentage: ((1 - parseFloat(price || "0") / parseFloat(originalPrice)) * 100).toFixed(0) })}
-                </span>
-              )}
-              {(!originalPrice || parseFloat(originalPrice) <= parseFloat(price || "0")) && t("add_offer.price_hint")}
-            </p>
           </div>
-        </div>
+        )}
 
-        {/* Quantity */}
-        <div>
-          <label
-            htmlFor="quantity"
-            className="block text-sm font-semibold text-gray-700 mb-2"
-          >
-            {t("add_offer.available_quantity")} <span className="text-red-500">*</span>
-          </label>
-          <Input
-            id="quantity"
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^\d*$/.test(value)) setQuantity(value);
-            }}
-            placeholder={t("add_offer.quantity_placeholder")}
-            className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-            required
-          />
-          <p className="text-xs text-gray-500 mt-1">{t("add_offer.quantity_hint")}</p>
-        </div>
+        {/* Step 3: Availability */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-amber-800">
+                ⏰ {t("add_offer.step3_tip")}
+              </p>
+            </div>
+
+            {/* Pickup Location Info */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="text-emerald-600 text-lg">📍</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-emerald-900 mb-1">
+                    {t("add_offer.pickup_location")}
+                  </h3>
+                  <p className="text-xs text-emerald-700">
+                    {t("add_offer.pickup_location_hint")}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Time Presets */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {t("add_offer.quick_presets")} <span className="text-gray-400 font-normal text-xs">({t("common.optional") || "Optional"})</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => applyTimePreset('today-afternoon')}
+                  className="text-xs py-2 h-auto"
+                >
+                  {t("add_offer.preset_today_afternoon")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => applyTimePreset('today-evening')}
+                  className="text-xs py-2 h-auto"
+                >
+                  {t("add_offer.preset_today_evening")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => applyTimePreset('tomorrow-morning')}
+                  className="text-xs py-2 h-auto"
+                >
+                  {t("add_offer.preset_tomorrow_morning")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => applyTimePreset('tomorrow-afternoon')}
+                  className="text-xs py-2 h-auto"
+                >
+                  {t("add_offer.preset_tomorrow_afternoon")}
+                </Button>
+              </div>
+            </div>
 
         {/* Pickup Location Info */}
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
@@ -504,236 +819,164 @@ const AddOffer: React.FC = () => {
           </div>
         </div>
 
-        {/* Pickup Date and Time Range */}
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="pickupDate"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
-            </label>
-            <Input
-              id="pickupDate"
-              type="date"
-              value={pickupDate}
-              onChange={(e) => setPickupDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-              className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">{t("add_offer.pickup_date_hint")}</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="pickupStartTime"
-                className="block text-sm font-semibold text-gray-700 mb-2"
-              >
-                {t("add_offer.start_time")} <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="pickupStartTime"
-                type="time"
-                value={pickupStartTime}
-                onChange={(e) => setPickupStartTime(e.target.value)}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">{t("add_offer.start_time_hint")}</p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="pickupEndTime"
-                className="block text-sm font-semibold text-gray-700 mb-2"
-              >
-                {t("add_offer.end_time")} <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="pickupEndTime"
-                type="time"
-                value={pickupEndTime}
-                onChange={(e) => setPickupEndTime(e.target.value)}
-                min={pickupStartTime || undefined}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">{t("add_offer.end_time_hint")}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Category Fields */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Food Type */}
-          <div>
-            <label
-              htmlFor="foodType"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              {t("add_offer.food_type_label")}
-            </label>
-            <select
-              id="foodType"
-              value={foodType}
-              onChange={(e) => setFoodType(e.target.value as FoodType)}
-              className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
-            >
-              <option value="snack">{t("add_offer.food_type_snack")}</option>
-              <option value="meal">{t("add_offer.food_type_meal")}</option>
-              <option value="beverage">{t("add_offer.food_type_beverage")}</option>
-              <option value="other">{t("add_offer.food_type_other")}</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">{t("add_offer.food_type_hint")}</p>
-          </div>
-
-          {/* Taste */}
-          <div>
-            <label
-              htmlFor="taste"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              {t("add_offer.taste_label")}
-            </label>
-            <select
-              id="taste"
-              value={taste}
-              onChange={(e) => setTaste(e.target.value as Taste)}
-              className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
-            >
-              <option value="sweet">{t("add_offer.taste_sweet")}</option>
-              <option value="salty">{t("add_offer.taste_salty")}</option>
-              <option value="both">{t("add_offer.taste_both")}</option>
-              <option value="neutral">{t("add_offer.taste_neutral")}</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">{t("add_offer.taste_hint")}</p>
-          </div>
-        </div>
-
-        {/* Image Upload */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            {t("add_offer.photos")} <span className="text-gray-400 font-normal">{t("add_offer.photos_optional")}</span>
-          </label>
-          <FileUploader
-            value={localFiles || []}
-            onValueChange={handleImageUpload}
-            dropzoneOptions={dropzone}
-          >
-            <FileInput>
-              <div className={`flex flex-col items-center justify-center h-40 w-full border-2 border-dashed rounded-xl transition-colors ${
-                uploading 
-                  ? "border-yellow-300 bg-yellow-50 cursor-wait" 
-                  : "border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-pointer"
-              }`}>
-                {uploading ? (
-                  <>
-                    <div className="animate-spin text-4xl mb-2">⏳</div>
-                    <p className="text-gray-600 font-medium">{t("add_offer.uploading_images")}</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-4xl mb-2">📸</div>
-                    <p className="text-gray-600 font-medium">{t("add_offer.click_upload")}</p>
-                    <p className="text-xs text-gray-400 mt-1">{t("add_offer.upload_hint")}</p>
-                  </>
-                )}
+            {/* Pickup Date and Time Range */}
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="pickupDate"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="pickupDate"
+                  type="date"
+                  value={pickupDate}
+                  onChange={(e) => setPickupDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-lg"
+                  required
+                  autoFocus
+                />
+                <p className="text-xs text-gray-500 mt-1">{t("add_offer.pickup_date_hint")}</p>
               </div>
-            </FileInput>
 
-            <FileUploaderContent className="flex items-center flex-row gap-3 mt-3 flex-wrap">
-              {/* Show preview - prefer uploaded version, fallback to local file */}
-              {localFiles && localFiles.length > 0 && localFiles.map((file, i) => {
-                // Check if this file has been uploaded
-                const uploadedImage = uploadedImages.length > 0 && uploadedImages[i];
-                const isUploaded = !!uploadedImage;
-                
-                // Determine image source - prioritize uploaded image URL
-                let imageSrc: string;
-                if (isUploaded && uploadedImage) {
-                  // Use the uploaded image URL
-                  imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
-                  
-                  // If we have a relative URL, construct absolute URL
-                  if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-                    imageSrc = `${backendUrl}/storage/${imageSrc}`;
-                  } else if (imageSrc && imageSrc.startsWith("/storage/")) {
-                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-                    imageSrc = `${backendUrl}${imageSrc}`;
-                  }
-                  
-                  // Add cache buster to ensure fresh image
-                  if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
-                    imageSrc += `?t=${Date.now()}`;
-                  }
-                  
-                  console.log("Using uploaded image URL:", imageSrc); // Debug log
-                } else {
-                  // Use local file preview
-                  imageSrc = URL.createObjectURL(file) || DEFAULT_BAG_IMAGE;
-                }
-                
-                return (
-                  <FileUploaderItem
-                    key={`preview-${i}`}
-                    index={i}
-                    className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
-                      isUploaded ? "border-emerald-600" : "border-yellow-400"
-                    }`}
-                    aria-roledescription={`File ${i + 1} containing ${file.name}`}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="pickupStartTime"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Image
-                        src={imageSrc || DEFAULT_BAG_IMAGE}
-                        alt={file.name}
-                        width={96}
-                        height={96}
-                        className="w-full h-full object-cover rounded-xl"
-                        unoptimized={true}
-                      />
-                    </div>
-                    <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
-                      isUploaded 
-                        ? "bg-emerald-600" 
-                        : uploading 
-                        ? "bg-yellow-500" 
-                        : "bg-yellow-400"
-                    }`}>
-                      {isUploaded ? "✓" : uploading ? "⏳" : "📤"}
-                    </div>
-                  </FileUploaderItem>
-                );
-              })}
-            </FileUploaderContent>
-          </FileUploader>
-          <div className="mt-2 flex items-center gap-2 text-xs">
-            {uploadedImages.length > 0 && (
-              <span className="text-emerald-600 font-medium">
-                {t("add_offer.images_uploaded", { count: uploadedImages.length, plural: uploadedImages.length > 1 ? "s" : "" })}
-              </span>
-            )}
-            {localFiles && localFiles.length > uploadedImages.length && (
-              <span className="text-yellow-600 font-medium">
-                {t("add_offer.pending_upload", { count: localFiles.length - uploadedImages.length })}
-              </span>
-            )}
-            {uploadedImages.length === 0 && localFiles?.length === 0 && (
-              <span className="text-gray-500">{t("add_offer.photos_tip")}</span>
-            )}
-          </div>
-        </div>
+                    {t("add_offer.start_time")} <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="pickupStartTime"
+                    type="time"
+                    value={pickupStartTime}
+                    onChange={(e) => setPickupStartTime(e.target.value)}
+                    className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">{t("add_offer.start_time_hint")}</p>
+                </div>
 
-        {/* Submit */}
-        <Button
-          type="submit"
-          disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.01] mt-2"
-        >
-          {t("add_offer.create_button")}
-        </Button>
+                <div>
+                  <label
+                    htmlFor="pickupEndTime"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    {t("add_offer.end_time")} <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="pickupEndTime"
+                    type="time"
+                    value={pickupEndTime}
+                    onChange={(e) => setPickupEndTime(e.target.value)}
+                    min={pickupStartTime || undefined}
+                    className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">{t("add_offer.end_time_hint")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Categories */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
+              <p className="text-sm text-purple-800">
+                🏷️ {t("add_offer.step4_tip")}
+              </p>
+            </div>
+
+            {/* Category Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Food Type */}
+              <div>
+                <label
+                  htmlFor="foodType"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  {t("add_offer.food_type_label")}
+                </label>
+                <select
+                  id="foodType"
+                  value={foodType}
+                  onChange={(e) => setFoodType(e.target.value as FoodType)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
+                  autoFocus
+                >
+                  <option value="snack">{t("add_offer.food_type_snack")}</option>
+                  <option value="meal">{t("add_offer.food_type_meal")}</option>
+                  <option value="beverage">{t("add_offer.food_type_beverage")}</option>
+                  <option value="other">{t("add_offer.food_type_other")}</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">{t("add_offer.food_type_hint")}</p>
+              </div>
+
+              {/* Taste */}
+              <div>
+                <label
+                  htmlFor="taste"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  {t("add_offer.taste_label")}
+                </label>
+                <select
+                  id="taste"
+                  value={taste}
+                  onChange={(e) => setTaste(e.target.value as Taste)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
+                >
+                  <option value="sweet">{t("add_offer.taste_sweet")}</option>
+                  <option value="salty">{t("add_offer.taste_salty")}</option>
+                  <option value="both">{t("add_offer.taste_both")}</option>
+                  <option value="neutral">{t("add_offer.taste_neutral")}</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">{t("add_offer.taste_hint")}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex gap-3 pt-6 border-t border-gray-200">
+          {currentStep > 1 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrevious}
+              className="flex-1 flex items-center justify-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              {t("add_offer.previous")}
+            </Button>
+          )}
+          
+          {currentStep < totalSteps ? (
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={!canProceedToNextStep()}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold flex items-center justify-center gap-2"
+            >
+              {t("add_offer.next")}
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-2"
+            >
+              <Check className="w-4 h-4" />
+              {t("add_offer.create_button")}
+            </Button>
+          )}
+        </div>
       </form>
     </div>
   );

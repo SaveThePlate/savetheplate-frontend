@@ -44,7 +44,8 @@
     "at": "à",
     "open_in_maps": "Ouvrir dans Maps",
     "view_on_maps": "Voir sur Maps →",
-    "free": "Gratuit"
+    "free": "Gratuit",
+    "optional": "Optionnel"
   },
   "landing": {
     "get_started": "Commencer",
@@ -467,6 +468,7 @@
     "description": "Description",
     "description_placeholder": "Décrivez ce qui est inclus dans cette offre. Soyez précis sur les articles, quantités et détails spéciaux...",
     "description_hint": "{count}/500 caractères. Minimum 10 caractères requis.",
+    "description_hint_no_limit": "Ajoutez une description détaillée pour aider les clients à mieux comprendre votre offre.",
     "original_price": "Prix Original (TND)",
     "original_price_optional": "(Optionnel)",
     "original_price_placeholder": "0.00",
@@ -527,6 +529,25 @@
     "success_created": "Offre créée avec succès ! 🎉",
     "error_create_failed": "Échec de la création de l'offre",
     "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !",
+    "step_basic_info": "Informations de Base",
+    "step_pricing": "Prix et Quantité",
+    "step_availability": "Disponibilité de Ramassage",
+    "step_categories": "Catégories",
+    "step_progress": "Étape {current} sur {total}",
+    "step1_tip": "Commencez par un titre clair et ajoutez des photos pour faire ressortir votre offre !",
+    "step2_tip": "Fixez des prix compétitifs pour attirer les clients. N'oubliez pas d'ajouter la quantité !",
+    "step3_tip": "Choisissez quand les clients peuvent récupérer. Utilisez les presets rapides ou définissez des heures personnalisées.",
+    "step4_tip": "Aidez les clients à trouver votre offre en sélectionnant les bonnes catégories.",
+    "quick_presets": "Presets d'Heure Rapides",
+    "preset_today_afternoon": "Aujourd'hui 14h-18h",
+    "preset_today_evening": "Aujourd'hui 17h-20h",
+    "preset_tomorrow_morning": "Demain 10h-14h",
+    "preset_tomorrow_afternoon": "Demain 14h-18h",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}",
+    "compressing_images": "Compression des images pour un téléchargement plus rapide..."
+    "previous": "Précédent",
     "images_uploaded": "✓ {count} image{plural} téléchargée{plural}",
     "compressing_images": "Compression des images pour un téléchargement plus rapide..."
   },
