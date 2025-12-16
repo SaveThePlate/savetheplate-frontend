@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProviderOfferCard } from "@/components/offerCard";
 import { useRouter } from "next/navigation";
-import { PlusCircle, Filter, Search, TrendingUp, Clock, CheckCircle, XCircle, SlidersHorizontal, ChevronDown, X } from "lucide-react";
+import { PlusCircle, Search, CheckCircle, XCircle, X, TrendingUp } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 // WEBSOCKET INTEGRATION TEMPORARILY DISABLED
@@ -54,10 +54,8 @@ interface Offer {
 
 const DEFAULT_PROFILE_IMAGE = "/defaultBag.png";
 
-type FilterType = "all" | "active" | "expired" | "low_stock";
-type SortType = "newest" | "oldest" | "price_low" | "price_high" | "quantity_low";
-type CategoryFilterType = "all" | FoodType;
-type TasteFilterType = "all" | Taste;
+type FilterType = "all" | "active" | "expired";
+type SortType = "newest" | "oldest";
 
 const ProviderHome = () => {
   const router = useRouter();
@@ -68,9 +66,6 @@ const ProviderHome = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filter, setFilter] = useState<FilterType>("all");
   const [sort, setSort] = useState<SortType>("newest");
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilterType>("all");
-  const [tasteFilter, setTasteFilter] = useState<TasteFilterType>("all");
-  const [showFilters, setShowFilters] = useState(false);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -454,16 +449,13 @@ const ProviderHome = () => {
 
   // Calculate stats
   const stats = useMemo(() => {
-    const now = Date.now();
     const active = offers.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0).length;
     const expired = offers.filter(o => isOfferExpired(o.expirationDate)).length;
-    const lowStock = offers.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0 && o.quantity <= 5).length;
     
     return {
       total: offers.length,
       active,
       expired,
-      lowStock,
     };
   }, [offers]);
 
@@ -486,41 +478,17 @@ const ProviderHome = () => {
       result = result.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0);
     } else if (filter === "expired") {
       result = result.filter(o => isOfferExpired(o.expirationDate));
-    } else if (filter === "low_stock") {
-      result = result.filter(o => !isOfferExpired(o.expirationDate) && o.quantity > 0 && o.quantity <= 5);
-    }
-
-    // Apply category filter
-    if (categoryFilter !== "all") {
-      result = result.filter(o => o.foodType === categoryFilter);
-    }
-
-    // Apply taste filter
-    if (tasteFilter !== "all") {
-      result = result.filter(o => o.taste === tasteFilter || o.taste === "both");
     }
 
     // Apply sorting
-    switch (sort) {
-      case "newest":
-        result.sort((a, b) => new Date(b.expirationDate).getTime() - new Date(a.expirationDate).getTime());
-        break;
-      case "oldest":
-        result.sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
-        break;
-      case "price_low":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price_high":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "quantity_low":
-        result.sort((a, b) => a.quantity - b.quantity);
-        break;
+    if (sort === "newest") {
+      result.sort((a, b) => new Date(b.expirationDate).getTime() - new Date(a.expirationDate).getTime());
+    } else {
+      result.sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
     }
 
     return result;
-  }, [offers, searchQuery, filter, sort, categoryFilter, tasteFilter]);
+  }, [offers, searchQuery, filter, sort]);
 
   return (
     <main className="flex flex-col items-center w-full">
@@ -562,166 +530,90 @@ const ProviderHome = () => {
           </button>
         </div>
 
-        {/* Stats Section */}
+        {/* Stats Section - Clickable Filters */}
         {!loading && offers.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
-                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.total")}</span>
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.active")}</span>
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.active}</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-2 mb-1">
-                <XCircle className="w-4 h-4 text-red-600" />
-                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.expired")}</span>
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-red-600">{stats.expired}</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="w-4 h-4 text-amber-600" />
-                <span className="text-xs sm:text-sm text-gray-600 font-medium">{t("provider.home.stats.low_stock")}</span>
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-amber-600">{stats.lowStock}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Search Bar - White (Too Good To Go style) */}
-        {!loading && offers.length > 0 && (
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-            <input
-              type="text"
-              placeholder={t("provider.home.search_placeholder") || "Search offers..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-14 py-3.5 sm:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm sm:text-base shadow-md transition-all"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+              onClick={() => setFilter("all")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                filter === "all" ? "ring-2 ring-emerald-500 scale-[1.02]" : ""
+              }`}
             >
-              <SlidersHorizontal className="w-5 h-5" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.home.stats.total")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</p>
+                </div>
+                <div className={`p-2 sm:p-3 rounded-lg ${filter === "all" ? "bg-emerald-100" : "bg-gray-100"}`}>
+                  <TrendingUp className={`w-5 h-5 sm:w-6 sm:h-6 ${filter === "all" ? "text-emerald-700" : "text-gray-600"}`} />
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setFilter("active")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                filter === "active" ? "ring-2 ring-emerald-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.home.stats.active")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-emerald-700">{stats.active}</p>
+                </div>
+                <div className={`p-2 sm:p-3 rounded-lg ${filter === "active" ? "bg-emerald-200" : "bg-emerald-100"}`}>
+                  <CheckCircle className={`w-5 h-5 sm:w-6 sm:h-6 ${filter === "active" ? "text-emerald-800" : "text-emerald-700"}`} />
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setFilter("expired")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                filter === "expired" ? "ring-2 ring-red-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.home.stats.expired")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-red-700">{stats.expired}</p>
+                </div>
+                <div className={`p-2 sm:p-3 rounded-lg ${filter === "expired" ? "bg-red-200" : "bg-red-100"}`}>
+                  <XCircle className={`w-5 h-5 sm:w-6 sm:h-6 ${filter === "expired" ? "text-red-800" : "text-red-700"}`} />
+                </div>
+              </div>
             </button>
           </div>
         )}
 
-        {/* Filters Section - Collapsible */}
-        {!loading && offers.length > 0 && showFilters && (
-          <div className="space-y-4 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-            {/* Filters Section */}
-            <div className="space-y-3">
-              {/* Status Filter */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 min-w-[100px]">
-                  <Filter className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t("provider.home.status_label") || "Status"}:</span>
-                </div>
-                <div className="flex flex-wrap gap-2 flex-1">
-                  {[
-                    { value: "all", label: t("provider.home.filter_all") || "All" },
-                    { value: "active", label: t("provider.home.filter_active") || "Active" },
-                    { value: "expired", label: t("provider.home.filter_expired") || "Expired" },
-                    { value: "low_stock", label: t("provider.home.filter_low_stock") || "Low Stock" },
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setFilter(option.value as FilterType)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        filter === option.value
-                          ? "bg-emerald-600 text-white shadow-md scale-105"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
-                      }`}
-                    >
-                      <span>{option.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category and Taste Filters */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {/* Category Filter */}
-                <div className="relative">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    {t("provider.home.category") || "Category"}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value as CategoryFilterType)}
-                      className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
-                    >
-                      <option value="all">{t("provider.home.category_all") || "All Categories"}</option>
-                      <option value="snack">🍪 {t("provider.home.category_snack") || "Snack"}</option>
-                      <option value="meal">🍽️ {t("provider.home.category_meal") || "Meal"}</option>
-                      <option value="beverage">🥤 {t("provider.home.category_beverage") || "Beverage"}</option>
-                      <option value="other">📦 {t("provider.home.category_other") || "Other"}</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Taste Filter */}
-                <div className="relative">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    {t("provider.home.taste") || "Taste"}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={tasteFilter}
-                      onChange={(e) => setTasteFilter(e.target.value as TasteFilterType)}
-                      className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
-                    >
-                      <option value="all">{t("provider.home.taste_all") || "All Tastes"}</option>
-                      <option value="sweet">🍰 {t("provider.home.taste_sweet") || "Sweet"}</option>
-                      <option value="salty">🧂 {t("provider.home.taste_salty") || "Salty"}</option>
-                      <option value="both">🍬 {t("provider.home.taste_both") || "Both"}</option>
-                      <option value="neutral">⚪ {t("provider.home.taste_neutral") || "Neutral"}</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Sort Filter */}
-                <div className="relative">
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    {t("provider.home.sort_by") || "Sort by"}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={sort}
-                      onChange={(e) => setSort(e.target.value as SortType)}
-                      className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
-                    >
-                      <option value="newest">{t("provider.home.sort_newest") || "Newest First"}</option>
-                      <option value="oldest">{t("provider.home.sort_oldest") || "Oldest First"}</option>
-                      <option value="price_low">{t("provider.home.sort_price_low") || "Price: Low to High"}</option>
-                      <option value="price_high">{t("provider.home.sort_price_high") || "Price: High to Low"}</option>
-                      <option value="quantity_low">{t("provider.home.sort_quantity_low") || "Quantity: Low to High"}</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
+        {/* Search and Filters */}
+        {!loading && offers.length > 0 && (
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder={t("provider.home.search_placeholder") || "Search offers..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3.5 sm:py-4 bg-white border-2 border-gray-200 focus:border-emerald-500 rounded-xl shadow-sm text-sm sm:text-base outline-none transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortType)}
+                className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-sm font-medium shadow-sm hover:border-gray-300 transition-colors"
+              >
+                <option value="newest">{t("provider.home.sort_newest") || "Newest First"}</option>
+                <option value="oldest">{t("provider.home.sort_oldest") || "Oldest First"}</option>
+              </select>
             </div>
           </div>
         )}
@@ -730,22 +622,22 @@ const ProviderHome = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
-            <p className="text-gray-600 text-lg">{t("provider.home.loading_offers")}</p>
+            <p className="text-gray-600">{t("provider.home.loading_offers")}</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-            <p className="text-red-600 font-medium">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-600">{error}</p>
           </div>
         ) : offers.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="bg-white rounded-xl border-0 shadow-md p-12 sm:p-16 text-center">
             <div className="max-w-md mx-auto">
               <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <PlusCircle className="w-10 h-10 text-emerald-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {t("provider.home.empty_state_title")}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-6 text-sm sm:text-base">
                 {t("provider.home.empty_state_description")}
               </p>
               <button
@@ -758,13 +650,13 @@ const ProviderHome = () => {
             </div>
           </div>
         ) : filteredAndSortedOffers.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-            <p className="text-gray-600 text-lg">
+          <div className="bg-white rounded-xl border-0 shadow-md p-8 sm:p-12 text-center">
+            <p className="text-gray-600 text-base sm:text-lg">
               {t("provider.home.no_results")}
             </p>
           </div>
         ) : (
-          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 pb-6">
             {filteredAndSortedOffers.map((offer) => {
   // Handle images - might be array, JSON string, or undefined
   let imagesArray: any[] = [];
@@ -810,58 +702,29 @@ const ProviderHome = () => {
         ownerId={offer.ownerId}
         onDelete={handleDeleteOffer}
         onUpdate={async (id, data) => {
-          console.log("🔄 onUpdate called with id:", id, "data:", data);
-          console.log("🔄 data.images:", data?.images);
-          console.log("🔄 data.images is array?", Array.isArray(data?.images));
-          console.log("🔄 data.images type:", typeof data?.images);
-          
-          // Check if data is already the updated offer object (from PUT response)
           const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
           
-          // Normalize images array helper
           const normalizeImages = (images: any) => {
-            if (!Array.isArray(images)) {
-              console.log("⚠️ normalizeImages: not an array, returning empty");
-              return [];
-            }
+            if (!Array.isArray(images)) return [];
             return images.map((img: any) => {
               if (!img) return img;
-              
-              // Normalize absoluteUrl
-              if (typeof img.absoluteUrl === "string") {
-                if (/^https?:\/\//i.test(img.absoluteUrl)) {
-                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
-                  if (match && backendOrigin) {
-                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
-                  }
-                } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
-                  return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
-                }
+              if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
               }
-              
-              // Normalize url field
-              if (typeof img.url === "string" && /^https?:\/\//i.test(img.url)) {
-                const match = img.url.match(/\/(storage\/.+)$/);
-                if (match && backendOrigin) {
-                  return { ...img, url: `${backendOrigin}${match[1]}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${match[1]}` };
-                }
+              if (typeof img.url === "string" && img.url.startsWith("/storage/") && backendOrigin) {
+                return { ...img, url: `${backendOrigin}${img.url}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${img.url}` };
               }
-              
               return img;
             });
           };
           
-          // Handle images - they might be an array, JSON string, or undefined
           let imagesToUse: any[] = [];
-          
-          if (data && data.images) {
-            // Check if images is a JSON string (from backend)
+          if (data?.images) {
             if (typeof data.images === 'string') {
               try {
                 const parsed = JSON.parse(data.images);
                 imagesToUse = Array.isArray(parsed) ? parsed : [];
               } catch {
-                console.warn("Failed to parse images JSON string");
                 imagesToUse = [];
               }
             } else if (Array.isArray(data.images)) {
@@ -869,17 +732,13 @@ const ProviderHome = () => {
             }
           }
           
-          // If we have images, normalize and update
           if (imagesToUse.length > 0) {
-            console.log("✅ Using images from PUT response directly");
             const normalizedImages = normalizeImages(imagesToUse);
             setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data, images: normalizedImages } : o));
             return;
           }
           
-          console.log("⚠️ Images not found in response, refetching...");
-          
-          // Otherwise, refetch the updated offer to get the latest data including images
+          // Refetch if no images in response
           try {
             const token = localStorage.getItem("accessToken");
             if (!token) return;
@@ -890,7 +749,6 @@ const ProviderHome = () => {
             );
             
             const updatedOffer = response.data;
-            // Handle images from refetch - might be array or JSON string
             let refetchImages: any[] = [];
             if (updatedOffer.images) {
               if (typeof updatedOffer.images === 'string') {
@@ -906,12 +764,9 @@ const ProviderHome = () => {
             }
             
             const normalizedImages = normalizeImages(refetchImages);
-            
-            // Update the offer in state with normalized data
             setOffers(prev => prev.map(o => o.id === id ? { ...o, ...updatedOffer, images: normalizedImages } : o));
           } catch (err) {
             console.error("Failed to refetch updated offer:", err);
-            // Fallback to manual update if refetch fails
             setOffers(prev => prev.map(o => o.id === id ? { ...o, ...data } : o));
           }
         }}

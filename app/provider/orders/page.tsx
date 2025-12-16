@@ -27,7 +27,6 @@ import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { formatDateTimeRange, isDateToday } from "@/components/offerCard/utils";
 // WEBSOCKET INTEGRATION TEMPORARILY DISABLED
 // import { useWebSocket } from "@/hooks/useWebSocket";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -341,84 +340,98 @@ const ProviderOrdersContent = () => {
             </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Clickable Filters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.total_orders")}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{safeOrders.length}</p>
-                  </div>
-                  <div className="p-2 sm:p-3 bg-gray-100 rounded-lg">
-                    <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                  </div>
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                activeTab === "all" ? "ring-2 ring-emerald-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.total_orders")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{safeOrders.length}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className={`p-2 sm:p-3 rounded-lg ${activeTab === "all" ? "bg-emerald-100" : "bg-gray-100"}`}>
+                  <ShoppingBag className={`w-5 h-5 sm:w-6 sm:h-6 ${activeTab === "all" ? "text-emerald-700" : "text-gray-600"}`} />
+                </div>
+              </div>
+            </button>
 
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.pending_orders")}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-yellow-700">{pending.length}</p>
-                  </div>
-                  <div className="p-2 sm:p-3 bg-yellow-100 rounded-lg">
-                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-700" />
-                  </div>
+            <button
+              onClick={() => setActiveTab("pending")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                activeTab === "pending" ? "ring-2 ring-yellow-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.pending_orders")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-yellow-700">{pending.length}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className={`p-2 sm:p-3 rounded-lg ${activeTab === "pending" ? "bg-yellow-200" : "bg-yellow-100"}`}>
+                  <Clock className={`w-5 h-5 sm:w-6 sm:h-6 ${activeTab === "pending" ? "text-yellow-800" : "text-yellow-700"}`} />
+                </div>
+              </div>
+            </button>
 
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.confirmed_orders")}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-emerald-700">{confirmed.length}</p>
-                  </div>
-                  <div className="p-2 sm:p-3 bg-emerald-100 rounded-lg">
-                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
-                  </div>
+            <button
+              onClick={() => setActiveTab("confirmed")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                activeTab === "confirmed" ? "ring-2 ring-emerald-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.confirmed_orders")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-emerald-700">{confirmed.length}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className={`p-2 sm:p-3 rounded-lg ${activeTab === "confirmed" ? "bg-emerald-200" : "bg-emerald-100"}`}>
+                  <CheckCircle2 className={`w-5 h-5 sm:w-6 sm:h-6 ${activeTab === "confirmed" ? "text-emerald-800" : "text-emerald-700"}`} />
+                </div>
+              </div>
+            </button>
 
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.cancelled_orders")}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-red-700">{cancelled.length}</p>
-                  </div>
-                  <div className="p-2 sm:p-3 bg-red-100 rounded-lg">
-                    <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-700" />
-                  </div>
+            <button
+              onClick={() => setActiveTab("cancelled")}
+              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                activeTab === "cancelled" ? "ring-2 ring-red-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.cancelled_orders")}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-red-700">{cancelled.length}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className={`p-2 sm:p-3 rounded-lg ${activeTab === "cancelled" ? "bg-red-200" : "bg-red-100"}`}>
+                  <XCircle className={`w-5 h-5 sm:w-6 sm:h-6 ${activeTab === "cancelled" ? "text-red-800" : "text-red-700"}`} />
+                </div>
+              </div>
+            </button>
         </div>
 
         {/* Search Bar */}
-        <div className="relative mb-6">
+        {!loading && safeOrders.length > 0 && (
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
               placeholder={t("provider.search_placeholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-6 sm:py-7 text-base border-2 border-gray-200 focus:border-emerald-500 rounded-xl shadow-sm"
+              className="pl-10 pr-4 py-3.5 sm:py-4 text-sm sm:text-base border-2 border-gray-200 focus:border-emerald-500 rounded-xl shadow-sm outline-none transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <XCircle size={20} />
+                <XCircle size={18} />
               </button>
             )}
-        </div>
+          </div>
+        )}
 
         {/* Tabs and Orders */}
         {loading ? (
@@ -442,87 +455,62 @@ const ProviderOrdersContent = () => {
         ) : safeOrders.length === 0 ? (
           <Card className="border-0 shadow-md">
             <CardContent className="p-12 sm:p-16 text-center">
-              <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                 {t("provider.no_orders")}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 {t("provider.no_orders_message")}
               </p>
             </CardContent>
           </Card>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6 bg-white shadow-sm border border-gray-200 rounded-xl p-1 h-auto">
-              <TabsTrigger 
-                value="all" 
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
-              >
-                {t("provider.tab_all")} ({safeOrders.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="pending" 
-                className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
-              >
-                {t("provider.tab_pending")} ({pending.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="confirmed" 
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
-              >
-                {t("provider.tab_confirmed")} ({confirmed.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="cancelled" 
-                className="data-[state=active]:bg-red-500 data-[state=active]:text-white py-2.5 sm:py-3 text-sm sm:text-base"
-              >
-                {t("provider.tab_cancelled")} ({cancelled.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={activeTab} className="mt-0">
-              {filteredOrders.length === 0 ? (
-                <Card className="border-0 shadow-md">
-                  <CardContent className="p-12 sm:p-16 text-center">
-                    <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {searchQuery 
+          <div className="w-full">
+            {filteredOrders.length === 0 ? (
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-12 sm:p-16 text-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <AlertCircle className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                    {searchQuery 
+                      ? t("provider.no_orders_found")
+                      : activeTab === "all"
                         ? t("provider.no_orders_found")
-                        : activeTab === "all"
-                          ? t("provider.no_orders_found")
-                          : t("provider.no_orders_for_status", { status: t(`provider.status.${activeTab}`).toLowerCase() })}
-                    </h3>
-                    <p className="text-gray-600">
-                      {searchQuery 
-                        ? t("provider.try_adjusting_search")
-                        : activeTab === "all" 
-                          ? t("provider.no_orders_match_filters")
-                          : t("provider.no_orders_for_status_message", { status: t(`provider.status.${activeTab}`).toLowerCase() })}
-                    </p>
-                    {searchQuery && (
-                      <Button
-                        onClick={() => setSearchQuery("")}
-                        variant="outline"
-                        className="mt-4"
-                      >
-                        {t("provider.clear_search")}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {filteredOrders.map((order) => (
-                    <OrderCard 
-                      key={order.id} 
-                      order={order}
-                      onScanClick={() => setShowScanner(true)}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+                        : t("provider.no_orders_for_status", { status: t(`provider.status.${activeTab}`).toLowerCase() })}
+                  </h3>
+                  <p className="text-gray-600 text-sm sm:text-base mb-4">
+                    {searchQuery 
+                      ? t("provider.try_adjusting_search")
+                      : activeTab === "all" 
+                        ? t("provider.no_orders_match_filters")
+                        : t("provider.no_orders_for_status_message", { status: t(`provider.status.${activeTab}`).toLowerCase() })}
+                  </p>
+                  {searchQuery && (
+                    <Button
+                      onClick={() => setSearchQuery("")}
+                      variant="outline"
+                      className="mt-4"
+                    >
+                      {t("provider.clear_search")}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4 pb-6">
+                {filteredOrders.map((order) => (
+                  <OrderCard 
+                    key={order.id} 
+                    order={order}
+                    onScanClick={() => setShowScanner(true)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -678,7 +666,7 @@ const OrderCard: React.FC<{
   };
 
   return (
-    <Card className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
       <CardContent className="p-0">
         <div className="p-4 sm:p-6">
           <div className="flex items-start gap-4 sm:gap-6">
