@@ -3,37 +3,45 @@
 import { useEffect } from "react";
 import Script from "next/script";
 
-export default function FacebookSDK() {
-  useEffect(() => {
-    // This will run after the script loads
-    if (typeof window !== "undefined" && (window as any).FB) {
-      (window as any).FB.init({
-        appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "",
-        cookie: true,
-        xfbml: true,
-        version: "v18.0",
-      });
-    }
-  }, []);
+declare global {
+  interface Window {
+    fbAsyncInit?: () => void;
+    FB?: any;
+  }
+}
 
-  if (!process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) {
+export default function FacebookSDK() {
+  const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+
+  useEffect(() => {
+    if (!appId) {
+      return;
+    }
+
+    // Set up the Facebook SDK initialization function
+    // This follows the official Facebook SDK pattern
+    window.fbAsyncInit = function () {
+      if (window.FB) {
+        window.FB.init({
+          appId: appId,
+          xfbml: true,
+          version: "v24.0",
+        });
+      }
+    };
+  }, [appId]);
+
+  if (!appId) {
     return null;
   }
 
   return (
     <Script
       src="https://connect.facebook.net/en_US/sdk.js"
-      strategy="lazyOnload"
-      onLoad={() => {
-        if (typeof window !== "undefined" && (window as any).FB) {
-          (window as any).FB.init({
-            appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || "",
-            cookie: true,
-            xfbml: true,
-            version: "v18.0",
-          });
-        }
-      }}
+      strategy="afterInteractive"
+      async
+      defer
+      crossOrigin="anonymous"
     />
   );
 }
