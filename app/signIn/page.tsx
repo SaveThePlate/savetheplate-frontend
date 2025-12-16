@@ -322,17 +322,18 @@ export default function SignIn() {
                     {t("signin.google_signing_in") || "Signing in..."}
                   </Button>
                 ) : (
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    useOneTap={false}
-                    theme="outline"
-                    size="large"
-                    text="signin_with"
-                    shape="rectangular"
-                    locale={language}
-                    width="100%"
-                  />
+                  <div className="w-full flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap={false}
+                      theme="outline"
+                      size="large"
+                      text="signin_with"
+                      shape="rectangular"
+                      locale={language}
+                    />
+                  </div>
                 )}
               </div>
 
