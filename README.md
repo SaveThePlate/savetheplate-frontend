@@ -32,6 +32,11 @@ We prefer documentation as README files in this repo. However, we have a conflue
 
 📑https://codecooperation.atlassian.net
 
+### Configuration
+- [Configuration des variables d'environnement](./ENV_SETUP.md)
+- [Guide Facebook Login SDK](./GUIDE_FACEBOOK_LOGIN_JSSDK.md)
+- [Activer Facebook JavaScript SDK](./GUIDE_ACTIVER_FACEBOOK_JSSDK.md)
+
 ## Code of conduct and best practices
 
 🛡️https://github.com/CodeCooperation/CC-Guidelines

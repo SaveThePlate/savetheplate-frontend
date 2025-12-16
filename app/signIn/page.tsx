@@ -269,7 +269,27 @@ export default function SignIn() {
     try {
       // Check if Facebook SDK is loaded
       if (typeof window === 'undefined' || !(window as any).FB) {
-        throw new Error("Facebook SDK not loaded");
+        throw new Error("Facebook SDK not loaded. Please refresh the page and try again.");
+      }
+
+      // Verify SDK is initialized
+      if (!(window as any).FB.getLoginStatus) {
+        throw new Error("Facebook SDK is not fully initialized. Please wait a moment and try again.");
+      }
+
+      // Check for SDK initialization errors
+      const sdkError = (window as any).facebookSDKError;
+      if (sdkError) {
+        console.error("Facebook SDK initialization error detected:", sdkError);
+        throw new Error(sdkError);
+      }
+
+      // Log App ID for debugging (only in console, not exposed to user)
+      const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      if (appId) {
+        console.log("Attempting Facebook login with App ID:", appId);
+      } else {
+        console.warn("NEXT_PUBLIC_FACEBOOK_APP_ID is not set");
       }
 
       // Check if we're on HTTPS (required for FB.login in production)
@@ -293,33 +313,98 @@ export default function SignIn() {
       }
 
       // Login with Facebook - use regular function, not async
-      (window as any).FB.login(
-        (response: any) => {
-          // Handle the response in a separate async function
-          handleFacebookResponse(response);
-        },
-        { scope: 'email,public_profile' }
-      );
+      // Wrap in try-catch to handle errors from FB.login
+      try {
+        (window as any).FB.login(
+          (response: any) => {
+            // Check for errors in the response
+            if (response.error) {
+              console.error("Facebook login response error:", response.error);
+              handleFacebookError(response.error);
+              return;
+            }
+            // Handle the response in a separate async function
+            handleFacebookResponse(response);
+          },
+          { scope: 'email,public_profile' }
+        );
+      } catch (loginError: any) {
+        console.error("FB.login threw an error:", loginError);
+        handleFacebookError(loginError);
+      }
     } catch (err: any) {
       console.error("Facebook login error:", err);
-      
-      // Check for specific Facebook HTTPS errors
-      const errorMessage = err?.message || err?.error?.message || '';
-      if (errorMessage.includes('secure') || errorMessage.includes('HTTPS') || errorMessage.includes('connexion sécurisée')) {
-        setErrorMessage(
-          t("signin.facebook_https_error") || 
-          "Facebook requires a secure connection (HTTPS). Please ensure:\n" +
-          "1. Your site uses HTTPS\n" +
-          "2. 'Enforce HTTPS' is enabled in Facebook Developers\n" +
-          "3. All OAuth redirect URIs use HTTPS"
-        );
-      } else {
-        setErrorMessage(t("signin.facebook_error") || "Facebook sign-in failed. Please try again.");
-      }
-      
-      setShowErrorToast(true);
-      setFacebookLoading(false);
+      handleFacebookError(err);
     }
+  }
+
+  function handleFacebookError(error: any) {
+    setFacebookLoading(false);
+    
+    const errorMessage = error?.message || error?.error?.message || error?.errorMessage || '';
+    const errorCode = error?.code || error?.error?.code;
+    
+    console.error("Facebook error details:", {
+      message: errorMessage,
+      code: errorCode,
+      error: error
+    });
+
+    // Check for JSSDK not enabled error (in French or English)
+    if (
+      errorMessage.includes('JSSDK') || 
+      errorMessage.includes('JavaScript SDK') ||
+      errorMessage.includes('Se connecter avec le SDK JavaScript') ||
+      errorMessage.includes('Login with JavaScript SDK') ||
+      errorCode === 190
+    ) {
+      const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      setErrorMessage(
+        "Facebook JavaScript SDK is not enabled for this app.\n\n" +
+        "To fix this:\n" +
+        "1. Go to https://developers.facebook.com/apps/\n" +
+        "2. Select your app" + (appId ? ` (App ID: ${appId})` : '') + "\n" +
+        "3. Go to Settings > Basic Settings\n" +
+        "4. Scroll to 'Facebook Login' section\n" +
+        "5. Enable 'Login with JavaScript SDK' (set to 'Yes')\n" +
+        "6. Save changes and wait a few minutes\n" +
+        "7. Try again\n\n" +
+        "For detailed instructions, see GUIDE_ACTIVER_FACEBOOK_JSSDK.md"
+      );
+    }
+    // Check for specific Facebook HTTPS errors
+    else if (errorMessage.includes('secure') || errorMessage.includes('HTTPS') || errorMessage.includes('connexion sécurisée')) {
+      setErrorMessage(
+        t("signin.facebook_https_error") || 
+        "Facebook requires a secure connection (HTTPS). Please ensure:\n" +
+        "1. Your site uses HTTPS\n" +
+        "2. 'Enforce HTTPS' is enabled in Facebook Developers\n" +
+        "3. All OAuth redirect URIs use HTTPS"
+      );
+    }
+    // Check for app not setup errors
+    else if (errorMessage.includes('App Not Setup') || errorMessage.includes('app is still in development')) {
+      setErrorMessage(
+        "Facebook app is not properly configured or is in development mode.\n\n" +
+        "To fix this:\n" +
+        "1. Go to https://developers.facebook.com/apps/\n" +
+        "2. Select your app\n" +
+        "3. Go to Settings > Basic Settings\n" +
+        "4. Ensure 'Login with JavaScript SDK' is enabled\n" +
+        "5. Add your domain to 'App Domains'\n" +
+        "6. If in development mode, add yourself as a Tester in Roles\n" +
+        "7. Try again"
+      );
+    }
+    // Generic error
+    else {
+      setErrorMessage(
+        t("signin.facebook_error") || 
+        "Facebook sign-in failed. " + (errorMessage ? `Error: ${errorMessage}` : "Please try again.")
+      );
+    }
+    
+    setShowErrorToast(true);
   }
 
   async function handleFacebookResponse(response: any) {
@@ -410,9 +495,13 @@ export default function SignIn() {
       }
     } else {
       // User cancelled or login failed
-      setErrorMessage(t("signin.facebook_error") || "Facebook sign-in was cancelled or failed. Please try again.");
-      setShowErrorToast(true);
-      setFacebookLoading(false);
+      if (response.error) {
+        handleFacebookError(response.error);
+      } else {
+        setErrorMessage(t("signin.facebook_error") || "Facebook sign-in was cancelled or failed. Please try again.");
+        setShowErrorToast(true);
+        setFacebookLoading(false);
+      }
     }
   }
 

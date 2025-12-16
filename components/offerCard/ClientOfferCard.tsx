@@ -63,6 +63,29 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
     }
   }, [imageSrc]);
 
+  // Hide body scrollbar when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      // Save the current scrollbar width and body overflow
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      // Compensate for scrollbar width to prevent layout shift
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+    } else {
+      // Restore body styles when modal is closed
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isModalOpen]);
+
   const handleImageError = () => {
     const nextIndex = fallbackIndex + 1;
     if (nextIndex < fallbacks.length) {

@@ -62,20 +62,30 @@ export default function FacebookSDK() {
     // This follows the official Facebook SDK pattern
     window.fbAsyncInit = function () {
       if (window.FB) {
-        window.FB.init({
-          appId: appId,
-          cookie: true,                     // Enable cookies to allow the server to access the session.
-          xfbml: true,                     // Parse social plugins on this webpage.
-          version: apiVersion              // Use this Graph API version for this call.
-        });
+        try {
+          window.FB.init({
+            appId: appId,
+            cookie: true,                     // Enable cookies to allow the server to access the session.
+            xfbml: true,                     // Parse social plugins on this webpage.
+            version: apiVersion              // Use this Graph API version for this call.
+          });
 
-        // Called after the JS SDK has been initialized.
-        // Returns the login status.
-        window.FB.getLoginStatus(function (response: any) {
-          if (window.statusChangeCallback) {
-            window.statusChangeCallback(response);
+          console.log('Facebook SDK initialized successfully with App ID:', appId);
+
+          // Called after the JS SDK has been initialized.
+          // Returns the login status.
+          window.FB.getLoginStatus(function (response: any) {
+            if (window.statusChangeCallback) {
+              window.statusChangeCallback(response);
+            }
+          }, true); // Force a roundtrip to Facebook to get fresh status
+        } catch (error: any) {
+          console.error('Facebook SDK initialization error:', error);
+          // Store error for sign-in page to display
+          if (typeof window !== 'undefined') {
+            (window as any).facebookSDKError = error?.message || 'Facebook SDK initialization failed';
           }
-        });
+        }
       }
     };
   }, [appId]);
