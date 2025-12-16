@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -19,6 +21,13 @@ const Footer = () => {
         <span className="text-gray-400">
           © {currentYear}
         </span>
+        <span className="text-gray-400">·</span>
+        <Link
+          href="/privacy"
+          className="text-gray-500 hover:text-emerald-600 transition-colors"
+        >
+          Privacy Policy
+        </Link>
       </div>
     </footer>
   );

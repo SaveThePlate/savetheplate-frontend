@@ -484,7 +484,7 @@
     "quantity_hint": "Combien d'unités sont disponibles ?",
     "pickup_location": "Lieu de Ramassage",
     "pickup_location_placeholder": "ex. : 123 Rue Principale, Tunis",
-    "pickup_location_hint": "Où les clients doivent-ils récupérer leur commande ?",
+    "pickup_location_hint": "Les commandes seront récupérées à l'emplacement de votre magasin depuis votre profil. Assurez-vous que votre emplacement est à jour dans les paramètres de votre profil.",
     "pickup_date": "Date de Ramassage",
     "pickup_date_hint": "Sélectionnez la date de ramassage",
     "start_time": "Heure de Début",
@@ -876,5 +876,127 @@
         "step5_content": "Sur les appareils mobiles, utilisez la barre de navigation en bas pour un accès rapide à Accueil, Publier, Commandes et Profil."
       }
     }
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "last_updated": "Dernière Mise à Jour",
+    "introduction": {
+      "title": "Introduction",
+      "content": "Save The Plate ('nous', 'notre' ou 'nos') s'engage à protéger votre vie privée. Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez notre application mobile et nos services. Veuillez lire attentivement cette politique de confidentialité. Si vous n'êtes pas d'accord avec les termes de cette politique de confidentialité, veuillez ne pas accéder à l'application."
+    },
+    "collect": {
+      "title": "Informations Que Nous Collectons",
+      "personal": {
+        "title": "Informations Personnelles",
+        "email": "Adresse e-mail",
+        "name": "Nom et nom d'utilisateur",
+        "phone": "Numéro de téléphone",
+        "location": "Données de localisation (à des fins de ramassage)"
+      },
+      "usage": {
+        "title": "Informations d'Utilisation",
+        "orders": "Historique des commandes et préférences",
+        "offers": "Offres publiées (pour les fournisseurs)",
+        "preferences": "Préférences et paramètres de l'application",
+        "device": "Informations sur l'appareil et adresse IP"
+      }
+    },
+    "use": {
+      "title": "Comment Nous Utilisons Vos Informations",
+      "service": "Pour fournir, maintenir et améliorer nos services",
+      "communication": "Pour communiquer avec vous concernant les commandes, offres et mises à jour",
+      "improvement": "Pour analyser les modèles d'utilisation et améliorer l'expérience utilisateur",
+      "security": "Pour détecter, prévenir et résoudre les problèmes techniques et les menaces de sécurité",
+      "legal": "Pour se conformer aux obligations légales et protéger nos droits"
+    },
+    "sharing": {
+      "title": "Partage et Divulgation des Données",
+      "content": "Nous ne vendons pas vos informations personnelles. Nous ne partageons vos informations que dans les circonstances suivantes :",
+      "providers": "Avec les fournisseurs alimentaires lorsque vous passez une commande (nom, téléphone, détails de la commande)",
+      "service": "Avec les prestataires de services qui nous aident à exploiter notre application (sous des accords de confidentialité stricts)",
+      "legal": "Lorsque requis par la loi ou pour protéger nos droits et notre sécurité"
+    },
+    "security": {
+      "title": "Sécurité des Données",
+      "content": "Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos informations personnelles. Cependant, aucune méthode de transmission sur Internet ou de stockage électronique n'est sécurisée à 100%. Bien que nous nous efforcions d'utiliser des moyens commercialement acceptables pour protéger vos informations, nous ne pouvons garantir une sécurité absolue."
+    },
+    "rights": {
+      "title": "Vos Droits",
+      "content": "Vous avez les droits suivants concernant vos informations personnelles :",
+      "access": "Droit d'accéder à vos données personnelles",
+      "correction": "Droit de corriger les données inexactes ou incomplètes",
+      "deletion": "Droit de demander la suppression de vos données",
+      "objection": "Droit de vous opposer au traitement de vos données",
+      "portability": "Droit à la portabilité des données",
+      "deletion_note": "Pour demander la suppression de vos données, veuillez visiter notre",
+      "deletion_link": "Page de Demande de Suppression des Données"
+    },
+    "cookies": {
+      "title": "Cookies et Technologies de Suivi",
+      "content": "Nous utilisons des cookies et des technologies de suivi similaires pour suivre l'activité sur notre application et stocker certaines informations. Vous pouvez demander à votre navigateur de refuser tous les cookies ou d'indiquer quand un cookie est envoyé."
+    },
+    "third_party": {
+      "title": "Services Tiers",
+      "content": "Notre application utilise des services tiers qui peuvent collecter des informations utilisées pour vous identifier :",
+      "google": "Google OAuth pour l'authentification",
+      "facebook": "Facebook Login pour l'authentification",
+      "analytics": "Google Analytics pour l'analyse de l'utilisation de l'application"
+    },
+    "changes": {
+      "title": "Modifications de Cette Politique de Confidentialité",
+      "content": "Nous pouvons mettre à jour notre Politique de Confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle Politique de Confidentialité sur cette page et en mettant à jour la date de 'Dernière Mise à Jour'. Il est conseillé de consulter périodiquement cette Politique de Confidentialité pour tout changement."
+    },
+    "contact": {
+      "title": "Contactez-Nous",
+      "content": "Si vous avez des questions concernant cette Politique de Confidentialité, veuillez nous contacter :",
+      "email": "E-mail",
+      "address": "Adresse"
+    }
+  },
+  "data_deletion": {
+    "title": "Demande de Suppression des Données",
+    "subtitle": "Demander la suppression de votre compte et de vos données personnelles",
+    "warning": {
+      "title": "Avis Important",
+      "content": "Demander la suppression des données est permanent et ne peut pas être annulé. Toutes vos informations de compte, historique des commandes et préférences seront définitivement supprimées de notre système."
+    },
+    "what_will_be_deleted": {
+      "title": "Ce Qui Sera Supprimé",
+      "profile": "Vos informations de profil (nom, e-mail, téléphone, localisation)",
+      "orders": "Tout votre historique de commandes",
+      "offers": "Toutes vos offres publiées (si vous êtes un fournisseur)",
+      "preferences": "Vos préférences et paramètres d'application",
+      "analytics": "Vos données d'analyse d'utilisation"
+    },
+    "what_will_remain": {
+      "title": "Ce Qui Peut Rester",
+      "legal": "Les données que nous sommes légalement tenus de conserver (par exemple, les enregistrements de transaction à des fins fiscales)",
+      "aggregate": "Données agrégées et anonymisées qui ne peuvent pas vous identifier"
+    },
+    "how_to_request": {
+      "title": "Comment Demander la Suppression",
+      "content": "Pour demander la suppression de vos données, veuillez remplir le formulaire ci-dessous avec l'adresse e-mail associée à votre compte. Nous traiterons votre demande dans les 30 jours."
+    },
+    "request_form": {
+      "title": "Demander la Suppression des Données",
+      "email_label": "Adresse E-mail",
+      "email_placeholder": "votre.email@exemple.com",
+      "submit": "Soumettre la Demande de Suppression",
+      "submitting": "Envoi..."
+    },
+    "alternative": {
+      "title": "Méthode Alternative",
+      "content": "Vous pouvez également nous envoyer un e-mail directement avec votre demande de suppression :",
+      "email": "E-mail"
+    },
+    "success": {
+      "title": "Demande Reçue",
+      "message": "Nous avons reçu votre demande de suppression de données. Notre équipe la traitera dans les 30 jours. Vous recevrez un e-mail de confirmation une fois que vos données auront été supprimées.",
+      "timeline": "Nous traitons généralement les demandes de suppression dans les 30 jours. Vous recevrez un e-mail de confirmation une fois le processus terminé."
+    },
+    "invalid_email": "Veuillez entrer une adresse e-mail valide",
+    "request_sent": "Demande de suppression soumise avec succès",
+    "email_opened": "Ouverture de votre client e-mail...",
+    "error": "Échec de l'envoi de la demande. Veuillez réessayer."
   }
 }
