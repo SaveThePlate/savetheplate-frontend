@@ -113,98 +113,75 @@ const WelcomePage = () => {
         <LanguageSwitcher variant="button" />
       </div>
 
-      {/* Redesigned Logo Header */}
-      <div className="w-full flex justify-center items-center pt-4 pb-0 px-4 sm:px-6">
+      {/* Compact Logo Header */}
+      <div className="w-full flex justify-center items-center pt-2 pb-0 px-4 sm:px-6">
         <div className="group cursor-pointer transition-transform duration-300 hover:scale-105">
           <Image
             src="/logo.png"
             alt="Save the plate"
-            width={200}
-            height={200}
-            className="object-contain drop-shadow-2xl sm:w-64 sm:h-64 md:w-80 md:h-80"
+            width={150}
+            height={150}
+            className="object-contain drop-shadow-xl sm:w-48 sm:h-48 md:w-56 md:h-56"
             priority
           />
         </div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-0 pb-32">
-        {/* Enhanced Decorative Background Elements */}
-        <div className="absolute top-10 left-[-4rem] w-72 h-72 bg-emerald-200 rounded-full blur-3xl opacity-40 animate-pulse -z-10" />
-        <div className="absolute bottom-20 right-[-4rem] w-80 h-80 bg-teal-200 rounded-full blur-3xl opacity-35 -z-10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-100 rounded-full blur-3xl opacity-25 -z-10" />
-        <div className="absolute top-32 right-1/4 w-48 h-48 bg-emerald-100 rounded-full blur-2xl opacity-30 -z-10" />
+      {/* Hero Section - Compact Design */}
+      <section className="relative pt-2 pb-8 sm:pt-4 sm:pb-12 lg:pt-6 lg:pb-16 px-4 sm:px-6 lg:px-8">
+        {/* Subtle Decorative Background Elements */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-200 rounded-full blur-3xl opacity-30 -z-10" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-teal-200 rounded-full blur-3xl opacity-25 -z-10" />
 
-        <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
-            {/* Left: Content */}
-            <div className="text-center lg:text-left space-y-6 sm:space-y-8">
-              {/* Enhanced Main Headline */}
-              <div className="space-y-5 sm:space-y-6">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1B4332] leading-tight drop-shadow-sm">
-                  {t("landing.welcome_title")}{" "}
-                  <span className="text-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                    {t("landing.welcome_subtitle")}
-                  </span>
-                </h1>
-                <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                  {t("landing.welcome_description")}
-                </p>
-              </div>
+        <div className="w-full mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-center">
+            {/* Left: Content - Takes 3 columns */}
+            <div className="lg:col-span-3 text-center lg:text-left space-y-4">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-[#1B4332] leading-tight">
+                {t("landing.welcome_title")}{" "}
+                <span className="text-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  {t("landing.welcome_subtitle")}
+                </span>
+              </h1>
+              <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                {t("landing.welcome_description")}
+              </p>
 
-              {/* Enhanced CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center lg:justify-start pt-2">
+              {/* CTA Buttons - Inline */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">
                 <button
                   onClick={handleGetStarted}
-                  className="group px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg transform hover:scale-105 active:scale-95"
+                  className="group px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base transform hover:scale-105"
                 >
                   {t("landing.get_started")}
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
                   onClick={handleSignIn}
-                  className="px-8 py-4 sm:px-10 sm:py-5 bg-white/90 backdrop-blur-sm hover:bg-white text-emerald-700 font-bold rounded-xl border-2 border-emerald-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base sm:text-lg transform hover:scale-105 active:scale-95"
+                  className="px-6 py-3 sm:px-8 sm:py-4 bg-white/90 backdrop-blur-sm hover:bg-white text-emerald-700 font-bold rounded-lg border-2 border-emerald-600 shadow-md hover:shadow-lg transition-all duration-300 text-sm sm:text-base transform hover:scale-105"
                 >
                   {t("landing.sign_in")}
                 </button>
               </div>
-
-              {/* Stats */}
-              {/* <div className="grid grid-cols-3 gap-4 pt-4">
-                <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-emerald-700">100+</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Meals Saved</div>
-                </div>
-                <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-emerald-700">50+</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Local Partners</div>
-                </div>
-                <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-emerald-700">500+</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Happy Users</div>
-                </div>
-              </div> */}
             </div>
 
-            {/* Right: Illustration */}
-            <div className="relative">
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-emerald-100 p-8 sm:p-12 overflow-hidden">
-                {/* Decorative blobs */}
-                <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-100 rounded-full blur-3xl opacity-50" />
-                <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-teal-100 rounded-full blur-3xl opacity-50" />
+            {/* Right: Illustration - Takes 2 columns, more compact */}
+            <div className="lg:col-span-2 relative">
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-emerald-100 p-6 sm:p-8 overflow-hidden">
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-100 rounded-full blur-2xl opacity-40" />
+                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-teal-100 rounded-full blur-2xl opacity-40" />
                 
                 <div className="relative z-10 flex flex-col items-center">
                   <Image
                     src="/loveyou.png"
-                    width={280}
-                    height={280}
+                    width={200}
+                    height={200}
                     alt={t("landing.illustration_alt")}
-                    className="mx-auto animate-float mb-6"
-                    style={{ width: "auto", height: "auto" }}
+                    className="mx-auto animate-float mb-4 w-auto h-auto"
                     priority
                   />
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border-2 border-emerald-200 w-full">
-                    <p className="text-center text-gray-800 font-semibold text-base sm:text-lg">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-200 w-full">
+                    <p className="text-center text-gray-800 font-semibold text-sm sm:text-base">
                       &quot;{t("landing.quote")}&quot;
                     </p>
                   </div>
@@ -215,81 +192,81 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
-        <div className="w-full mx-auto max-w-2xl lg:max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1B4332] mb-4">
+      {/* Features Section - More Compact */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div className="w-full mx-auto max-w-7xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
               {t("landing.why_choose")}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               {t("landing.why_subtitle")}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {/* Feature 1 */}
-            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-emerald-100 flex items-center justify-center mb-4">
-                <DollarSign className="w-7 h-7 text-emerald-700" />
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-5 border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-3">
+                <DollarSign className="w-6 h-6 text-emerald-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("landing.save_money_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.save_money_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.save_money_desc")}
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-4">
-                <Leaf className="w-7 h-7 text-teal-700" />
+            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-5 border-2 border-teal-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center mb-3">
+                <Leaf className="w-6 h-6 text-teal-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("landing.save_planet_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.save_planet_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.save_planet_desc")}
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-amber-100 flex items-center justify-center mb-4">
-                <MapPin className="w-7 h-7 text-amber-700" />
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
+                <MapPin className="w-6 h-6 text-amber-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("landing.support_local_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.support_local_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.support_local_desc")}
               </p>
             </div>
 
             {/* Feature 4 */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
-                <Clock className="w-7 h-7 text-blue-700" />
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
+                <Clock className="w-6 h-6 text-blue-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("landing.quick_easy_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.quick_easy_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.quick_easy_desc")}
               </p>
             </div>
 
             {/* Feature 5 */}
-            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 border-2 border-pink-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-pink-100 flex items-center justify-center mb-4">
-                <Heart className="w-7 h-7 text-pink-700" />
+            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-5 border-2 border-pink-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-pink-100 flex items-center justify-center mb-3">
+                <Heart className="w-6 h-6 text-pink-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("landing.make_difference_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.make_difference_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.make_difference_desc")}
               </p>
             </div>
 
             {/* Feature 6 */}
-            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-6 border-2 border-purple-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center mb-4">
-                <ShoppingBag className="w-7 h-7 text-purple-700" />
+            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border-2 border-purple-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-3">
+                <ShoppingBag className="w-6 h-6 text-purple-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("landing.surprise_packs_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.surprise_packs_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.surprise_packs_desc")}
               </p>
             </div>
@@ -297,48 +274,48 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
-        <div className="w-full mx-auto max-w-2xl lg:max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1B4332] mb-4">
+      {/* How It Works Section - More Compact */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
+        <div className="w-full mx-auto max-w-7xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
               {t("landing.how_it_works")}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               {t("landing.how_subtitle")}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {/* Step 1 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-200 text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-emerald-200 text-center">
+              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 1
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{t("landing.step1_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step1_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.step1_desc")}
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-200 text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-emerald-200 text-center">
+              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 2
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{t("landing.step2_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step2_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.step2_desc")}
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-200 text-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-emerald-200 text-center">
+              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 3
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{t("landing.step3_title")}</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step3_title")}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {t("landing.step3_desc")}
               </p>
             </div>
@@ -346,46 +323,46 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* For Providers Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="w-full mx-auto max-w-2xl lg:max-w-7xl">
-          <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      {/* For Providers Section - More Compact */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="w-full mx-auto max-w-7xl">
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-6 sm:p-8 lg:p-10 text-white shadow-xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-4 py-2 mb-6">
-                  <Store className="w-5 h-5" />
-                  <span className="text-sm font-semibold">{t("landing.for_business")}</span>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1.5 mb-4">
+                  <Store className="w-4 h-4" />
+                  <span className="text-xs sm:text-sm font-semibold">{t("landing.for_business")}</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">
                   {t("landing.list_surplus")}
                 </h2>
-                <p className="text-lg mb-6 opacity-90">
+                <p className="text-base sm:text-lg mb-5 opacity-90">
                   {t("landing.business_desc")}
                 </p>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                <ul className="space-y-2 mb-5">
+                  <li className="flex items-center gap-2 text-sm sm:text-base">
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span>{t("landing.business_benefit1")}</span>
                   </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                  <li className="flex items-center gap-2 text-sm sm:text-base">
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span>{t("landing.business_benefit2")}</span>
                   </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                  <li className="flex items-center gap-2 text-sm sm:text-base">
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span>{t("landing.business_benefit3")}</span>
                   </li>
                 </ul>
                 <button
                   onClick={handleGetStarted}
-                  className="px-6 py-3 bg-white text-emerald-700 font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
+                  className="px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-emerald-700 font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
                 >
                   {t("landing.start_listing")}
                 </button>
               </div>
               <div className="hidden lg:block">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border-2 border-white/20">
-                  <TrendingUp className="w-24 h-24 mx-auto opacity-80" />
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-white/20">
+                  <TrendingUp className="w-16 h-16 sm:w-20 sm:h-20 mx-auto opacity-80" />
                 </div>
               </div>
             </div>
@@ -393,28 +370,28 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Carbon Footprint Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
-        <div className="w-full mx-auto max-w-2xl lg:max-w-4xl">
+      {/* Carbon Footprint Section - More Compact */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div className="w-full mx-auto max-w-7xl">
           <CarbonFootprint />
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
-        <div className="w-full mx-auto max-w-2xl lg:max-w-4xl text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#1B4332] mb-4">
+      {/* Final CTA - More Compact */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
+        <div className="w-full mx-auto max-w-4xl text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
             {t("landing.ready_title")}
           </h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
             {t("landing.ready_desc")}
           </p>
           <button
             onClick={handleGetStarted}
-            className="px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto"
+            className="px-8 py-3 sm:px-10 sm:py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto text-sm sm:text-base"
           >
             {t("landing.get_started_now")}
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </section>

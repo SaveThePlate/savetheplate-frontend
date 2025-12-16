@@ -91,7 +91,10 @@
     "start_listing": "Commencer à Lister",
     "ready_title": "Prêt à Faire une Différence ?",
     "ready_desc": "Rejoignez notre communauté de sauveteurs alimentaires et commencez à économiser de l'argent tout en aidant la planète dès aujourd'hui.",
-    "illustration_alt": "Illustration Save The Plate"
+    "illustration_alt": "Illustration Save The Plate",
+    "meals_saved": "Repas Sauvés",
+    "local_partners": "Partenaires Locaux",
+    "happy_users": "Utilisateurs Heureux"
   },
   "signin": {
     "welcome_new": "Bienvenue sur SaveThePlate ! 🥳",

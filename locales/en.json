@@ -91,7 +91,10 @@
     "start_listing": "Start Listing",
     "ready_title": "Ready to Make a Difference?",
     "ready_desc": "Join our community of food rescuers and start saving money while helping the planet today.",
-    "illustration_alt": "Save The Plate illustration"
+    "illustration_alt": "Save The Plate illustration",
+    "meals_saved": "Meals Saved",
+    "local_partners": "Local Partners",
+    "happy_users": "Happy Users"
   },
   "signin": {
     "welcome_new": "Welcome to SaveThePlate! 🥳",
