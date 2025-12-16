@@ -120,6 +120,21 @@ const nextConfig = {
     ].join('; ');
 
     return [
+      // Headers for sign-in page - use unsafe-none COOP to allow Google OAuth popups
+      {
+        source: '/signIn',
+        headers: [
+          {
+            key: 'Content-Security-Policy-Report-Only',
+            value: csp,
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'unsafe-none',
+          },
+        ],
+      },
+      // Headers for all other pages - with stricter COOP for security
       {
         source: '/(.*)',
         headers: [
