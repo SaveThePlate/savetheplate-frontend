@@ -433,25 +433,25 @@ const AddOffer: React.FC = () => {
       />
 
       {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center mb-4">
           {[1, 2, 3, 4].map((step) => (
             <React.Fragment key={step}>
-              <div className="flex items-center">
+              <div className="flex items-center flex-1">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm transition-all flex-shrink-0 ${
                     step < currentStep
                       ? "bg-emerald-600 text-white"
                       : step === currentStep
-                      ? "bg-emerald-500 text-white ring-4 ring-emerald-200"
+                      ? "bg-emerald-500 text-white ring-2 sm:ring-4 ring-emerald-200"
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {step < currentStep ? <Check className="w-5 h-5" /> : step}
+                  {step < currentStep ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : step}
                 </div>
                 {step < totalSteps && (
                   <div
-                    className={`h-1 w-12 sm:w-16 mx-2 transition-all ${
+                    className={`h-1 flex-1 transition-all ${
                       step < currentStep ? "bg-emerald-600" : "bg-gray-200"
                     }`}
                   />
@@ -461,7 +461,7 @@ const AddOffer: React.FC = () => {
           ))}
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-xs sm:text-sm font-medium text-gray-700">
             {currentStep === 1 && t("add_offer.step_basic_info")}
             {currentStep === 2 && t("add_offer.step_pricing")}
             {currentStep === 3 && t("add_offer.step_availability")}
@@ -771,7 +771,7 @@ const AddOffer: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => applyTimePreset('today-afternoon')}
-                  className="text-xs py-2 h-auto"
+                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   {t("add_offer.preset_today_afternoon")}
                 </Button>
@@ -779,7 +779,7 @@ const AddOffer: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => applyTimePreset('today-evening')}
-                  className="text-xs py-2 h-auto"
+                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   {t("add_offer.preset_today_evening")}
                 </Button>
@@ -787,7 +787,7 @@ const AddOffer: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => applyTimePreset('tomorrow-morning')}
-                  className="text-xs py-2 h-auto"
+                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   {t("add_offer.preset_tomorrow_morning")}
                 </Button>
@@ -795,7 +795,7 @@ const AddOffer: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => applyTimePreset('tomorrow-afternoon')}
-                  className="text-xs py-2 h-auto"
+                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
                 >
                   {t("add_offer.preset_tomorrow_afternoon")}
                 </Button>
@@ -943,16 +943,16 @@ const AddOffer: React.FC = () => {
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex gap-3 pt-6 border-t border-gray-200">
+        <div className="flex gap-2 sm:gap-3 pt-6 border-t border-gray-200">
           {currentStep > 1 && (
             <Button
               type="button"
               variant="outline"
               onClick={handlePrevious}
-              className="flex-1 flex items-center justify-center gap-2"
+              className="flex-1 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0"
             >
-              <ChevronLeft className="w-4 h-4" />
-              {t("add_offer.previous")}
+              <ChevronLeft className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{t("add_offer.previous")}</span>
             </Button>
           )}
           
@@ -961,19 +961,19 @@ const AddOffer: React.FC = () => {
               type="button"
               onClick={handleNext}
               disabled={!canProceedToNextStep()}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold flex items-center justify-center gap-2"
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0"
             >
-              {t("add_offer.next")}
-              <ChevronRight className="w-4 h-4" />
+              <span className="truncate">{t("add_offer.next")}</span>
+              <ChevronRight className="w-4 h-4 flex-shrink-0" />
             </Button>
           ) : (
             <Button
               type="submit"
               disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-2"
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0"
             >
-              <Check className="w-4 h-4" />
-              {t("add_offer.create_button")}
+              <Check className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{t("add_offer.create_button")}</span>
             </Button>
           )}
         </div>
