@@ -7,15 +7,55 @@ declare global {
   interface Window {
     fbAsyncInit?: () => void;
     FB?: any;
+    checkLoginState?: () => void;
+    statusChangeCallback?: (response: any) => void;
   }
 }
 
 export default function FacebookSDK() {
   const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+  const apiVersion = "v24.0";
 
   useEffect(() => {
     if (!appId) {
       return;
+    }
+
+    // Status change callback - Called with the results from FB.getLoginStatus()
+    window.statusChangeCallback = function (response: any) {
+      console.log('statusChangeCallback');
+      console.log(response); // The current login status of the person.
+      
+      if (response.status === 'connected') {
+        // Logged into your webpage and Facebook.
+        testAPI();
+      } else {
+        // Not logged into your webpage or we are unable to tell.
+        // This is handled by the sign-in page, so we don't need to update UI here
+        console.log('User is not connected to Facebook');
+      }
+    };
+
+    // Check login state - Called when a person is finished with the Login Button
+    window.checkLoginState = function () {
+      if (window.FB) {
+        window.FB.getLoginStatus(function (response: any) {
+          // See the onlogin handler
+          if (window.statusChangeCallback) {
+            window.statusChangeCallback(response);
+          }
+        });
+      }
+    };
+
+    // Test API - Testing Graph API after login
+    function testAPI() {
+      console.log('Welcome!  Fetching your information.... ');
+      if (window.FB) {
+        window.FB.api('/me', function (response: any) {
+          console.log('Successful login for: ' + response.name);
+        });
+      }
     }
 
     // Set up the Facebook SDK initialization function
@@ -24,8 +64,17 @@ export default function FacebookSDK() {
       if (window.FB) {
         window.FB.init({
           appId: appId,
-          xfbml: true,
-          version: "v24.0",
+          cookie: true,                     // Enable cookies to allow the server to access the session.
+          xfbml: true,                     // Parse social plugins on this webpage.
+          version: apiVersion              // Use this Graph API version for this call.
+        });
+
+        // Called after the JS SDK has been initialized.
+        // Returns the login status.
+        window.FB.getLoginStatus(function (response: any) {
+          if (window.statusChangeCallback) {
+            window.statusChangeCallback(response);
+          }
         });
       }
     };
@@ -45,4 +94,3 @@ export default function FacebookSDK() {
     />
   );
 }
-

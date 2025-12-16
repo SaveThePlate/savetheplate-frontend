@@ -272,9 +272,21 @@ export default function SignIn() {
         throw new Error("Facebook SDK not loaded");
       }
 
-      // Check if we're on HTTPS (required for FB.login)
-      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        setErrorMessage("Facebook login requires HTTPS. Please use the production URL.");
+      // Check if we're on HTTPS (required for FB.login in production)
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const isHttps = window.location.protocol === 'https:';
+      
+      if (!isHttps && !isLocalhost) {
+        const currentUrl = window.location.href;
+        const httpsUrl = currentUrl.replace(/^http:/, 'https:');
+        setErrorMessage(
+          t("signin.facebook_https_required") || 
+          `Facebook login requires HTTPS. Please use: ${httpsUrl}\n\n` +
+          "If you're the administrator, ensure:\n" +
+          "1. Your site is served over HTTPS\n" +
+          "2. 'Enforce HTTPS' is enabled in Facebook Developers settings\n" +
+          "3. All OAuth redirect URIs use HTTPS"
+        );
         setShowErrorToast(true);
         setFacebookLoading(false);
         return;
@@ -290,7 +302,21 @@ export default function SignIn() {
       );
     } catch (err: any) {
       console.error("Facebook login error:", err);
-      setErrorMessage(t("signin.facebook_error") || "Facebook sign-in failed. Please try again.");
+      
+      // Check for specific Facebook HTTPS errors
+      const errorMessage = err?.message || err?.error?.message || '';
+      if (errorMessage.includes('secure') || errorMessage.includes('HTTPS') || errorMessage.includes('connexion sécurisée')) {
+        setErrorMessage(
+          t("signin.facebook_https_error") || 
+          "Facebook requires a secure connection (HTTPS). Please ensure:\n" +
+          "1. Your site uses HTTPS\n" +
+          "2. 'Enforce HTTPS' is enabled in Facebook Developers\n" +
+          "3. All OAuth redirect URIs use HTTPS"
+        );
+      } else {
+        setErrorMessage(t("signin.facebook_error") || "Facebook sign-in failed. Please try again.");
+      }
+      
       setShowErrorToast(true);
       setFacebookLoading(false);
     }
