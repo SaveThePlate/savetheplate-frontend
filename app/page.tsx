@@ -372,7 +372,7 @@ const WelcomePage = () => {
 
       {/* Carbon Footprint Section - More Compact */}
       <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
-        <div className="w-full mx-auto max-w-7xl">
+        <div className="w-full mx-auto max-w-2xl">
           <CarbonFootprint />
         </div>
       </section>
