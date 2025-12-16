@@ -599,8 +599,8 @@ export default function SignIn() {
               <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
 
               <div className="w-full space-y-3 relative z-10">
-                {/* Google Sign In */}
-                {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+                {/* Google Sign In - Temporarily commented out until logic is fixed */}
+                {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
                   <div className="w-full flex justify-center">
                     {googleLoading ? (
                       <Button
@@ -625,7 +625,7 @@ export default function SignIn() {
                       </div>
                     )}
                   </div>
-                )}
+                )} */}
 
                 {/* Facebook Sign In */}
                 {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
