@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { sanitizeImageUrl, shouldUnoptimizeImage } from "@/utils/imageUtils";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
@@ -225,7 +226,19 @@ const ProfilePage = () => {
         <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-              <Image src={profileImage} alt="Profile" width={56} height={56} priority className="object-cover w-full h-full" />
+              <Image 
+                src={sanitizeImageUrl(profileImage)} 
+                alt="Profile" 
+                width={56} 
+                height={56} 
+                priority 
+                className="object-cover w-full h-full"
+                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(profileImage))}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = DEFAULT_PROFILE_IMAGE;
+                }}
+              />
             </div>
             
             {isEditing ? (

@@ -52,6 +52,15 @@ const nextConfig = {
         hostname: 'leftover-be.ccdev.space', 
         pathname: '/storage/**' 
       },
+      // Facebook CDN for profile images
+      {
+        protocol: 'https',
+        hostname: '*.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent.*.fbcdn.net',
+      },
       // Allow images from any domain (for flexibility)
       { 
         protocol: 'http', 
