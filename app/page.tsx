@@ -113,48 +113,57 @@ const WelcomePage = () => {
         <LanguageSwitcher variant="button" />
       </div>
 
+      {/* Redesigned Logo Header */}
+      <div className="w-full flex justify-center items-center pt-4 pb-0 px-4 sm:px-6">
+        <div className="group cursor-pointer transition-transform duration-300 hover:scale-105">
+          <Image
+            src="/logo.png"
+            alt="Save the plate"
+            width={200}
+            height={200}
+            className="object-contain drop-shadow-2xl sm:w-64 sm:h-64 md:w-80 md:h-80"
+            priority
+          />
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-32">
-        {/* Decorative Background Elements */}
-        <div className="absolute top-20 left-[-4rem] w-64 h-64 bg-emerald-200 rounded-full blur-3xl opacity-30 -z-10" />
-        <div className="absolute bottom-20 right-[-4rem] w-64 h-64 bg-teal-200 rounded-full blur-3xl opacity-30 -z-10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-20 -z-10" />
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-0 pb-32">
+        {/* Enhanced Decorative Background Elements */}
+        <div className="absolute top-10 left-[-4rem] w-72 h-72 bg-emerald-200 rounded-full blur-3xl opacity-40 animate-pulse -z-10" />
+        <div className="absolute bottom-20 right-[-4rem] w-80 h-80 bg-teal-200 rounded-full blur-3xl opacity-35 -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-green-100 rounded-full blur-3xl opacity-25 -z-10" />
+        <div className="absolute top-32 right-1/4 w-48 h-48 bg-emerald-100 rounded-full blur-2xl opacity-30 -z-10" />
 
         <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
             {/* Left: Content */}
-            <div className="text-center lg:text-left space-y-8">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-sm border-2 border-emerald-200 px-4 py-2 shadow-sm">
-                <Leaf className="w-4 h-4 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-700">
-                  {t("landing.badge_text")}
-                </span>
-              </div>
-
-              {/* Main Headline */}
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#1B4332] leading-tight">
+            <div className="text-center lg:text-left space-y-6 sm:space-y-8">
+              {/* Enhanced Main Headline */}
+              <div className="space-y-5 sm:space-y-6">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1B4332] leading-tight drop-shadow-sm">
                   {t("landing.welcome_title")}{" "}
-                  <span className="text-emerald-600">{t("landing.welcome_subtitle")}</span>
+                  <span className="text-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                    {t("landing.welcome_subtitle")}
+                  </span>
                 </h1>
-                <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
                   {t("landing.welcome_description")}
                 </p>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              {/* Enhanced CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center lg:justify-start pt-2">
                 <button
                   onClick={handleGetStarted}
-                  className="group px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+                  className="group px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 text-base sm:text-lg transform hover:scale-105 active:scale-95"
                 >
                   {t("landing.get_started")}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
                   onClick={handleSignIn}
-                  className="px-8 py-4 bg-white hover:bg-gray-50 text-emerald-700 font-bold rounded-xl border-2 border-emerald-600 shadow-md hover:shadow-lg transition-all duration-300"
+                  className="px-8 py-4 sm:px-10 sm:py-5 bg-white/90 backdrop-blur-sm hover:bg-white text-emerald-700 font-bold rounded-xl border-2 border-emerald-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base sm:text-lg transform hover:scale-105 active:scale-95"
                 >
                   {t("landing.sign_in")}
                 </button>
