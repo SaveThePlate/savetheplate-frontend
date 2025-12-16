@@ -44,7 +44,10 @@
     "at": "à",
     "open_in_maps": "Ouvrir dans Maps",
     "view_on_maps": "Voir sur Maps →",
-    "free": "Gratuit"
+    "free": "Gratuit",
+    "saved": "ÉCONOMISÉ",
+    "item": "article",
+    "items": "articles"
   },
   "landing": {
     "get_started": "Commencer",
@@ -376,7 +379,11 @@
     "location_not_available": "Emplacement non disponible",
     "within_distance": "À moins de {distance} km",
     "distance_filter": "Distance Maximale",
-    "search_placeholder_extended": "Pâtisserie, restaurant, magasin..."
+    "search_placeholder_extended": "Pâtisserie, restaurant, magasin...",
+    "pickup_time": "Heure de Ramassage",
+    "pickup_location": "Lieu de Ramassage",
+    "quantity_available": "Disponible",
+    "save": "ÉCONOMISÉ"
   },
   "contact": {
     "title": "Contactez-nous",
@@ -754,7 +761,9 @@
     "offer_updated": "Offre mise à jour avec succès",
     "update_failed": "Échec de la mise à jour de l'offre",
     "upload_failed": "Échec du téléchargement des images",
-    "pickup_time": "Heure de Ramassage :",
+    "pickup_time": "Heure de Ramassage",
+    "pickup_location": "Lieu de Ramassage",
+    "quantity_available": "Disponible",
     "location_label": "Emplacement :",
     "invalid_price": "Prix invalide",
     "invalid_quantity": "Quantité invalide",

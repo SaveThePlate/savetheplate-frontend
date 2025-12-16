@@ -16,7 +16,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { LocalStorage } from "@/lib/utils";
 
 export default function SignIn() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -306,36 +306,40 @@ export default function SignIn() {
             )}
           </form>
 
-          {/* Separator */}
-          <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+          {/* Google Sign In - Only show if configured */}
+          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+            <>
+              {/* Separator */}
+              <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
 
-          {/* Google Sign In */}
-          <div className="w-full flex justify-center relative z-10">
-            {googleLoading ? (
-              <Button
-                disabled
-                className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
-              >
-                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                {t("signin.google_signing_in") || "Signing in..."}
-              </Button>
-            ) : (
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap={false}
-                theme="outline"
-                size="large"
-                text="signin_with"
-                shape="rectangular"
-                locale="en"
-                width="100%"
-              />
-            )}
-          </div>
+              <div className="w-full flex justify-center relative z-10">
+                {googleLoading ? (
+                  <Button
+                    disabled
+                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
+                  >
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    {t("signin.google_signing_in") || "Signing in..."}
+                  </Button>
+                ) : (
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap={false}
+                    theme="outline"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    locale={language}
+                    width="100%"
+                  />
+                )}
+              </div>
 
-          {/* Separator */}
-          <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+              {/* Separator */}
+              <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+            </>
+          )}
 
           {showAuthToast && AuthToast}
           {showErrorToast && <ErrorToast message={errorMessage} />}
