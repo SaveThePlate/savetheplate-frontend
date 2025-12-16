@@ -642,17 +642,19 @@ const OrderCard: React.FC<{
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
+    const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const atStr = t("common.at") || "à";
 
     if (date.toDateString() === today.toDateString()) {
-      return `Today at ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      return `${t("common.today")} ${atStr} ${timeStr}`;
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday at ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      return `${t("common.yesterday") || "Hier"} ${atStr} ${timeStr}`;
     } else {
       return date.toLocaleDateString([], { 
         month: "short", 
         day: "numeric", 
         year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined
-      }) + ` at ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      }) + ` ${atStr} ${timeStr}`;
     }
   };
 
