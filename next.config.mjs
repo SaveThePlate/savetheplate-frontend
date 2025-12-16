@@ -127,6 +127,10 @@ const nextConfig = {
             key: 'Content-Security-Policy-Report-Only',
             value: csp,
           },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
         ],
       },
     ];

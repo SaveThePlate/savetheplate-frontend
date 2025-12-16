@@ -271,11 +271,18 @@ export default function SignIn() {
             {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
           </h1>
 
-          <p className="text-gray-700 text-sm sm:text-base mb-6 font-medium animate-fadeInUp">
+          <p className="text-gray-700 text-sm sm:text-base mb-4 font-medium animate-fadeInUp">
             {!isNewUser
               ? t("signin.description_new")
               : t("signin.description_back")}
           </p>
+
+          {/* Passwordless notice */}
+          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <p className="text-sm text-blue-800 font-medium">
+              {t("signin.passwordless_notice")}
+            </p>
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col items-center w-full space-y-4 relative z-10">
@@ -350,6 +357,11 @@ export default function SignIn() {
             {!isNewUser
               ? t("signin.footer_new")
               : t("signin.footer_back")}
+          </p>
+          
+          {/* Spam folder reminder */}
+          <p className="mt-2 text-center font-medium text-xs sm:text-sm text-amber-700">
+            {t("signin.check_spam")}
           </p>
         </main>
       </div>
