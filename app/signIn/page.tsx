@@ -484,7 +484,22 @@ export default function SignIn() {
           // Log backend error details for debugging
           const errorDetails = err?.response?.data;
           console.error("Backend Facebook auth error (500):", errorDetails);
-          userMessage = `Server error during Facebook authentication. ${errorDetails?.message ? `Error: ${errorDetails.message}` : 'Please check the backend logs.'}`;
+          
+          // Try to extract more detailed error message from backend response
+          let detailedError = '';
+          if (errorDetails?.message) {
+            if (typeof errorDetails.message === 'object') {
+              detailedError = JSON.stringify(errorDetails.message);
+            } else {
+              detailedError = errorDetails.message;
+            }
+          } else if (errorDetails?.error) {
+            detailedError = typeof errorDetails.error === 'string' 
+              ? errorDetails.error 
+              : JSON.stringify(errorDetails.error);
+          }
+          
+          userMessage = `Server error during Facebook authentication. ${detailedError ? `Error: ${detailedError}` : 'Please check the backend logs. The backend may be experiencing issues with Facebook OAuth configuration.'}`;
         } else if (err?.isNetworkError || 
             err?.status === 502 || 
             err?.status === 503 ||

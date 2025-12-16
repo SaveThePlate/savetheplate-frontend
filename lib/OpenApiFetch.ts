@@ -23,9 +23,12 @@ const useOpenApiFetch = () => {
   
   // Create client without any global configuration to avoid token conflicts
   // We'll pass the token in each request individually
+  // Note: We explicitly don't set TOKEN or HEADERS in createClient to avoid
+  // the "overriding current access token" warning from openapi-fetch
   const baseClient = createClient<paths>({
     baseUrl: getBaseUrl(),
     // Don't set headers here - pass them per request to avoid global conflicts
+    // This prevents the "overriding current access token" warning
   });
 
   function wrapper<T extends Function>(originalFn: T): T {
