@@ -112,7 +112,14 @@
     "pending_orders_single": "Vous avez {count} commande en attente.",
     "pending_orders_plural": "Vous avez {count} commandes en attente.",
     "pending_reminder": "N'oubliez pas de les récupérer et de les confirmer à temps !",
-    "view_orders": "Voir les Commandes"
+    "view_orders": "Voir les Commandes",
+    "carbon_footprint_title": "L'Empreinte Carbone de Notre Site Web",
+    "carbon_footprint_subtitle": "Nous nous engageons en faveur de la durabilité, même dans notre présence numérique",
+    "carbon_per_visit": "Seulement {co2} g de CO₂ par visite de page",
+    "carbon_cleaner_than": "Plus propre que {percentage}% de tous les sites web dans le monde",
+    "sustainable_energy": "Fonctionne avec de l'énergie durable",
+    "learn_more": "En savoir plus sur notre impact carbone",
+    "carbon_badge": "🌱 Site Web Neutre en Carbone"
   },
   "provider": {
     "home": {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import CarbonFootprint from "@/components/CarbonFootprint";
 import { 
   ArrowRight, 
   Leaf, 
@@ -380,6 +381,13 @@ const WelcomePage = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Carbon Footprint Section */}
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div className="w-full mx-auto max-w-2xl lg:max-w-4xl">
+          <CarbonFootprint />
         </div>
       </section>
 
