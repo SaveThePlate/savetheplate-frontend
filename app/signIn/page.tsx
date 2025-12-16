@@ -372,6 +372,11 @@ export default function SignIn() {
 
           {showAuthToast && AuthToast}
           {showErrorToast && <ErrorToast message={errorMessage} />}
+
+          {/* Spam folder reminder */}
+          <p className="mt-4 text-center font-medium text-xs sm:text-sm text-amber-700">
+            {t("signin.check_spam")}
+          </p>
         </main>
       </div>
 

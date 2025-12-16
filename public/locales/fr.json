@@ -99,7 +99,8 @@
     "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
     "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",
     "email_placeholder": "nom@exemple.com",
-    "checking_auth": "Vérification de l'authentification..."
+    "checking_auth": "Vérification de l'authentification...",
+    "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !"
   },
   "home": {
     "pending_orders_single": "Vous avez {count} commande en attente.",
@@ -818,7 +819,8 @@
     "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
     "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",
     "email_placeholder": "nom@exemple.com",
-    "checking_auth": "Vérification de l'authentification..."
+    "checking_auth": "Vérification de l'authentification...",
+    "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !"
   },
   "callback": {
     "verifying": "Vérification de votre lien magique...",
