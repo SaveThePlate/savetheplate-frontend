@@ -147,6 +147,8 @@ export default function SignIn() {
     }
   }
 
+
+
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
@@ -158,6 +160,12 @@ export default function SignIn() {
       </div>
     );
   }
+
+  // Google Login Handler
+  const handleGoogleLogin = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/google-auth/google`;
+    // window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] overflow-x-hidden flex items-center justify-center py-8 sm:py-12">
@@ -212,6 +220,17 @@ export default function SignIn() {
                 {t("signin.sign_in_email")}
               </Button>
             )}
+
+            <Separator className="my-2 w-full" />
+
+            {/* Google Sign-In Button */}
+            <Button
+              onClick={handleGoogleLogin}
+              type="button"
+              className="w-full bg-[#4285F4] hover:bg-[#357ae8] text-white font-semibold py-3 rounded-xl flex items-center justify-center space-x-2 shadow-md transition-all duration-300"
+            >
+              {t("Sign in with Google")}
+            </Button>
           </form>
 
           {/* Separator */}

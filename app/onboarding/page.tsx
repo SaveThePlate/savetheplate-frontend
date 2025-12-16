@@ -39,7 +39,7 @@ const OnboardingPage = () => {
         if (userRole && userRole !== 'NONE') {
           // Map PENDING_PROVIDER to PROVIDER for selection
           setRole(userRole === 'PENDING_PROVIDER' ? 'PROVIDER' : userRole);
-        }
+        } 
       } catch (error) {
         console.error("Error checking current role:", error);
       } finally {
