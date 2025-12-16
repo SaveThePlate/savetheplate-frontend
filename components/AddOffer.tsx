@@ -10,7 +10,6 @@ import Image from "next/image";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
@@ -19,6 +18,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImages, shouldCompress } from "@/utils/imageCompression";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 type UploadedImage = {
   filename: string;
@@ -54,20 +54,6 @@ const AddOffer: React.FC = () => {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
   const [offers, setOffers] = useState<{ price: number; title: string }[]>([]);
-
-  const axiosInstance = axios.create({
-    baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
-    headers: { "Content-Type": "application/json" },
-  });
-
-  axiosInstance.interceptors.request.use((config) => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
 
   useEffect(() => {
     // Keep uploaded images even if localFiles is cleared (they're already uploaded)

@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/comp
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import { getImageFallbacks, resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { compressImages, shouldCompress } from "@/utils/imageCompression";
@@ -139,11 +139,8 @@ const CustomCard: FC<CustomCardProps> = ({
         return;
       }
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        const response = await axiosInstance.get(
+          `/users/get-role`
         );
         setRole(response?.data?.role);
       } catch {
@@ -157,20 +154,6 @@ const CustomCard: FC<CustomCardProps> = ({
     const { name, value } = e.target;
     setLocalData((prev) => ({ ...prev, [name]: value }));
   };
-
-  // Create axios instance for image uploads
-  const axiosInstance = axios.create({
-    baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
-    headers: { "Content-Type": "application/json" },
-  });
-
-  axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
 
   // Upload images function
   const uploadFiles = async (files: File[]): Promise<Array<{
@@ -370,9 +353,7 @@ const CustomCard: FC<CustomCardProps> = ({
         payload.images = JSON.stringify(imagesPayload);
       }
 
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axiosInstance.put(`/offers/${offerId}`, payload);
       toast.success(t("custom_card.offer_updated"));
       setLocalData({
         ...localData,

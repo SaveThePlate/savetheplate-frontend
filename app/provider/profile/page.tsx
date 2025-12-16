@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -366,19 +367,7 @@ const EditProfileDialog: React.FC<{
         }
       }
 
-      // Create axios instance with baseURL and auth interceptor (same as AddOffer)
-      const axiosInstance = axios.create({
-        baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      axiosInstance.interceptors.request.use((config) => {
-        const token = localStorage.getItem("accessToken");
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      });
+      // Use centralized axios instance to avoid token conflicts
 
       const fd = new FormData();
       fd.append("files", fileToUpload);

@@ -4,7 +4,8 @@ import { FC, useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import axios, { CancelTokenSource } from "axios";
+import { CancelTokenSource } from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import { ProviderOfferCardProps, FoodType, Taste } from "./types";
 import { PriceBadge } from "./shared/PriceBadge";
@@ -156,20 +157,6 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     const { name, value } = e.target;
     setLocalData((prev) => ({ ...prev, [name]: value }));
   };
-
-  // Create axios instance for image uploads
-  const axiosInstance = axios.create({
-    baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
-    headers: { "Content-Type": "application/json" },
-  });
-
-  axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
 
   const uploadFiles = async (files: File[]): Promise<Array<{ filename: string; url: string; absoluteUrl: string }>> => {
     // Compress images client-side before upload for faster transfer
@@ -427,8 +414,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         payload.images = JSON.stringify(imagesPayload);
       }
 
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${offerId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axiosInstance.put(`/offers/${offerId}`, payload, {
         signal: abortController.signal,
       });
       

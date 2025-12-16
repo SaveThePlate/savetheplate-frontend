@@ -9,6 +9,7 @@ import useOpenApiFetch from "@/lib/OpenApiFetch";
 import { AuthToast, ErrorToast } from "@/components/Toasts";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
@@ -413,6 +414,7 @@ export default function SignIn() {
       const accessToken = response.authResponse.accessToken;
 
       // Send Facebook access token to backend
+      // Use axios directly (not axiosInstance) since we're authenticating - no token needed
       try {
         const backendResponse = await axios.post(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/facebook`,
@@ -423,6 +425,8 @@ export default function SignIn() {
             headers: {
               'Content-Type': 'application/json',
             },
+            // Don't use axiosInstance here - we're authenticating, so no auth token needed
+            // This prevents token conflicts
           }
         );
 
@@ -467,11 +471,20 @@ export default function SignIn() {
         }
       } catch (err: any) {
         console.error("Failed to authenticate with Facebook:", err);
+        console.error("Error details:", {
+          status: err?.response?.status,
+          statusText: err?.response?.statusText,
+          data: err?.response?.data,
+          message: err?.message,
+        });
         
         let userMessage = "There was an error signing in with Facebook. Please try again.";
         
         if (err?.response?.status === 500) {
-          userMessage = "Server error during Facebook authentication. Please try again or contact support if the issue persists.";
+          // Log backend error details for debugging
+          const errorDetails = err?.response?.data;
+          console.error("Backend Facebook auth error (500):", errorDetails);
+          userMessage = `Server error during Facebook authentication. ${errorDetails?.message ? `Error: ${errorDetails.message}` : 'Please check the backend logs.'}`;
         } else if (err?.isNetworkError || 
             err?.status === 502 || 
             err?.status === 503 ||
