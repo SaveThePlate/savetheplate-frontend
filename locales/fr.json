@@ -99,8 +99,6 @@
     "passwordless_notice": "🔐 Authentification sans mot de passe — aucun mot de passe requis ! Entrez simplement votre email et nous vous enverrons un lien magique.",
     "sign_in_email": "Se connecter avec l'email",
     "sending": "Envoi...",
-    "footer_new": "Vérifiez votre boîte de réception pour compléter votre inscription 💌",
-    "footer_back": "Nous avons envoyé votre lien magique — vérifiez votre email ✉️",
     "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !",
     "google_signing_in": "Connexion avec Google...",
     "google_error": "La connexion Google a été annulée ou a échoué. Veuillez réessayer."

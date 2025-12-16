@@ -156,11 +156,21 @@ export default function SignIn() {
     setShowAuthToast(false);
 
     try {
+      // Validate credential exists
+      if (!credentialResponse?.credential) {
+        throw new Error("No credential received from Google");
+      }
+
       // Send Google credential to backend
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`,
         {
           credential: credentialResponse.credential,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -206,10 +216,21 @@ export default function SignIn() {
       }
     } catch (err: any) {
       console.error("Failed to authenticate with Google:", err);
+      console.error("Error details:", {
+        status: err?.response?.status,
+        statusText: err?.response?.statusText,
+        data: err?.response?.data,
+        message: err?.message,
+        credentialLength: credentialResponse?.credential?.length,
+      });
       
       let userMessage = "There was an error signing in with Google. Please try again.";
       
-      if (err?.isNetworkError || 
+      // Handle 500 Internal Server Error specifically
+      if (err?.response?.status === 500) {
+        userMessage = "Server error during Google authentication. Please try again or contact support if the issue persists.";
+        console.error("Backend returned 500 error. This is a server-side issue. Response data:", err?.response?.data);
+      } else if (err?.isNetworkError || 
           err?.status === 502 || 
           err?.status === 503 ||
           err?.message?.includes("Server is temporarily unavailable") ||
@@ -351,18 +372,6 @@ export default function SignIn() {
 
           {showAuthToast && AuthToast}
           {showErrorToast && <ErrorToast message={errorMessage} />}
-
-          {/* Footer */}
-          <p className="mt-4 text-center font-light text-xs sm:text-sm text-gray-500">
-            {!isNewUser
-              ? t("signin.footer_new")
-              : t("signin.footer_back")}
-          </p>
-          
-          {/* Spam folder reminder */}
-          <p className="mt-2 text-center font-medium text-xs sm:text-sm text-amber-700">
-            {t("signin.check_spam")}
-          </p>
         </main>
       </div>
 

@@ -94,9 +94,7 @@
     "description_new": "Join us in reducing food waste and saving the planet, one meal at a time 🌍",
     "description_back": "We're happy to have you back! Keep rescuing meals 🌿",
     "sign_in_email": "Sign In with Email",
-    "sending": "Sending...",
-    "footer_new": "Check your inbox to complete your registration 💌",
-    "footer_back": "We've sent your magic link — check your email ✉️"
+    "sending": "Sending..."
   },
   "home": {
     "pending_orders_single": "You have {count} pending order.",

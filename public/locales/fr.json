@@ -95,8 +95,6 @@
     "description_back": "Nous sommes heureux de vous revoir ! Continuez à sauver des repas 🌿",
     "sign_in_email": "Se connecter avec l'email",
     "sending": "Envoi...",
-    "footer_new": "Vérifiez votre boîte de réception pour compléter votre inscription 💌",
-    "footer_back": "Nous avons envoyé votre lien magique — vérifiez votre email ✉️",
     "error_sending_link": "Une erreur s'est produite lors de l'envoi du lien magique. Veuillez réessayer.",
     "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
     "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",

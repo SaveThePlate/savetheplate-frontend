@@ -99,8 +99,6 @@
     "passwordless_notice": "🔐 Passwordless authentication — no password needed! Just enter your email and we'll send you a magic link.",
     "sign_in_email": "Sign In with Email",
     "sending": "Sending...",
-    "footer_new": "Check your inbox to complete your registration 💌",
-    "footer_back": "We've sent your magic link — check your email ✉️",
     "check_spam": "📧 Don't forget to check your spam folder if you don't see the email!",
     "google_signing_in": "Signing in with Google...",
     "google_error": "Google sign-in was cancelled or failed. Please try again."
