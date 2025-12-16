@@ -96,7 +96,9 @@
     "sign_in_email": "Se connecter avec l'email",
     "sending": "Envoi...",
     "footer_new": "Vérifiez votre boîte de réception pour compléter votre inscription 💌",
-    "footer_back": "Nous avons envoyé votre lien magique — vérifiez votre email ✉️"
+    "footer_back": "Nous avons envoyé votre lien magique — vérifiez votre email ✉️",
+    "google_signing_in": "Connexion avec Google...",
+    "google_error": "La connexion Google a été annulée ou a échoué. Veuillez réessayer."
   },
   "home": {
     "pending_orders_single": "Vous avez {count} commande en attente.",

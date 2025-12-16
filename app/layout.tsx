@@ -6,6 +6,7 @@ import { UserProvider } from "@/context/UserContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export const metadata: Metadata = {
   title: "Save the plate app",
@@ -41,8 +42,9 @@ export default function RootLayout({
       </head>
       <body className="flex flex-col min-h-screen bg-white safe-area-inset">
         <ErrorBoundary>
-          <UserProvider>
-            <LanguageProvider>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+            <UserProvider>
+              <LanguageProvider>
               {/* Google Analytics - gtag.js */}
               <Script
                 src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
@@ -67,6 +69,7 @@ export default function RootLayout({
               />
             </LanguageProvider>
           </UserProvider>
+          </GoogleOAuthProvider>
         </ErrorBoundary>
       </body>
     </html>

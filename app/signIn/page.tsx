@@ -12,6 +12,8 @@ import axios from "axios";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { GoogleLogin } from "@react-oauth/google";
+import { LocalStorage } from "@/lib/utils";
 
 export default function SignIn() {
   const { t } = useLanguage();
@@ -22,6 +24,7 @@ export default function SignIn() {
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const clientApi = useOpenApiFetch();
   const router = useRouter();
@@ -147,6 +150,95 @@ export default function SignIn() {
     }
   }
 
+  async function handleGoogleSuccess(credentialResponse: any) {
+    setGoogleLoading(true);
+    setShowErrorToast(false);
+    setShowAuthToast(false);
+
+    try {
+      // Send Google credential to backend
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`,
+        {
+          credential: credentialResponse.credential,
+        }
+      );
+
+      // Check if response has tokens
+      if (response.data?.accessToken && response.data?.refreshToken) {
+        // Store tokens
+        LocalStorage.setItem("refresh-token", response.data.refreshToken);
+        LocalStorage.setItem("accessToken", response.data.accessToken);
+        LocalStorage.removeItem("remember");
+
+        // Determine redirect based on user's role
+        const role = response.data.role || response.data.user?.role;
+        let redirectTo = '/onboarding'; // Default for new users
+
+        // If user has a valid role, determine redirect
+        if (role === 'PROVIDER') {
+          // Check if provider has submitted location details
+          try {
+            const userDetails = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+              { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
+            );
+            const { phoneNumber, mapsLink } = userDetails.data || {};
+            if (!phoneNumber || !mapsLink) {
+              redirectTo = '/onboarding/fillDetails';
+            } else {
+              redirectTo = '/provider/home';
+            }
+          } catch (error) {
+            console.error("Error fetching user details:", error);
+            redirectTo = '/onboarding/fillDetails';
+          }
+        } else if (role === 'PENDING_PROVIDER') {
+          redirectTo = '/onboarding/thank-you';
+        } else if (role === 'CLIENT') {
+          redirectTo = '/client/home';
+        }
+
+        // Redirect user
+        router.push(redirectTo);
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err: any) {
+      console.error("Failed to authenticate with Google:", err);
+      
+      let userMessage = "There was an error signing in with Google. Please try again.";
+      
+      if (err?.isNetworkError || 
+          err?.status === 502 || 
+          err?.status === 503 ||
+          err?.message?.includes("Server is temporarily unavailable") ||
+          err?.message?.includes("Network error")) {
+        userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
+      } else if (err?.message?.includes("CORS") || 
+                 err?.message?.includes("Access-Control") ||
+                 err?.message?.includes("Failed to fetch")) {
+        userMessage = "Unable to connect to the server. Please check your connection and try again.";
+      } else if (err?.response?.data || err?.data) {
+        userMessage = sanitizeErrorMessage(err, {
+          action: "sign in with Google",
+          defaultMessage: "There was an error signing in with Google. Please try again."
+        });
+      }
+      
+      setErrorMessage(userMessage);
+      setShowErrorToast(true);
+      setGoogleLoading(false);
+    }
+  }
+
+  function handleGoogleError() {
+    console.error("Google sign-in failed");
+    setErrorMessage(t("signin.google_error") || "Google sign-in was cancelled or failed. Please try again.");
+    setShowErrorToast(true);
+    setGoogleLoading(false);
+  }
+
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
@@ -213,6 +305,34 @@ export default function SignIn() {
               </Button>
             )}
           </form>
+
+          {/* Separator */}
+          <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+
+          {/* Google Sign In */}
+          <div className="w-full flex justify-center relative z-10">
+            {googleLoading ? (
+              <Button
+                disabled
+                className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
+              >
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                {t("signin.google_signing_in") || "Signing in..."}
+              </Button>
+            ) : (
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                useOneTap={false}
+                theme="outline"
+                size="large"
+                text="signin_with"
+                shape="rectangular"
+                locale="en"
+                width="100%"
+              />
+            )}
+          </div>
 
           {/* Separator */}
           <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />

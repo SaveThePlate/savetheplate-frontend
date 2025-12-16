@@ -96,7 +96,9 @@
     "sign_in_email": "Sign In with Email",
     "sending": "Sending...",
     "footer_new": "Check your inbox to complete your registration 💌",
-    "footer_back": "We've sent your magic link — check your email ✉️"
+    "footer_back": "We've sent your magic link — check your email ✉️",
+    "google_signing_in": "Signing in with Google...",
+    "google_error": "Google sign-in was cancelled or failed. Please try again."
   },
   "home": {
     "pending_orders_single": "You have {count} pending order.",

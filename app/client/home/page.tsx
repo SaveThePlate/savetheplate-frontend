@@ -5,7 +5,7 @@ import Offers from "@/components/Offers";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
@@ -14,7 +14,6 @@ const Home = () => {
   const [error, setError] = useState<string | null>(null);
   const [offers, setOffers] = useState<{ id: number; title: string; latitude: number; longitude: number }[]>([]);
   const [pendingCount, setPendingCount] = useState<number>(0);
-  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const { t } = useLanguage();
   const isMountedRef = useRef(true);
@@ -26,13 +25,9 @@ const Home = () => {
     };
   }, []);
 
-  // Fetch offers function - can be called to refresh
-  const fetchOffers = React.useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
+  // Fetch offers function
+  const fetchOffers = React.useCallback(async () => {
+    setLoading(true);
 
     try {
       const token = localStorage.getItem("accessToken");
@@ -88,7 +83,7 @@ const Home = () => {
         setError(null);
       } else {
         console.error("Failed to fetch offers:", offersResponse.reason);
-        if (!isRefresh && isMountedRef.current) {
+        if (isMountedRef.current) {
           const errorMsg = sanitizeErrorMessage(offersResponse.reason, {
             action: "load offers",
             defaultMessage: t("client.home.fetch_offers_failed") || "Unable to load offers. Please try again later."
@@ -110,7 +105,7 @@ const Home = () => {
       }
     } catch (fetchError) {
       console.error("Failed to fetch data:", fetchError);
-      if (!isRefresh && isMountedRef.current) {
+      if (isMountedRef.current) {
         const errorMsg = sanitizeErrorMessage(fetchError, {
           action: "load offers",
           defaultMessage: "Unable to load offers. Please check your connection and try again."
@@ -120,7 +115,6 @@ const Home = () => {
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
-        setRefreshing(false);
       }
     }
   }, [router, t]);
@@ -182,16 +176,6 @@ const Home = () => {
               {t("offers.discover_meals")}
             </p>
           </div>
-          <button
-            data-tour="refresh-button"
-            onClick={() => fetchOffers(true)}
-            disabled={refreshing || loading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-            title="Refresh offers to see latest available meals"
-          >
-            <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
-            <span className="hidden sm:inline">{t("common.refresh")}</span>
-          </button>
         </div>
 
         {/* Offers List */}
