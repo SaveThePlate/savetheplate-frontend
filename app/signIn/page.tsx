@@ -25,6 +25,7 @@ export default function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
 
   const clientApi = useOpenApiFetch();
   const router = useRouter();
@@ -260,6 +261,135 @@ export default function SignIn() {
     setGoogleLoading(false);
   }
 
+  function handleFacebookLogin() {
+    setFacebookLoading(true);
+    setShowErrorToast(false);
+    setShowAuthToast(false);
+
+    try {
+      // Check if Facebook SDK is loaded
+      if (typeof window === 'undefined' || !(window as any).FB) {
+        throw new Error("Facebook SDK not loaded");
+      }
+
+      // Check if we're on HTTPS (required for FB.login)
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        setErrorMessage("Facebook login requires HTTPS. Please use the production URL.");
+        setShowErrorToast(true);
+        setFacebookLoading(false);
+        return;
+      }
+
+      // Login with Facebook - use regular function, not async
+      (window as any).FB.login(
+        (response: any) => {
+          // Handle the response in a separate async function
+          handleFacebookResponse(response);
+        },
+        { scope: 'email,public_profile' }
+      );
+    } catch (err: any) {
+      console.error("Facebook login error:", err);
+      setErrorMessage(t("signin.facebook_error") || "Facebook sign-in failed. Please try again.");
+      setShowErrorToast(true);
+      setFacebookLoading(false);
+    }
+  }
+
+  async function handleFacebookResponse(response: any) {
+    if (response.authResponse) {
+      // Get user access token
+      const accessToken = response.authResponse.accessToken;
+
+      // Send Facebook access token to backend
+      try {
+        const backendResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/facebook`,
+          {
+            accessToken: accessToken,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        // Check if response has tokens
+        if (backendResponse.data?.accessToken && backendResponse.data?.refreshToken) {
+          // Store tokens
+          LocalStorage.setItem("refresh-token", backendResponse.data.refreshToken);
+          LocalStorage.setItem("accessToken", backendResponse.data.accessToken);
+          LocalStorage.removeItem("remember");
+
+          // Determine redirect based on user's role
+          const role = backendResponse.data.role || backendResponse.data.user?.role;
+          let redirectTo = '/onboarding'; // Default for new users
+
+          // If user has a valid role, determine redirect
+          if (role === 'PROVIDER') {
+            try {
+              const userDetails = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                { headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` } }
+              );
+              const { phoneNumber, mapsLink } = userDetails.data || {};
+              if (!phoneNumber || !mapsLink) {
+                redirectTo = '/onboarding/fillDetails';
+              } else {
+                redirectTo = '/provider/home';
+              }
+            } catch (error) {
+              console.error("Error fetching user details:", error);
+              redirectTo = '/onboarding/fillDetails';
+            }
+          } else if (role === 'PENDING_PROVIDER') {
+            redirectTo = '/onboarding/thank-you';
+          } else if (role === 'CLIENT') {
+            redirectTo = '/client/home';
+          }
+
+          // Redirect user
+          router.push(redirectTo);
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      } catch (err: any) {
+        console.error("Failed to authenticate with Facebook:", err);
+        
+        let userMessage = "There was an error signing in with Facebook. Please try again.";
+        
+        if (err?.response?.status === 500) {
+          userMessage = "Server error during Facebook authentication. Please try again or contact support if the issue persists.";
+        } else if (err?.isNetworkError || 
+            err?.status === 502 || 
+            err?.status === 503 ||
+            err?.message?.includes("Server is temporarily unavailable") ||
+            err?.message?.includes("Network error")) {
+          userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
+        } else if (err?.message?.includes("CORS") || 
+                   err?.message?.includes("Access-Control") ||
+                   err?.message?.includes("Failed to fetch")) {
+          userMessage = "Unable to connect to the server. Please check your connection and try again.";
+        } else if (err?.response?.data || err?.data) {
+          userMessage = sanitizeErrorMessage(err, {
+            action: "sign in with Facebook",
+            defaultMessage: "There was an error signing in with Facebook. Please try again."
+          });
+        }
+        
+        setErrorMessage(userMessage);
+        setShowErrorToast(true);
+        setFacebookLoading(false);
+      }
+    } else {
+      // User cancelled or login failed
+      setErrorMessage(t("signin.facebook_error") || "Facebook sign-in was cancelled or failed. Please try again.");
+      setShowErrorToast(true);
+      setFacebookLoading(false);
+    }
+  }
+
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
@@ -334,34 +464,62 @@ export default function SignIn() {
             )}
           </form>
 
-          {/* Google Sign In - Only show if configured */}
-          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+          {/* Social Sign In - Google and Facebook */}
+          {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) && (
             <>
               {/* Separator */}
               <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
 
-              <div className="w-full flex justify-center relative z-10">
-                {googleLoading ? (
-                  <Button
-                    disabled
-                    className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
-                  >
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                    {t("signin.google_signing_in") || "Signing in..."}
-                  </Button>
-                ) : (
+              <div className="w-full space-y-3 relative z-10">
+                {/* Google Sign In */}
+                {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
                   <div className="w-full flex justify-center">
-                    <GoogleLogin
-                      onSuccess={handleGoogleSuccess}
-                      onError={handleGoogleError}
-                      useOneTap={false}
-                      theme="outline"
-                      size="large"
-                      text="signin_with"
-                      shape="rectangular"
-                      locale={language}
-                    />
+                    {googleLoading ? (
+                      <Button
+                        disabled
+                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
+                      >
+                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                        {t("signin.google_signing_in") || "Signing in..."}
+                      </Button>
+                    ) : (
+                      <div className="w-full flex justify-center">
+                        <GoogleLogin
+                          onSuccess={handleGoogleSuccess}
+                          onError={handleGoogleError}
+                          useOneTap={false}
+                          theme="outline"
+                          size="large"
+                          text="signin_with"
+                          shape="rectangular"
+                          locale={language}
+                        />
+                      </div>
+                    )}
                   </div>
+                )}
+
+                {/* Facebook Sign In */}
+                {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
+                  <Button
+                    onClick={handleFacebookLogin}
+                    disabled={facebookLoading}
+                    className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 rounded-xl flex justify-center items-center gap-2 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {facebookLoading ? (
+                      <>
+                        <ReloadIcon className="h-4 w-4 animate-spin" />
+                        {t("signin.facebook_signing_in") || "Signing in with Facebook..."}
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        {t("signin.facebook_sign_in") || "Sign in with Facebook"}
+                      </>
+                    )}
+                  </Button>
                 )}
               </div>
 

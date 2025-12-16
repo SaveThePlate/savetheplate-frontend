@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import FacebookSDK from "@/components/FacebookSDK";
 
 export const metadata: Metadata = {
   title: "Save the plate app",
@@ -35,6 +36,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space"} />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
         {/* Prefetch critical routes */}
         <link rel="prefetch" href="/client/home" />
         <link rel="prefetch" href="/provider/home" />
@@ -57,6 +60,8 @@ export default function RootLayout({
 
                 gtag('config', 'G-CVCP72DH21');`}
               </Script>
+              {/* Facebook SDK */}
+              <FacebookSDK />
 
               <main className="flex-1">
                 {children}

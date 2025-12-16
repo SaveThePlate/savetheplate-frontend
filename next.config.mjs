@@ -113,7 +113,7 @@ const nextConfig = {
       "media-src 'self' data: blob: https:",
       `connect-src 'self' ${backendUrl} http://localhost:*/ https: ws: wss:`,
       "font-src 'self' data: https:",
-      "frame-src 'self' https://accounts.google.com https://*.google.com",
+      "frame-src 'self' https://accounts.google.com https://*.google.com https://*.facebook.com https://www.facebook.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

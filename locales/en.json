@@ -101,7 +101,10 @@
     "sending": "Sending...",
     "check_spam": "📧 Don't forget to check your spam folder if you don't see the email!",
     "google_signing_in": "Signing in with Google...",
-    "google_error": "Google sign-in was cancelled or failed. Please try again."
+    "google_error": "Google sign-in was cancelled or failed. Please try again.",
+    "facebook_sign_in": "Sign in with Facebook",
+    "facebook_signing_in": "Signing in with Facebook...",
+    "facebook_error": "Facebook sign-in was cancelled or failed. Please try again."
   },
   "home": {
     "pending_orders_single": "You have {count} pending order.",

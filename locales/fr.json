@@ -101,7 +101,10 @@
     "sending": "Envoi...",
     "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !",
     "google_signing_in": "Connexion avec Google...",
-    "google_error": "La connexion Google a été annulée ou a échoué. Veuillez réessayer."
+    "google_error": "La connexion Google a été annulée ou a échoué. Veuillez réessayer.",
+    "facebook_sign_in": "Se connecter avec Facebook",
+    "facebook_signing_in": "Connexion avec Facebook...",
+    "facebook_error": "La connexion Facebook a été annulée ou a échoué. Veuillez réessayer."
   },
   "home": {
     "pending_orders_single": "Vous avez {count} commande en attente.",

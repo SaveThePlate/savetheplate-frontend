@@ -11,7 +11,8 @@
     "gen-apis": "npx openapi-typescript http://localhost:3001/api-yaml -o ./generated/api/schema.d.ts -t --additional-properties --empty-objects-unknown",
     "gen-types": "npx @kalissaac/prisma-typegen ./generated/types/prismaTypes.ts ../leftover-backend/prisma/schema.prisma",
     "test:websocket": "node test-websocket.js",
-    "test:google-auth": "node test-google-auth.js"
+    "test:google-auth": "node test-google-auth.js",
+    "test:facebook-auth": "node test-facebook-auth.js"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.8",
