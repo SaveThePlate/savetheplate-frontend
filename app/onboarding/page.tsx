@@ -17,7 +17,6 @@ const OnboardingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if user already has a role and pre-select it
   useEffect(() => {
     const checkCurrentRole = async () => {
       try {
@@ -34,14 +33,14 @@ const OnboardingPage = () => {
           }
         );
 
-        const userRole = response?.data?.role;
-        // Pre-select the role if user already has one (PROVIDER, CLIENT, or PENDING_PROVIDER)
+        const userRole = response.data?.role;
+
+        // 4️⃣ Preselect role if exists
         if (userRole && userRole !== 'NONE') {
-          // Map PENDING_PROVIDER to PROVIDER for selection
           setRole(userRole === 'PENDING_PROVIDER' ? 'PROVIDER' : userRole);
-        } 
+        }
       } catch (error) {
-        console.error("Error checking current role:", error);
+        console.error('Error checking current role:', error);
       } finally {
         setLoading(false);
       }
