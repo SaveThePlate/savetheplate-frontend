@@ -322,6 +322,12 @@ const CreateMagicBoxPage = () => {
                 )}
                 {(!originalPrice[selectedSize] || parseFloat(originalPrice[selectedSize]) <= rescuePackOptions[selectedSize].price) && t("create_magic_box.original_price_hint")}
               </p>
+              <p className="text-xs text-blue-600 mt-2 bg-blue-50 p-2 rounded border border-blue-200">
+                {t("create_magic_box.commission_notice", { 
+                  price: rescuePackOptions[selectedSize].price.toFixed(2), 
+                  finalPrice: (rescuePackOptions[selectedSize].price + 1).toFixed(2) 
+                })}
+              </p>
             </div>
           </div>
 

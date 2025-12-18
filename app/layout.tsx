@@ -6,6 +6,8 @@ import { UserProvider } from "@/context/UserContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import FacebookSDK from "@/components/FacebookSDK";
 
 export const metadata: Metadata = {
   title: "Save the plate app",
@@ -22,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         {/* Mobile viewport optimization */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -34,6 +36,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space"} />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
         {/* Prefetch critical routes */}
         <link rel="prefetch" href="/client/home" />
         <link rel="prefetch" href="/provider/home" />
@@ -41,8 +45,9 @@ export default function RootLayout({
       </head>
       <body className="flex flex-col min-h-screen bg-white safe-area-inset">
         <ErrorBoundary>
-          <UserProvider>
-            <LanguageProvider>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+            <UserProvider>
+              <LanguageProvider>
               {/* Google Analytics - gtag.js */}
               <Script
                 src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
@@ -55,6 +60,8 @@ export default function RootLayout({
 
                 gtag('config', 'G-CVCP72DH21');`}
               </Script>
+              {/* Facebook SDK */}
+              <FacebookSDK />
 
               <main className="flex-1">
                 {children}
@@ -67,6 +74,7 @@ export default function RootLayout({
               />
             </LanguageProvider>
           </UserProvider>
+          </GoogleOAuthProvider>
         </ErrorBoundary>
       </body>
     </html>

@@ -37,6 +37,9 @@
       --chart-3: 197 37% 24%;
       --chart-4: 43 74% 66%;
       --chart-5: 27 87% 67%;
+      
+      /* Responsive scaling factor - smaller screens get smaller base size */
+      --scale-factor: 1;
     }
 
     .dark {
@@ -71,8 +74,93 @@
     * {
       @apply border-border;
     }
+    
+    html {
+      /* Fluid base font size that scales smoothly based on viewport */
+      /* Scales from 13px on small screens to 16px on larger screens */
+      font-size: clamp(13px, 1.5vw + 10px, 16px);
+    }
+    
     body {
       @apply bg-background text-foreground;
+    }
+  }
+  
+  @layer utilities {
+    /* Utility classes for fluid sizing that scale proportionally */
+    .text-fluid-xs {
+      font-size: clamp(0.625rem, 1.5vw + 0.5rem, 0.75rem);
+    }
+    
+    .text-fluid-sm {
+      font-size: clamp(0.75rem, 1.5vw + 0.625rem, 0.875rem);
+    }
+    
+    .text-fluid-base {
+      font-size: clamp(0.875rem, 1.5vw + 0.75rem, 1rem);
+    }
+    
+    .text-fluid-lg {
+      font-size: clamp(1rem, 1.5vw + 0.875rem, 1.125rem);
+    }
+    
+    .text-fluid-xl {
+      font-size: clamp(1.125rem, 1.5vw + 1rem, 1.25rem);
+    }
+    
+    .text-fluid-2xl {
+      font-size: clamp(1.25rem, 1.5vw + 1.125rem, 1.5rem);
+    }
+    
+    .text-fluid-3xl {
+      font-size: clamp(1.5rem, 2vw + 1.25rem, 1.875rem);
+    }
+    
+    .text-fluid-4xl {
+      font-size: clamp(1.875rem, 2.5vw + 1.5rem, 2.25rem);
+    }
+    
+    /* Fluid spacing utilities */
+    .space-fluid-1 {
+      gap: clamp(0.25rem, 0.5vw + 0.125rem, 0.5rem);
+    }
+    
+    .space-fluid-2 {
+      gap: clamp(0.5rem, 1vw + 0.25rem, 1rem);
+    }
+    
+    .space-fluid-4 {
+      gap: clamp(1rem, 1.5vw + 0.5rem, 1.5rem);
+    }
+    
+    .space-fluid-6 {
+      gap: clamp(1.5rem, 2vw + 1rem, 2rem);
+    }
+    
+    /* Fluid padding utilities */
+    .p-fluid-sm {
+      padding: clamp(0.5rem, 1vw + 0.25rem, 1rem);
+    }
+    
+    .p-fluid-md {
+      padding: clamp(1rem, 1.5vw + 0.5rem, 1.5rem);
+    }
+    
+    .p-fluid-lg {
+      padding: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+    }
+    
+    /* Fluid border radius */
+    .rounded-fluid {
+      border-radius: clamp(0.5rem, 1vw + 0.25rem, 1rem);
+    }
+    
+    .rounded-fluid-lg {
+      border-radius: clamp(0.75rem, 1.5vw + 0.5rem, 1.5rem);
+    }
+    
+    .rounded-fluid-xl {
+      border-radius: clamp(1rem, 2vw + 0.75rem, 2rem);
     }
   }
 

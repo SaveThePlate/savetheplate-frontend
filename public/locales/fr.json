@@ -40,15 +40,11 @@
     "available": "disponible",
     "left": "restant",
     "today": "Aujourd'hui",
-    "yesterday": "Hier",
     "between": "entre",
     "at": "à",
     "open_in_maps": "Ouvrir dans Maps",
     "view_on_maps": "Voir sur Maps →",
     "free": "Gratuit",
-    "saved": "ÉCONOMISÉ",
-    "item": "article",
-    "items": "articles",
     "optional": "Optionnel"
   },
   "landing": {
@@ -91,38 +87,27 @@
     "start_listing": "Commencer à Lister",
     "ready_title": "Prêt à Faire une Différence ?",
     "ready_desc": "Rejoignez notre communauté de sauveteurs alimentaires et commencez à économiser de l'argent tout en aidant la planète dès aujourd'hui.",
-    "illustration_alt": "Illustration Save The Plate",
-    "meals_saved": "Repas Sauvés",
-    "local_partners": "Partenaires Locaux",
-    "happy_users": "Utilisateurs Heureux"
+    "illustration_alt": "Illustration Save The Plate"
   },
   "signin": {
     "welcome_new": "Bienvenue sur SaveThePlate ! 🥳",
     "welcome_back": "Content de vous revoir ! 🥰",
     "description_new": "Rejoignez-nous pour réduire le gaspillage alimentaire et sauver la planète, un repas à la fois 🌍",
     "description_back": "Nous sommes heureux de vous revoir ! Continuez à sauver des repas 🌿",
-    "passwordless_notice": "🔐 Authentification sans mot de passe — aucun mot de passe requis ! Entrez simplement votre email et nous vous enverrons un lien magique.",
     "sign_in_email": "Se connecter avec l'email",
     "sending": "Envoi...",
-    "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !",
-    "google_signing_in": "Connexion avec Google...",
-    "google_error": "La connexion Google a été annulée ou a échoué. Veuillez réessayer.",
-    "facebook_sign_in": "Se connecter avec Facebook",
-    "facebook_signing_in": "Connexion avec Facebook...",
-    "facebook_error": "La connexion Facebook a été annulée ou a échoué. Veuillez réessayer."
+    "error_sending_link": "Une erreur s'est produite lors de l'envoi du lien magique. Veuillez réessayer.",
+    "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
+    "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",
+    "email_placeholder": "nom@exemple.com",
+    "checking_auth": "Vérification de l'authentification...",
+    "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !"
   },
   "home": {
     "pending_orders_single": "Vous avez {count} commande en attente.",
     "pending_orders_plural": "Vous avez {count} commandes en attente.",
     "pending_reminder": "N'oubliez pas de les récupérer et de les confirmer à temps !",
-    "view_orders": "Voir les Commandes",
-    "carbon_footprint_title": "L'Empreinte Carbone de Notre Site Web",
-    "carbon_footprint_subtitle": "Nous nous engageons en faveur de la durabilité, même dans notre présence numérique",
-    "carbon_per_visit": "Seulement {co2} g de CO₂ par visite de page",
-    "carbon_cleaner_than": "Plus propre que {percentage}% de tous les sites web dans le monde",
-    "sustainable_energy": "Fonctionne avec de l'énergie durable",
-    "learn_more": "En savoir plus sur notre impact carbone",
-    "carbon_badge": "🌱 Site Web Neutre en Carbone"
+    "view_orders": "Voir les Commandes"
   },
   "provider": {
     "home": {
@@ -153,10 +138,6 @@
       "no_results": "Aucune offre ne correspond à vos critères de recherche. Essayez d'ajuster vos filtres.",
       "empty_state_title": "Vous n'avez pas encore d'offres publiées. Commencez par en créer une !",
       "empty_state_description": "Commencez par créer votre première offre pour atteindre plus de clients !",
-      "status_label": "Statut",
-      "category": "Catégorie",
-      "taste": "Goût",
-      "sort_by": "Trier par",
       "status": {
         "active": "Active",
         "low_stock": "Stock Faible"
@@ -170,15 +151,12 @@
       "taste_sweet": "🍰 Sucré",
       "taste_salty": "🧂 Salé",
       "taste_both": "🍬 Les Deux",
-      "taste_neutral": "⚪ Neutre",
-      "error_auth": "Votre session a expiré. Veuillez vous reconnecter.",
-      "error_server": "Erreur du serveur. Veuillez réessayer dans un instant."
+      "taste_neutral": "⚪ Neutre"
     },
     "fetch_failed": "Échec du chargement des commandes du fournisseur",
-    "orders_title": "Vos Commandes",
-    "orders_subtitle": "Gérez et suivez toutes les commandes pour vos offres",
+    "orders_title": "Commandes pour vos offres",
     "loading_orders": "Chargement des commandes...",
-    "no_orders": "Aucune commande pour le moment.",
+    "no_orders": "Aucune commande pour vos offres pour le moment.",
     "total_orders": "Total des commandes",
     "pending_orders": "Commandes en attente",
     "confirmed_orders": "Commandes confirmées",
@@ -193,33 +171,41 @@
     "ordered_on": "Commandé le :",
     "at_time": "à",
     "order_confirmed_toast": "Commande #{orderId} confirmée !",
+    "error_auth": "Votre session a expiré. Veuillez vous reconnecter.",
+    "network_error": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
+    "error_scanning": "Une erreur s'est produite lors du scan du code QR",
+    "orders": {
+      "manage_track": "Gérez et suivez toutes les commandes pour vos offres",
+      "search_placeholder": "Rechercher par ID de commande, nom du client, téléphone ou offre...",
+      "no_orders_found": "Aucune commande trouvée",
+      "no_orders_tab": "Aucune commande {tab}",
+      "try_adjusting_search": "Essayez d'ajuster vos critères de recherche",
+      "no_orders_match_filters": "Aucune commande ne correspond à vos filtres",
+      "no_orders_tab_moment": "Vous n'avez aucune commande {tab} pour le moment",
+      "clear_search": "Effacer la recherche",
+      "all": "Toutes",
+      "pending": "En attente",
+      "confirmed": "Confirmées",
+      "cancelled": "Annulées",
+      "order_number": "Commande #{orderId}",
+      "item": "article",
+      "items": "articles",
+      "today_at": "Aujourd'hui à {time}",
+      "yesterday_at": "Hier à {time}",
+      "pickup_location_label": "Lieu de Ramassage : ",
+      "order_date_label": "Date de Commande : ",
+      "show_less": "Afficher moins",
+      "show_details": "Afficher les détails",
+      "scan": "Scanner",
+      "offer_image": "Image de l'offre",
+      "loading": "Chargement...",
+      "orders_will_appear": "Les commandes apparaîtront ici une fois que les clients auront passé des commandes pour vos offres"
+    },
     "status": {
       "pending": "En attente",
       "confirmed": "Confirmée",
       "cancelled": "Annulée"
     },
-    "search_placeholder": "Rechercher par ID de commande, nom du client, téléphone ou offre...",
-    "tab_all": "Toutes",
-    "tab_pending": "En attente",
-    "tab_confirmed": "Confirmées",
-    "tab_cancelled": "Annulées",
-    "no_orders_message": "Les commandes apparaîtront ici une fois que les clients passeront des commandes pour vos offres",
-    "no_orders_found": "Aucune commande trouvée",
-    "no_orders_for_status": "Aucune commande {status}",
-    "try_adjusting_search": "Essayez d'ajuster vos critères de recherche",
-    "no_orders_match_filters": "Aucune commande ne correspond à vos filtres",
-    "no_orders_for_status_message": "Vous n'avez aucune commande {status} pour le moment",
-    "clear_search": "Effacer la recherche",
-    "scan_mobile": "Scanner",
-    "order_number": "Commande #",
-    "item": "article",
-    "items": "articles",
-    "pickup_location_label": "Lieu de ramassage :",
-    "pickup_deadline_label": "Date limite de ramassage :",
-    "order_date_label": "Date de commande :",
-    "show_less": "Afficher moins",
-    "show_details": "Afficher les détails",
-    "offer_fallback": "Offre",
     "profile": {
       "your_store": "Votre Magasin",
       "location": "Emplacement",
@@ -232,14 +218,6 @@
       "total_items_available": "Total d'articles disponibles",
       "revenue": "Revenus",
       "total_earnings": "Gains totaux (TND)",
-      "business_overview": "Aperçu de l'Entreprise",
-      "business_overview_desc": "Suivez les performances de votre entreprise en un coup d'œil",
-      "active_offers": "Offres Actives",
-      "offers_published": "Offres que vous avez publiées",
-      "total_items": "Total d'Articles",
-      "items_available": "Articles disponibles dans toutes les offres",
-      "total_revenue": "Revenus Totaux",
-      "from_confirmed_orders": "Depuis les commandes confirmées",
       "environmental_impact": "Impact Environnemental",
       "contribution": "Votre contribution à la sauvegarde de la planète",
       "learn_more": "En savoir plus",
@@ -277,7 +255,13 @@
         "update_failed": "Échec de la mise à jour du profil",
         "fetch_data_failed": "Échec du chargement des données",
         "upload_image_failed": "Échec du téléchargement de l'image de profil"
-      }
+      },
+      "could_not_fetch_user": "Impossible de récupérer les informations utilisateur",
+      "could_not_determine_user_id": "Impossible de déterminer l'ID utilisateur",
+      "phone_number_placeholder": "Numéro de téléphone",
+      "unable_to_upload_image": "Impossible de télécharger l'image. Veuillez vérifier le fichier et réessayer.",
+      "store_logo": "Logo du magasin",
+      "loading_ellipsis": "..."
     }
   },
   "client": {
@@ -328,6 +312,9 @@
       "phone_number": "Numéro de téléphone",
       "fetch_failed": "Échec du chargement du profil ou des commandes"
     },
+    "home": {
+      "fetch_offers_failed": "Échec du chargement des offres. Veuillez réessayer plus tard."
+    },
     "orders": {
       "my_orders": "Mes Commandes",
       "track_orders": "Suivez et gérez vos commandes de sauvetage alimentaire",
@@ -369,13 +356,10 @@
     "pick_up": "Ramasser {date}{time}",
     "pickup_details": "Détails de Ramassage",
     "error_generic": "Une erreur s'est produite. Veuillez réessayer plus tard.",
-    "error_auth": "Votre session a expiré. Veuillez vous reconnecter.",
-    "error_fetch": "Impossible de charger les offres. Veuillez réessayer plus tard.",
     "search_placeholder": "Rechercher des offres...",
     "filter_all": "Toutes les Offres",
     "filter_available": "Disponibles",
     "filter_low_stock": "Stock Faible",
-    "sort_by": "Trier par",
     "sort_newest": "Plus Récentes",
     "sort_price_low": "Prix: Croissant",
     "sort_price_high": "Prix: Décroissant",
@@ -396,17 +380,7 @@
     "taste_both": "Les deux",
     "taste_neutral": "Neutre",
     "try_adjusting_filters": "Essayez d'ajuster votre recherche ou vos filtres pour voir plus de résultats.",
-    "check_back_later": "Revenez plus tard pour de nouvelles offres !",
-    "no_rating": "Nouveau",
-    "your_location": "Votre Emplacement",
-    "location_not_available": "Emplacement non disponible",
-    "within_distance": "À moins de {distance} km",
-    "distance_filter": "Distance Maximale",
-    "search_placeholder_extended": "Pâtisserie, restaurant, magasin...",
-    "pickup_time": "Heure de Ramassage",
-    "pickup_location": "Lieu de Ramassage",
-    "quantity_available": "Disponible",
-    "save": "ÉCONOMISÉ"
+    "check_back_later": "Revenez plus tard pour de nouvelles offres !"
   },
   "contact": {
     "title": "Contactez-nous",
@@ -502,14 +476,13 @@
     "your_price": "Votre Prix (TND)",
     "price_placeholder": "0.00",
     "price_hint": "Définissez votre prix de vente",
-    "commission_notice": "ℹ️ Note : Une commission de 1 dinar sera automatiquement ajoutée à votre prix. Prix final : {price} + 1 dt = {finalPrice} dt",
     "save_percentage": "Économisez {percentage}% !",
     "available_quantity": "Quantité Disponible",
     "quantity_placeholder": "1",
     "quantity_hint": "Combien d'unités sont disponibles ?",
     "pickup_location": "Lieu de Ramassage",
     "pickup_location_placeholder": "ex. : 123 Rue Principale, Tunis",
-    "pickup_location_hint": "Les commandes seront récupérées à l'emplacement de votre magasin depuis votre profil. Assurez-vous que votre emplacement est à jour dans les paramètres de votre profil.",
+    "pickup_location_hint": "Où les clients doivent-ils récupérer leur commande ?",
     "pickup_date": "Date de Ramassage",
     "pickup_date_hint": "Sélectionnez la date de ramassage",
     "start_time": "Heure de Début",
@@ -552,9 +525,10 @@
     "taste_neutral": "⚪ Neutre",
     "taste_hint": "Quel est le profil de goût ?",
     "error_upload_files": "Erreur lors du téléchargement des fichiers",
+    "info_uploading": "Téléchargement des images avant l'envoi...",
     "success_created": "Offre créée avec succès ! 🎉",
+    "error_create_failed": "Échec de la création de l'offre",
     "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !",
-    "compressing_images": "Compression des images pour un téléchargement plus rapide...",
     "step_basic_info": "Informations de Base",
     "step_pricing": "Prix et Quantité",
     "step_availability": "Disponibilité de Ramassage",
@@ -570,7 +544,12 @@
     "preset_tomorrow_morning": "Demain 10h-14h",
     "preset_tomorrow_afternoon": "Demain 14h-18h",
     "next": "Suivant",
-    "previous": "Précédent"
+    "previous": "Précédent",
+    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}",
+    "compressing_images": "Compression des images pour un téléchargement plus rapide..."
+    "previous": "Précédent",
+    "images_uploaded": "✓ {count} image{plural} téléchargée{plural}",
+    "compressing_images": "Compression des images pour un téléchargement plus rapide..."
   },
   "publish": {
     "title": "Créer une Nouvelle Offre",
@@ -600,7 +579,6 @@
     "original_price_optional": "(Optionnel)",
     "original_price_placeholder": "0.00",
     "original_price_hint": "Quelle était la valeur originale ?",
-    "commission_notice": "ℹ️ Note : Une commission de 1 dinar sera automatiquement ajoutée à votre prix. Prix final : {price} + 1 dt = {finalPrice} dt",
     "save_percentage": "Économisez {percentage}% !",
     "pickup_location": "Lieu de Ramassage",
     "pickup_location_placeholder": "ex. : 123 Rue Principale, Tunis",
@@ -648,7 +626,6 @@
     "title_label": "Titre",
     "description_label": "Description",
     "price_label": "Prix",
-    "commission_notice": "ℹ️ Note : Une commission de 1 dinar sera automatiquement ajoutée à votre prix. Prix final : {price} + 1 dt = {finalPrice} dt",
     "original_price_label": "Prix Original",
     "food_type_label": "Type d'Aliment",
     "food_type_snack": "🍪 Collation",
@@ -764,39 +741,7 @@
     "hide_qr": "Masquer le Code QR",
     "show_qr": "Afficher le Code QR",
     "cancelling": "Annulation...",
-    "cancel_order": "Annuler la Commande",
-    "rate_experience": "Évaluer l'Expérience",
-    "rated": "Merci pour votre évaluation !"
-  },
-  "rating": {
-    "title": "Évaluez Votre Expérience",
-    "description": "Comment s'est passée votre expérience avec ce fournisseur alimentaire ?",
-    "description_with_name": "Comment s'est passée votre expérience avec {name} ?",
-    "select_rating": "Veuillez sélectionner une note",
-    "login_required": "Veuillez vous connecter pour soumettre une évaluation",
-    "submitted_success": "Merci pour votre évaluation !",
-    "submit_failed": "Échec de l'envoi de l'évaluation. Veuillez réessayer.",
-    "excellent": "Excellent ! ⭐⭐⭐⭐⭐",
-    "very_good": "Très Bien ! ⭐⭐⭐⭐",
-    "good": "Bien ! ⭐⭐⭐",
-    "fair": "Moyen ⭐⭐",
-    "poor": "Médiocre ⭐",
-    "quick_feedback": "Qu'avez-vous aimé ? (Optionnel)",
-    "comment_label": "Commentaires supplémentaires (Optionnel)",
-    "comment_placeholder": "Partagez votre expérience... (ex. qualité de la nourriture, service, emballage)",
-    "characters": "caractères",
-    "skip": "Passer",
-    "submit": "Soumettre l'Évaluation",
-    "submitting": "Envoi...",
-    "tag": {
-      "great_value": "Excellent Rapport Qualité-Prix",
-      "fresh_food": "Nourriture Fraîche",
-      "friendly_staff": "Personnel Amical",
-      "good_quantity": "Bonne Quantité",
-      "excellent_quality": "Excellente Qualité",
-      "fast_pickup": "Ramassage Rapide",
-      "well_packaged": "Bien Emballé"
-    }
+    "cancel_order": "Annuler la Commande"
   },
   "custom_card": {
     "fill_all_fields": "Veuillez remplir tous les champs",
@@ -804,9 +749,7 @@
     "offer_updated": "Offre mise à jour avec succès",
     "update_failed": "Échec de la mise à jour de l'offre",
     "upload_failed": "Échec du téléchargement des images",
-    "pickup_time": "Heure de Ramassage",
-    "pickup_location": "Lieu de Ramassage",
-    "quantity_available": "Disponible",
+    "pickup_time": "Heure de Ramassage :",
     "location_label": "Emplacement :",
     "invalid_price": "Prix invalide",
     "invalid_quantity": "Quantité invalide",
@@ -876,6 +819,30 @@
     "failed_to_fetch_data": "Échec du chargement des données",
     "failed_to_upload_profile_image": "Échec du téléchargement de l'image de profil"
   },
+  "toasts": {
+    "check_email": "Vérifiez votre email",
+    "login_link_sent": "Nous vous avons envoyé un lien de connexion. N'oubliez pas de vérifier vos spams également.",
+    "error": "Erreur",
+    "error_generic": "Une erreur s'est produite, veuillez réessayer."
+  },
+  "error_boundary": {
+    "title": "Une erreur s'est produite",
+    "message": "Nous sommes désolés, mais quelque chose d'inattendu s'est produit. Veuillez essayer de rafraîchir la page.",
+    "go_home": "Retour à l'accueil",
+    "error_details": "Détails de l'erreur (Développement uniquement)"
+  },
+  "footer": {
+    "app_name": "Save the plate",
+    "copyright": "© {year}"
+  },
+  "signin": {
+    "error_sending_link": "Une erreur s'est produite lors de l'envoi du lien magique. Veuillez réessayer.",
+    "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer dans quelques instants.",
+    "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion et réessayer.",
+    "email_placeholder": "nom@exemple.com",
+    "checking_auth": "Vérification de l'authentification...",
+    "check_spam": "📧 N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email !"
+  },
   "callback": {
     "verifying": "Vérification de votre lien magique...",
     "verify_failed": "Échec de la vérification du lien magique. Veuillez réessayer de vous connecter.",
@@ -919,127 +886,5 @@
         "step5_content": "Sur les appareils mobiles, utilisez la barre de navigation en bas pour un accès rapide à Accueil, Publier, Commandes et Profil."
       }
     }
-  },
-  "privacy": {
-    "title": "Politique de Confidentialité",
-    "last_updated": "Dernière Mise à Jour",
-    "introduction": {
-      "title": "Introduction",
-      "content": "Save The Plate ('nous', 'notre' ou 'nos') s'engage à protéger votre vie privée. Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez notre application mobile et nos services. Veuillez lire attentivement cette politique de confidentialité. Si vous n'êtes pas d'accord avec les termes de cette politique de confidentialité, veuillez ne pas accéder à l'application."
-    },
-    "collect": {
-      "title": "Informations Que Nous Collectons",
-      "personal": {
-        "title": "Informations Personnelles",
-        "email": "Adresse e-mail",
-        "name": "Nom et nom d'utilisateur",
-        "phone": "Numéro de téléphone",
-        "location": "Données de localisation (à des fins de ramassage)"
-      },
-      "usage": {
-        "title": "Informations d'Utilisation",
-        "orders": "Historique des commandes et préférences",
-        "offers": "Offres publiées (pour les fournisseurs)",
-        "preferences": "Préférences et paramètres de l'application",
-        "device": "Informations sur l'appareil et adresse IP"
-      }
-    },
-    "use": {
-      "title": "Comment Nous Utilisons Vos Informations",
-      "service": "Pour fournir, maintenir et améliorer nos services",
-      "communication": "Pour communiquer avec vous concernant les commandes, offres et mises à jour",
-      "improvement": "Pour analyser les modèles d'utilisation et améliorer l'expérience utilisateur",
-      "security": "Pour détecter, prévenir et résoudre les problèmes techniques et les menaces de sécurité",
-      "legal": "Pour se conformer aux obligations légales et protéger nos droits"
-    },
-    "sharing": {
-      "title": "Partage et Divulgation des Données",
-      "content": "Nous ne vendons pas vos informations personnelles. Nous ne partageons vos informations que dans les circonstances suivantes :",
-      "providers": "Avec les fournisseurs alimentaires lorsque vous passez une commande (nom, téléphone, détails de la commande)",
-      "service": "Avec les prestataires de services qui nous aident à exploiter notre application (sous des accords de confidentialité stricts)",
-      "legal": "Lorsque requis par la loi ou pour protéger nos droits et notre sécurité"
-    },
-    "security": {
-      "title": "Sécurité des Données",
-      "content": "Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos informations personnelles. Cependant, aucune méthode de transmission sur Internet ou de stockage électronique n'est sécurisée à 100%. Bien que nous nous efforcions d'utiliser des moyens commercialement acceptables pour protéger vos informations, nous ne pouvons garantir une sécurité absolue."
-    },
-    "rights": {
-      "title": "Vos Droits",
-      "content": "Vous avez les droits suivants concernant vos informations personnelles :",
-      "access": "Droit d'accéder à vos données personnelles",
-      "correction": "Droit de corriger les données inexactes ou incomplètes",
-      "deletion": "Droit de demander la suppression de vos données",
-      "objection": "Droit de vous opposer au traitement de vos données",
-      "portability": "Droit à la portabilité des données",
-      "deletion_note": "Pour demander la suppression de vos données, veuillez visiter notre",
-      "deletion_link": "Page de Demande de Suppression des Données"
-    },
-    "cookies": {
-      "title": "Cookies et Technologies de Suivi",
-      "content": "Nous utilisons des cookies et des technologies de suivi similaires pour suivre l'activité sur notre application et stocker certaines informations. Vous pouvez demander à votre navigateur de refuser tous les cookies ou d'indiquer quand un cookie est envoyé."
-    },
-    "third_party": {
-      "title": "Services Tiers",
-      "content": "Notre application utilise des services tiers qui peuvent collecter des informations utilisées pour vous identifier :",
-      "google": "Google OAuth pour l'authentification",
-      "facebook": "Facebook Login pour l'authentification",
-      "analytics": "Google Analytics pour l'analyse de l'utilisation de l'application"
-    },
-    "changes": {
-      "title": "Modifications de Cette Politique de Confidentialité",
-      "content": "Nous pouvons mettre à jour notre Politique de Confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle Politique de Confidentialité sur cette page et en mettant à jour la date de 'Dernière Mise à Jour'. Il est conseillé de consulter périodiquement cette Politique de Confidentialité pour tout changement."
-    },
-    "contact": {
-      "title": "Contactez-Nous",
-      "content": "Si vous avez des questions concernant cette Politique de Confidentialité, veuillez nous contacter :",
-      "email": "E-mail",
-      "address": "Adresse"
-    }
-  },
-  "data_deletion": {
-    "title": "Demande de Suppression des Données",
-    "subtitle": "Demander la suppression de votre compte et de vos données personnelles",
-    "warning": {
-      "title": "Avis Important",
-      "content": "Demander la suppression des données est permanent et ne peut pas être annulé. Toutes vos informations de compte, historique des commandes et préférences seront définitivement supprimées de notre système."
-    },
-    "what_will_be_deleted": {
-      "title": "Ce Qui Sera Supprimé",
-      "profile": "Vos informations de profil (nom, e-mail, téléphone, localisation)",
-      "orders": "Tout votre historique de commandes",
-      "offers": "Toutes vos offres publiées (si vous êtes un fournisseur)",
-      "preferences": "Vos préférences et paramètres d'application",
-      "analytics": "Vos données d'analyse d'utilisation"
-    },
-    "what_will_remain": {
-      "title": "Ce Qui Peut Rester",
-      "legal": "Les données que nous sommes légalement tenus de conserver (par exemple, les enregistrements de transaction à des fins fiscales)",
-      "aggregate": "Données agrégées et anonymisées qui ne peuvent pas vous identifier"
-    },
-    "how_to_request": {
-      "title": "Comment Demander la Suppression",
-      "content": "Pour demander la suppression de vos données, veuillez remplir le formulaire ci-dessous avec l'adresse e-mail associée à votre compte. Nous traiterons votre demande dans les 30 jours."
-    },
-    "request_form": {
-      "title": "Demander la Suppression des Données",
-      "email_label": "Adresse E-mail",
-      "email_placeholder": "votre.email@exemple.com",
-      "submit": "Soumettre la Demande de Suppression",
-      "submitting": "Envoi..."
-    },
-    "alternative": {
-      "title": "Méthode Alternative",
-      "content": "Vous pouvez également nous envoyer un e-mail directement avec votre demande de suppression :",
-      "email": "E-mail"
-    },
-    "success": {
-      "title": "Demande Reçue",
-      "message": "Nous avons reçu votre demande de suppression de données. Notre équipe la traitera dans les 30 jours. Vous recevrez un e-mail de confirmation une fois que vos données auront été supprimées.",
-      "timeline": "Nous traitons généralement les demandes de suppression dans les 30 jours. Vous recevrez un e-mail de confirmation une fois le processus terminé."
-    },
-    "invalid_email": "Veuillez entrer une adresse e-mail valide",
-    "request_sent": "Demande de suppression soumise avec succès",
-    "email_opened": "Ouverture de votre client e-mail...",
-    "error": "Échec de l'envoi de la demande. Veuillez réessayer."
   }
 }

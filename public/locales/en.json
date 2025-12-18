@@ -20,7 +20,6 @@
     "confirm_pickup": "Confirm pickup",
     "cancel": "Cancel",
     "save": "Save",
-    "saved": "SAVED",
     "delete": "Delete",
     "edit": "Edit",
     "close": "Close",
@@ -29,8 +28,6 @@
     "success": "Success",
     "refresh": "Refresh",
     "view_orders": "View Orders",
-    "item": "item",
-    "items": "items",
     "back": "Back",
     "saving": "Saving...",
     "try_again": "Try Again",
@@ -43,7 +40,6 @@
     "available": "available",
     "left": "left",
     "today": "Today",
-    "yesterday": "Yesterday",
     "between": "between",
     "at": "at",
     "open_in_maps": "Open in Maps",
@@ -91,38 +87,22 @@
     "start_listing": "Start Listing",
     "ready_title": "Ready to Make a Difference?",
     "ready_desc": "Join our community of food rescuers and start saving money while helping the planet today.",
-    "illustration_alt": "Save The Plate illustration",
-    "meals_saved": "Meals Saved",
-    "local_partners": "Local Partners",
-    "happy_users": "Happy Users"
+    "illustration_alt": "Save The Plate illustration"
   },
   "signin": {
     "welcome_new": "Welcome to SaveThePlate! 🥳",
     "welcome_back": "Welcome back! 🥰",
     "description_new": "Join us in reducing food waste and saving the planet, one meal at a time 🌍",
     "description_back": "We're happy to have you back! Keep rescuing meals 🌿",
-    "passwordless_notice": "🔐 Passwordless authentication — no password needed! Just enter your email and we'll send you a magic link.",
     "sign_in_email": "Sign In with Email",
     "sending": "Sending...",
-    "check_spam": "📧 Don't forget to check your spam folder if you don't see the email!",
-    "google_signing_in": "Signing in with Google...",
-    "google_error": "Google sign-in was cancelled or failed. Please try again.",
-    "facebook_sign_in": "Sign in with Facebook",
-    "facebook_signing_in": "Signing in with Facebook...",
-    "facebook_error": "Facebook sign-in was cancelled or failed. Please try again."
+    "check_spam": "📧 Don't forget to check your spam folder if you don't see the email!"
   },
   "home": {
     "pending_orders_single": "You have {count} pending order.",
     "pending_orders_plural": "You have {count} pending orders.",
     "pending_reminder": "Don't forget to collect and confirm them on time!",
-    "view_orders": "View Orders",
-    "carbon_footprint_title": "Our Website's Carbon Footprint",
-    "carbon_footprint_subtitle": "We're committed to sustainability, even in our digital presence",
-    "carbon_per_visit": "Only {co2} g of CO₂ per page visit",
-    "carbon_cleaner_than": "Cleaner than {percentage}% of all web pages globally",
-    "sustainable_energy": "Running on sustainable energy",
-    "learn_more": "Learn more about our carbon impact",
-    "carbon_badge": "🌱 Carbon Neutral Website"
+    "view_orders": "View Orders"
   },
   "provider": {
     "home": {
@@ -153,10 +133,6 @@
       "no_results": "No offers match your search criteria. Try adjusting your filters.",
       "empty_state_title": "You have no published offers yet. Start by creating one!",
       "empty_state_description": "Start by creating your first offer to reach more customers!",
-      "status_label": "Status",
-      "category": "Category",
-      "taste": "Taste",
-      "sort_by": "Sort by",
       "status": {
         "active": "Active",
         "low_stock": "Low Stock"
@@ -170,13 +146,10 @@
       "taste_sweet": "🍰 Sweet",
       "taste_salty": "🧂 Salty",
       "taste_both": "🍬 Both",
-      "taste_neutral": "⚪ Neutral",
-      "error_auth": "Your session has expired. Please sign in again.",
-      "error_server": "Server error. Please try again in a moment."
+      "taste_neutral": "⚪ Neutral"
     },
     "fetch_failed": "Failed to fetch provider orders",
     "orders_title": "Orders for your offers",
-    "orders_subtitle": "Manage and track all orders for your offers",
     "loading_orders": "Loading orders...",
     "no_orders": "No orders for your offers yet.",
     "total_orders": "Total orders",
@@ -193,33 +166,41 @@
     "ordered_on": "Ordered on:",
     "at_time": "at",
     "order_confirmed_toast": "Order #{orderId} confirmed!",
+    "error_auth": "Your session has expired. Please sign in again.",
+    "network_error": "Network error. Please check your connection and try again.",
+    "error_scanning": "An error occurred while scanning the QR code",
+    "orders": {
+      "manage_track": "Manage and track all orders for your offers",
+      "search_placeholder": "Search by order ID, customer name, phone, or offer...",
+      "no_orders_found": "No orders found",
+      "no_orders_tab": "No {tab} orders",
+      "try_adjusting_search": "Try adjusting your search criteria",
+      "no_orders_match_filters": "No orders match your filters",
+      "no_orders_tab_moment": "You don't have any {tab} orders at the moment",
+      "clear_search": "Clear Search",
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "order_number": "Order #{orderId}",
+      "item": "item",
+      "items": "items",
+      "today_at": "Today at {time}",
+      "yesterday_at": "Yesterday at {time}",
+      "pickup_location_label": "Pickup Location: ",
+      "order_date_label": "Order Date: ",
+      "show_less": "Show Less",
+      "show_details": "Show Details",
+      "scan": "Scan",
+      "offer_image": "Offer image",
+      "loading": "Loading...",
+      "orders_will_appear": "Orders will appear here once customers place orders for your offers"
+    },
     "status": {
       "pending": "Pending",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled"
     },
-    "search_placeholder": "Search by order ID, customer name, phone, or offer...",
-    "tab_all": "All",
-    "tab_pending": "Pending",
-    "tab_confirmed": "Confirmed",
-    "tab_cancelled": "Cancelled",
-    "no_orders_message": "Orders will appear here once customers place orders for your offers",
-    "no_orders_found": "No orders found",
-    "no_orders_for_status": "No {status} orders",
-    "try_adjusting_search": "Try adjusting your search criteria",
-    "no_orders_match_filters": "No orders match your filters",
-    "no_orders_for_status_message": "You don't have any {status} orders at the moment",
-    "clear_search": "Clear Search",
-    "scan_mobile": "Scan",
-    "order_number": "Order #",
-    "item": "item",
-    "items": "items",
-    "pickup_location_label": "Pickup Location:",
-    "pickup_deadline_label": "Pickup Deadline:",
-    "order_date_label": "Order Date:",
-    "show_less": "Show Less",
-    "show_details": "Show Details",
-    "offer_fallback": "Offer",
     "profile": {
       "your_store": "Your Store",
       "location": "Location",
@@ -232,14 +213,6 @@
       "total_items_available": "Total items available",
       "revenue": "Revenue",
       "total_earnings": "Total earnings (TND)",
-      "business_overview": "Business Overview",
-      "business_overview_desc": "Track your business performance at a glance",
-      "active_offers": "Active Offers",
-      "offers_published": "Offers you've published",
-      "total_items": "Total Items",
-      "items_available": "Items available across all offers",
-      "total_revenue": "Total Revenue",
-      "from_confirmed_orders": "From confirmed orders",
       "environmental_impact": "Environmental Impact",
       "contribution": "Your contribution to saving the planet",
       "learn_more": "Learn More",
@@ -275,9 +248,15 @@
         "click_to_upload": "Click to upload",
         "profile_updated": "Profile updated successfully!",
         "update_failed": "Failed to update profile",
-      "fetch_data_failed": "Failed to fetch data",
-      "upload_image_failed": "Failed to upload profile image"
-      }
+        "fetch_data_failed": "Failed to fetch data",
+        "upload_image_failed": "Failed to upload profile image"
+      },
+      "could_not_fetch_user": "Could not fetch user information",
+      "could_not_determine_user_id": "Could not determine user ID",
+      "phone_number_placeholder": "Phone number",
+      "unable_to_upload_image": "Unable to upload image. Please check the file and try again.",
+      "store_logo": "Store Logo",
+      "loading_ellipsis": "..."
     }
   },
   "client": {
@@ -369,13 +348,10 @@
     "pick_up": "Pick up {date}{time}",
     "pickup_details": "Pickup Details",
     "error_generic": "Something went wrong. Please try again later.",
-    "error_auth": "Your session has expired. Please sign in again.",
-    "error_fetch": "Unable to load offers. Please try again later.",
     "search_placeholder": "Search offers...",
     "filter_all": "All Offers",
     "filter_available": "Available",
     "filter_low_stock": "Low Stock",
-    "sort_by": "Sort by",
     "sort_newest": "Newest First",
     "sort_price_low": "Price: Low to High",
     "sort_price_high": "Price: High to Low",
@@ -396,17 +372,7 @@
     "taste_both": "Both",
     "taste_neutral": "Neutral",
     "try_adjusting_filters": "Try adjusting your search or filters to see more results.",
-    "check_back_later": "Check back later for new offers!",
-    "no_rating": "New",
-    "your_location": "Your Location",
-    "location_not_available": "Location not available",
-    "within_distance": "Within {distance} km",
-    "distance_filter": "Maximum Distance",
-    "search_placeholder_extended": "Bakery, restaurant, shop...",
-    "pickup_time": "Pickup Time",
-    "pickup_location": "Pickup Location",
-    "quantity_available": "Available",
-    "save": "SAVED"
+    "check_back_later": "Check back later for new offers!"
   },
   "contact": {
     "title": "Contact Us",
@@ -502,14 +468,13 @@
     "your_price": "Your Price (TND)",
     "price_placeholder": "0.00",
     "price_hint": "Set your selling price",
-    "commission_notice": "ℹ️ Note: A 1 dinar commission will be automatically added to your price. Final price: {price} + 1 dt = {finalPrice} dt",
     "save_percentage": "Save {percentage}%!",
     "available_quantity": "Available Quantity",
     "quantity_placeholder": "1",
     "quantity_hint": "How many units are available?",
     "pickup_location": "Pickup Location",
     "pickup_location_placeholder": "e.g., 123 Main Street, Tunis",
-    "pickup_location_hint": "Orders will be picked up at your store location from your profile. Make sure your location is up to date in your profile settings.",
+    "pickup_location_hint": "Where should customers pick up their order?",
     "pickup_date": "Pickup Date",
     "pickup_date_hint": "Select the pickup date",
     "start_time": "Start Time",
@@ -552,8 +517,11 @@
     "taste_neutral": "⚪ Neutral",
     "taste_hint": "What's the taste profile?",
     "error_upload_files": "Error uploading files",
+    "info_uploading": "Uploading images before submitting...",
     "success_created": "Offer created successfully! 🎉",
+    "error_create_failed": "Failed to create offer",
     "images_uploaded_success": "{count} image(s) uploaded successfully!",
+    "images_uploaded": "✓ {count} image{plural} uploaded",
     "compressing_images": "Compressing images for faster upload...",
     "step_basic_info": "Basic Information",
     "step_pricing": "Pricing & Quantity",
@@ -596,7 +564,6 @@
     "title_label": "Title",
     "description_label": "Description",
     "price_label": "Price",
-    "commission_notice": "ℹ️ Note: A 1 dinar commission will be automatically added to your price. Final price: {price} + 1 dt = {finalPrice} dt",
     "original_price_label": "Original Price",
     "food_type_label": "Food Type",
     "food_type_snack": "🍪 Snack",
@@ -692,7 +659,6 @@
     "original_price_optional": "(Optional)",
     "original_price_placeholder": "0.00",
     "original_price_hint": "What was the original value?",
-    "commission_notice": "ℹ️ Note: A 1 dinar commission will be automatically added to your price. Final price: {price} + 1 dt = {finalPrice} dt",
     "save_percentage": "Save {percentage}%!",
     "pickup_location": "Pickup Location",
     "pickup_location_placeholder": "e.g., 123 Main Street, Tunis",
@@ -769,39 +735,7 @@
     "hide_qr": "Hide QR Code",
     "show_qr": "Show QR Code",
     "cancelling": "Cancelling...",
-    "cancel_order": "Cancel Order",
-    "rate_experience": "Rate Experience",
-    "rated": "Thank you for your rating!"
-  },
-  "rating": {
-    "title": "Rate Your Experience",
-    "description": "How was your experience with this food provider?",
-    "description_with_name": "How was your experience with {name}?",
-    "select_rating": "Please select a rating",
-    "login_required": "Please log in to submit a rating",
-    "submitted_success": "Thank you for your rating!",
-    "submit_failed": "Failed to submit rating. Please try again.",
-    "excellent": "Excellent! ⭐⭐⭐⭐⭐",
-    "very_good": "Very Good! ⭐⭐⭐⭐",
-    "good": "Good! ⭐⭐⭐",
-    "fair": "Fair ⭐⭐",
-    "poor": "Poor ⭐",
-    "quick_feedback": "What did you like? (Optional)",
-    "comment_label": "Additional comments (Optional)",
-    "comment_placeholder": "Share your experience... (e.g., food quality, service, packaging)",
-    "characters": "characters",
-    "skip": "Skip",
-    "submit": "Submit Rating",
-    "submitting": "Submitting...",
-    "tag": {
-      "great_value": "Great Value",
-      "fresh_food": "Fresh Food",
-      "friendly_staff": "Friendly Staff",
-      "good_quantity": "Good Quantity",
-      "excellent_quality": "Excellent Quality",
-      "fast_pickup": "Fast Pickup",
-      "well_packaged": "Well Packaged"
-    }
+    "cancel_order": "Cancel Order"
   },
   "custom_card": {
     "fill_all_fields": "Please fill out all fields",
@@ -809,9 +743,7 @@
     "offer_updated": "Offer updated successfully",
     "update_failed": "Failed to update offer",
     "upload_failed": "Failed to upload images",
-    "pickup_time": "Pickup Time",
-    "pickup_location": "Pickup Location",
-    "quantity_available": "Available",
+    "pickup_time": "Pickup Time:",
     "location_label": "Location:",
     "invalid_price": "Invalid price",
     "invalid_quantity": "Invalid quantity",
@@ -881,6 +813,29 @@
     "failed_to_fetch_data": "Failed to fetch data",
     "failed_to_upload_profile_image": "Failed to upload profile image"
   },
+  "toasts": {
+    "check_email": "Check your email",
+    "login_link_sent": "We sent you a login link. Be sure to check your spam too.",
+    "error": "Error",
+    "error_generic": "There was an error, please try again."
+  },
+  "error_boundary": {
+    "title": "Something went wrong",
+    "message": "We're sorry, but something unexpected happened. Please try refreshing the page.",
+    "go_home": "Go to Home",
+    "error_details": "Error Details (Development Only)"
+  },
+  "footer": {
+    "app_name": "Save the plate",
+    "copyright": "© {year}"
+  },
+  "signin": {
+    "error_sending_link": "There was an error sending the magic link. Please try again.",
+    "server_unavailable": "Server is temporarily unavailable. Please try again in a few moments.",
+    "connection_error": "Unable to connect to the server. Please check your connection and try again.",
+    "email_placeholder": "name@example.com",
+    "checking_auth": "Checking authentication..."
+  },
   "tour": {
     "back": "Back",
     "close": "Close",
@@ -919,127 +874,5 @@
         "step5_content": "On mobile devices, use the bottom navigation bar for quick access to Home, Publish, Orders, and Profile."
       }
     }
-  },
-  "privacy": {
-    "title": "Privacy Policy",
-    "last_updated": "Last Updated",
-    "introduction": {
-      "title": "Introduction",
-      "content": "Save The Plate ('we', 'our', or 'us') is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and services. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the application."
-    },
-    "collect": {
-      "title": "Information We Collect",
-      "personal": {
-        "title": "Personal Information",
-        "email": "Email address",
-        "name": "Name and username",
-        "phone": "Phone number",
-        "location": "Location data (for pickup purposes)"
-      },
-      "usage": {
-        "title": "Usage Information",
-        "orders": "Order history and preferences",
-        "offers": "Published offers (for providers)",
-        "preferences": "App preferences and settings",
-        "device": "Device information and IP address"
-      }
-    },
-    "use": {
-      "title": "How We Use Your Information",
-      "service": "To provide, maintain, and improve our services",
-      "communication": "To communicate with you about orders, offers, and updates",
-      "improvement": "To analyze usage patterns and improve user experience",
-      "security": "To detect, prevent, and address technical issues and security threats",
-      "legal": "To comply with legal obligations and protect our rights"
-    },
-    "sharing": {
-      "title": "Data Sharing and Disclosure",
-      "content": "We do not sell your personal information. We may share your information only in the following circumstances:",
-      "providers": "With food providers when you place an order (name, phone, order details)",
-      "service": "With service providers who assist us in operating our app (under strict confidentiality agreements)",
-      "legal": "When required by law or to protect our rights and safety"
-    },
-    "security": {
-      "title": "Data Security",
-      "content": "We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your information, we cannot guarantee absolute security."
-    },
-    "rights": {
-      "title": "Your Rights",
-      "content": "You have the following rights regarding your personal information:",
-      "access": "Right to access your personal data",
-      "correction": "Right to correct inaccurate or incomplete data",
-      "deletion": "Right to request deletion of your data",
-      "objection": "Right to object to processing of your data",
-      "portability": "Right to data portability",
-      "deletion_note": "To request deletion of your data, please visit our",
-      "deletion_link": "Data Deletion Request page"
-    },
-    "cookies": {
-      "title": "Cookies and Tracking Technologies",
-      "content": "We use cookies and similar tracking technologies to track activity on our app and store certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent."
-    },
-    "third_party": {
-      "title": "Third-Party Services",
-      "content": "Our app uses third-party services that may collect information used to identify you:",
-      "google": "Google OAuth for authentication",
-      "facebook": "Facebook Login for authentication",
-      "analytics": "Google Analytics for app usage analytics"
-    },
-    "changes": {
-      "title": "Changes to This Privacy Policy",
-      "content": "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the 'Last Updated' date. You are advised to review this Privacy Policy periodically for any changes."
-    },
-    "contact": {
-      "title": "Contact Us",
-      "content": "If you have any questions about this Privacy Policy, please contact us:",
-      "email": "Email",
-      "address": "Address"
-    }
-  },
-  "data_deletion": {
-    "title": "Data Deletion Request",
-    "subtitle": "Request deletion of your account and personal data",
-    "warning": {
-      "title": "Important Notice",
-      "content": "Requesting data deletion is permanent and cannot be undone. All your account information, order history, and preferences will be permanently removed from our system."
-    },
-    "what_will_be_deleted": {
-      "title": "What Will Be Deleted",
-      "profile": "Your profile information (name, email, phone, location)",
-      "orders": "All your order history",
-      "offers": "All your published offers (if you are a provider)",
-      "preferences": "Your app preferences and settings",
-      "analytics": "Your usage analytics data"
-    },
-    "what_will_remain": {
-      "title": "What May Remain",
-      "legal": "Data we are legally required to retain (e.g., transaction records for tax purposes)",
-      "aggregate": "Aggregated, anonymized data that cannot identify you"
-    },
-    "how_to_request": {
-      "title": "How to Request Deletion",
-      "content": "To request deletion of your data, please fill out the form below with the email address associated with your account. We will process your request within 30 days."
-    },
-    "request_form": {
-      "title": "Request Data Deletion",
-      "email_label": "Email Address",
-      "email_placeholder": "your.email@example.com",
-      "submit": "Submit Deletion Request",
-      "submitting": "Submitting..."
-    },
-    "alternative": {
-      "title": "Alternative Method",
-      "content": "You can also send us an email directly with your deletion request:",
-      "email": "Email"
-    },
-    "success": {
-      "title": "Request Received",
-      "message": "We have received your data deletion request. Our team will process it within 30 days. You will receive a confirmation email once your data has been deleted.",
-      "timeline": "We typically process deletion requests within 30 days. You will receive a confirmation email once the process is complete."
-    },
-    "invalid_email": "Please enter a valid email address",
-    "request_sent": "Deletion request submitted successfully",
-    "email_opened": "Opening your email client...",
-    "error": "Failed to submit request. Please try again."
   }
 }

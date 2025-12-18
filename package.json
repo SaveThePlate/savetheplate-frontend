@@ -10,7 +10,9 @@
     "analyze": "ANALYZE=true next build",
     "gen-apis": "npx openapi-typescript http://localhost:3001/api-yaml -o ./generated/api/schema.d.ts -t --additional-properties --empty-objects-unknown",
     "gen-types": "npx @kalissaac/prisma-typegen ./generated/types/prismaTypes.ts ../leftover-backend/prisma/schema.prisma",
-    "test:websocket": "node test-websocket.js"
+    "test:websocket": "node test-websocket.js",
+    "test:google-auth": "node test-google-auth.js",
+    "test:facebook-auth": "node test-facebook-auth.js"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.8",
@@ -44,6 +46,7 @@
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@react-oauth/google": "^0.12.2",
     "@types/jwt-decode": "^3.1.0",
     "@uidotdev/usehooks": "^2.4.1",
     "axios": "^1.12.0",
@@ -93,13 +96,9 @@
     "@types/react-dom": "^18",
     "@types/react-slick": "^0.23.13",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^14.2.35",
+    "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
-  },
-  "overrides": {
-    "glob": "^10.1.0",
-    "globby": "^11.1.0"
   }
 }

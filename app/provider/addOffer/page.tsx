@@ -36,8 +36,8 @@ const AddOfferPage = () => {
   }, [router]);
 
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 max-w-lg pt-4 sm:pt-6 flex flex-col items-center">
-    <main className="relative w-full max-w-lg bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-100">
+    <div className="w-full mx-auto px-3 sm:px-4 md:px-6 max-w-lg pt-4 sm:pt-6 flex flex-col items-center overflow-x-hidden">
+    <main className="relative w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-4 sm:p-6 md:p-10 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-100 overflow-x-hidden">
       {/* Back Button */}
       <Button
         variant="ghost"

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -366,19 +367,7 @@ const EditProfileDialog: React.FC<{
         }
       }
 
-      // Create axios instance with baseURL and auth interceptor (same as AddOffer)
-      const axiosInstance = axios.create({
-        baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      axiosInstance.interceptors.request.use((config) => {
-        const token = localStorage.getItem("accessToken");
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      });
+      // Use centralized axios instance to avoid token conflicts
 
       const fd = new FormData();
       fd.append("files", fileToUpload);
@@ -865,61 +854,66 @@ export default function ProviderProfile() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="p-6 md:p-8">
+        {/* Business Overview Section */}
+        <div className="p-6 md:p-8 border-t border-gray-100">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("provider.profile.business_overview")}</h2>
+            <p className="text-sm text-gray-600">{t("provider.profile.business_overview_desc")}</p>
+          </div>
+          
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Number of Offers */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 rounded-lg bg-emerald-200 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 hover:shadow-lg transition-all">
+              <div className="flex items-start gap-4 mb-3">
+                <div className="w-14 h-14 rounded-xl bg-emerald-200 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-7 h-7 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">{t("provider.profile.offers")}</p>
-                  <p className="text-3xl font-bold text-emerald-800">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-emerald-800 mb-1">{t("provider.profile.active_offers")}</p>
+                  <p className="text-4xl font-bold text-emerald-900 mb-1">
                     {loading ? "..." : stats.totalOffers}
                   </p>
+                  <p className="text-xs text-emerald-700">{t("provider.profile.offers_published")}</p>
                 </div>
               </div>
-              <p className="text-xs text-emerald-700 mt-1">{t("provider.profile.published_offers")}</p>
             </div>
 
             {/* Number of Items */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 rounded-lg bg-blue-200 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all">
+              <div className="flex items-start gap-4 mb-3">
+                <div className="w-14 h-14 rounded-xl bg-blue-200 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">{t("provider.profile.items")}</p>
-                  <p className="text-3xl font-bold text-blue-800">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-blue-800 mb-1">{t("provider.profile.total_items")}</p>
+                  <p className="text-4xl font-bold text-blue-900 mb-1">
                     {loading ? "..." : stats.totalItems}
                   </p>
+                  <p className="text-xs text-blue-700">{t("provider.profile.items_available")}</p>
                 </div>
               </div>
-              <p className="text-xs text-blue-700 mt-1">{t("provider.profile.total_items_available")}</p>
             </div>
 
             {/* Generated Revenue */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-xl p-5 border border-amber-200 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 rounded-lg bg-amber-200 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-xl p-6 border border-amber-200 hover:shadow-lg transition-all">
+              <div className="flex items-start gap-4 mb-3">
+                <div className="w-14 h-14 rounded-xl bg-amber-200 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-7 h-7 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">{t("provider.profile.revenue")}</p>
-                  <p className="text-3xl font-bold text-amber-800">
-                    {loading ? "..." : stats.revenue.toFixed(2)}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-amber-800 mb-1">{t("provider.profile.total_revenue")}</p>
+                  <p className="text-4xl font-bold text-amber-900 mb-1">
+                    {loading ? "..." : `${stats.revenue.toFixed(2)} dt`}
                   </p>
+                  <p className="text-xs text-amber-700">{t("provider.profile.from_confirmed_orders")}</p>
                 </div>
               </div>
-              <p className="text-xs text-amber-700 mt-1">{t("provider.profile.total_earnings")}</p>
             </div>
           </div>
         </div>
@@ -927,76 +921,70 @@ export default function ProviderProfile() {
 
       {/* Environmental Impact Section */}
       <div className="w-full max-w-2xl mx-auto mt-8">
-        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 md:p-8 shadow-sm">
           <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center">
-                <span className="text-3xl">🌱</span>
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-teal-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-4xl">🌱</span>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-teal-900">{t("provider.profile.environmental_impact")}</h2>
-                <p className="text-sm text-teal-700">{t("provider.profile.contribution")}</p>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-teal-900 mb-2">{t("provider.profile.environmental_impact")}</h2>
+                <p className="text-sm text-teal-700 mb-4">{t("provider.profile.contribution")}</p>
+                <Button
+                  onClick={() => router.push("/impact")}
+                  className="bg-teal-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-teal-700 text-sm"
+                >
+                  {t("provider.profile.learn_more")}
+                </Button>
               </div>
             </div>
-            <Button
-              onClick={() => router.push("/impact")}
-              className="bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 text-sm"
-            >
-              {t("provider.profile.learn_more")}
-            </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             {/* Meals Saved */}
-            <div className="bg-white rounded-xl p-5 border border-teal-200">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
-                  <span className="text-xl">🍽️</span>
+            <div className="bg-white rounded-xl p-5 border-2 border-teal-200 hover:border-teal-300 transition-all">
+              <div className="flex flex-col items-center text-center mb-2">
+                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
+                  <span className="text-3xl">🍽️</span>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("provider.profile.meals_saved")}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {loading ? "..." : stats.totalMealsSaved}
-                  </p>
-                </div>
+                <p className="text-sm font-semibold text-gray-700 mb-1">{t("provider.profile.meals_saved")}</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">
+                  {loading ? "..." : stats.totalMealsSaved}
+                </p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600 text-center leading-relaxed">
                 {t("provider.profile.food_rescued")}
               </p>
             </div>
 
             {/* CO2 Saved */}
-            <div className="bg-white rounded-xl p-5 border border-teal-200">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
-                  <span className="text-xl">🌍</span>
+            <div className="bg-white rounded-xl p-5 border-2 border-teal-200 hover:border-teal-300 transition-all">
+              <div className="flex flex-col items-center text-center mb-2">
+                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
+                  <span className="text-3xl">🌍</span>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("provider.profile.co2_saved")}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {loading ? "..." : stats.co2Saved.toFixed(1)} kg
-                  </p>
-                </div>
+                <p className="text-sm font-semibold text-gray-700 mb-1">{t("provider.profile.co2_saved")}</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">
+                  {loading ? "..." : `${stats.co2Saved.toFixed(1)} kg`}
+                </p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600 text-center leading-relaxed">
                 {t("provider.profile.equivalent_trees", { trees: loading ? "..." : (stats.co2Saved / 21).toFixed(1) })}
               </p>
             </div>
 
             {/* Water Saved */}
-            <div className="bg-white rounded-xl p-5 border border-teal-200">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
-                  <span className="text-xl">💧</span>
+            <div className="bg-white rounded-xl p-5 border-2 border-teal-200 hover:border-teal-300 transition-all">
+              <div className="flex flex-col items-center text-center mb-2">
+                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
+                  <span className="text-3xl">💧</span>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-600 font-medium uppercase tracking-wide">{t("provider.profile.water_saved")}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {loading ? "..." : stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} L
-                  </p>
-                </div>
+                <p className="text-sm font-semibold text-gray-700 mb-1">{t("provider.profile.water_saved")}</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">
+                  {loading ? "..." : stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} L
+                </p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600 text-center leading-relaxed">
                 {t("provider.profile.water_footprint")}
               </p>
             </div>
@@ -1004,15 +992,18 @@ export default function ProviderProfile() {
 
           {/* Impact Message */}
           {!loading && stats.totalMealsSaved > 0 && (
-            <div className="mt-6 p-4 bg-teal-100 rounded-xl border border-teal-300">
-              <p className="text-sm text-teal-900 font-medium text-center">
-                {t("provider.profile.impact_message", { 
-                  meals: stats.totalMealsSaved, 
-                  plural: stats.totalMealsSaved !== 1 ? "s" : "",
-                  co2: stats.co2Saved.toFixed(1),
-                  water: stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)
-                })}
-              </p>
+            <div className="mt-6 p-5 bg-teal-100 rounded-xl border-2 border-teal-300">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">✨</span>
+                <p className="text-sm text-teal-900 font-medium flex-1">
+                  {t("provider.profile.impact_message", { 
+                    meals: stats.totalMealsSaved, 
+                    plural: stats.totalMealsSaved !== 1 ? "s" : "",
+                    co2: stats.co2Saved.toFixed(1),
+                    water: stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)
+                  })}
+                </p>
+              </div>
             </div>
           )}
         </div>

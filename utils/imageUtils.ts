@@ -68,34 +68,38 @@ export const shouldUnoptimizeImage = (url: string | null | undefined): boolean =
     return false;
   }
   
-  // Check if it's a full URL (external image)
-  if (/^https?:\/\//i.test(url)) {
-    try {
-      const urlObj = new URL(url);
-      // Localhost images should be unoptimized
-      if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
-        return true;
-      }
-      // Check if it's from the backend domain (more robust check)
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-      if (backendUrl) {
+      // Check if it's a full URL (external image)
+      if (/^https?:\/\//i.test(url)) {
         try {
-          const backendUrlObj = new URL(backendUrl);
-          // Check if hostname matches (handles both with and without www)
-          if (urlObj.hostname === backendUrlObj.hostname || 
-              urlObj.hostname.replace(/^www\./, '') === backendUrlObj.hostname.replace(/^www\./, '')) {
+          const urlObj = new URL(url);
+          // Localhost images should be unoptimized
+          if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
             return true;
           }
-        } catch {
-          // Fallback: check if URL contains backend hostname
-          const backendHost = backendUrl.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
-          if (urlObj.hostname === backendHost || url.includes(backendHost)) {
+          // Facebook CDN images should be unoptimized (they often have CORS restrictions)
+          if (urlObj.hostname.includes('fbcdn.net') || urlObj.hostname.includes('facebook.com')) {
             return true;
           }
-        }
-      }
-      // All other external URLs should be unoptimized to avoid CORS/fetch issues
-      return true;
+          // Check if it's from the backend domain (more robust check)
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+          if (backendUrl) {
+            try {
+              const backendUrlObj = new URL(backendUrl);
+              // Check if hostname matches (handles both with and without www)
+              if (urlObj.hostname === backendUrlObj.hostname || 
+                  urlObj.hostname.replace(/^www\./, '') === backendUrlObj.hostname.replace(/^www\./, '')) {
+                return true;
+              }
+            } catch {
+              // Fallback: check if URL contains backend hostname
+              const backendHost = backendUrl.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
+              if (urlObj.hostname === backendHost || url.includes(backendHost)) {
+                return true;
+              }
+            }
+          }
+          // All other external URLs should be unoptimized to avoid CORS/fetch issues
+          return true;
     } catch {
       // If URL parsing fails, assume it should be unoptimized
       return true;

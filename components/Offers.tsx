@@ -7,7 +7,7 @@ import { resolveImageSource } from "@/utils/imageUtils";
 // WEBSOCKET INTEGRATION TEMPORARILY DISABLED
 // import { useWebSocket } from "@/hooks/useWebSocket";
 import { useLanguage } from "@/context/LanguageContext";
-import { Search, Filter, X, Check, ChevronDown } from "lucide-react";
+import { Search, Filter, X, Check, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isOfferExpired } from "./offerCard/utils";
@@ -48,6 +48,8 @@ interface Offer {
     longitude?: number | null;
   };
   user?: { username: string }; // Legacy field
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
@@ -69,6 +71,8 @@ const OffersPage = () => {
   const [tasteFilter, setTasteFilter] = useState<TasteFilter>("all");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [distanceFilter, setDistanceFilter] = useState<number>(3); // Default 3km
+  const [showFilters, setShowFilters] = useState(false);
   const router = useRouter();
   const { t } = useLanguage();
 
@@ -139,9 +143,45 @@ const OffersPage = () => {
 
         const data = await response.json();
 
+        // Fetch ratings for all providers in parallel
+        const providerIds = Array.from(new Set(data.map((o: any) => o.ownerId).filter(Boolean))) as number[];
+        const ratingPromises = providerIds.map(async (providerId: number) => {
+          try {
+            const ratingResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/ratings/provider/${providerId}/average`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            if (ratingResponse.ok) {
+              const ratingData = await ratingResponse.json();
+              return { providerId, ...ratingData };
+            }
+          } catch (err) {
+            // Silently fail - ratings are optional
+            console.warn(`Failed to fetch rating for provider ${providerId}:`, err);
+          }
+          return { providerId, averageRating: 0, totalRatings: 0 };
+        });
+
+        const ratingsMap = new Map<number, { averageRating: number; totalRatings: number }>();
+        const ratingsResults = await Promise.allSettled(ratingPromises);
+        ratingsResults.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            ratingsMap.set(result.value.providerId, {
+              averageRating: result.value.averageRating || 0,
+              totalRatings: result.value.totalRatings || 0,
+            });
+          }
+        });
+
         // normalize images array - preserve URLs from different backends, only normalize relative paths
         const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
         const mappedOffers: Offer[] = data.map((o: any) => {
+          const rating = o.ownerId ? ratingsMap.get(o.ownerId) : null;
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
             if (!img) return img;
             
@@ -228,7 +268,12 @@ const OffersPage = () => {
             return img;
           }) : [];
 
-          return { ...o, images };
+          return { 
+            ...o, 
+            images,
+            averageRating: rating?.averageRating,
+            totalRatings: rating?.totalRatings,
+          };
         });
 
         setOffers(mappedOffers);
@@ -429,6 +474,24 @@ const OffersPage = () => {
       result = result.filter(o => o.taste === tasteFilter);
     }
 
+    // Apply distance filter if user location is available
+    if (userLocation && distanceFilter) {
+      result = result.filter(offer => {
+        const offerLat = offer.latitude ?? offer.owner?.latitude ?? null;
+        const offerLng = offer.longitude ?? offer.owner?.longitude ?? null;
+        if (offerLat && offerLng) {
+          const distance = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            offerLat,
+            offerLng
+          );
+          return distance <= distanceFilter;
+        }
+        return true; // Include offers without coordinates
+      });
+    }
+
     // Apply sorting
     const now = Date.now();
     switch (sort) {
@@ -483,7 +546,7 @@ const OffersPage = () => {
     }
 
     return result;
-  }, [offers, searchQuery, filter, sort, foodTypeFilter, tasteFilter, userLocation]);
+  }, [offers, searchQuery, filter, sort, foodTypeFilter, tasteFilter, userLocation, distanceFilter]);
 
   if (loading)
     return (
@@ -515,32 +578,56 @@ const OffersPage = () => {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Search and Filter Section */}
+    <div className="space-y-4">
+      {/* Search Bar - White (Too Good To Go style) */}
       {!loading && offers.length > 0 && (
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+          <input
+            type="text"
+            placeholder={t("offers.search_placeholder_extended") || "Bakery, restaurant, shop..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-14 py-3.5 sm:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-teal-500 outline-none text-sm sm:text-base shadow-md transition-all"
+          />
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          >
+            <SlidersHorizontal className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Filters Section - Collapsible */}
+      {!loading && offers.length > 0 && showFilters && (
         <div className="space-y-4 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder={t("offers.search_placeholder") || "Search offers..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm transition-all"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
           
           {/* Filters Section */}
           <div className="space-y-3">
+            {/* Distance Filter */}
+            {userLocation && (
+              <div className="pb-3 border-b border-gray-200">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
+                  {t("offers.distance_filter") || "Maximum Distance"}
+                </label>
+                <div className="flex gap-2">
+                  {[3, 5, 10, 20].map((distance) => (
+                    <button
+                      key={distance}
+                      onClick={() => setDistanceFilter(distance)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        distanceFilter === distance
+                          ? "bg-teal-600 text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {distance} km
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {/* Status Filter - Button Group */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700 min-w-[100px]">
@@ -617,7 +704,7 @@ const OffersPage = () => {
               {/* Sort Filter */}
               <div className="relative">
                 <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                  Sort by
+                  {t("offers.sort_by") || "Sort by"}
                 </label>
                 <div className="relative">
                   <select
@@ -803,6 +890,8 @@ const OffersPage = () => {
                 mapsLink: offer.owner.mapsLink,
                 profileImage: offer.owner.profileImage,
               } : undefined}
+              averageRating={offer.averageRating}
+              totalRatings={offer.totalRatings}
             />
           );
         })}

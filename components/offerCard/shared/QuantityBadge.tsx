@@ -19,14 +19,14 @@ export const QuantityBadge: FC<QuantityBadgeProps> = ({
 
   if (quantity > 0) {
     return (
-      <div className={`${positionClasses} bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10`}>
+      <div className={`${positionClasses} bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10 whitespace-nowrap`}>
         {quantity} left
       </div>
     );
   }
 
   return (
-    <div className={`${positionClasses} px-2 py-0.5 text-xs font-medium rounded-full shadow-md bg-red-100 text-red-600`}>
+    <div className={`${positionClasses} px-2 py-0.5 text-xs font-medium rounded-full shadow-md bg-red-100 text-red-600 whitespace-nowrap`}>
       Sold Out
     </div>
   );

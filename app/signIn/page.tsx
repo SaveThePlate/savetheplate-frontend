@@ -9,12 +9,15 @@ import useOpenApiFetch from "@/lib/OpenApiFetch";
 import { AuthToast, ErrorToast } from "@/components/Toasts";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { GoogleLogin } from "@react-oauth/google";
+import { LocalStorage } from "@/lib/utils";
 
 export default function SignIn() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -22,6 +25,8 @@ export default function SignIn() {
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
 
   const clientApi = useOpenApiFetch();
   const router = useRouter();
@@ -147,6 +152,387 @@ export default function SignIn() {
     }
   }
 
+  async function handleGoogleSuccess(credentialResponse: any) {
+    setGoogleLoading(true);
+    setShowErrorToast(false);
+    setShowAuthToast(false);
+
+    try {
+      // Validate credential exists
+      if (!credentialResponse?.credential) {
+        throw new Error("No credential received from Google");
+      }
+
+      // Send Google credential to backend
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`,
+        {
+          credential: credentialResponse.credential,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      // Check if response has tokens
+      if (response.data?.accessToken && response.data?.refreshToken) {
+        // Store tokens
+        LocalStorage.setItem("refresh-token", response.data.refreshToken);
+        LocalStorage.setItem("accessToken", response.data.accessToken);
+        LocalStorage.removeItem("remember");
+
+        // Determine redirect based on user's role
+        const role = response.data.role || response.data.user?.role;
+        let redirectTo = '/onboarding'; // Default for new users
+
+        // If user has a valid role, determine redirect
+        if (role === 'PROVIDER') {
+          // Check if provider has submitted location details
+          try {
+            const userDetails = await axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+              { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
+            );
+            const { phoneNumber, mapsLink } = userDetails.data || {};
+            if (!phoneNumber || !mapsLink) {
+              redirectTo = '/onboarding/fillDetails';
+            } else {
+              redirectTo = '/provider/home';
+            }
+          } catch (error) {
+            console.error("Error fetching user details:", error);
+            redirectTo = '/onboarding/fillDetails';
+          }
+        } else if (role === 'PENDING_PROVIDER') {
+          redirectTo = '/onboarding/thank-you';
+        } else if (role === 'CLIENT') {
+          redirectTo = '/client/home';
+        }
+
+        // Redirect user
+        router.push(redirectTo);
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err: any) {
+      console.error("Failed to authenticate with Google:", err);
+      console.error("Error details:", {
+        status: err?.response?.status,
+        statusText: err?.response?.statusText,
+        data: err?.response?.data,
+        message: err?.message,
+        credentialLength: credentialResponse?.credential?.length,
+      });
+      
+      let userMessage = "There was an error signing in with Google. Please try again.";
+      
+      // Handle 500 Internal Server Error specifically
+      if (err?.response?.status === 500) {
+        userMessage = "Server error during Google authentication. Please try again or contact support if the issue persists.";
+        console.error("Backend returned 500 error. This is a server-side issue. Response data:", err?.response?.data);
+      } else if (err?.isNetworkError || 
+          err?.status === 502 || 
+          err?.status === 503 ||
+          err?.message?.includes("Server is temporarily unavailable") ||
+          err?.message?.includes("Network error")) {
+        userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
+      } else if (err?.message?.includes("CORS") || 
+                 err?.message?.includes("Access-Control") ||
+                 err?.message?.includes("Failed to fetch")) {
+        userMessage = "Unable to connect to the server. Please check your connection and try again.";
+      } else if (err?.response?.data || err?.data) {
+        userMessage = sanitizeErrorMessage(err, {
+          action: "sign in with Google",
+          defaultMessage: "There was an error signing in with Google. Please try again."
+        });
+      }
+      
+      setErrorMessage(userMessage);
+      setShowErrorToast(true);
+      setGoogleLoading(false);
+    }
+  }
+
+  function handleGoogleError() {
+    console.error("Google sign-in failed");
+    setErrorMessage(t("signin.google_error") || "Google sign-in was cancelled or failed. Please try again.");
+    setShowErrorToast(true);
+    setGoogleLoading(false);
+  }
+
+  function handleFacebookLogin() {
+    setFacebookLoading(true);
+    setShowErrorToast(false);
+    setShowAuthToast(false);
+
+    try {
+      // Check if Facebook SDK is loaded
+      if (typeof window === 'undefined' || !(window as any).FB) {
+        throw new Error("Facebook SDK not loaded. Please refresh the page and try again.");
+      }
+
+      // Verify SDK is initialized
+      if (!(window as any).FB.getLoginStatus) {
+        throw new Error("Facebook SDK is not fully initialized. Please wait a moment and try again.");
+      }
+
+      // Check for SDK initialization errors
+      const sdkError = (window as any).facebookSDKError;
+      if (sdkError) {
+        console.error("Facebook SDK initialization error detected:", sdkError);
+        throw new Error(sdkError);
+      }
+
+      // Log App ID for debugging (only in console, not exposed to user)
+      const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      if (appId) {
+        console.log("Attempting Facebook login with App ID:", appId);
+      } else {
+        console.warn("NEXT_PUBLIC_FACEBOOK_APP_ID is not set");
+      }
+
+      // Check if we're on HTTPS (required for FB.login in production)
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const isHttps = window.location.protocol === 'https:';
+      
+      if (!isHttps && !isLocalhost) {
+        const currentUrl = window.location.href;
+        const httpsUrl = currentUrl.replace(/^http:/, 'https:');
+        setErrorMessage(
+          t("signin.facebook_https_required") || 
+          `Facebook login requires HTTPS. Please use: ${httpsUrl}\n\n` +
+          "If you're the administrator, ensure:\n" +
+          "1. Your site is served over HTTPS\n" +
+          "2. 'Enforce HTTPS' is enabled in Facebook Developers settings\n" +
+          "3. All OAuth redirect URIs use HTTPS"
+        );
+        setShowErrorToast(true);
+        setFacebookLoading(false);
+        return;
+      }
+
+      // Login with Facebook - use regular function, not async
+      // Wrap in try-catch to handle errors from FB.login
+      try {
+        (window as any).FB.login(
+          (response: any) => {
+            // Check for errors in the response
+            if (response.error) {
+              console.error("Facebook login response error:", response.error);
+              handleFacebookError(response.error);
+              return;
+            }
+            // Handle the response in a separate async function
+            handleFacebookResponse(response);
+          },
+          { scope: 'email,public_profile' }
+        );
+      } catch (loginError: any) {
+        console.error("FB.login threw an error:", loginError);
+        handleFacebookError(loginError);
+      }
+    } catch (err: any) {
+      console.error("Facebook login error:", err);
+      handleFacebookError(err);
+    }
+  }
+
+  function handleFacebookError(error: any) {
+    setFacebookLoading(false);
+    
+    const errorMessage = error?.message || error?.error?.message || error?.errorMessage || '';
+    const errorCode = error?.code || error?.error?.code;
+    
+    console.error("Facebook error details:", {
+      message: errorMessage,
+      code: errorCode,
+      error: error
+    });
+
+    // Check for JSSDK not enabled error (in French or English)
+    if (
+      errorMessage.includes('JSSDK') || 
+      errorMessage.includes('JavaScript SDK') ||
+      errorMessage.includes('Se connecter avec le SDK JavaScript') ||
+      errorMessage.includes('Login with JavaScript SDK') ||
+      errorCode === 190
+    ) {
+      const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+      setErrorMessage(
+        "Facebook JavaScript SDK is not enabled for this app.\n\n" +
+        "To fix this:\n" +
+        "1. Go to https://developers.facebook.com/apps/\n" +
+        "2. Select your app" + (appId ? ` (App ID: ${appId})` : '') + "\n" +
+        "3. Go to Settings > Basic Settings\n" +
+        "4. Scroll to 'Facebook Login' section\n" +
+        "5. Enable 'Login with JavaScript SDK' (set to 'Yes')\n" +
+        "6. Save changes and wait a few minutes\n" +
+        "7. Try again\n\n" +
+        "For detailed instructions, see GUIDE_ACTIVER_FACEBOOK_JSSDK.md"
+      );
+    }
+    // Check for specific Facebook HTTPS errors
+    else if (errorMessage.includes('secure') || errorMessage.includes('HTTPS') || errorMessage.includes('connexion sécurisée')) {
+      setErrorMessage(
+        t("signin.facebook_https_error") || 
+        "Facebook requires a secure connection (HTTPS). Please ensure:\n" +
+        "1. Your site uses HTTPS\n" +
+        "2. 'Enforce HTTPS' is enabled in Facebook Developers\n" +
+        "3. All OAuth redirect URIs use HTTPS"
+      );
+    }
+    // Check for app not setup errors
+    else if (errorMessage.includes('App Not Setup') || errorMessage.includes('app is still in development')) {
+      setErrorMessage(
+        "Facebook app is not properly configured or is in development mode.\n\n" +
+        "To fix this:\n" +
+        "1. Go to https://developers.facebook.com/apps/\n" +
+        "2. Select your app\n" +
+        "3. Go to Settings > Basic Settings\n" +
+        "4. Ensure 'Login with JavaScript SDK' is enabled\n" +
+        "5. Add your domain to 'App Domains'\n" +
+        "6. If in development mode, add yourself as a Tester in Roles\n" +
+        "7. Try again"
+      );
+    }
+    // Generic error
+    else {
+      setErrorMessage(
+        t("signin.facebook_error") || 
+        "Facebook sign-in failed. " + (errorMessage ? `Error: ${errorMessage}` : "Please try again.")
+      );
+    }
+    
+    setShowErrorToast(true);
+  }
+
+  async function handleFacebookResponse(response: any) {
+    if (response.authResponse) {
+      // Get user access token
+      const accessToken = response.authResponse.accessToken;
+
+      // Send Facebook access token to backend
+      // Use axios directly (not axiosInstance) since we're authenticating - no token needed
+      try {
+        const backendResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/facebook`,
+          {
+            accessToken: accessToken,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            // Don't use axiosInstance here - we're authenticating, so no auth token needed
+            // This prevents token conflicts
+          }
+        );
+
+        // Check if response has tokens
+        if (backendResponse.data?.accessToken && backendResponse.data?.refreshToken) {
+          // Store tokens
+          LocalStorage.setItem("refresh-token", backendResponse.data.refreshToken);
+          LocalStorage.setItem("accessToken", backendResponse.data.accessToken);
+          LocalStorage.removeItem("remember");
+
+          // Determine redirect based on user's role
+          const role = backendResponse.data.role || backendResponse.data.user?.role;
+          let redirectTo = '/onboarding'; // Default for new users
+
+          // If user has a valid role, determine redirect
+          if (role === 'PROVIDER') {
+            try {
+              const userDetails = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                { headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` } }
+              );
+              const { phoneNumber, mapsLink } = userDetails.data || {};
+              if (!phoneNumber || !mapsLink) {
+                redirectTo = '/onboarding/fillDetails';
+              } else {
+                redirectTo = '/provider/home';
+              }
+            } catch (error) {
+              console.error("Error fetching user details:", error);
+              redirectTo = '/onboarding/fillDetails';
+            }
+          } else if (role === 'PENDING_PROVIDER') {
+            redirectTo = '/onboarding/thank-you';
+          } else if (role === 'CLIENT') {
+            redirectTo = '/client/home';
+          }
+
+          // Redirect user
+          router.push(redirectTo);
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      } catch (err: any) {
+        console.error("Failed to authenticate with Facebook:", err);
+        console.error("Error details:", {
+          status: err?.response?.status,
+          statusText: err?.response?.statusText,
+          data: err?.response?.data,
+          message: err?.message,
+        });
+        
+        let userMessage = "There was an error signing in with Facebook. Please try again.";
+        
+        if (err?.response?.status === 500) {
+          // Log backend error details for debugging
+          const errorDetails = err?.response?.data;
+          console.error("Backend Facebook auth error (500):", errorDetails);
+          
+          // Try to extract more detailed error message from backend response
+          let detailedError = '';
+          if (errorDetails?.message) {
+            if (typeof errorDetails.message === 'object') {
+              detailedError = JSON.stringify(errorDetails.message);
+            } else {
+              detailedError = errorDetails.message;
+            }
+          } else if (errorDetails?.error) {
+            detailedError = typeof errorDetails.error === 'string' 
+              ? errorDetails.error 
+              : JSON.stringify(errorDetails.error);
+          }
+          
+          userMessage = `Server error during Facebook authentication. ${detailedError ? `Error: ${detailedError}` : 'Please check the backend logs. The backend may be experiencing issues with Facebook OAuth configuration.'}`;
+        } else if (err?.isNetworkError || 
+            err?.status === 502 || 
+            err?.status === 503 ||
+            err?.message?.includes("Server is temporarily unavailable") ||
+            err?.message?.includes("Network error")) {
+          userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
+        } else if (err?.message?.includes("CORS") || 
+                   err?.message?.includes("Access-Control") ||
+                   err?.message?.includes("Failed to fetch")) {
+          userMessage = "Unable to connect to the server. Please check your connection and try again.";
+        } else if (err?.response?.data || err?.data) {
+          userMessage = sanitizeErrorMessage(err, {
+            action: "sign in with Facebook",
+            defaultMessage: "There was an error signing in with Facebook. Please try again."
+          });
+        }
+        
+        setErrorMessage(userMessage);
+        setShowErrorToast(true);
+        setFacebookLoading(false);
+      }
+    } else {
+      // User cancelled or login failed
+      if (response.error) {
+        handleFacebookError(response.error);
+      } else {
+        setErrorMessage(t("signin.facebook_error") || "Facebook sign-in was cancelled or failed. Please try again.");
+        setShowErrorToast(true);
+        setFacebookLoading(false);
+      }
+    }
+  }
+
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
@@ -179,11 +565,18 @@ export default function SignIn() {
             {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
           </h1>
 
-          <p className="text-gray-700 text-sm sm:text-base mb-6 font-medium animate-fadeInUp">
+          <p className="text-gray-700 text-sm sm:text-base mb-4 font-medium animate-fadeInUp">
             {!isNewUser
               ? t("signin.description_new")
               : t("signin.description_back")}
           </p>
+
+          {/* Passwordless notice */}
+          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <p className="text-sm text-blue-800 font-medium">
+              {t("signin.passwordless_notice")}
+            </p>
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col items-center w-full space-y-4 relative z-10">
@@ -214,17 +607,76 @@ export default function SignIn() {
             )}
           </form>
 
-          {/* Separator */}
-          <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+          {/* Social Sign In - Google and Facebook */}
+          {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) && (
+            <>
+              {/* Separator */}
+              <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+
+              <div className="w-full space-y-3 relative z-10">
+                {/* Google Sign In - Temporarily commented out until logic is fixed */}
+                {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+                  <div className="w-full flex justify-center">
+                    {googleLoading ? (
+                      <Button
+                        disabled
+                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
+                      >
+                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                        {t("signin.google_signing_in") || "Signing in..."}
+                      </Button>
+                    ) : (
+                      <div className="w-full flex justify-center">
+                        <GoogleLogin
+                          onSuccess={handleGoogleSuccess}
+                          onError={handleGoogleError}
+                          useOneTap={false}
+                          theme="outline"
+                          size="large"
+                          text="signin_with"
+                          shape="rectangular"
+                          locale={language}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )} */}
+
+                {/* Facebook Sign In */}
+                {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
+                  <Button
+                    onClick={handleFacebookLogin}
+                    disabled={facebookLoading}
+                    className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 rounded-xl flex justify-center items-center gap-2 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {facebookLoading ? (
+                      <>
+                        <ReloadIcon className="h-4 w-4 animate-spin" />
+                        {t("signin.facebook_signing_in") || "Signing in with Facebook..."}
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        {t("signin.facebook_sign_in") || "Sign in with Facebook"}
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+
+              {/* Separator */}
+              <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+            </>
+          )}
 
           {showAuthToast && AuthToast}
           {showErrorToast && <ErrorToast message={errorMessage} />}
 
-          {/* Footer */}
-          <p className="mt-4 text-center font-light text-xs sm:text-sm text-gray-500">
-            {!isNewUser
-              ? t("signin.footer_new")
-              : t("signin.footer_back")}
+          {/* Spam folder reminder */}
+          <p className="mt-4 text-center font-medium text-xs sm:text-sm text-amber-700">
+            {t("signin.check_spam")}
           </p>
         </main>
       </div>

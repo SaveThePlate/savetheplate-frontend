@@ -52,6 +52,15 @@ const nextConfig = {
         hostname: 'leftover-be.ccdev.space', 
         pathname: '/storage/**' 
       },
+      // Facebook CDN for profile images
+      {
+        protocol: 'https',
+        hostname: '*.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent.*.fbcdn.net',
+      },
       // Allow images from any domain (for flexibility)
       { 
         protocol: 'http', 
@@ -113,18 +122,38 @@ const nextConfig = {
       "media-src 'self' data: blob: https:",
       `connect-src 'self' ${backendUrl} http://localhost:*/ https: ws: wss:`,
       "font-src 'self' data: https:",
+      "frame-src 'self' https://accounts.google.com https://*.google.com https://*.facebook.com https://www.facebook.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
     ].join('; ');
 
     return [
+      // Headers for sign-in page - use unsafe-none COOP to allow Google OAuth popups
+      {
+        source: '/signIn',
+        headers: [
+          {
+            key: 'Content-Security-Policy-Report-Only',
+            value: csp,
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'unsafe-none',
+          },
+        ],
+      },
+      // Headers for all other pages - with stricter COOP for security
       {
         source: '/(.*)',
         headers: [
           {
             key: 'Content-Security-Policy-Report-Only',
             value: csp,
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
           },
         ],
       },

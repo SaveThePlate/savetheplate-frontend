@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/comp
 import Image from "next/image";
 import Link from "next/link";
 import { ClientOfferCardProps } from "./types";
-import { PriceBadge } from "./shared/PriceBadge";
 import { QuantityBadge } from "./shared/QuantityBadge";
 import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
@@ -21,7 +20,7 @@ import {
   CredenzaClose,
 } from "@/components/ui/credenza";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { X } from "lucide-react";
+import { X, Star, MapPin, Clock, Package } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
@@ -42,6 +41,8 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   foodType,
   taste,
   owner,
+  averageRating,
+  totalRatings,
 }) => {
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,6 +63,29 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
     }
   }, [imageSrc]);
 
+  // Hide body scrollbar when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      // Save the current scrollbar width and body overflow
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      // Compensate for scrollbar width to prevent layout shift
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+    } else {
+      // Restore body styles when modal is closed
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isModalOpen]);
+
   const handleImageError = () => {
     const nextIndex = fallbackIndex + 1;
     if (nextIndex < fallbacks.length) {
@@ -80,11 +104,14 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   const expired = isOfferExpired(expirationDate);
   const isRescuePack = title.toLowerCase().includes("rescue pack");
 
+  const providerName = owner?.location || owner?.username || pickupLocation;
+  const displayRating = averageRating && averageRating > 0 ? averageRating.toFixed(1) : null;
+
   return (
     <Credenza open={isModalOpen} onOpenChange={setIsModalOpen}>
       <CredenzaTrigger asChild>
         <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full hover:shadow-xl hover:border-emerald-400 hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
-      {/* Image */}
+      {/* Image Section - Similar to Too Good To Go */}
       <div className="relative w-full h-48 sm:h-52 md:h-56 overflow-hidden bg-gray-100">
         {currentImage ? (
           <Image
@@ -105,60 +132,74 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
           </div>
         )}
 
-        {/* Gradient overlay for better badge visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-
-        <PriceBadge price={price} originalPrice={originalPrice} />
+        {/* Quantity Badge - top right */}
         <QuantityBadge quantity={quantity} isExpired={expired} />
-        <ProviderOverlay owner={owner} pickupLocation={pickupLocation} />
 
+        {/* Expired Badge */}
         {expired && (
-          <div className="absolute top-2 left-2 bg-gray-800/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
+          <div className="absolute top-3 right-3 bg-gray-800/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
             {t("common.expired")}
           </div>
         )}
+
+        {/* Provider Overlay - Same as ProviderOfferCard */}
+        <ProviderOverlay owner={owner} pickupLocation={pickupLocation} />
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-3">
-        <div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors leading-tight">
-            {title}
-          </h3>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-              {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
-            </span>
-            {foodType && foodType !== "other" && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                {t(`offers.food_type_${foodType}`) || foodType}
+      {/* Lower Section - Textual Information (Too Good To Go style) */}
+      <div className="flex flex-col flex-1 bg-gray-50 p-4 sm:p-5">
+        {/* Offer Title - Dark Teal, Prominent (replaces provider name) */}
+        <h3 className="text-lg sm:text-xl font-bold text-teal-800 mb-1.5 line-clamp-2">
+          {title}
+        </h3>
+
+        {/* Offer Type - Lighter Teal */}
+        <p className="text-sm sm:text-base text-teal-600 mb-4 font-medium">
+          {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
+        </p>
+
+        {/* Bottom Row: Rating (left) and Pricing (right) */}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200">
+          {/* Rating - Bottom Left (Light Green Star + Number) */}
+          {displayRating ? (
+            <div className="flex items-center gap-1.5">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-emerald-400 text-emerald-400" />
+              <span className="text-sm sm:text-base font-semibold text-emerald-600">
+                {displayRating}
               </span>
-            )}
-            {taste && taste !== "neutral" && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                {t(`offers.taste_${taste}`) || taste}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-gray-300 text-gray-300" />
+              <span className="text-sm sm:text-base font-medium text-gray-400">
+                {t("offers.no_rating") || "New"}
+              </span>
+            </div>
+          )}
+
+          {/* Pricing - Bottom Right (Original price strikethrough + Discounted price bold) */}
+          <div className="flex flex-col items-end">
+            {originalPrice && originalPrice > price ? (
+              <>
+                <span className="text-xs sm:text-sm text-gray-400 line-through">
+                  {originalPrice.toFixed(2)} dt
+                </span>
+                <span className="text-lg sm:text-xl font-bold text-teal-800">
+                  {price.toFixed(2)} dt
+                </span>
+              </>
+            ) : (
+              <span className="text-lg sm:text-xl font-bold text-teal-800">
+                {price.toFixed(2)} dt
               </span>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mt-auto pt-2 border-t border-gray-100">
-          <span className="font-medium text-base">🕐</span>
-          <span className="flex-1">
-            <span className="font-medium text-gray-700">
-              {formattedDate === "Today" ? t("common.today") : formattedDate}
-            </span>
-            {formattedTime && (
-              <span className="font-semibold text-emerald-700 ml-1.5">
-                {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
-              </span>
-            )}
-          </span>
-        </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - Order Button */}
       <CardFooter 
-        className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 flex flex-row gap-3 w-full items-center justify-between border-t border-gray-100"
+        className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 flex flex-row gap-3 w-full items-center justify-between border-t border-gray-200 bg-white"
         onClick={(e) => e.stopPropagation()} // Prevent card click when clicking footer
       >
         {expired ? (
@@ -182,147 +223,222 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
     </Card>
     </CredenzaTrigger>
 
-      {/* Details Modal */}
-      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg border border-gray-100 p-0 overflow-hidden max-h-[90vh] sm:max-h-[95vh] flex flex-col">
+      {/* Details Modal - Too Good To Go Style */}
+      <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-2xl max-w-[calc(100vw-1rem)] sm:max-w-lg border-0 p-0 overflow-hidden max-h-[95vh] flex flex-col">
         {/* Accessibility: DialogTitle and Description for screen readers */}
         <VisuallyHidden>
           <CredenzaTitle>{title}</CredenzaTitle>
           <CredenzaDescription>{description}</CredenzaDescription>
         </VisuallyHidden>
         
-        {/* Close Button */}
-        <button
-          onClick={() => setIsModalOpen(false)}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-[110] rounded-full bg-white/90 backdrop-blur-sm p-2 shadow-lg hover:bg-white transition-colors border border-gray-200 flex items-center justify-center cursor-pointer"
-          aria-label="Close"
-          type="button"
-        >
-          <X className="h-4 w-4 text-gray-700" />
-        </button>
-        
         {/* Scrollable Content Container */}
         <div className="overflow-y-auto flex-1 min-h-0">
-          {/* Large Image at Top */}
-          <div className="relative w-full h-48 sm:h-64 flex-shrink-0">
+          {/* Large Hero Image */}
+          <div className="relative w-full h-64 sm:h-80 flex-shrink-0 overflow-hidden">
             {currentImage ? (
               <Image
                 src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
                 alt={title}
                 fill
-                sizes="(max-width: 640px) calc(100vw - 2rem), 512px"
+                sizes="(max-width: 640px) calc(100vw - 1rem), 512px"
                 className="object-cover"
                 unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
                 onError={handleImageError}
               />
             ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                 <span className="text-gray-400">No image</span>
               </div>
             )}
+            
+            {/* Quantity Badge on Image - Top Left */}
+            {!expired && (
+              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 max-w-[calc(100%-1rem)]">
+                <div className="bg-green-500 text-white px-2 sm:px-2.5 py-1 rounded-full text-xs font-semibold shadow-md whitespace-nowrap">
+                  {quantity > 0 ? `${quantity} left` : "Sold Out"}
+                </div>
+              </div>
+            )}
+            
+            {/* Close Button - Top Right */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 rounded-full bg-white/95 backdrop-blur-sm p-2 shadow-lg hover:bg-white transition-colors border border-gray-200 flex items-center justify-center cursor-pointer"
+              aria-label="Close"
+              type="button"
+            >
+              <X className="h-5 w-5 text-gray-700" />
+            </button>
           </div>
 
-          <div className="p-4 sm:p-6">
-          {/* Store Information */}
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0 mb-4">
-            <div className="flex items-center gap-3">
-              {owner && (
-                <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden bg-white flex-shrink-0">
-                  <Image
-                    src={sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
-                    alt={owner.location || pickupLocation}
-                    width={48}
-                    height={48}
-                    className="object-cover w-full h-full"
-                    unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/logo.png";
-                    }}
-                  />
+          {/* Content Section */}
+          <div className="bg-white">
+            {/* Provider Header - Prominent */}
+            <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3 mb-3">
+                {owner && (
+                  <div className="w-14 h-14 rounded-full border-2 border-white shadow-md overflow-hidden bg-white flex-shrink-0">
+                    <Image
+                      src={sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
+                      alt={owner.location || pickupLocation}
+                      width={56}
+                      height={56}
+                      className="object-cover w-full h-full"
+                      unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/logo.png";
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                    {owner?.location || pickupLocation}
+                  </h2>
+                  {/* Rating */}
+                  {displayRating ? (
+                    <div className="flex items-center gap-1.5">
+                      <Star className="w-4 h-4 fill-emerald-400 text-emerald-400" />
+                      <span className="text-sm font-semibold text-emerald-600">
+                        {displayRating}
+                      </span>
+                      {totalRatings && totalRatings > 0 && (
+                        <span className="text-xs text-gray-500">
+                          ({totalRatings})
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <Star className="w-4 h-4 fill-gray-300 text-gray-300" />
+                      <span className="text-xs text-gray-400">
+                        {t("offers.no_rating") || "New"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  {owner?.location || pickupLocation}
-                </h3>
               </div>
             </div>
-            <div className="text-left sm:text-right">
-              <p className="text-lg sm:text-xl font-bold text-gray-900">{price} dt</p>
-              {originalPrice && originalPrice > price && (
-                <p className="text-xs sm:text-sm text-gray-500 line-through">{originalPrice.toFixed(2)} dt</p>
-              )}
-            </div>
-          </div>
 
-          {/* Offer Details */}
-          <div className="mb-4">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
-              </span>
-              {foodType && foodType !== "other" && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                  {t(`offers.food_type_${foodType}`) || foodType}
-                </span>
-              )}
-              {taste && taste !== "neutral" && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                  {t(`offers.taste_${taste}`) || taste}
-                </span>
-              )}
-            </div>
-            <p className="text-sm sm:text-base text-gray-800 leading-relaxed">{description}</p>
-          </div>
-
-          {/* Pickup Information */}
-          <div className="mb-4 p-3 sm:p-4 bg-gray-50 rounded-xl">
-            <p className="text-xs sm:text-sm font-medium text-gray-900 mb-2">{t("offers.pickup_details")}</p>
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
-              <span className="font-semibold text-base sm:text-lg">🕐</span>
-              <span>
-                <span className="font-medium">{formattedDate === "Today" ? t("common.today") : formattedDate}</span>
-                {formattedTime && (
-                  <span className="font-semibold text-emerald-700 ml-1 sm:ml-2">
-                    {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+            {/* Offer Title and Pricing */}
+            <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-gray-100">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                {title}
+              </h1>
+              
+              {/* Pricing - Prominent */}
+              <div className="flex items-baseline gap-3">
+                {originalPrice && originalPrice > price ? (
+                  <>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500 line-through">
+                        {originalPrice.toFixed(2)} dt
+                      </span>
+                      <span className="text-3xl sm:text-4xl font-bold text-teal-700">
+                        {price.toFixed(2)} dt
+                      </span>
+                    </div>
+                    <div className="flex-1" />
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">
+                      <span className="text-sm font-bold text-emerald-700">
+                        {Math.round(((originalPrice - price) / originalPrice) * 100)}% {t("offers.save") || "SAVED"}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-3xl sm:text-4xl font-bold text-teal-700">
+                    {price.toFixed(2)} dt
                   </span>
                 )}
-              </span>
+              </div>
             </div>
-            {(owner?.mapsLink || mapsLink) && (
-              <a
-                href={owner?.mapsLink || mapsLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-emerald-600 font-medium mt-1 inline-flex items-center gap-1 hover:underline"
-              >
-                {t("common.view_on_maps")}
-              </a>
-            )}
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col gap-2">
-            {!expired && quantity > 0 && (
-              <Link
-                href={reserveLink}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 sm:py-3.5 bg-emerald-600 text-white text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl hover:bg-emerald-700 transition-colors"
-              >
-                {t("common.order_now")}
-              </Link>
-            )}
-            {expired && (
-              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
-                {t("common.expired")}
+            {/* Description */}
+            {description && (
+              <div className="px-5 sm:px-6 py-5 border-b border-gray-100">
+                <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
+                  {description}
+                </p>
               </div>
             )}
-            {quantity === 0 && !expired && (
-              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
-                {t("common.sold_out")}
+
+            {/* Key Information Cards */}
+            <div className="px-5 sm:px-6 py-5 space-y-3">
+              {/* Pickup Time */}
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                <Clock className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900 mb-1">
+                    {t("offers.pickup_time") || "Pickup Time"}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">{formattedDate === "Today" ? t("common.today") : formattedDate}</span>
+                    {formattedTime && (
+                      <span className="text-teal-700 font-semibold ml-2">
+                        {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
-            )}
+
+              {/* Location */}
+              {(owner?.mapsLink || mapsLink) && (
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                  <MapPin className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900 mb-1">
+                      {t("offers.pickup_location") || "Pickup Location"}
+                    </p>
+                    <a
+                      href={owner?.mapsLink || mapsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-teal-600 font-medium hover:underline inline-flex items-center gap-1"
+                    >
+                      {pickupLocation}
+                      <span className="text-xs">↗</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity Available */}
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                <Package className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900 mb-1">
+                    {t("offers.quantity_available") || "Available"}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    {quantity} {quantity === 1 ? t("common.item") || "item" : t("common.items") || "items"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          </div>
+        </div>
+
+        {/* Fixed Bottom Action Bar */}
+        <div className="border-t border-gray-200 bg-white p-4 sm:p-5 flex-shrink-0">
+          {!expired && quantity > 0 ? (
+            <Link
+              href={reserveLink}
+              onClick={() => setIsModalOpen(false)}
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 text-white text-lg font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {t("common.order_now") || "Reserve Now"}
+            </Link>
+          ) : expired ? (
+            <div className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-500 text-lg font-semibold rounded-2xl">
+              {t("common.expired")}
+            </div>
+          ) : (
+            <div className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-500 text-lg font-semibold rounded-2xl">
+              {t("common.sold_out")}
+            </div>
+          )}
         </div>
       </CredenzaContent>
     </Credenza>
@@ -331,3 +447,4 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
 // Memoize component to prevent unnecessary re-renders
 export const ClientOfferCard = memo(ClientOfferCardComponent);
+
