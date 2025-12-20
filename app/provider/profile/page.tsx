@@ -822,6 +822,21 @@ export default function ProviderProfile() {
         </div>
       </div>
 
+      {/* Edit Profile Button */}
+      <div className="mb-3 sm:mb-4">
+        <Link href="/provider/profile/edit" className="block">
+          <button className="w-full flex items-center justify-between p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border transition-all group active:scale-[0.99]">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <Settings size={16} className="sm:w-5 sm:h-5" />
+              </div>
+              <span className="font-medium text-xs sm:text-sm md:text-base">{t("provider.profile.edit_profile") || "Edit Personal Details"}</span>
+            </div>
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 group-hover:text-white transition-colors" />
+          </button>
+        </Link>
+      </div>
+
       {/* Menu */}
       <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
         <Link href="/provider/impact" className="block">

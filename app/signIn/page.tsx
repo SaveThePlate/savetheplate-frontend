@@ -566,27 +566,27 @@ export default function SignIn() {
 
       <div className="w-full max-w-md mx-auto">
         {/* Sign In Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-border overflow-hidden">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-border overflow-hidden">
           {/* Header Section with Logo */}
-          <div className="bg-white px-6 sm:px-8 py-8 sm:py-10 text-center border-b border-border">
+          <div className="bg-white px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-center border-b border-border">
             <button
               onClick={() => router.push("/")}
-              className="inline-block mb-6 hover:opacity-90 transition-opacity"
+              className="inline-block mb-4 sm:mb-6 hover:opacity-90 transition-opacity"
               aria-label="Go to home page"
             >
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={100}
-                height={100}
-                className="object-contain cursor-pointer mx-auto"
+                width={80}
+                height={80}
+                className="sm:w-[100px] sm:h-[100px] object-contain cursor-pointer mx-auto"
                 priority
               />
             </button>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-1 sm:mb-2">
               {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base px-2">
               {!isNewUser
                 ? t("signin.description_new")
                 : t("signin.description_back")}
@@ -594,16 +594,16 @@ export default function SignIn() {
           </div>
 
           {/* Form Section */}
-          <div className="px-6 sm:px-8 py-6 sm:py-8">
-            <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
                   Email
                 </label>
                 <Input
                   id="email"
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
                   type="email"
                   required
                   value={email}
@@ -614,14 +614,14 @@ export default function SignIn() {
               {loading ? (
                 <Button
                   disabled
-                  className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg"
+                  className="w-full bg-emerald-600 text-white font-semibold py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center text-sm sm:text-base shadow-lg"
                 >
-                  <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                  <ReloadIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                   {t("signin.sending")}
                 </Button>
               ) : (
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                   type="submit"
                   id="sign-in-button"
                 >
@@ -634,18 +634,18 @@ export default function SignIn() {
             {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) && (
               <>
                 {/* Separator */}
-                <div className="relative my-6">
+                <div className="relative my-4 sm:my-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-border"></div>
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-muted-foreground">
+                  <div className="relative flex justify-center text-xs sm:text-sm">
+                    <span className="px-3 sm:px-4 bg-white text-muted-foreground">
                       {t("common.or") || "or"}
                     </span>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5 sm:space-y-3">
                 {/* Google Sign In - Temporarily commented out until logic is fixed */}
                 {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
                   <div className="w-full flex justify-center">
@@ -679,19 +679,20 @@ export default function SignIn() {
                     <Button
                       onClick={handleFacebookLogin}
                       disabled={facebookLoading}
-                      className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                      className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                     >
                       {facebookLoading ? (
                         <>
-                          <ReloadIcon className="h-5 w-5 animate-spin" />
-                          {t("signin.facebook_signing_in") || "Signing in with Facebook..."}
+                          <ReloadIcon className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                          <span className="hidden sm:inline">{t("signin.facebook_signing_in") || "Signing in with Facebook..."}</span>
+                          <span className="sm:hidden">{t("signin.facebook_signing_in") || "Signing in..."}</span>
                         </>
                       ) : (
                         <>
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                           </svg>
-                          {t("signin.facebook_sign_in") || "Sign in with Facebook"}
+                          <span className="truncate">{t("signin.facebook_sign_in") || "Sign in with Facebook"}</span>
                         </>
                       )}
                     </Button>
@@ -704,7 +705,7 @@ export default function SignIn() {
             {showErrorToast && <ErrorToast message={errorMessage} />}
 
             {/* Spam folder reminder */}
-            <p className="mt-6 text-center font-medium text-xs sm:text-sm text-foreground">
+            <p className="mt-4 sm:mt-6 text-center font-medium text-[10px] sm:text-xs lg:text-sm text-foreground px-2">
               {t("signin.check_spam")}
             </p>
           </div>

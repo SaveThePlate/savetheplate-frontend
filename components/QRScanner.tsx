@@ -188,11 +188,15 @@ const QRScanner: React.FC<QRScannerProps> = ({
         const html5QrCode = new Html5Qrcode("qr-reader");
         scannerRef.current = html5QrCode;
 
+        // Calculate responsive QR box size based on viewport
+        const isMobile = window.innerWidth < 640; // sm breakpoint
+        const qrBoxSize = isMobile ? 200 : 250;
+
         await html5QrCode.start(
           { facingMode: "environment" }, // Use back camera
           {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
+            qrbox: { width: qrBoxSize, height: qrBoxSize },
           },
           (decodedText) => {
             handleScanResult(decodedText);
@@ -306,36 +310,36 @@ const QRScanner: React.FC<QRScannerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">{t("qr_scanner.title")}</h2>
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 flex-shrink-0">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate pr-2">{t("qr_scanner.title")}</h2>
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             aria-label="Close scanner"
           >
-            <X size={24} className="text-gray-600" />
+            <X size={20} className="sm:w-6 sm:h-6 text-gray-600" />
           </button>
         </div>
 
         {/* Scanner or Manual Entry */}
-        <div className="p-4">
+        <div className="p-3 sm:p-4 flex-1 min-h-0 overflow-y-auto">
           {!showManualEntry && useCamera ? (
             <div
               id="qr-reader"
-              className="w-full rounded-xl overflow-hidden bg-gray-100"
-              style={{ minHeight: "300px" }}
+              className="w-full rounded-lg sm:rounded-xl overflow-hidden bg-gray-100"
+              style={{ minHeight: "250px", maxHeight: "400px" }}
             />
           ) : (
             <div className="w-full">
-              <div className="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 text-center mb-4">
-                <Keyboard size={48} className="mx-auto text-gray-400 mb-3" />
-                <p className="text-sm text-gray-600 mb-4">
+              <div className="p-4 sm:p-6 bg-gray-50 rounded-lg sm:rounded-xl border-2 border-dashed border-gray-300 text-center mb-3 sm:mb-4">
+                <Keyboard size={40} className="sm:w-12 sm:h-12 mx-auto text-gray-400 mb-2 sm:mb-3" />
+                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
                   {t("qr_scanner.enter_manually")}
                 </p>
-                <form onSubmit={handleManualSubmit} className="space-y-3">
+                <form onSubmit={handleManualSubmit} className="space-y-2 sm:space-y-3">
                   <input
                     type="text"
                     value={manualCode}
@@ -344,7 +348,7 @@ const QRScanner: React.FC<QRScannerProps> = ({
                       setError(null);
                     }}
                     placeholder={t("qr_scanner.paste_placeholder")}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-center font-mono text-sm"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg sm:rounded-xl focus:border-emerald-500 focus:outline-none text-center font-mono text-xs sm:text-sm"
                     autoFocus
                   />
                   <div className="flex gap-2">
@@ -356,14 +360,14 @@ const QRScanner: React.FC<QRScannerProps> = ({
                         setManualCode("");
                         setError(null);
                       }}
-                      className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                      className="flex-1 px-3 sm:px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium text-xs sm:text-sm transition-colors"
                     >
                       {t("qr_scanner.use_camera")}
                     </button>
                     <button
                       type="submit"
                       disabled={!manualCode.trim() || scanningOrder}
-                      className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                      className="flex-1 px-3 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium text-xs sm:text-sm transition-colors"
                     >
                       {scanningOrder ? t("qr_scanner.validating") : t("qr_scanner.validate_code")}
                     </button>
@@ -381,32 +385,32 @@ const QRScanner: React.FC<QRScannerProps> = ({
                 setShowManualEntry(true);
                 setUseCamera(false);
               }}
-              className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+              className="w-full mt-2 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-xs sm:text-sm transition-colors"
             >
-              <Keyboard size={18} />
+              <Keyboard size={16} className="sm:w-[18px] sm:h-[18px]" />
               {t("qr_scanner.enter_manually_button")}
             </button>
           )}
 
           {/* Status Messages */}
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle size={18} className="sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs sm:text-sm text-red-800 break-words">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-              <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-green-800">{success}</p>
+            <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+              <CheckCircle size={18} className="sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs sm:text-sm text-green-800 break-words">{success}</p>
             </div>
           )}
 
           {!error && !success && scanning && useCamera && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
-              <Camera size={20} className="text-blue-600" />
-              <p className="text-sm text-blue-800">
+            <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+              <Camera size={18} className="sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
+              <p className="text-xs sm:text-sm text-blue-800">
                 {t("qr_scanner.point_camera")}
               </p>
             </div>
@@ -414,8 +418,8 @@ const QRScanner: React.FC<QRScannerProps> = ({
         </div>
 
         {/* Instructions */}
-        <div className="p-4 bg-gray-50 border-t border-gray-200">
-          <p className="text-xs text-gray-600 text-center">
+        <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200 flex-shrink-0">
+          <p className="text-[10px] sm:text-xs text-gray-600 text-center">
             {useCamera && !showManualEntry
               ? t("qr_scanner.instructions_camera")
               : t("qr_scanner.instructions_manual")}

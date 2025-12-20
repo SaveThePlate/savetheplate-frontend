@@ -38,13 +38,15 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "!fixed !left-[50%] !top-[50%] z-[100] w-full sm:max-w-lg max-h-[90vh] sm:max-h-[95vh] !translate-x-[-50%] !translate-y-[-50%] gap-4 border bg-background p-4 sm:p-6 shadow-lg duration-200 overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-lg sm:rounded-lg",
+        "!fixed !left-[50%] !top-[50%] z-[100] w-[calc(100%-2rem)] sm:w-full sm:max-w-lg max-h-[calc(100vh-2rem)] sm:max-h-[95vh] !translate-x-[-50%] !translate-y-[-50%] gap-4 border bg-background p-0 sm:p-0 shadow-lg duration-200 overflow-hidden flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-lg sm:rounded-lg",
         className
       )}
       {...props}
     >
-      {children}
-      <DialogPrimitive.Close className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-full p-1.5 sm:p-2 bg-gray-100 hover:bg-gray-200 opacity-90 ring-offset-background transition-all hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-10">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6">
+        {children}
+      </div>
+      <DialogPrimitive.Close className="absolute right-2 top-2 sm:right-3 sm:top-3 rounded-full p-1.5 sm:p-2 bg-gray-100 hover:bg-gray-200 opacity-90 ring-offset-background transition-all hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-10">
         <Cross2Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
