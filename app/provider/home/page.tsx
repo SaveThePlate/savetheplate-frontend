@@ -587,8 +587,8 @@ const ProviderHome = () => {
             <p className="text-red-600 text-xs sm:text-sm">{error}</p>
           </div>
         ) : offers.length === 0 ? (
-          <div className="bg-white rounded-xl border-0 shadow-md p-8 sm:p-12 md:p-16 text-center">
-            <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-center min-h-[60vh] sm:min-h-[70vh]">
+            <div className="bg-white rounded-xl border-0 shadow-md p-8 sm:p-12 md:p-16 text-center w-full max-w-md mx-auto">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
                 <PlusCircle className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" />
               </div>

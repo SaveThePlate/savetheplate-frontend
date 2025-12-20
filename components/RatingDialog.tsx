@@ -133,12 +133,12 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
-        <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl bg-white">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">
             {t("rating.title") || "Rate Your Experience"}
           </DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-muted-foreground">
+          <DialogDescription className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-1 sm:mt-2">
             {providerName
               ? t("rating.description_with_name", { name: providerName }) ||
                 `How was your experience with ${providerName}?`
@@ -146,10 +146,10 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 sm:space-y-6 py-3 sm:py-4 overflow-y-auto flex-1 min-h-0">
           {/* Star Rating */}
-          <div className="flex flex-col items-center space-y-3">
-            <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-col items-center space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -162,7 +162,7 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
                   aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
                 >
                   <Star
-                    className={`w-10 h-10 sm:w-12 sm:h-12 transition-colors ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 transition-colors ${
                       star <= (hoveredRating || rating)
                         ? "fill-yellow-400 text-yellow-400"
                         : "fill-gray-200 text-gray-300"
@@ -172,7 +172,7 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
               ))}
             </div>
             {rating > 0 && (
-              <p className="text-sm sm:text-base font-medium text-foreground">
+              <p className="text-xs sm:text-sm lg:text-base font-medium text-foreground text-center px-2">
                 {rating === 5 && (t("rating.excellent") || "Excellent! ⭐⭐⭐⭐⭐")}
                 {rating === 4 && (t("rating.very_good") || "Very Good! ⭐⭐⭐⭐")}
                 {rating === 3 && (t("rating.good") || "Good! ⭐⭐⭐")}
@@ -183,18 +183,18 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
           </div>
 
           {/* Quick Feedback Tags */}
-          <div className="space-y-3">
-            <label className="text-sm sm:text-base font-semibold text-foreground">
+          <div className="space-y-2 sm:space-y-3">
+            <label className="text-xs sm:text-sm lg:text-base font-semibold text-foreground">
               {t("rating.quick_feedback") || "What did you like? (Optional)"}
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {feedbackTags.map((tag) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => handleTagToggle(tag)}
                   disabled={submitting}
-                  className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
+                  className={`px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium transition-all ${
                     selectedTags.includes(tag)
                       ? "bg-emerald-600 text-white shadow-md"
                       : "bg-white border border-border text-foreground hover:bg-emerald-50 hover:border-emerald-600"
@@ -210,7 +210,7 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
           <div className="space-y-2">
             <label
               htmlFor="rating-comment"
-              className="text-sm sm:text-base font-semibold text-foreground"
+              className="text-xs sm:text-sm lg:text-base font-semibold text-foreground"
             >
               {t("rating.comment_label") || "Additional comments (Optional)"}
             </label>
@@ -222,33 +222,33 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
                 t("rating.comment_placeholder") ||
                 "Share your experience... (e.g., food quality, service, packaging)"
               }
-              className="min-h-[100px] resize-none text-sm sm:text-base bg-white border-border"
+              className="min-h-[80px] sm:min-h-[100px] resize-none text-xs sm:text-sm lg:text-base bg-white border-border"
               disabled={submitting}
               maxLength={500}
             />
-            <p className="text-xs text-muted-foreground text-right">
+            <p className="text-[10px] sm:text-xs text-muted-foreground text-right">
               {comment.length}/500 {t("rating.characters") || "characters"}
             </p>
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 flex-shrink-0 pt-2 sm:pt-4 border-t border-border mt-2 sm:mt-4">
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={submitting}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto text-xs sm:text-sm"
           >
             {t("rating.skip") || "Skip"}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting || rating === 0}
-            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm"
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2 animate-spin" />
                 {t("rating.submitting") || "Submitting..."}
               </>
             ) : (

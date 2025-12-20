@@ -154,24 +154,24 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
 
         {/* Mobile Drawer */}
         <div
-          className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ${
+          className={`fixed top-0 right-0 h-full w-[280px] sm:w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 overflow-y-auto ${
             menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 flex-shrink-0 sticky top-0 bg-white z-10">
             <Image
               src="/logoOnly.png"
               alt="Logo"
-              width={40}
-              height={40}
-              className="object-contain"
+              width={36}
+              height={36}
+              className="sm:w-10 sm:h-10 object-contain"
             />
-            <button onClick={() => setMenuOpen(false)}>
-              <X size={24} className="text-gray-700" />
+            <button onClick={() => setMenuOpen(false)} className="p-1">
+              <X size={20} className="sm:w-6 sm:h-6 text-gray-700" />
             </button>
           </div>
 
-          <nav className="flex flex-col p-6 space-y-4 text-gray-700 font-medium">
+          <nav className="flex flex-col p-4 sm:p-6 space-y-3 sm:space-y-4 text-gray-700 font-medium">
             <div className="pb-2 border-b border-gray-200">
               <LanguageSwitcher variant="button" />
             </div>
