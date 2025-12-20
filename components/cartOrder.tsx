@@ -39,6 +39,7 @@ interface CartOrderProps {
     qrCodeToken?: string;
     collectedAt?: string;
   };
+  onOrderCancelled?: (orderId: number) => void;
 }
 
 type Offer = {
@@ -64,7 +65,7 @@ type Offer = {
 
 const DEFAULT_IMAGE = "/defaultBag.png";
 
-const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
+const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
   const router = useRouter();
   const [offer, setOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,12 +78,19 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const [showDetails, setShowDetails] = useState(false); // For confirmed/cancelled orders
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  // Local state for instant UI updates
+  const [localOrderStatus, setLocalOrderStatus] = useState<string>(order.status);
   const { t } = useLanguage();
+
+  // Sync local status with prop when prop changes
+  useEffect(() => {
+    setLocalOrderStatus(order.status);
+  }, [order.status]);
 
   // Check if order has been rated
   useEffect(() => {
     const checkRating = async () => {
-      if (order.status !== "confirmed" || !order.collectedAt) return;
+      if (localOrderStatus !== "confirmed" || !order.collectedAt) return;
       
       const token = localStorage.getItem("accessToken");
       if (!token) return;
@@ -104,7 +112,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
     };
 
     checkRating();
-  }, [order.id, order.status, order.collectedAt]);
+  }, [order.id, localOrderStatus, order.collectedAt]);
 
   useEffect(() => {
     const run = async () => {
@@ -185,12 +193,15 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
 
   const isExpired = offer && new Date(offer.expirationDate).getTime() <= Date.now();
   
+  // Use local status for instant UI updates
+  const currentStatus = localOrderStatus;
+  
   // For pending orders, always show details. For others, use state
-  const isPending = order.status === "pending";
+  const isPending = currentStatus === "pending";
   const shouldShowDetails = isPending || showDetails;
 
   const getStatusConfig = () => {
-    switch (order.status) {
+    switch (currentStatus) {
       case "pending":
         return {
           bg: "bg-yellow-50",
@@ -232,7 +243,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
   const handleCancelOrder = async () => {
     const token = localStorage.getItem("accessToken");
     if (!token) return router.push("/signIn");
-    if (order.status !== "pending") return toast.error(t("cart_order.only_pending_cancellable"));
+    if (localOrderStatus !== "pending") return toast.error(t("cart_order.only_pending_cancellable"));
     setCanceling(true);
     try {
       await axios.post(
@@ -240,8 +251,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(t("cart_order.order_cancelled"));
-      window.location.reload();
+      // Update order status locally for instant UI update
+      setLocalOrderStatus("cancelled");
+      if (onOrderCancelled) {
+        onOrderCancelled(order.id);
+      }
     } catch (err: any) {
       console.error(err);
       const errorMsg = sanitizeErrorMessage(err, {
@@ -339,7 +353,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border ${statusConfig.badge} mb-2 sm:mb-3`}>
               <StatusIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="text-[10px] xs:text-xs font-bold uppercase tracking-wide whitespace-nowrap">
-                {order.status}
+                {currentStatus}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 sm:mb-3 break-words">
@@ -430,7 +444,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
             </div>
 
             {/* Picked Up At - Only show for confirmed orders with collectedAt */}
-            {order.status === "confirmed" && collectedDate && (
+            {currentStatus === "confirmed" && collectedDate && (
               <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-emerald-50 rounded-xl border border-emerald-200">
                 <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
                   <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
@@ -483,7 +497,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         {/* Actions Section - Only show for pending orders or when details are expanded */}
         {shouldShowDetails && (
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200">
-            {order.status === "pending" && order.qrCodeToken && (
+            {currentStatus === "pending" && order.qrCodeToken && (
               <button
                 onClick={() => setShowQRCode(!showQRCode)}
                 className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base min-w-0"
@@ -497,7 +511,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
                 )}
               </button>
             )}
-            {order.status === "pending" && (
+            {currentStatus === "pending" && (
               <button
                 onClick={handleCancelOrder}
                 disabled={canceling}
@@ -515,7 +529,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         )}
 
         {/* Rate Experience Section - Always visible for confirmed orders with pickup */}
-        {order.status === "confirmed" && order.collectedAt && (
+        {currentStatus === "confirmed" && order.collectedAt && (
           <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
             {!hasRated ? (
               <button
@@ -535,7 +549,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order }) => {
         )}
 
         {/* QR Code Section (Collapsible) */}
-        {order.status === "pending" && order.qrCodeToken && showQRCode && (
+        {currentStatus === "pending" && order.qrCodeToken && showQRCode && (
           <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
             <OrderQRCode
               qrCodeToken={order.qrCodeToken}

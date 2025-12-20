@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Gift } from "lucide-react";
 import Image from "next/image";
@@ -74,25 +72,21 @@ const CreateMagicBoxPage = () => {
     // Validation
     if (!quantity || parseFloat(quantity) <= 0) {
       setError(t("create_magic_box.error_quantity_required"));
-      toast.error(t("create_magic_box.error_quantity_toast"));
       return;
     }
 
     if (!pickupDate) {
       setError(t("create_magic_box.error_date_required"));
-      toast.error(t("create_magic_box.error_date_toast"));
       return;
     }
 
     if (!pickupStartTime) {
       setError(t("create_magic_box.error_start_time_required"));
-      toast.error(t("create_magic_box.error_start_time_toast"));
       return;
     }
 
     if (!pickupEndTime) {
       setError(t("create_magic_box.error_end_time_required"));
-      toast.error(t("create_magic_box.error_end_time_toast"));
       return;
     }
 
@@ -104,13 +98,11 @@ const CreateMagicBoxPage = () => {
 
     if (startDateTime >= endDateTime) {
       setError(t("create_magic_box.error_time_order"));
-      toast.error(t("create_magic_box.error_time_order_toast"));
       return;
     }
 
     if (endDateTime <= new Date()) {
       setError(t("create_magic_box.error_future_time"));
-      toast.error(t("create_magic_box.error_future_time_toast"));
       return;
     }
 
@@ -170,7 +162,6 @@ const CreateMagicBoxPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success(t("create_magic_box.success_created"));
       setTimeout(() => {
         router.push("/provider/home");
       }, 1500);
@@ -180,7 +171,6 @@ const CreateMagicBoxPage = () => {
         action: "create rescue pack",
         defaultMessage: t("create_magic_box.error_create_failed")
       });
-      toast.error(errorMsg);
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -189,26 +179,13 @@ const CreateMagicBoxPage = () => {
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 max-w-xl pt-4 sm:pt-6 flex flex-col items-center">
-      <ToastContainer
-        position="top-right"
-        autoClose={1000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        limit={3}
-        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-        bodyClassName="text-sm font-medium"
-        progressClassName="bg-white/80"
-      />
 
       <main className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 sm:p-10 transition-all duration-300 hover:shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => router.back()}
-          className="absolute top-5 left-5 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base"
+          onClick={() => router.push("/provider/publish")}
+          className="absolute top-5 left-5 flex items-center text-muted-foreground hover:text-emerald-600 gap-2 text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="hidden sm:inline">{t("common.back")}</span>
@@ -219,10 +196,10 @@ const CreateMagicBoxPage = () => {
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mb-4 shadow-sm">
             <Gift className="w-10 h-10 text-emerald-700" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
             {t("create_magic_box.title")}
           </h1>
-          <p className="text-gray-600 text-base mt-2 max-w-sm">
+          <p className="text-muted-foreground text-base mt-2 max-w-sm">
             {t("create_magic_box.subtitle")}
           </p>
         </div>
@@ -236,7 +213,7 @@ const CreateMagicBoxPage = () => {
               className={`cursor-pointer rounded-2xl p-5 text-center transition-all duration-200 shadow-sm hover:shadow-md border-2 ${
                 selectedSize === size
                   ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-500 scale-[1.02] shadow-md"
-                  : "bg-white border-gray-200 hover:border-emerald-300 hover:bg-gray-50"
+                  : "bg-white border-border hover:border-emerald-600 hover:bg-emerald-50"
               }`}
             >
               <div className="flex items-center justify-center mb-3">
@@ -248,19 +225,19 @@ const CreateMagicBoxPage = () => {
                   className="object-contain mx-auto"
                 />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 capitalize mb-1">
+              <h2 className="text-lg font-bold text-foreground capitalize mb-1">
                 {t(`create_magic_box.size_${size}`)}
               </h2>
               <p className="text-xs text-emerald-700 font-medium mb-2">
                 {items}
               </p>
-              <p className="text-gray-600 text-sm mb-3 leading-snug min-h-[40px]">
+              <p className="text-muted-foreground text-sm mb-3 leading-snug min-h-[40px]">
                 {description}
               </p>
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <p className="font-bold text-2xl text-emerald-700">{price} dt</p>
                 {originalPrice[size as RescuePackSize] && parseFloat(originalPrice[size as RescuePackSize]) > price && (
-                  <p className="text-xs text-gray-500 line-through mt-1">
+                  <p className="text-xs text-muted-foreground line-through mt-1">
                     {parseFloat(originalPrice[size as RescuePackSize]).toFixed(2)} dt
                   </p>
                 )}
@@ -273,7 +250,7 @@ const CreateMagicBoxPage = () => {
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="quantity" className="block text-xs sm:text-sm font-semibold text-foreground mb-2">
                 {t("create_magic_box.available_quantity")} <span className="text-red-500">*</span>
               </label>
               <Input
@@ -286,15 +263,15 @@ const CreateMagicBoxPage = () => {
                   if (/^\d*$/.test(value)) setQuantity(value);
                 }}
                 placeholder={t("create_magic_box.quantity_placeholder")}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.quantity_hint", { size: t(`create_magic_box.size_${selectedSize}`) })}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t("create_magic_box.quantity_hint", { size: t(`create_magic_box.size_${selectedSize}`) })}</p>
             </div>
 
             <div>
-              <label htmlFor="originalPrice" className="block text-sm font-semibold text-gray-700 mb-2">
-                {t("create_magic_box.original_price")} <span className="text-gray-400 font-normal text-xs">{t("create_magic_box.original_price_optional")}</span>
+              <label htmlFor="originalPrice" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                {t("create_magic_box.original_price")} <span className="text-gray-400 font-normal text-[10px] sm:text-xs">{t("create_magic_box.original_price_optional")}</span>
               </label>
               <div className="relative">
                 <Input
@@ -312,7 +289,7 @@ const CreateMagicBoxPage = () => {
                   placeholder={t("create_magic_box.original_price_placeholder")}
                   className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12 text-base"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-[10px] sm:text-xs">dt</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {originalPrice[selectedSize] && parseFloat(originalPrice[selectedSize]) > rescuePackOptions[selectedSize].price && (
@@ -322,7 +299,7 @@ const CreateMagicBoxPage = () => {
                 )}
                 {(!originalPrice[selectedSize] || parseFloat(originalPrice[selectedSize]) <= rescuePackOptions[selectedSize].price) && t("create_magic_box.original_price_hint")}
               </p>
-              <p className="text-xs text-blue-600 mt-2 bg-blue-50 p-2 rounded border border-blue-200">
+              <p className="text-[10px] sm:text-xs text-blue-600 mt-2 bg-blue-50 p-2 rounded border border-blue-200">
                 {t("create_magic_box.commission_notice", { 
                   price: rescuePackOptions[selectedSize].price.toFixed(2), 
                   finalPrice: (rescuePackOptions[selectedSize].price + 1).toFixed(2) 
@@ -338,10 +315,10 @@ const CreateMagicBoxPage = () => {
                 <span className="text-emerald-600 text-lg">📍</span>
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-emerald-900 mb-1">
+                <h3 className="text-xs sm:text-sm font-semibold text-emerald-900 mb-1">
                   {t("create_magic_box.pickup_location")}
                 </h3>
-                <p className="text-xs text-emerald-700">
+                <p className="text-[10px] sm:text-xs text-emerald-700">
                   {t("create_magic_box.pickup_location_hint")}
                 </p>
               </div>
@@ -359,7 +336,7 @@ const CreateMagicBoxPage = () => {
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base"
                 required
               />
               <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.pickup_date_hint")}</p>
@@ -375,7 +352,7 @@ const CreateMagicBoxPage = () => {
                   type="time"
                   value={pickupStartTime}
                   onChange={(e) => setPickupStartTime(e.target.value)}
-                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.start_time_hint")}</p>
@@ -391,7 +368,7 @@ const CreateMagicBoxPage = () => {
                   value={pickupEndTime}
                   onChange={(e) => setPickupEndTime(e.target.value)}
                   min={pickupStartTime || undefined}
-                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-base"
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">{t("create_magic_box.end_time_hint")}</p>

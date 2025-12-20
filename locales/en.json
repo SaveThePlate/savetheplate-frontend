@@ -49,7 +49,12 @@
     "open_in_maps": "Open in Maps",
     "view_on_maps": "View on Maps →",
     "free": "Free",
-    "optional": "Optional"
+    "optional": "Optional",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "preferences": "Preferences",
+    "clear": "Clear",
+    "search": "Search"
   },
   "landing": {
     "get_started": "Get Started",
@@ -97,7 +102,7 @@
     "happy_users": "Happy Users"
   },
   "signin": {
-    "welcome_new": "Welcome to SaveThePlate! 🥳",
+    "welcome_new": "Welcome to SaveThePlate!",
     "welcome_back": "Welcome back! 🥰",
     "description_new": "Join us in reducing food waste and saving the planet, one meal at a time 🌍",
     "description_back": "We're happy to have you back! Keep rescuing meals 🌿",
@@ -122,7 +127,18 @@
     "carbon_cleaner_than": "Cleaner than {percentage}% of all web pages globally",
     "sustainable_energy": "Running on sustainable energy",
     "learn_more": "Learn more about our carbon impact",
-    "carbon_badge": "🌱 Carbon Neutral Website"
+    "carbon_badge": "🌱 Carbon Neutral Website",
+    "title": "Save food, Save money",
+    "subtitle": "Help the planet by rescuing delicious unsold food from local shops.",
+    "browseBags": "Discover Exclusive Offers",
+    "recommended": "Recommended for you",
+    "seeAll": "See all",
+    "newOnApp": "New on the app",
+    "categories": "Categories",
+    "clearFilter": "Clear filter",
+    "noProductsInCategory": "No products available in this category",
+    "getLocation": "Get Location",
+    "searchPlaceholder": "Search for food, stores..."
   },
   "provider": {
     "home": {
@@ -484,10 +500,10 @@
     "ripple_10000": "Meals saved = 15,000 kg CO₂ prevented"
   },
   "add_offer": {
-    "title": "Create Custom Offer",
+    "title": "Create Offer",
     "subtitle": "Set your own title, description, price, and photos. Perfect for specific items or special promotions! 💚",
     "tip": "💡 Tip: Add clear photos and detailed descriptions to attract more customers!",
-    "badge": "🌱 Create Custom Offer",
+    "badge": "🌱 Create Offer",
     "offer_title": "Offer Title",
     "title_placeholder": "e.g., Fresh Pastries Bundle",
     "title_hint": "A clear, descriptive title helps customers find your offer",
@@ -545,12 +561,14 @@
     "food_type_beverage": "🥤 Beverage",
     "food_type_other": "📦 Other",
     "food_type_hint": "What type of food is this?",
+    "select_food_type": "Select food type",
     "taste_label": "Taste Profile",
     "taste_sweet": "🍰 Sweet",
     "taste_salty": "🧂 Salty",
     "taste_both": "🍬 Both (Sweet & Salty)",
     "taste_neutral": "⚪ Neutral",
     "taste_hint": "What's the taste profile?",
+    "select_taste": "Select taste",
     "error_upload_files": "Error uploading files",
     "success_created": "Offer created successfully! 🎉",
     "images_uploaded_success": "{count} image(s) uploaded successfully!",
@@ -1041,5 +1059,67 @@
     "request_sent": "Deletion request submitted successfully",
     "email_opened": "Opening your email client...",
     "error": "Failed to submit request. Please try again."
+  },
+  "auth": {
+    "signInRequired": "Sign in required",
+    "signInToContinue": "Please sign in to continue",
+    "signedOut": "Signed out",
+    "signedOutSuccess": "You've been signed out successfully"
+  },
+  "profile": {
+    "title": "Profile",
+    "mealsSaved": "Meals Saved",
+    "co2Saved": "kg CO₂ Saved",
+    "moneySaved": "Money Saved",
+    "pendingProvider": "Pending to become a provider",
+    "pendingProviderDesc": "Your request is being reviewed",
+    "accountDetails": "Account Details",
+    "paymentMethods": "Payment Methods",
+    "helpSupport": "Help & Support",
+    "providerDashboard": "Provider Dashboard",
+    "becomeProvider": "Become a Provider",
+    "version": "Version"
+  },
+  "payment": {
+    "title": "Payment Methods",
+    "info": "Choose your preferred payment method. Currently, cash payment is available at pickup.",
+    "cash": "Cash",
+    "cashDesc": "Pay with cash when you pick up your order",
+    "creditCard": "Credit Card",
+    "creditCardDesc": "Pay securely with your credit or debit card",
+    "available": "Available",
+    "comingSoon": "Coming Soon"
+  },
+  "preferences": {
+    "title": "Preferences",
+    "language": "Language",
+    "chooseLanguage": "Choose your preferred language",
+    "languageChanged": "Language changed to",
+    "languageUpdated": "Language Updated",
+    "note": "Note:",
+    "noteText": "Changing the language will update the app interface immediately."
+  },
+  "help": {
+    "title": "Need Help?",
+    "subtitle": "We're here to assist you with any questions or issues",
+    "contactUs": "Contact Us",
+    "contactUsDesc": "Get in touch with our support team",
+    "privacyPolicy": "Privacy Policy",
+    "privacyPolicyDesc": "Learn how we protect your data",
+    "emailSupport": "Email Support",
+    "emailSupportDesc": "Send us an email for assistance",
+    "faq": "Frequently Asked Questions",
+    "faq1Question": "How do I place an order?",
+    "faq1Answer": "Browse available offers, select the items you want, and place your order. You'll receive a QR code for pickup.",
+    "faq2Question": "When can I pick up my order?",
+    "faq2Answer": "Check the pickup deadline on your order. Make sure to collect your order before the expiration date.",
+    "faq3Question": "What payment methods are accepted?",
+    "faq3Answer": "Currently, we accept cash payments at pickup. More payment options are coming soon."
+  },
+  "toasts": {
+    "check_email": "Check your email",
+    "login_link_sent": "We sent you a login link. Be sure to check your spam too.",
+    "error": "Error",
+    "error_generic": "There was an error, please try again."
   }
 }

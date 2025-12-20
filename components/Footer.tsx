@@ -10,14 +10,14 @@ const Footer = () => {
         <div className="inline-flex items-center">
           <Image
             src="/logoOnly.png"
-            alt="Save the plate"
+            alt="Save The Plate"
             width={20}
             height={20}
             className="object-contain"
           />
         </div>
         <span className="inline-flex items-center font-medium text-gray-700">
-          Save the plate
+          Save The Plate
         </span>
         <span className="inline-flex items-center text-gray-400">·</span>
         <span className="inline-flex items-center text-gray-400">

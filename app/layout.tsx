@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
@@ -10,12 +10,58 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import FacebookSDK from "@/components/FacebookSDK";
 
 export const metadata: Metadata = {
-  title: "Save the plate app",
-  description: "Discover the best foods at the most affordable prices!",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_FRONTEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000"),
+  title: "Save The Plate",
+  description: "Connect restaurants with consumers to reduce food waste. Discover the best foods at the most affordable prices!",
+  keywords: ["food waste", "sustainable food", "restaurant deals", "eco-friendly", "save food", "reduce waste"],
+  authors: [{ name: "Save The Plate" }],
+  creator: "Save The Plate",
+  publisher: "Save The Plate",
+  applicationName: "Save The Plate",
+  // Open Graph / Social Media
+  openGraph: {
+    type: "website",
+    siteName: "Save The Plate",
+    title: "Save The Plate - Reduce Food Waste",
+    description: "Connect restaurants with consumers to reduce food waste. Discover the best foods at the most affordable prices!",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Save The Plate Logo",
+      },
+    ],
+  },
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "Save The Plate",
+    description: "Connect restaurants with consumers to reduce food waste.",
+    images: ["/logo.png"],
+  },
+  // App Icons
+  icons: {
+    icon: [
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/logo.png",
+  },
   // Optimize font loading
   other: {
     "font-display": "swap",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#10b981" }, // emerald-500
+    { media: "(prefers-color-scheme: dark)", color: "#059669" }, // emerald-600
+  ],
 };
 
 export default function RootLayout({
@@ -31,6 +77,11 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Save The Plate" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="icon" type="image/png" href="/logo.png" />
+        <link rel="shortcut icon" href="/logo.png" />
+        <link rel="manifest" href="/manifest.json" />
         {/* Resource hints for performance */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space"} />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space"} />

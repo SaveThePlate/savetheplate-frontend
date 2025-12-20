@@ -185,10 +185,10 @@ function FacebookAuthCallbackContent() {
   // Show loading state while processing
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-emerald-50 via-white to-emerald-50">
         <div className="flex flex-col items-center gap-3">
-          <ReloadIcon className="h-6 w-6 animate-spin text-[#A8DADC]" />
-          <p className="text-gray-600 text-sm">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">
             {t("callback.verifying") || "Completing Facebook authentication..."}
           </p>
         </div>
@@ -217,10 +217,10 @@ function FacebookAuthCallback() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE]">
+        <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-emerald-50 via-white to-emerald-50">
           <div className="flex flex-col items-center gap-3">
-            <ReloadIcon className="h-6 w-6 animate-spin text-[#A8DADC]" />
-            <p className="text-gray-600 text-sm">Loading...</p>
+            <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-muted-foreground text-sm">Loading...</p>
           </div>
         </div>
       }

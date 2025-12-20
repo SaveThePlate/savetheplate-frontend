@@ -4,13 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
-import { ArrowLeft, MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
+import { MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 interface Offer {
   id: number;
@@ -34,6 +31,8 @@ interface Offer {
   pickupLocation: string;
   mapsLink?: string;
   quantity: number;
+  foodType?: "snack" | "meal" | "beverage" | "other";
+  taste?: "sweet" | "salty" | "both" | "neutral";
 }
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
@@ -114,8 +113,8 @@ const Offers = () => {
         setImageSrc(resolved);
         setFallbackIndex(0);
         setOffer(res.data);
-      } catch {
-        toast.error(t("client.offers.detail.failed"));
+      } catch (err) {
+        console.error("Failed to fetch offer:", err);
       }
     };
     fetchOffer();
@@ -138,9 +137,12 @@ const Offers = () => {
   const handleOrder = async () => {
     if (!offer) return;
     const token = localStorage.getItem("accessToken");
-    if (!token) return toast.error(t("client.offers.detail.login_required"));
+    if (!token) {
+      router.push("/signIn");
+      return;
+    }
     if (new Date(offer.expirationDate).getTime() <= new Date().getTime()) {
-      return toast.error(t("client.offers.detail.expired_cannot_order"));
+      return;
     }
     try {
       await axios.post(
@@ -149,17 +151,11 @@ const Offers = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInCart(true);
-      toast.success(t("client.offers.detail.order_success"));
     } catch (err: any) {
-      const errorMsg = sanitizeErrorMessage(err, {
-        action: "place order",
-        defaultMessage: t("client.offers.detail.order_failed") || "Unable to place order. Please try again."
-      });
-      toast.error(errorMsg);
+      console.error("Error placing order:", err);
     }
   };
 
-  const isRescuePack = offer?.title.toLowerCase().includes("rescue pack") || false;
   const isExpired = offer ? new Date(offer.expirationDate).getTime() <= new Date().getTime() : false;
   const { date: formattedDate, time: formattedTime } = offer 
     ? formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate)
@@ -174,61 +170,19 @@ const Offers = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("client.offers.detail.loading")}</p>
+          <p className="text-muted-foreground">{t("client.offers.detail.loading")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        limit={3}
-        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-        bodyClassName="text-sm font-medium"
-        progressClassName="bg-white/80"
-      />
+    <div className="w-full h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] flex items-center justify-center px-3 sm:px-4 lg:px-6 overflow-hidden">
+      <div className="w-full max-w-2xl lg:max-w-4xl flex items-center justify-center h-full">
 
-      {/* Header with Back Button */}
-      <div className="sticky top-14 sm:top-16 z-50 bg-white border-b border-gray-200 shadow-sm -mx-4 sm:-mx-6 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto py-3 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </button>
-          <h1 className="text-lg font-semibold text-gray-900 truncate">{t("client.offers.detail.title")}</h1>
-        </div>
-      </div>
-
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
-        {/* Decorative soft shapes */}
-        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
-        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="text-left space-y-1 sm:space-y-2 flex-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
-              {t("client.offers.detail.title")}
-            </h1>
-            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
-              View offer details and place your order
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200">
-          {/* Hero Image */}
-          <div className="relative w-full h-80 sm:h-96 bg-gray-100">
+        <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border w-full h-auto max-h-[90%] flex flex-col">
+          {/* Hero Image - Compact */}
+          <div className="relative w-full h-48 sm:h-56 flex-shrink-0 bg-muted">
             <Image
               src={sanitizeImageUrl(imageSrc)}
               alt={offer.title}
@@ -248,31 +202,26 @@ const Offers = () => {
               }}
             />
             
-            {/* Badges Overlay */}
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
+            {/* Badges Overlay - Top Left */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1.5">
               {isExpired && (
-                <div className="bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
+                <div className="bg-gray-800 text-white px-2 py-1 rounded-full text-[10px] font-semibold shadow-md">
                   {t("common.expired")}
-                </div>
-              )}
-              {offer.quantity > 0 && !isExpired && (
-                <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
-                  {offer.quantity} {t("common.left")}
                 </div>
               )}
             </div>
 
             {/* Price Badge - Top Right */}
             {offer.price && (
-              <div className="absolute top-4 right-4 bg-emerald-600 text-white font-semibold px-4 py-2 rounded-2xl text-sm shadow-lg z-10">
+              <div className="absolute top-2 right-2 bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-xl text-xs shadow-lg z-10">
                 <div className="flex flex-col items-end leading-tight">
-                  <span className="font-bold text-lg">{offer.price} dt</span>
+                  <span className="font-bold text-base">{offer.price} dt</span>
                   {offer.originalPrice && offer.originalPrice > offer.price && (
                     <>
-                      <span className="text-xs font-normal line-through opacity-75">
+                      <span className="text-[10px] font-normal line-through opacity-75">
                         {offer.originalPrice.toFixed(2)} dt
                       </span>
-                      <span className="text-xs font-bold mt-1 bg-white/20 px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-bold mt-0.5 bg-emerald-50/80 px-1.5 py-0.5 rounded">
                         -{((1 - offer.price / offer.originalPrice) * 100).toFixed(0)}%
                       </span>
                     </>
@@ -280,30 +229,52 @@ const Offers = () => {
                 </div>
               </div>
             )}
+
+            {/* Type and Taste Badges - Bottom Left (Horizontal, like home page) */}
+            {(offer.foodType || offer.taste) && (
+              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1.5 z-10">
+                {/* Type Badge */}
+                {offer.foodType && (
+                  <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-blue-100 text-blue-800 shadow-md">
+                    {offer.foodType === "snack" && "🍪"}
+                    {offer.foodType === "meal" && "🍽️"}
+                    {offer.foodType === "beverage" && "🥤"}
+                    {offer.foodType === "other" && "📦"}
+                    <span className="ml-1">{t(`offers.food_type_${offer.foodType}`) || offer.foodType}</span>
+                  </span>
+                )}
+                
+                {/* Taste Badge */}
+                {offer.taste && (
+                  <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-purple-100 text-purple-800 shadow-md">
+                    {offer.taste === "sweet" && "🍰"}
+                    {offer.taste === "salty" && "🧂"}
+                    {offer.taste === "both" && "🍬"}
+                    {offer.taste === "neutral" && "⚪"}
+                    <span className="ml-1">{t(`offers.taste_${offer.taste}`) || offer.taste}</span>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Title and Type */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
-                  {isRescuePack ? t("offers.rescue_pack") : t("offers.custom_offer")}
-                </span>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{offer.title}</h1>
-              <p className="text-gray-700 leading-relaxed">{offer.description}</p>
+          {/* Content - Compact, no scroll */}
+          <div className="p-2 sm:p-3 space-y-2 flex-1 min-h-0 overflow-hidden flex flex-col">
+            {/* Title */}
+            <div className="flex-shrink-0">
+              <h1 className="text-lg sm:text-xl font-bold text-foreground mb-0.5 line-clamp-1">{offer.title}</h1>
+              <p className="text-xs text-muted-foreground leading-tight line-clamp-1">{offer.description}</p>
             </div>
 
-            {/* Provider Information */}
+            {/* Provider Information - Compact */}
             {offer.owner && (
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0 shadow-md">
+              <div className="flex items-center gap-1.5 p-1.5 bg-gray-50 rounded-lg border border-border flex-shrink-0">
+                <div className="w-7 h-7 rounded-full border border-white overflow-hidden bg-white flex-shrink-0 shadow-sm">
                   <Image
                     src={sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png")}
                     alt={offer.owner.username}
-                    width={56}
-                    height={56}
+                    width={28}
+                    height={28}
                     className="object-cover w-full h-full"
                     unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png"))}
                     onError={(e) => {
@@ -313,10 +284,10 @@ const Offers = () => {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 truncate">{offer.owner.username}</h3>
+                  <h3 className="text-xs font-bold text-foreground truncate">{offer.owner.username}</h3>
                   {offer.owner.phoneNumber && (
-                    <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
-                      <Phone className="w-4 h-4" />
+                    <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                      <Phone className="w-2.5 h-2.5" />
                       <span>{offer.owner.phoneNumber}</span>
                     </div>
                   )}
@@ -324,47 +295,47 @@ const Offers = () => {
               </div>
             )}
 
-            {/* Pickup Information */}
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-emerald-700" />
+            {/* Pickup Information - Compact Grid */}
+            <div className="grid grid-cols-2 gap-1.5 flex-shrink-0">
+              <div className="flex items-start gap-1.5 p-1.5 bg-gray-50 rounded-lg border border-border">
+                <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <MapPin className="w-3 h-3 text-emerald-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">
                     {t("client.offers.detail.pickup_location")}
                   </p>
-                  <p className="text-base font-semibold text-gray-900 mb-1">{currentLocation}</p>
+                  <p className="text-[10px] font-semibold text-foreground line-clamp-1">{currentLocation}</p>
                   {currentMapsLink && (
                     <a
                       href={currentMapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                      className="inline-flex items-center gap-0.5 text-[9px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-0.5"
                     >
-                      <MapPin className="w-4 h-4" />
+                      <MapPin className="w-2.5 h-2.5" />
                       {t("common.open_in_maps")}
                     </a>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-amber-700" />
+              <div className="flex items-start gap-1.5 p-1.5 bg-gray-50 rounded-lg border border-border">
+                <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <Clock className="w-3 h-3 text-amber-700" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">
                     {t("client.offers.detail.pickup_deadline")}
                   </p>
-                  <p className="text-base font-semibold text-gray-900">
+                  <p className="text-[10px] font-semibold text-foreground">
                     {isToday ? t("common.today") : formattedDate}
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">
                     {formattedTime ? (formattedTime.includes(" - ") ? `${t("common.between")} ${formattedTime}` : `${t("common.at")} ${formattedTime}`) : ""}
                   </p>
                   {isExpired && (
-                    <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                    <span className="inline-block mt-0.5 px-1 py-0.5 bg-red-100 text-red-700 text-[9px] font-semibold rounded-full">
                       {t("common.expired")}
                     </span>
                   )}
@@ -372,51 +343,53 @@ const Offers = () => {
               </div>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
-              <p className="text-sm font-semibold text-gray-700 mb-3">{t("client.offers.detail.quantity")}</p>
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
-                  className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-emerald-500 font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={quantity <= 1}
-                >
-                  −
-                </button>
-                <span className="text-2xl font-bold text-gray-900 min-w-[3rem] text-center">{quantity}</span>
-                <button
-                  onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
-                  className="w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-emerald-500 font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={quantity >= offer.quantity}
-                >
-                  +
-                </button>
+            {/* Quantity Selector and Order Button - Compact */}
+            <div className="space-y-1.5 flex-shrink-0 mt-auto">
+              <div className="p-1.5 bg-gray-50 rounded-lg border border-border">
+                <p className="text-[10px] font-semibold text-foreground mb-1 text-center">{t("client.offers.detail.quantity")}</p>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
+                    className="w-7 h-7 flex items-center justify-center bg-white border-2 border-border rounded-lg hover:bg-gray-50 hover:border-primary font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={quantity <= 1}
+                  >
+                    −
+                  </button>
+                  <span className="text-base font-bold text-foreground min-w-[1.5rem] text-center">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
+                    className="w-7 h-7 flex items-center justify-center bg-white border-2 border-border rounded-lg hover:bg-gray-50 hover:border-primary font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={quantity >= offer.quantity}
+                  >
+                    +
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted-foreground text-center mt-0.5">
+                  {offer.quantity} {t("client.offers.detail.available")}
+                </p>
               </div>
-              <p className="text-xs text-gray-500 text-center mt-2">
-                {offer.quantity} {t("client.offers.detail.available")}
-              </p>
-            </div>
 
-            {/* Order Button */}
-            <button
-              onClick={handleOrder}
-              disabled={offer.quantity === 0 || isExpired}
-              className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${
-                offer.quantity === 0 || isExpired
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              {/* Order Button */}
+              <button
+                onClick={handleOrder}
+                disabled={offer.quantity === 0 || isExpired}
+                className={`w-full py-2 rounded-lg font-bold text-xs transition-all shadow-md ${
+                  offer.quantity === 0 || isExpired
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : inCart
+                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    : "bg-emerald-600 text-white hover:bg-emerald-700"
+                }`}
+              >
+                {offer.quantity === 0
+                  ? t("common.out_of_stock")
+                  : isExpired
+                  ? t("common.expired")
                   : inCart
-                  ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                  : "bg-emerald-600 text-white hover:bg-emerald-700"
-              }`}
-            >
-              {offer.quantity === 0
-                ? t("common.out_of_stock")
-                : isExpired
-                ? t("common.expired")
-                : inCart
-                ? t("common.added_to_cart")
-                : t("client.offers.detail.order_button", { price: offer.price ? `${(offer.price * quantity).toFixed(2)}` : t("common.free") })}
-            </button>
+                  ? t("common.added_to_cart")
+                  : t("client.offers.detail.order_button", { price: offer.price ? `${(offer.price * quantity).toFixed(2)}` : t("common.free") })}
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/credenza";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { Clock, MapPin, Package, Edit2, X, Check, Calendar } from "lucide-react";
 
 export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   offerId,
@@ -60,6 +61,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
   
   // Track mounted state to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -487,11 +489,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const isActive = !expired && quantity > 0;
 
   return (
-    <Card className={`flex flex-col bg-white rounded-2xl overflow-hidden border transition-all hover:shadow-lg ${
+    <Card className={`flex flex-col bg-white rounded-xl sm:rounded-2xl overflow-hidden border transition-all hover:shadow-lg ${
       expired ? "border-gray-200 opacity-75" : isLowStock ? "border-amber-200" : "border-gray-100"
     } ${isDeleting ? "opacity-0 scale-95" : ""}`}>
       {/* Image */}
-      <div className="relative w-full h-48 sm:h-52">
+      <div className="relative w-full h-32 sm:h-40 md:h-44">
         {currentImage ? (
           <Image
             src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
@@ -516,62 +518,77 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         <ProviderOverlay owner={owner} pickupLocation={owner?.location || pickupLocation} />
 
         {/* Status Badge */}
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20">
           {expired ? (
-            <div className="bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-              {t("common.expired")}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 px-2 sm:px-2.5 py-1 sm:py-1.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-600"></div>
+                <span className="text-[10px] sm:text-xs font-semibold text-gray-800">
+                  {t("common.expired")}
+                </span>
+              </div>
             </div>
           ) : isLowStock ? (
-            <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-              {t("provider.home.status.low_stock")}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 px-2 sm:px-2.5 py-1 sm:py-1.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500"></div>
+                <span className="text-[10px] sm:text-xs font-semibold text-amber-700">
+                  {t("provider.home.status.low_stock")}
+                </span>
+              </div>
             </div>
           ) : isActive ? (
-            <div className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-              {t("provider.home.status.active")}
+            <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 px-2 sm:px-2.5 py-1 sm:py-1.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500"></div>
+                <span className="text-[10px] sm:text-xs font-semibold text-emerald-700">
+                  {t("provider.home.status.active")}
+                </span>
+              </div>
             </div>
           ) : null}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-4 sm:p-5">
-        <CardHeader className="p-0 mb-3">
-          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+      <div className="flex flex-col flex-1 p-2.5 sm:p-3 md:p-4">
+        <CardHeader className="p-0 mb-2 sm:mb-2.5">
+          <CardTitle className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1 sm:mb-1.5 line-clamp-2">
             {title}
           </CardTitle>
-          <CardDescription className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
+          <CardDescription className="text-[10px] sm:text-xs md:text-sm text-gray-600 leading-relaxed line-clamp-2 mb-2 sm:mb-2.5">
             {description}
           </CardDescription>
           
           {/* Category Badges */}
-          <div className="flex flex-wrap gap-2 mb-2">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-1.5 sm:mb-2">
             {foodType && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] md:text-xs font-semibold bg-blue-100 text-blue-800">
                 {foodType === "snack" && "🍪"}
                 {foodType === "meal" && "🍽️"}
                 {foodType === "beverage" && "🥤"}
                 {foodType === "other" && "📦"}
-                <span className="ml-1 capitalize">{foodType}</span>
+                <span className="ml-0.5 sm:ml-1 capitalize">{foodType}</span>
               </span>
             )}
             {taste && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] md:text-xs font-semibold bg-purple-100 text-purple-800">
                 {taste === "sweet" && "🍰"}
                 {taste === "salty" && "🧂"}
                 {taste === "both" && "🍬"}
                 {taste === "neutral" && "⚪"}
-                <span className="ml-1 capitalize">{taste}</span>
+                <span className="ml-0.5 sm:ml-1 capitalize">{taste}</span>
               </span>
             )}
           </div>
 
           {/* Pickup Time */}
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 px-1">
-            <span>🕐</span>
-            <span>
+          <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs md:text-sm text-gray-600">
+            <span className="text-xs sm:text-sm">🕐</span>
+            <span className="truncate">
               {formattedDate === "Today" ? t("common.today") : formattedDate}
               {formattedTime && (
-                <span className="font-semibold text-emerald-700 ml-1">
+                <span className="font-semibold text-emerald-700 ml-0.5 sm:ml-1">
                   {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
                 </span>
               )}
@@ -580,13 +597,14 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         </CardHeader>
 
         {/* Footer Buttons */}
-        <CardFooter className="mt-auto pt-4 flex w-full gap-2 sm:gap-3 border-t border-gray-100">
+        <CardFooter className="mt-auto pt-2 sm:pt-3 md:pt-4 flex w-full gap-1.5 sm:gap-2 border-t border-gray-100 px-0 pb-0">
           {/* Edit Modal */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <Credenza 
               open={isEditing} 
               onOpenChange={(open) => {
                 setIsEditing(open);
+                setEditingField(null);
                 if (!open) {
                       // Reset all form data to original values
                       setLocalData({
@@ -611,412 +629,36 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
               <CredenzaTrigger asChild>
                 <button
                   disabled={loading}
-                  className="w-full bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base shadow-sm"
+                  className="w-full bg-emerald-600 text-white px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[10px] sm:text-xs md:text-sm shadow-sm"
                 >
                   {t("common.edit")}
                 </button>
               </CredenzaTrigger>
 
-              <CredenzaContent className="bg-white rounded-3xl sm:rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 max-w-2xl mx-auto border border-gray-100 max-h-[90vh] overflow-y-auto">
-                <CredenzaHeader className="mb-4 sm:mb-6">
-                  <CredenzaTitle className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {t("offer_card.edit_offer")}
-                  </CredenzaTitle>
-                  <CredenzaDescription className="text-sm text-gray-500 mt-2">
-                    {t("offer_card.update_details")}
-                  </CredenzaDescription>
-                </CredenzaHeader>
-
-                <CredenzaBody className="space-y-4 sm:space-y-5">
-                  {/* Title */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-title" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("offer_card.title_label")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="edit-title"
-                      name="title"
-                      value={localData.title}
-                      onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      placeholder={t("offer_card.title_label")}
+              <CredenzaContent className="bg-white !rounded-none shadow-2xl w-full md:max-w-xl lg:max-w-2xl border-0 md:border border-border p-0 overflow-hidden max-h-[92vh] md:max-h-[90vh] flex flex-col [&>button]:!hidden">
+                {/* Hero Image */}
+                <div className="relative w-full h-40 sm:h-48 lg:h-44 flex-shrink-0 overflow-hidden">
+                  {currentImage ? (
+                    <Image
+                      src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
+                      alt={title}
+                      fill
+                      sizes="(max-width: 640px) calc(100vw - 1rem), 512px"
+                      className="object-cover"
+                      unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+                      onError={handleImageError}
                     />
-                  </div>
-
-                  {/* Description */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-description" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("offer_card.description_label")} <span className="text-gray-400 font-normal text-xs">(Optional)</span>
-                    </label>
-                    <textarea
-                      id="edit-description"
-                      name="description"
-                      value={localData.description}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
-                      disabled={loading}
-                      placeholder={t("offer_card.description_label")}
-                      maxLength={500}
-                    />
-                    <p className="text-xs text-gray-500">
-                      {localData.description?.length || 0}/500 characters. Optional - helps customers understand your offer better.
-                    </p>
-                  </div>
-
-                  {/* Price Fields */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label htmlFor="edit-price" className="text-xs sm:text-sm font-semibold text-gray-700">
-                        {t("offer_card.price_label")} <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <input
-                          id="edit-price"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          name="price"
-                          value={localData.price}
-                          onChange={handleInputChange}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                          disabled={loading}
-                          placeholder="0.00"
-                          required
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm">dt</span>
-                      </div>
-                      {localData.price && !isNaN(parseFloat(localData.price as any)) && parseFloat(localData.price as any) > 0 && (
-                        <p className="text-xs text-blue-600 mt-1 bg-blue-50 p-2 rounded border border-blue-200">
-                          {t("offer_card.commission_notice", { 
-                            price: parseFloat(localData.price as any).toFixed(2), 
-                            finalPrice: (parseFloat(localData.price as any) + 1).toFixed(2) 
-                          })}
-                        </p>
-                      )}
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-muted to-secondary flex items-center justify-center">
+                      <span className="text-muted-foreground">No image</span>
                     </div>
-
-                    <div className="space-y-1.5">
-                      <label htmlFor="edit-originalPrice" className="text-xs sm:text-sm font-semibold text-gray-700">
-                        {t("offer_card.original_price_label")}
-                      </label>
-                      <div className="relative">
-                        <input
-                          id="edit-originalPrice"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          name="originalPrice"
-                          value={localData.originalPrice}
-                          onChange={handleInputChange}
-                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                          disabled={loading}
-                          placeholder="0.00"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm">dt</span>
-                      </div>
-                      {localData.originalPrice && parseFloat(localData.originalPrice as any) > parseFloat(localData.price as any) && (
-                        <p className="text-xs text-emerald-600 font-medium">
-                          Save {((1 - parseFloat(localData.price as any) / parseFloat(localData.originalPrice as any)) * 100).toFixed(0)}%
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Quantity */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-quantity" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("offer_card.quantity_label")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="edit-quantity"
-                      type="number"
-                      min="0"
-                      name="quantity"
-                      value={localData.quantity}
-                      onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      placeholder="0"
-                      required
-                    />
-                  </div>
-
-                  {/* Pickup Date */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-expirationDate" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="edit-expirationDate"
-                      type="date"
-                      name="expirationDate"
-                      value={localData.expirationDate ? (() => {
-                        // Convert ISO string to local date string (YYYY-MM-DD) to avoid timezone issues
-                        const date = new Date(localData.expirationDate);
-                        // Get local date components to avoid UTC conversion issues
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;
-                      })() : ""}
-                      onChange={(e) => {
-                        const dateValue = e.target.value;
-                        if (dateValue) {
-                          // Parse the date value (YYYY-MM-DD) and create date in local timezone
-                          // Split the date string to avoid timezone conversion issues
-                          const [year, month, day] = dateValue.split('-').map(Number);
-                          // Create date at noon local time to avoid timezone shifts, then set to end of day
-                          const date = new Date(year, month - 1, day, 23, 59, 59, 999);
-                          setLocalData(prev => ({ ...prev, expirationDate: date.toISOString() }));
-                        } else {
-                          setLocalData(prev => ({ ...prev, expirationDate: "" }));
-                        }
-                      }}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-
-                  {/* Pickup Start Time */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-pickupStartTime" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("add_offer.start_time")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="edit-pickupStartTime"
-                      type="time"
-                      name="pickupStartTime"
-                      value={localData.pickupStartTime ? new Date(localData.pickupStartTime).toISOString().slice(0, 16).split('T')[1] : ""}
-                      onChange={(e) => {
-                        const timeValue = e.target.value;
-                        if (timeValue && localData.expirationDate) {
-                          const [hours, minutes] = timeValue.split(':');
-                          // Use the expiration date and set time in local timezone
-                          const expDate = new Date(localData.expirationDate);
-                          const date = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate(), parseInt(hours), parseInt(minutes), 0, 0);
-                          setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
-                        } else if (timeValue) {
-                          const [hours, minutes] = timeValue.split(':');
-                          const date = new Date();
-                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                          setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
-                        } else {
-                          setLocalData(prev => ({ ...prev, pickupStartTime: "" }));
-                        }
-                      }}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-
-                  {/* Pickup End Time */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="edit-pickupEndTime" className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("add_offer.end_time")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="edit-pickupEndTime"
-                      type="time"
-                      name="pickupEndTime"
-                      value={localData.pickupEndTime ? new Date(localData.pickupEndTime).toISOString().slice(0, 16).split('T')[1] : ""}
-                      onChange={(e) => {
-                        const timeValue = e.target.value;
-                        if (timeValue && localData.expirationDate) {
-                          const [hours, minutes] = timeValue.split(':');
-                          // Use the expiration date and set time in local timezone
-                          const expDate = new Date(localData.expirationDate);
-                          const date = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate(), parseInt(hours), parseInt(minutes), 0, 0);
-                          setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
-                        } else if (timeValue) {
-                          const [hours, minutes] = timeValue.split(':');
-                          const date = new Date();
-                          date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                          setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
-                        } else {
-                          setLocalData(prev => ({ ...prev, pickupEndTime: "" }));
-                        }
-                      }}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-
-                  {/* Pickup Location Info */}
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <span className="text-emerald-600 text-lg">📍</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-emerald-900 mb-1">
-                          {t("add_offer.pickup_location")}
-                        </h3>
-                        <p className="text-xs text-emerald-700">
-                          Pickup location is set from your profile. Update your location in profile settings if needed.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Category Fields */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Food Type */}
-                    <div className="space-y-1.5">
-                      <label htmlFor="edit-foodType" className="text-xs sm:text-sm font-semibold text-gray-700">
-                        {t("offer_card.food_type_label")}
-                      </label>
-                      <select
-                        id="edit-foodType"
-                        name="foodType"
-                        value={localData.foodType}
-                        onChange={(e) => setLocalData(prev => ({ ...prev, foodType: e.target.value as FoodType }))}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white"
-                        disabled={loading}
-                      >
-                        <option value="snack">{t("offer_card.food_type_snack")}</option>
-                        <option value="meal">{t("offer_card.food_type_meal")}</option>
-                        <option value="beverage">{t("offer_card.food_type_beverage")}</option>
-                        <option value="other">{t("offer_card.food_type_other")}</option>
-                      </select>
-                    </div>
-
-                    {/* Taste */}
-                    <div className="space-y-1.5">
-                      <label htmlFor="edit-taste" className="text-xs sm:text-sm font-semibold text-gray-700">
-                        {t("offer_card.taste_label")}
-                      </label>
-                      <select
-                        id="edit-taste"
-                        name="taste"
-                        value={localData.taste}
-                        onChange={(e) => setLocalData(prev => ({ ...prev, taste: e.target.value as Taste }))}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white"
-                        disabled={loading}
-                      >
-                        <option value="sweet">{t("offer_card.taste_sweet")}</option>
-                        <option value="salty">{t("offer_card.taste_salty")}</option>
-                        <option value="both">{t("offer_card.taste_both")}</option>
-                        <option value="neutral">{t("offer_card.taste_neutral")}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Images Upload */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs sm:text-sm font-semibold text-gray-700">
-                      {t("offer_card.images_label")} {uploadedImages.length > 0 && <span className="text-emerald-600">({t("offer_card.images_uploaded", { count: uploadedImages.length })})</span>}
-                    </label>
-                    <FileUploader
-                      value={localFiles || []}
-                      onValueChange={handleImageUpload}
-                      dropzoneOptions={{
-                        accept: { "image/*": [".jpg", ".jpeg", ".png"] },
-                        multiple: false,
-                        maxFiles: 1,
-                        maxSize: 5 * 1024 * 1024,
-                      }}
-                    >
-                      <FileInput>
-                        <div className="flex flex-col items-center justify-center h-28 sm:h-32 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-colors cursor-pointer touch-manipulation">
-                          {uploadingImages ? (
-                            <>
-                              <div className="animate-spin text-xl sm:text-2xl mb-1 sm:mb-2">⏳</div>
-                              <p className="text-gray-600 text-xs sm:text-sm">{t("offer_card.uploading")}</p>
-                            </>
-                          ) : localFiles && localFiles.length > 0 ? (
-                            <>
-                              <div className="text-xl sm:text-2xl mb-1 sm:mb-2">✓</div>
-                              <p className="text-gray-600 text-xs sm:text-sm">{t("offer_card.images_ready", { count: localFiles.length })}</p>
-                            </>
-                          ) : (
-                            <>
-                              <div className="text-xl sm:text-2xl mb-1 sm:mb-2">📸</div>
-                              <p className="text-gray-600 text-xs sm:text-sm">{t("offer_card.click_upload")}</p>
-                              <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">{t("offer_card.up_to_5")}</p>
-                            </>
-                          )}
-                        </div>
-                      </FileInput>
-                      <FileUploaderContent>
-                        {localFiles && localFiles.length > 0 && localFiles.map((file, index) => {
-                          // Check if this file has been uploaded
-                          const uploadedImage = uploadedImages.length > 0 && uploadedImages[index];
-                          const isUploaded = !!uploadedImage;
-                          
-                          // Determine image source - prioritize uploaded image URL
-                          let imageSrc: string;
-                          if (isUploaded && uploadedImage) {
-                            // Use the uploaded image URL
-                            imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
-                            
-                            // If we have a relative URL, construct absolute URL
-                            if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-                              imageSrc = `${backendUrl}/storage/${imageSrc}`;
-                            } else if (imageSrc && imageSrc.startsWith("/storage/")) {
-                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-                              imageSrc = `${backendUrl}${imageSrc}`;
-                            }
-                            
-                            // Add cache buster to ensure fresh image
-                            if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
-                              imageSrc += `?t=${Date.now()}`;
-                            }
-                            
-                            console.log("Using uploaded image URL:", imageSrc); // Debug log
-                          } else {
-                            // Use local file preview
-                            imageSrc = URL.createObjectURL(file) || "";
-                          }
-                          
-                          return (
-                            <FileUploaderItem
-                              key={`preview-${index}`}
-                              index={index}
-                              className={`size-20 sm:size-24 p-0 rounded-lg sm:rounded-xl overflow-hidden border-2 shadow-sm relative ${
-                                isUploaded ? "border-emerald-600" : "border-yellow-400"
-                              }`}
-                            >
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Image
-                                  src={imageSrc || "/defaultBag.png"}
-                                  alt={`Preview ${index + 1}`}
-                                  width={96}
-                                  height={96}
-                                  className="w-full h-full object-cover rounded-lg sm:rounded-xl"
-                                  unoptimized={true}
-                                />
-                              </div>
-                              <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
-                                isUploaded 
-                                  ? "bg-emerald-600" 
-                                  : uploadingImages 
-                                  ? "bg-yellow-500" 
-                                  : "bg-yellow-400"
-                              }`}>
-                                {isUploaded ? "✓" : uploadingImages ? "⏳" : "📤"}
-                              </div>
-                            </FileUploaderItem>
-                          );
-                        })}
-                      </FileUploaderContent>
-                    </FileUploader>
-                    <p className="text-xs text-gray-500">
-                      {t("offer_card.images_hint")}
-                    </p>
-                  </div>
-                </CredenzaBody>
-
-                <CredenzaFooter className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-6 border-t border-gray-200 sticky bottom-0 bg-white z-10">
-                  <button 
+                  )}
+                  
+                  {/* Close Button - Top Right */}
+                  <button
                     onClick={() => {
                       setIsEditing(false);
-                      // Reset form data to original values
+                      setEditingField(null);
                       setLocalData({
                         title,
                         description,
@@ -1026,7 +668,6 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                         expirationDate: expirationDate || "",
                         pickupStartTime: pickupStartTime || "",
                         pickupEndTime: pickupEndTime || "",
-                        // pickupLocation and mapsLink are managed from profile
                         foodType: foodType || "other" as FoodType,
                         taste: taste || "neutral" as Taste,
                       });
@@ -1034,28 +675,527 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       setUploadedImages([]);
                       setUploadingImages(false);
                     }}
-                    className="w-full sm:w-auto px-5 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-semibold hover:bg-gray-200 transition-colors"
-                    disabled={loading}
+                    className="absolute top-2 right-2 sm:top-3 sm:right-3 z-50 rounded-full bg-white p-1.5 shadow-lg hover:bg-gray-50 transition-colors border border-border flex items-center justify-center cursor-pointer"
+                    aria-label="Close"
+                    type="button"
                   >
-                    {t("common.cancel")}
+                    <X className="h-4 w-4 text-foreground" />
                   </button>
-                  <button
-                    onClick={handleEdit}
-                    disabled={loading || uploadingImages}
-                    className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white rounded-xl text-base font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                  >
-                    {loading ? t("common.saving") : uploadingImages ? t("offer_card.uploading") : t("offer_card.save_changes")}
-                  </button>
-                </CredenzaFooter>
+                </div>
+
+                {/* Content Section */}
+                <div className="bg-white flex-1 min-h-0 flex flex-col">
+                  {/* Title and Pricing Section */}
+                  <div className="px-4 sm:px-5 pt-3 pb-2 border-b border-border">
+                    {/* Title - Editable */}
+                    {editingField === "title" ? (
+                      <div className="mb-2">
+                        <input
+                          type="text"
+                          value={localData.title}
+                          onChange={(e) => setLocalData(prev => ({ ...prev, title: e.target.value }))}
+                          onBlur={() => setEditingField(null)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setEditingField(null);
+                            }
+                          }}
+                          className="w-full text-base sm:text-lg font-bold text-foreground px-2 py-1 border-2 border-emerald-500 rounded-lg focus:outline-none"
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <h1 
+                        className="text-base sm:text-lg font-bold text-foreground mb-1.5 cursor-pointer hover:text-emerald-600 transition-colors flex items-center gap-2 group"
+                        onClick={() => setEditingField("title")}
+                      >
+                        {localData.title}
+                        <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h1>
+                    )}
+                    
+                    {/* Pricing - Editable */}
+                    <div className="flex items-baseline gap-2">
+                      {editingField === "price" ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={localData.price}
+                            onChange={(e) => setLocalData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                            onBlur={() => setEditingField(null)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                setEditingField(null);
+                              }
+                            }}
+                            className="w-24 text-xl sm:text-2xl font-bold text-emerald-600 px-2 py-1 border-2 border-emerald-500 rounded-lg focus:outline-none"
+                            autoFocus
+                          />
+                          <span className="text-emerald-600 font-bold">dt</span>
+                        </div>
+                      ) : (
+                        <div 
+                          className="flex items-center gap-2 cursor-pointer hover:text-emerald-700 transition-colors group"
+                          onClick={() => setEditingField("price")}
+                        >
+                          {localData.originalPrice && parseFloat(localData.originalPrice as any) > localData.price ? (
+                            <>
+                              <div className="flex flex-col">
+                                <span className="text-[10px] text-muted-foreground line-through">
+                                  {parseFloat(localData.originalPrice as any).toFixed(2)} dt
+                                </span>
+                                <span className="text-xl sm:text-2xl font-bold text-emerald-600">
+                                  {localData.price.toFixed(2)} dt
+                                </span>
+                              </div>
+                              <div className="flex-1" />
+                              <div className="bg-emerald-50 border border-emerald-200 rounded-md px-2 py-0.5">
+                                <span className="text-[10px] font-bold text-emerald-700">
+                                  {Math.round(((parseFloat(localData.originalPrice as any) - localData.price) / parseFloat(localData.originalPrice as any)) * 100)}% {t("offers.save") || "SAVED"}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-xl sm:text-2xl font-bold text-emerald-600">
+                              {localData.price.toFixed(2)} dt
+                            </span>
+                          )}
+                          <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description - Editable */}
+                  {editingField === "description" ? (
+                    <div className="px-4 sm:px-5 py-2 border-b border-border">
+                      <textarea
+                        value={localData.description}
+                        onChange={(e) => setLocalData(prev => ({ ...prev, description: e.target.value }))}
+                        onBlur={() => setEditingField(null)}
+                        rows={3}
+                        maxLength={500}
+                        className="w-full text-xs text-muted-foreground leading-relaxed px-2 py-1 border-2 border-emerald-500 rounded-lg focus:outline-none resize-none"
+                        autoFocus
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {(localData.description?.length || 0)}/500
+                      </p>
+                    </div>
+                  ) : (
+                    <div 
+                      className="px-4 sm:px-5 py-2 border-b border-border cursor-pointer hover:bg-gray-50 transition-colors group"
+                      onClick={() => setEditingField("description")}
+                    >
+                      <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line line-clamp-2 flex items-start gap-2">
+                        <span className="flex-1">{localData.description || t("offer_card.description_label")}</span>
+                        <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Key Information Cards - Editable */}
+                  <div className="px-4 sm:px-5 py-2 flex-1 min-h-0 overflow-y-auto">
+                    <div className="grid grid-cols-1 gap-2">
+                      {/* Pickup Time - Editable */}
+                      {editingField === "pickupTime" ? (
+                        <div className="flex items-start gap-2 p-2 bg-amber-50 rounded-lg border-2 border-amber-300">
+                          <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <Clock className="w-3.5 h-3.5 text-amber-700" />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div>
+                              <label className="text-[10px] font-semibold text-foreground block mb-1">
+                                {t("add_offer.pickup_date")}
+                              </label>
+                              <input
+                                type="date"
+                                value={localData.expirationDate ? (() => {
+                                  const date = new Date(localData.expirationDate);
+                                  const year = date.getFullYear();
+                                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                                  const day = String(date.getDate()).padStart(2, '0');
+                                  return `${year}-${month}-${day}`;
+                                })() : ""}
+                                onChange={(e) => {
+                                  const dateValue = e.target.value;
+                                  if (dateValue) {
+                                    const [year, month, day] = dateValue.split('-').map(Number);
+                                    const date = new Date(year, month - 1, day, 23, 59, 59, 999);
+                                    setLocalData(prev => ({ ...prev, expirationDate: date.toISOString() }));
+                                  }
+                                }}
+                                className="w-full px-2 py-1 text-xs border-2 border-emerald-500 rounded-lg focus:outline-none"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="text-[10px] font-semibold text-foreground block mb-1">
+                                  {t("add_offer.start_time")}
+                                </label>
+                                <input
+                                  type="time"
+                                  value={localData.pickupStartTime ? new Date(localData.pickupStartTime).toISOString().slice(0, 16).split('T')[1] : ""}
+                                  onChange={(e) => {
+                                    const timeValue = e.target.value;
+                                    if (timeValue && localData.expirationDate) {
+                                      const [hours, minutes] = timeValue.split(':');
+                                      const expDate = new Date(localData.expirationDate);
+                                      const date = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate(), parseInt(hours), parseInt(minutes), 0, 0);
+                                      setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
+                                    }
+                                  }}
+                                  className="w-full px-2 py-1 text-xs border-2 border-emerald-500 rounded-lg focus:outline-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] font-semibold text-foreground block mb-1">
+                                  {t("add_offer.end_time")}
+                                </label>
+                                <input
+                                  type="time"
+                                  value={localData.pickupEndTime ? new Date(localData.pickupEndTime).toISOString().slice(0, 16).split('T')[1] : ""}
+                                  onChange={(e) => {
+                                    const timeValue = e.target.value;
+                                    if (timeValue && localData.expirationDate) {
+                                      const [hours, minutes] = timeValue.split(':');
+                                      const expDate = new Date(localData.expirationDate);
+                                      const date = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate(), parseInt(hours), parseInt(minutes), 0, 0);
+                                      setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
+                                    }
+                                  }}
+                                  className="w-full px-2 py-1 text-xs border-2 border-emerald-500 rounded-lg focus:outline-none"
+                                />
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setEditingField(null)}
+                              className="mt-2 px-3 py-1 bg-emerald-600 text-white text-xs rounded-lg hover:bg-emerald-700"
+                            >
+                              <Check className="w-3 h-3 inline mr-1" />
+                              {t("common.done") || "Done"}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div 
+                          className="flex items-start gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200 cursor-pointer hover:border-amber-300 transition-colors group"
+                          onClick={() => setEditingField("pickupTime")}
+                        >
+                          <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <Clock className="w-3.5 h-3.5 text-amber-700" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-semibold text-foreground mb-0.5 flex items-center gap-2">
+                              {t("offers.pickup_time") || "Pickup Time"}
+                              <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              <span className="font-medium">{formattedDate === "Today" ? t("common.today") : formattedDate}</span>
+                              {formattedTime && (
+                                <span className="text-emerald-600 font-semibold ml-1">
+                                  {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Quantity - Editable */}
+                      {editingField === "quantity" ? (
+                        <div className="flex items-start gap-2 p-2 bg-green-50 rounded-lg border-2 border-green-300">
+                          <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
+                            <Package className="w-3.5 h-3.5 text-green-700" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label className="text-[10px] font-semibold text-foreground block mb-1">
+                              {t("offers.quantity_available") || "Available"}
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                value={localData.quantity}
+                                onChange={(e) => setLocalData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                                onBlur={() => setEditingField(null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    setEditingField(null);
+                                  }
+                                }}
+                                className="w-20 px-2 py-1 text-xs border-2 border-emerald-500 rounded-lg focus:outline-none"
+                                autoFocus
+                              />
+                              <span className="text-[10px] text-muted-foreground">
+                                {localData.quantity === 1 ? t("common.item") || "item" : t("common.items") || "items"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div 
+                          className="flex items-start gap-2 p-2 bg-green-50 rounded-lg border border-green-200 cursor-pointer hover:border-green-300 transition-colors group"
+                          onClick={() => setEditingField("quantity")}
+                        >
+                          <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
+                            <Package className="w-3.5 h-3.5 text-green-700" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-semibold text-foreground mb-0.5 flex items-center gap-2">
+                              {t("offers.quantity_available") || "Available"}
+                              <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {localData.quantity} {localData.quantity === 1 ? t("common.item") || "item" : t("common.items") || "items"}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Original Price - Editable */}
+                      {editingField === "originalPrice" ? (
+                        <div className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg border-2 border-blue-300">
+                          <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-700 text-sm">💰</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label className="text-[10px] font-semibold text-foreground block mb-1">
+                              {t("offer_card.original_price_label")}
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={localData.originalPrice}
+                                onChange={(e) => setLocalData(prev => ({ ...prev, originalPrice: e.target.value }))}
+                                onBlur={() => setEditingField(null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    setEditingField(null);
+                                  }
+                                }}
+                                className="w-24 px-2 py-1 text-xs border-2 border-emerald-500 rounded-lg focus:outline-none"
+                                placeholder="0.00"
+                                autoFocus
+                              />
+                              <span className="text-xs text-muted-foreground">dt</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : localData.originalPrice && parseFloat(localData.originalPrice as any) > localData.price ? (
+                        <div 
+                          className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:border-blue-300 transition-colors group"
+                          onClick={() => setEditingField("originalPrice")}
+                        >
+                          <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-700 text-sm">💰</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-semibold text-foreground mb-0.5 flex items-center gap-2">
+                              {t("offer_card.original_price_label")}
+                              <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </p>
+                            <p className="text-[10px] text-muted-foreground line-through">
+                              {parseFloat(localData.originalPrice as any).toFixed(2)} dt
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {/* Categories - Editable */}
+                      <div className="flex items-start gap-2 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
+                          <span className="text-purple-700 text-sm">🏷️</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-semibold text-foreground mb-1">
+                            {t("offer_card.categories") || "Categories"}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            <select
+                              value={localData.foodType}
+                              onChange={(e) => setLocalData(prev => ({ ...prev, foodType: e.target.value as FoodType }))}
+                              className="px-2 py-1 text-[10px] border border-purple-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none bg-white"
+                              disabled={loading}
+                            >
+                              <option value="snack">{t("offer_card.food_type_snack")}</option>
+                              <option value="meal">{t("offer_card.food_type_meal")}</option>
+                              <option value="beverage">{t("offer_card.food_type_beverage")}</option>
+                              <option value="other">{t("offer_card.food_type_other")}</option>
+                            </select>
+                            <select
+                              value={localData.taste}
+                              onChange={(e) => setLocalData(prev => ({ ...prev, taste: e.target.value as Taste }))}
+                              className="px-2 py-1 text-[10px] border border-purple-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none bg-white"
+                              disabled={loading}
+                            >
+                              <option value="sweet">{t("offer_card.taste_sweet")}</option>
+                              <option value="salty">{t("offer_card.taste_salty")}</option>
+                              <option value="both">{t("offer_card.taste_both")}</option>
+                              <option value="neutral">{t("offer_card.taste_neutral")}</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Pickup Location Info */}
+                      <div className="flex items-start gap-2 p-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-semibold text-foreground mb-0.5">
+                            {t("offers.pickup_location") || "Pickup Location"}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {owner?.location || pickupLocation || "Location"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Image Upload */}
+                      <div className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <span className="text-gray-700 text-sm">📸</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-semibold text-foreground mb-1">
+                            {t("offer_card.images_label")}
+                          </p>
+                          <FileUploader
+                            value={localFiles || []}
+                            onValueChange={handleImageUpload}
+                            dropzoneOptions={{
+                              accept: { "image/*": [".jpg", ".jpeg", ".png"] },
+                              multiple: false,
+                              maxFiles: 1,
+                              maxSize: 5 * 1024 * 1024,
+                            }}
+                          >
+                            <FileInput>
+                              <div className="flex flex-col items-center justify-center h-20 w-full border-2 border-dashed border-gray-300 bg-white hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer">
+                                {uploadingImages ? (
+                                  <>
+                                    <div className="animate-spin text-lg mb-1">⏳</div>
+                                    <p className="text-[10px] text-muted-foreground">{t("offer_card.uploading")}</p>
+                                  </>
+                                ) : localFiles && localFiles.length > 0 ? (
+                                  <>
+                                    <div className="text-lg mb-1">✓</div>
+                                    <p className="text-[10px] text-muted-foreground">{t("offer_card.images_ready", { count: localFiles.length })}</p>
+                                  </>
+                                ) : (
+                                  <>
+                                    <p className="text-[10px] text-muted-foreground">{t("offer_card.click_upload")}</p>
+                                  </>
+                                )}
+                              </div>
+                            </FileInput>
+                            <FileUploaderContent>
+                              {localFiles && localFiles.length > 0 && localFiles.map((file, index) => {
+                                const uploadedImage = uploadedImages.length > 0 && uploadedImages[index];
+                                const isUploaded = !!uploadedImage;
+                                let imageSrc: string;
+                                if (isUploaded && uploadedImage) {
+                                  imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
+                                  if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                    imageSrc = `${backendUrl}/storage/${imageSrc}`;
+                                  } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                    imageSrc = `${backendUrl}${imageSrc}`;
+                                  }
+                                  if (imageSrc && !imageSrc.includes("?") && !imageSrc.includes("#")) {
+                                    imageSrc += `?t=${Date.now()}`;
+                                  }
+                                } else {
+                                  imageSrc = URL.createObjectURL(file) || "";
+                                }
+                                return (
+                                  <FileUploaderItem
+                                    key={`preview-${index}`}
+                                    index={index}
+                                    className={`size-16 p-0 rounded-lg overflow-hidden border-2 shadow-sm relative ${
+                                      isUploaded ? "border-emerald-600" : "border-yellow-400"
+                                    }`}
+                                  >
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <Image
+                                        src={imageSrc || "/defaultBag.png"}
+                                        alt={`Preview ${index + 1}`}
+                                        width={64}
+                                        height={64}
+                                        className="w-full h-full object-cover rounded-lg"
+                                        unoptimized={true}
+                                      />
+                                    </div>
+                                    <div className={`absolute top-0.5 right-0.5 text-white text-[8px] px-1 py-0.5 rounded-full z-10 ${
+                                      isUploaded ? "bg-emerald-600" : uploadingImages ? "bg-yellow-500" : "bg-yellow-400"
+                                    }`}>
+                                      {isUploaded ? "✓" : uploadingImages ? "⏳" : "📤"}
+                                    </div>
+                                  </FileUploaderItem>
+                                );
+                              })}
+                            </FileUploaderContent>
+                          </FileUploader>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fixed Bottom Action Bar */}
+                <div className="bg-white p-2.5 sm:p-3 flex-shrink-0 border-t border-border">
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditingField(null);
+                        // Reset form data to original values
+                        setLocalData({
+                          title,
+                          description,
+                          price,
+                          originalPrice: originalPrice || "",
+                          quantity,
+                          expirationDate: expirationDate || "",
+                          pickupStartTime: pickupStartTime || "",
+                          pickupEndTime: pickupEndTime || "",
+                          foodType: foodType || "other" as FoodType,
+                          taste: taste || "neutral" as Taste,
+                        });
+                        setLocalFiles(null);
+                        setUploadedImages([]);
+                        setUploadingImages(false);
+                      }}
+                      className="flex-1 px-4 py-2.5 bg-white border border-border text-foreground text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+                      disabled={loading}
+                    >
+                      {t("common.cancel")}
+                    </button>
+                    <button
+                      onClick={handleEdit}
+                      disabled={loading || uploadingImages}
+                      className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? t("common.saving") : uploadingImages ? t("offer_card.uploading") : t("offer_card.save_changes")}
+                    </button>
+                  </div>
+                </div>
               </CredenzaContent>
             </Credenza>
           </div>
 
           {/* Delete Modal */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
               <CredenzaTrigger asChild>
-                <button className="w-full bg-red-500 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-red-600 transition-colors text-sm sm:text-base shadow-sm">
+                <button className="w-full bg-red-500 text-white px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl font-semibold hover:bg-red-600 transition-colors text-[10px] sm:text-xs md:text-sm shadow-sm">
                   {t("common.delete")}
                 </button>
               </CredenzaTrigger>
