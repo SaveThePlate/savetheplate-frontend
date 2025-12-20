@@ -439,7 +439,7 @@ const AddOffer: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden overscroll-none">
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1 overscroll-none">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-1 sm:pr-2 overscroll-none">
         {/* Step 1: Basic Info */}
         {currentStep === 1 && (
           <div className="space-y-1.5 sm:space-y-2 animate-in fade-in duration-300">
