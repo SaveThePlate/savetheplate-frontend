@@ -10,12 +10,9 @@ import Image from "next/image";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { DropzoneOptions } from "react-dropzone";
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImages, shouldCompress } from "@/utils/imageCompression";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { axiosInstance } from "@/lib/axiosInstance";
@@ -43,13 +40,29 @@ const AddOffer: React.FC = () => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [originalPrice, setOriginalPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [quantity, setQuantity] = useState("1");
   const [pickupDate, setPickupDate] = useState("");
   const [pickupStartTime, setPickupStartTime] = useState("");
   const [pickupEndTime, setPickupEndTime] = useState("");
   // Pickup location is now taken from user's profile, no need for state
-  const [foodType, setFoodType] = useState<FoodType>("other");
-  const [taste, setTaste] = useState<Taste>("neutral");
+  const [foodType, setFoodType] = useState<FoodType | "">("");
+  const [taste, setTaste] = useState<Taste | "">("");
+  
+  // Auto-fill smart defaults on mount
+  useEffect(() => {
+    // Set default pickup time to today afternoon if not set
+    if (!pickupDate && !pickupStartTime && !pickupEndTime) {
+      const today = new Date();
+      const formatDate = (date: Date) => date.toISOString().split('T')[0];
+      const formatTime = (hours: number, minutes: number = 0) => 
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+      setPickupDate(formatDate(today));
+      setPickupStartTime(formatTime(14, 0)); // 2:00 PM
+      setPickupEndTime(formatTime(18, 0)); // 6:00 PM
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
   const [localFiles, setLocalFiles] = useState<File[] | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -112,8 +125,9 @@ const AddOffer: React.FC = () => {
         const startDateTime = new Date(`${pickupDate}T${pickupStartTime}`);
         const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
         return startDateTime < endDateTime && endDateTime > new Date();
-      case 4: // Categories (always valid, optional fields)
-        return true;
+      case 4: // Categories - ensure foodType and taste are selected
+        return foodType !== "" && foodType !== undefined && foodType !== null && 
+               taste !== "" && taste !== undefined && taste !== null;
       default:
         return false;
     }
@@ -208,11 +222,6 @@ const AddOffer: React.FC = () => {
       return mapped;
     } catch (err: any) {
       console.error("Upload error", err?.response?.data || err.message || err);
-      const errorMessage = sanitizeErrorMessage(err, {
-        action: "upload images",
-        defaultMessage: t("add_offer.error_upload_failed")
-      });
-      toast.error(errorMessage);
       throw err;
     }
   }
@@ -227,11 +236,6 @@ const AddOffer: React.FC = () => {
       setLocalFiles(files);
       // Removed success toast - user can see uploaded images in preview
     } catch (error: any) {
-      const errorMessage = sanitizeErrorMessage(error, {
-        action: "upload images",
-        defaultMessage: t("add_offer.error_upload_failed")
-      });
-      toast.error(errorMessage);
       // Clear files on error
       setLocalFiles(null);
       setUploadedImages([]);
@@ -266,7 +270,6 @@ const AddOffer: React.FC = () => {
 
     // Validation
     if (!title.trim()) {
-      toast.error(t("add_offer.error_title_required"));
       return;
     }
 
@@ -274,28 +277,23 @@ const AddOffer: React.FC = () => {
 
     const priceToFloat = parseFloat(price);
     if (isNaN(priceToFloat) || priceToFloat <= 0) {
-      toast.error(t("add_offer.error_price_required"));
       return;
     }
 
     const quantityToFloat = parseFloat(quantity);
     if (isNaN(quantityToFloat) || quantityToFloat <= 0) {
-      toast.error(t("add_offer.error_quantity_required"));
       return;
     }
 
     if (!pickupDate) {
-      toast.error(t("add_offer.error_date_required"));
       return;
     }
 
     if (!pickupStartTime) {
-      toast.error(t("add_offer.error_start_time_required"));
       return;
     }
 
     if (!pickupEndTime) {
-      toast.error(t("add_offer.error_end_time_required"));
       return;
     }
 
@@ -304,12 +302,10 @@ const AddOffer: React.FC = () => {
     const endDateTime = new Date(`${pickupDate}T${pickupEndTime}`);
 
     if (startDateTime >= endDateTime) {
-      toast.error(t("add_offer.error_time_order"));
       return;
     }
 
     if (endDateTime <= new Date()) {
-      toast.error(t("add_offer.error_future_time"));
       return;
     }
 
@@ -358,8 +354,8 @@ const AddOffer: React.FC = () => {
         expirationDate: endDateTime.toISOString(),
         pickupStartTime: startDateTime.toISOString(),
         pickupEndTime: endDateTime.toISOString(),
-        foodType: foodType,
-        taste: taste,
+        foodType: foodType as FoodType,
+        taste: taste as Taste,
         images: JSON.stringify(imagesPayload),
       };
 
@@ -371,7 +367,6 @@ const AddOffer: React.FC = () => {
       console.log("Sending payload:", payload); // Debug log
 
       await axiosInstance.post("/offers", payload);
-      toast.success(t("add_offer.success_created"));
 
       // Reset form
       setTitle("");
@@ -382,98 +377,81 @@ const AddOffer: React.FC = () => {
       setPickupDate("");
       setPickupStartTime("");
       setPickupEndTime("");
-      setFoodType("other");
-      setTaste("neutral");
+      setFoodType("");
+      setTaste("");
       setLocalFiles(null);
       setUploadedImages([]);
       
-      // Redirect to home after short delay
-      setTimeout(() => {
-        window.location.href = "/provider/home";
-      }, 1500);
+      // Redirect to home immediately
+      window.location.href = "/provider/home";
     } catch (error: any) {
       console.error("Error submitting offer:", error);
-      const errorMessage = sanitizeErrorMessage(error, {
-        action: "create offer",
-        defaultMessage: t("add_offer.error_create_failed")
-      });
-      toast.error(errorMessage);
     }
   };
 
   // ✅ Return JSX
   return (
-    <div className="w-full">
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        limit={3}
-        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-        bodyClassName="text-sm font-medium"
-        progressClassName="bg-white/80"
-      />
-
+    <div className="w-full h-full flex flex-col min-h-0 overflow-hidden overscroll-none">
       {/* Progress Indicator */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex items-center mb-4">
+      <div className="mb-2 sm:mb-4 flex-shrink-0">
+        <div className="flex items-center mb-2">
           {[1, 2, 3, 4].map((step) => (
             <React.Fragment key={step}>
               <div className="flex items-center flex-1">
-                <div
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm transition-all flex-shrink-0 ${
-                    step < currentStep
-                      ? "bg-emerald-600 text-white"
-                      : step === currentStep
-                      ? "bg-emerald-500 text-white ring-2 sm:ring-4 ring-emerald-200"
-                      : "bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  {step < currentStep ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : step}
+                <div className="flex flex-col items-center flex-1 relative">
+                  <div
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all flex-shrink-0 relative z-10 ${
+                      step < currentStep
+                        ? "bg-emerald-600 text-white"
+                        : step === currentStep
+                        ? "bg-emerald-500 text-white ring-2 ring-emerald-200"
+                        : "bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    {step < currentStep ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : step}
+                  </div>
+                  {/* Step Label - Only show for current step */}
+                  {step === currentStep && (
+                    <div className="mt-1 text-[9px] sm:text-xs text-center text-emerald-600 font-semibold transition-colors px-1">
+                      {step === 1 && t("add_offer.step_basic_info")}
+                      {step === 2 && t("add_offer.step_pricing")}
+                      {step === 3 && t("add_offer.step_availability")}
+                      {step === 4 && t("add_offer.step_categories")}
+                    </div>
+                  )}
+                  {step !== currentStep && (
+                    <div className="mt-1 h-[14px] sm:h-[16px]"></div>
+                  )}
                 </div>
                 {step < totalSteps && (
-                  <div
-                    className={`h-1 flex-1 transition-all ${
-                      step < currentStep ? "bg-emerald-600" : "bg-gray-200"
-                    }`}
-                  />
+                  <div className="flex-1 mx-1.5 flex items-center">
+                    <div
+                      className={`h-1 w-full transition-all ${
+                        step < currentStep ? "bg-emerald-600" : "bg-gray-200"
+                      }`}
+                    />
+                  </div>
                 )}
               </div>
             </React.Fragment>
           ))}
         </div>
-        <div className="text-center">
-          <p className="text-xs sm:text-sm font-medium text-gray-700">
-            {currentStep === 1 && t("add_offer.step_basic_info")}
-            {currentStep === 2 && t("add_offer.step_pricing")}
-            {currentStep === 3 && t("add_offer.step_availability")}
-            {currentStep === 4 && t("add_offer.step_categories")}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            {t("add_offer.step_progress", { current: currentStep, total: totalSteps })}
-          </p>
-        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden overscroll-none">
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1 overscroll-none">
         {/* Step 1: Basic Info */}
         {currentStep === 1 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
-              <p className="text-sm text-emerald-800">
-                💡 {t("add_offer.step1_tip")}
-              </p>
+          <div className="space-y-1.5 sm:space-y-2 animate-in fade-in duration-300">
+            <div className="mb-2 sm:mb-3 pb-1.5 sm:pb-2 border-b border-gray-200">
+              <h2 className="text-xs sm:text-sm font-semibold text-gray-800">{t("add_offer.step_basic_info")}</h2>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{t("add_offer.step1_tip")}</p>
             </div>
-
             {/* Title */}
             <div>
               <label
                 htmlFor="title"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
               >
                 {t("add_offer.offer_title")} <span className="text-red-500">*</span>
               </label>
@@ -482,39 +460,34 @@ const AddOffer: React.FC = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t("add_offer.title_placeholder")}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-lg"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 text-xs sm:text-sm"
                 required
                 maxLength={100}
                 autoFocus
               />
-              <p className="text-xs text-gray-500 mt-1">{t("add_offer.title_hint")}</p>
             </div>
 
             {/* Description */}
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
               >
-                {t("add_offer.description")} <span className="text-gray-400 font-normal text-xs">({t("common.optional") || "Optional"})</span>
+                {t("add_offer.description")} <span className="text-gray-400 font-normal text-[10px] sm:text-xs">({t("common.optional") || "Optional"})</span>
               </label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={t("add_offer.description_placeholder")}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[120px] resize-none"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl min-h-[80px] resize-none text-xs sm:text-sm"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                {description.length > 0 && `${description.length} characters`}
-                {description.length === 0 && t("add_offer.description_hint_no_limit")}
-              </p>
             </div>
 
             {/* Image Upload */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {t("add_offer.photos")} <span className="text-gray-400 font-normal">{t("add_offer.photos_optional")}</span>
+            <div className="mt-1">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                {t("add_offer.photos")} <span className="text-gray-400 font-normal text-[10px] sm:text-xs">({t("common.optional") || "Optional"})</span>
               </label>
               <FileUploader
                 value={localFiles || []}
@@ -522,27 +495,26 @@ const AddOffer: React.FC = () => {
                 dropzoneOptions={dropzone}
               >
                 <FileInput>
-                  <div className={`flex flex-col items-center justify-center h-40 w-full border-2 border-dashed rounded-xl transition-colors ${
+                  <div className={`flex flex-col items-center justify-center h-24 w-full border-2 border-dashed rounded-xl transition-colors ${
                     uploading 
                       ? "border-yellow-300 bg-yellow-50 cursor-wait" 
                       : "border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-pointer"
                   }`}>
                     {uploading ? (
                       <>
-                        <div className="animate-spin text-4xl mb-2">⏳</div>
-                        <p className="text-gray-600 font-medium">{t("add_offer.uploading_images")}</p>
+                        <div className="animate-spin text-2xl mb-1">⏳</div>
+                        <p className="text-gray-600 text-[10px] sm:text-xs">{t("add_offer.uploading_images")}</p>
                       </>
                     ) : (
                       <>
-                        <div className="text-4xl mb-2">📸</div>
-                        <p className="text-gray-600 font-medium">{t("add_offer.click_upload")}</p>
-                        <p className="text-xs text-gray-400 mt-1">{t("add_offer.upload_hint")}</p>
+                        <div className="text-2xl mb-1">📸</div>
+                        <p className="text-gray-600 text-[10px] sm:text-xs">{t("add_offer.click_upload")}</p>
                       </>
                     )}
                   </div>
                 </FileInput>
 
-                <FileUploaderContent className="flex items-center flex-row gap-3 mt-3 flex-wrap">
+                <FileUploaderContent className="flex items-center flex-row gap-3 mt-2 flex-wrap">
                   {localFiles && localFiles.length > 0 && localFiles.map((file, i) => {
                     const uploadedImage = uploadedImages.length > 0 && uploadedImages[i];
                     const isUploaded = !!uploadedImage;
@@ -570,7 +542,7 @@ const AddOffer: React.FC = () => {
                       <FileUploaderItem
                         key={`preview-${i}`}
                         index={i}
-                        className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
+                        className={`size-16 sm:size-20 p-0 rounded-lg overflow-hidden border-2 shadow-sm relative ${
                           isUploaded ? "border-emerald-600" : "border-yellow-400"
                         }`}
                         aria-roledescription={`File ${i + 1} containing ${file.name}`}
@@ -579,13 +551,13 @@ const AddOffer: React.FC = () => {
                           <Image
                             src={imageSrc || DEFAULT_BAG_IMAGE}
                             alt={file.name}
-                            width={96}
-                            height={96}
-                            className="w-full h-full object-cover rounded-xl"
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-cover rounded-lg"
                             unoptimized={true}
                           />
                         </div>
-                        <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                        <div className={`absolute top-0.5 right-0.5 text-white text-[10px] px-1 py-0.5 rounded-full z-10 ${
                           isUploaded 
                             ? "bg-emerald-600" 
                             : uploading 
@@ -599,39 +571,22 @@ const AddOffer: React.FC = () => {
                   })}
                 </FileUploaderContent>
               </FileUploader>
-              <div className="mt-2 flex items-center gap-2 text-xs">
-                {uploadedImages.length > 0 && (
-                  <span className="text-emerald-600 font-medium">
-                    {t("add_offer.images_uploaded", { count: uploadedImages.length, plural: uploadedImages.length > 1 ? "s" : "" })}
-                  </span>
-                )}
-                {localFiles && localFiles.length > uploadedImages.length && (
-                  <span className="text-yellow-600 font-medium">
-                    {t("add_offer.pending_upload", { count: localFiles.length - uploadedImages.length })}
-                  </span>
-                )}
-                {uploadedImages.length === 0 && localFiles?.length === 0 && (
-                  <span className="text-gray-500">{t("add_offer.photos_tip")}</span>
-                )}
-              </div>
             </div>
           </div>
         )}
 
         {/* Step 2: Pricing */}
         {currentStep === 2 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-              <p className="text-sm text-blue-800">
-                💰 {t("add_offer.step2_tip")}
-              </p>
+          <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-300">
+            <div className="mb-2 sm:mb-3 pb-1.5 sm:pb-2 border-b border-gray-200">
+              <h2 className="text-xs sm:text-sm font-semibold text-gray-800">{t("add_offer.step_pricing")}</h2>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{t("add_offer.step2_tip")}</p>
             </div>
-
             {/* Current Price */}
             <div>
               <label
                 htmlFor="price"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
               >
                 {t("add_offer.your_price")} <span className="text-red-500">*</span>
               </label>
@@ -647,29 +602,21 @@ const AddOffer: React.FC = () => {
                     if (/^\d*\.?\d*$/.test(value)) setPrice(value);
                   }}
                   placeholder={t("add_offer.price_placeholder")}
-                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12 text-lg"
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2.5 pr-10 text-sm"
                   required
                   autoFocus
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-[10px] sm:text-xs">dt</span>
               </div>
-              {price && !isNaN(parseFloat(price)) && parseFloat(price) > 0 && (
-                <p className="text-xs text-blue-600 mt-1 bg-blue-50 p-2 rounded border border-blue-200">
-                  {t("add_offer.commission_notice", { 
-                    price: parseFloat(price).toFixed(2), 
-                    finalPrice: (parseFloat(price) + 1).toFixed(2) 
-                  })}
-                </p>
-              )}
             </div>
 
             {/* Original Price (Optional) */}
             <div>
               <label
                 htmlFor="originalPrice"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
               >
-                {t("add_offer.original_price")} <span className="text-gray-400 font-normal text-xs">{t("add_offer.original_price_optional")}</span>
+                {t("add_offer.original_price")} <span className="text-gray-400 font-normal text-[10px] sm:text-xs">({t("common.optional") || "Optional"})</span>
               </label>
               <div className="relative">
                 <Input
@@ -683,23 +630,17 @@ const AddOffer: React.FC = () => {
                     if (/^\d*\.?\d*$/.test(value)) setOriginalPrice(value);
                   }}
                   placeholder={t("add_offer.original_price_placeholder")}
-                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 pr-12"
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2.5 pr-10 text-sm"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">dt</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-[10px] sm:text-xs">dt</span>
               </div>
-              {originalPrice && parseFloat(originalPrice) > parseFloat(price || "0") && (
-                <p className="text-xs text-emerald-600 font-semibold mt-1">
-                  {t("add_offer.save_percentage", { percentage: ((1 - parseFloat(price || "0") / parseFloat(originalPrice)) * 100).toFixed(0) })}
-                </p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">{t("add_offer.original_price_hint")}</p>
             </div>
 
             {/* Quantity */}
             <div>
               <label
                 htmlFor="quantity"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
               >
                 {t("add_offer.available_quantity")} <span className="text-red-500">*</span>
               </label>
@@ -713,104 +654,63 @@ const AddOffer: React.FC = () => {
                   if (/^\d*$/.test(value)) setQuantity(value);
                 }}
                 placeholder={t("add_offer.quantity_placeholder")}
-                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-lg"
+                className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 text-xs sm:text-sm"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">{t("add_offer.quantity_hint")}</p>
             </div>
           </div>
         )}
 
         {/* Step 3: Availability */}
         {currentStep === 3 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-              <p className="text-sm text-amber-800">
-                ⏰ {t("add_offer.step3_tip")}
-              </p>
+          <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-300">
+            <div className="mb-2 sm:mb-3 pb-1.5 sm:pb-2 border-b border-gray-200">
+              <h2 className="text-xs sm:text-sm font-semibold text-gray-800">{t("add_offer.step_availability")}</h2>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{t("add_offer.step3_tip")}</p>
             </div>
-
-            {/* Pickup Location Info */}
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-emerald-600 text-lg">📍</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-emerald-900 mb-1">
-                    {t("add_offer.pickup_location")}
-                  </h3>
-                  <p className="text-xs text-emerald-700">
-                    {t("add_offer.pickup_location_hint")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Quick Time Presets */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                {t("add_offer.quick_presets")} <span className="text-gray-400 font-normal text-xs">({t("common.optional") || "Optional"})</span>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+              <label className="block text-[10px] sm:text-xs font-semibold text-emerald-900 mb-2">
+                ⚡ {t("add_offer.quick_presets")}
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => applyTimePreset('today-afternoon')}
-                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
+                  className="bg-white hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-medium text-[10px] sm:text-xs py-1.5 sm:py-2 h-auto transition-all"
                 >
                   {t("add_offer.preset_today_afternoon")}
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => applyTimePreset('today-evening')}
-                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
+                  className="bg-white hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-medium text-[10px] sm:text-xs py-1.5 sm:py-2 h-auto transition-all"
                 >
                   {t("add_offer.preset_today_evening")}
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => applyTimePreset('tomorrow-morning')}
-                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
+                  className="bg-white hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-medium text-[10px] sm:text-xs py-1.5 sm:py-2 h-auto transition-all"
                 >
                   {t("add_offer.preset_tomorrow_morning")}
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => applyTimePreset('tomorrow-afternoon')}
-                  className="text-xs sm:text-sm py-2 h-auto whitespace-nowrap overflow-hidden text-ellipsis"
+                  className="bg-white hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-medium text-[10px] sm:text-xs py-1.5 sm:py-2 h-auto transition-all"
                 >
                   {t("add_offer.preset_tomorrow_afternoon")}
                 </Button>
               </div>
             </div>
 
-        {/* Pickup Location Info */}
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-              <span className="text-emerald-600 text-lg">📍</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-emerald-900 mb-1">
-                {t("add_offer.pickup_location")}
-              </h3>
-              <p className="text-xs text-emerald-700">
-                {t("add_offer.pickup_location_hint")}
-              </p>
-            </div>
-          </div>
-        </div>
-
             {/* Pickup Date and Time Range */}
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               <div>
                 <label
                   htmlFor="pickupDate"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
                 >
                   {t("add_offer.pickup_date")} <span className="text-red-500">*</span>
                 </label>
@@ -820,18 +720,17 @@ const AddOffer: React.FC = () => {
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3 text-lg"
+                  className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 text-xs sm:text-sm"
                   required
                   autoFocus
                 />
-                <p className="text-xs text-gray-500 mt-1">{t("add_offer.pickup_date_hint")}</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label
                     htmlFor="pickupStartTime"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
                   >
                     {t("add_offer.start_time")} <span className="text-red-500">*</span>
                   </label>
@@ -840,16 +739,15 @@ const AddOffer: React.FC = () => {
                     type="time"
                     value={pickupStartTime}
                     onChange={(e) => setPickupStartTime(e.target.value)}
-                    className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+                    className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 text-xs sm:text-sm"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">{t("add_offer.start_time_hint")}</p>
                 </div>
 
                 <div>
                   <label
                     htmlFor="pickupEndTime"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
                   >
                     {t("add_offer.end_time")} <span className="text-red-500">*</span>
                   </label>
@@ -859,10 +757,9 @@ const AddOffer: React.FC = () => {
                     value={pickupEndTime}
                     onChange={(e) => setPickupEndTime(e.target.value)}
                     min={pickupStartTime || undefined}
-                    className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-3"
+                    className="border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl py-2 sm:py-2.5 text-xs sm:text-sm"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">{t("add_offer.end_time_hint")}</p>
                 </div>
               </div>
             </div>
@@ -871,71 +768,72 @@ const AddOffer: React.FC = () => {
 
         {/* Step 4: Categories */}
         {currentStep === 4 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
-              <p className="text-sm text-purple-800">
-                🏷️ {t("add_offer.step4_tip")}
-              </p>
+          <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-300">
+            <div className="mb-2 sm:mb-3 pb-1.5 sm:pb-2 border-b border-gray-200">
+              <h2 className="text-xs sm:text-sm font-semibold text-gray-800">{t("add_offer.step_categories")}</h2>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{t("add_offer.step4_tip")}</p>
             </div>
-
             {/* Category Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {/* Food Type */}
               <div>
                 <label
                   htmlFor="foodType"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
                 >
-                  {t("add_offer.food_type_label")}
+                  {t("add_offer.food_type_label")} <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="foodType"
                   value={foodType}
                   onChange={(e) => setFoodType(e.target.value as FoodType)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
+                  className="w-full px-3 py-2 sm:py-2.5 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-xs sm:text-sm bg-white"
                   autoFocus
+                  required
                 >
+                  <option value="" disabled>{t("add_offer.select_food_type")}</option>
                   <option value="snack">{t("add_offer.food_type_snack")}</option>
                   <option value="meal">{t("add_offer.food_type_meal")}</option>
                   <option value="beverage">{t("add_offer.food_type_beverage")}</option>
                   <option value="other">{t("add_offer.food_type_other")}</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">{t("add_offer.food_type_hint")}</p>
               </div>
 
               {/* Taste */}
               <div>
                 <label
                   htmlFor="taste"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5"
                 >
-                  {t("add_offer.taste_label")}
+                  {t("add_offer.taste_label")} <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="taste"
                   value={taste}
                   onChange={(e) => setTaste(e.target.value as Taste)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-sm sm:text-base bg-white"
+                  className="w-full px-3 py-2 sm:py-2.5 border-2 border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-xl text-xs sm:text-sm bg-white"
+                  required
                 >
+                  <option value="" disabled>{t("add_offer.select_taste")}</option>
                   <option value="sweet">{t("add_offer.taste_sweet")}</option>
                   <option value="salty">{t("add_offer.taste_salty")}</option>
                   <option value="both">{t("add_offer.taste_both")}</option>
                   <option value="neutral">{t("add_offer.taste_neutral")}</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">{t("add_offer.taste_hint")}</p>
               </div>
             </div>
           </div>
         )}
 
+        </div>
         {/* Navigation Buttons */}
-        <div className="flex gap-2 sm:gap-3 pt-6 border-t border-gray-200">
+        <div className="flex gap-2 pt-2 sm:pt-3 pb-2 sm:pb-3 border-t border-gray-200 flex-shrink-0 bg-white">
           {currentStep > 1 && (
             <Button
               type="button"
               variant="outline"
               onClick={handlePrevious}
-              className="flex-1 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs sm:text-sm min-w-0 py-2 sm:py-2.5"
             >
               <ChevronLeft className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{t("add_offer.previous")}</span>
@@ -947,7 +845,7 @@ const AddOffer: React.FC = () => {
               type="button"
               onClick={handleNext}
               disabled={!canProceedToNextStep()}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0"
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold flex items-center justify-center gap-1.5 text-sm min-w-0 py-2.5"
             >
               <span className="truncate">{t("add_offer.next")}</span>
               <ChevronRight className="w-4 h-4 flex-shrink-0" />
@@ -955,8 +853,8 @@ const AddOffer: React.FC = () => {
           ) : (
             <Button
               type="submit"
-              disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0"
+              disabled={!title.trim() || !price || !quantity || !pickupDate || !pickupStartTime || !pickupEndTime || !foodType || !taste || !canProceedToNextStep()}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-1.5 text-sm min-w-0 py-2.5"
             >
               <Check className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{t("add_offer.create_button")}</span>

@@ -14,20 +14,28 @@ export const QuantityBadge: FC<QuantityBadgeProps> = ({
   if (isExpired) return null;
 
   const positionClasses = position === "top-left" 
-    ? "absolute top-2 left-2" 
-    : "absolute bottom-2 right-2";
+    ? "absolute top-2 left-2 sm:top-3 sm:left-3" 
+    : "absolute bottom-2 right-2 sm:bottom-3 sm:right-3";
 
   if (quantity > 0) {
     return (
-      <div className={`${positionClasses} bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10 whitespace-nowrap`}>
-        {quantity} left
+      <div className={`${positionClasses} z-20`}>
+        <div className="bg-emerald-600 text-white rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 shadow-md">
+          <span className="text-xs sm:text-sm font-semibold whitespace-nowrap">
+            {quantity} {quantity === 1 ? "left" : "left"}
+          </span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`${positionClasses} px-2 py-0.5 text-xs font-medium rounded-full shadow-md bg-red-100 text-red-600 whitespace-nowrap`}>
-      Sold Out
+    <div className={`${positionClasses} z-20`}>
+      <div className="bg-gray-600 text-white rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 shadow-md">
+        <span className="text-xs sm:text-sm font-semibold whitespace-nowrap">
+          Sold Out
+        </span>
+      </div>
     </div>
   );
 };

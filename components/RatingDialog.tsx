@@ -133,12 +133,12 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
             {t("rating.title") || "Rate Your Experience"}
           </DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-600">
+          <DialogDescription className="text-sm sm:text-base text-muted-foreground">
             {providerName
               ? t("rating.description_with_name", { name: providerName }) ||
                 `How was your experience with ${providerName}?`
@@ -172,7 +172,7 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
               ))}
             </div>
             {rating > 0 && (
-              <p className="text-sm sm:text-base font-medium text-gray-700">
+              <p className="text-sm sm:text-base font-medium text-foreground">
                 {rating === 5 && (t("rating.excellent") || "Excellent! ⭐⭐⭐⭐⭐")}
                 {rating === 4 && (t("rating.very_good") || "Very Good! ⭐⭐⭐⭐")}
                 {rating === 3 && (t("rating.good") || "Good! ⭐⭐⭐")}
@@ -184,7 +184,7 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
 
           {/* Quick Feedback Tags */}
           <div className="space-y-3">
-            <label className="text-sm sm:text-base font-semibold text-gray-700">
+            <label className="text-sm sm:text-base font-semibold text-foreground">
               {t("rating.quick_feedback") || "What did you like? (Optional)"}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -197,8 +197,8 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
                   className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                     selectedTags.includes(tag)
                       ? "bg-emerald-600 text-white shadow-md"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  } focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2`}
+                      : "bg-white border border-border text-foreground hover:bg-emerald-50 hover:border-emerald-600"
+                  } focus:outline-none focus:ring-2 focus:ring-emerald-600/20`}
                 >
                   {t(`rating.tag.${tag}`) || tag.replace(/_/g, " ")}
                 </button>
@@ -210,7 +210,7 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
           <div className="space-y-2">
             <label
               htmlFor="rating-comment"
-              className="text-sm sm:text-base font-semibold text-gray-700"
+              className="text-sm sm:text-base font-semibold text-foreground"
             >
               {t("rating.comment_label") || "Additional comments (Optional)"}
             </label>
@@ -222,11 +222,11 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
                 t("rating.comment_placeholder") ||
                 "Share your experience... (e.g., food quality, service, packaging)"
               }
-              className="min-h-[100px] resize-none text-sm sm:text-base"
+              className="min-h-[100px] resize-none text-sm sm:text-base bg-white border-border"
               disabled={submitting}
               maxLength={500}
             />
-            <p className="text-xs text-gray-500 text-right">
+            <p className="text-xs text-muted-foreground text-right">
               {comment.length}/500 {t("rating.characters") || "characters"}
             </p>
           </div>

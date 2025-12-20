@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { ProviderOfferCard } from "@/components/offerCard";
 import { useRouter } from "next/navigation";
 import { PlusCircle, Search, CheckCircle, XCircle, X, TrendingUp } from "lucide-react";
@@ -55,7 +53,6 @@ interface Offer {
 const DEFAULT_PROFILE_IMAGE = "/defaultBag.png";
 
 type FilterType = "all" | "active" | "expired";
-type SortType = "newest" | "oldest";
 
 const ProviderHome = () => {
   const router = useRouter();
@@ -65,8 +62,17 @@ const ProviderHome = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filter, setFilter] = useState<FilterType>("all");
-  const [sort, setSort] = useState<SortType>("newest");
   const isMountedRef = useRef(true);
+
+  // Prevent overscroll bounce on mobile
+  useEffect(() => {
+    const body = document.body;
+    body.style.touchAction = "pan-x pan-y";
+    
+    return () => {
+      body.style.touchAction = "";
+    };
+  }, []);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -393,14 +399,12 @@ const ProviderHome = () => {
       });
       
       // Success - show success toast
-      toast.success(t("provider.home.offer_deleted"));
     } catch (err: any) {
       // Check if the response status indicates success (some backends might return 2xx but axios throws)
       // This handles cases where deletion succeeds but response handling causes an error
       const status = err?.response?.status;
       if (status >= 200 && status < 300) {
         // Success status code - treat as success, don't show error
-        toast.success(t("provider.home.offer_deleted"));
         return;
       }
       
@@ -409,7 +413,6 @@ const ProviderHome = () => {
         action: "delete offer",
         defaultMessage: t("provider.home.delete_failed") || "Unable to delete offer. Please try again."
       });
-      toast.error(errorMsg);
       
       // refetch if failed
       setLoading(true);
@@ -480,104 +483,69 @@ const ProviderHome = () => {
       result = result.filter(o => isOfferExpired(o.expirationDate));
     }
 
-    // Apply sorting
-    if (sort === "newest") {
-      result.sort((a, b) => new Date(b.expirationDate).getTime() - new Date(a.expirationDate).getTime());
-    } else {
-      result.sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
-    }
-
     return result;
-  }, [offers, searchQuery, filter, sort]);
+  }, [offers, searchQuery, filter]);
 
   return (
-    <main className="flex flex-col items-center w-full">
-        <ToastContainer
-  position="top-right"
-  autoClose={1000}
-  hideProgressBar={false}
-  newestOnTop
-  closeOnClick
-  pauseOnFocusLoss
-  draggable
-  limit={3}
-  toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-  bodyClassName="text-sm font-medium"
-  progressClassName="bg-white/80"
-/>
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
-        {/* Decorative soft shapes */}
-        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
-        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
-
+    <main className="flex flex-col items-center w-full min-h-screen pb-20 sm:pb-24 lg:pb-6">
+      <div className="w-full mx-auto px-3 sm:px-4 max-w-2xl lg:max-w-6xl pt-6 sm:pt-8 md:pt-10 lg:pt-12 space-y-3 sm:space-y-4 relative">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="text-left space-y-1 sm:space-y-2 flex-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4 flex-shrink-0">
+          <div className="text-left flex-1">
+            <h1 className="font-display font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl">
               {t("provider.home.title")}
             </h1>
-            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
-              {t("provider.home.subtitle")}
-            </p>
           </div>
-          <button
-            data-tour="publish-button"
-            onClick={() => router.push("./publish")}
-            className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-[1.02] min-h-[48px] w-full sm:w-auto"
-          >
-            <PlusCircle size={22} />
-            {t("provider.home.publish_offer")}
-          </button>
         </div>
 
         {/* Stats Section - Clickable Filters */}
         {!loading && offers.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2 sm:mb-3 flex-shrink-0">
             <button
               onClick={() => setFilter("all")}
-              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+              className={`bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
                 filter === "all" ? "ring-2 ring-emerald-500 scale-[1.02]" : ""
               }`}
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.home.stats.total")}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">{t("provider.home.stats.total")}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground">{stats.total}</p>
                 </div>
-                <div className={`p-2 sm:p-3 rounded-lg ${filter === "all" ? "bg-emerald-100" : "bg-gray-100"}`}>
-                  <TrendingUp className={`w-5 h-5 sm:w-6 sm:h-6 ${filter === "all" ? "text-emerald-700" : "text-gray-600"}`} />
+                <div className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg flex-shrink-0 ml-1 ${filter === "all" ? "bg-emerald-100" : "bg-emerald-50"}`}>
+                  <TrendingUp className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${filter === "all" ? "text-emerald-700" : "text-emerald-600"}`} />
                 </div>
               </div>
             </button>
             <button
               onClick={() => setFilter("active")}
-              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+              className={`bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
                 filter === "active" ? "ring-2 ring-emerald-500 scale-[1.02]" : ""
               }`}
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.home.stats.active")}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-emerald-700">{stats.active}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">{t("provider.home.stats.active")}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-emerald-600">{stats.active}</p>
                 </div>
-                <div className={`p-2 sm:p-3 rounded-lg ${filter === "active" ? "bg-emerald-200" : "bg-emerald-100"}`}>
-                  <CheckCircle className={`w-5 h-5 sm:w-6 sm:h-6 ${filter === "active" ? "text-emerald-800" : "text-emerald-700"}`} />
+                <div className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg flex-shrink-0 ml-1 ${filter === "active" ? "bg-emerald-200" : "bg-emerald-100"}`}>
+                  <CheckCircle className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${filter === "active" ? "text-emerald-800" : "text-emerald-700"}`} />
                 </div>
               </div>
             </button>
             <button
               onClick={() => setFilter("expired")}
-              className={`bg-white rounded-xl p-4 sm:p-6 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+              className={`bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
                 filter === "expired" ? "ring-2 ring-red-500 scale-[1.02]" : ""
               }`}
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{t("provider.home.stats.expired")}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-red-700">{stats.expired}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">{t("provider.home.stats.expired")}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-red-700">{stats.expired}</p>
                 </div>
-                <div className={`p-2 sm:p-3 rounded-lg ${filter === "expired" ? "bg-red-200" : "bg-red-100"}`}>
-                  <XCircle className={`w-5 h-5 sm:w-6 sm:h-6 ${filter === "expired" ? "text-red-800" : "text-red-700"}`} />
+                <div className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg flex-shrink-0 ml-1 ${filter === "expired" ? "bg-red-200" : "bg-red-100"}`}>
+                  <XCircle className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${filter === "expired" ? "text-red-800" : "text-red-700"}`} />
                 </div>
               </div>
             </button>
@@ -586,77 +554,67 @@ const ProviderHome = () => {
 
         {/* Search and Filters */}
         {!loading && offers.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-3 mb-2 sm:mb-3 flex-shrink-0">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
                 placeholder={t("provider.home.search_placeholder") || "Search offers..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3.5 sm:py-4 bg-white border-2 border-gray-200 focus:border-emerald-500 rounded-xl shadow-sm text-sm sm:text-base outline-none transition-colors"
+                className="w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-2.5 md:py-3 bg-white border-2 border-border focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 rounded-lg sm:rounded-xl shadow-sm text-xs sm:text-sm md:text-base outline-none transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               )}
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortType)}
-                className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-sm font-medium shadow-sm hover:border-gray-300 transition-colors"
-              >
-                <option value="newest">{t("provider.home.sort_newest") || "Newest First"}</option>
-                <option value="oldest">{t("provider.home.sort_oldest") || "Oldest First"}</option>
-              </select>
             </div>
           </div>
         )}
 
         {/* Offers Grid */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
-            <p className="text-gray-600">{t("provider.home.loading_offers")}</p>
+          <div className="flex flex-col items-center justify-center py-12 sm:py-20">
+            <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-emerald-600 mb-3 sm:mb-4"></div>
+            <p className="text-muted-foreground text-xs sm:text-sm">{t("provider.home.loading_offers")}</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <p className="text-red-600">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6 text-center">
+            <p className="text-red-600 text-xs sm:text-sm">{error}</p>
           </div>
         ) : offers.length === 0 ? (
-          <div className="bg-white rounded-xl border-0 shadow-md p-12 sm:p-16 text-center">
+          <div className="bg-white rounded-xl border-0 shadow-md p-8 sm:p-12 md:p-16 text-center">
             <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <PlusCircle className="w-10 h-10 text-emerald-600" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <PlusCircle className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2">
                 {t("provider.home.empty_state_title")}
               </h3>
-              <p className="text-gray-600 mb-6 text-sm sm:text-base">
+              <p className="text-muted-foreground mb-4 sm:mb-6 text-xs sm:text-sm md:text-base">
                 {t("provider.home.empty_state_description")}
               </p>
               <button
                 onClick={() => router.push("./publish")}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-emerald-600 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-[1.02] text-xs sm:text-sm md:text-base"
               >
-                <PlusCircle size={20} />
+                <PlusCircle size={16} className="sm:w-5 sm:h-5" />
                 {t("provider.home.publish_offer")}
               </button>
             </div>
           </div>
         ) : filteredAndSortedOffers.length === 0 ? (
-          <div className="bg-white rounded-xl border-0 shadow-md p-8 sm:p-12 text-center">
-            <p className="text-gray-600 text-base sm:text-lg">
+          <div className="bg-white rounded-xl border-0 shadow-md p-6 sm:p-8 md:p-12 text-center">
+            <p className="text-muted-foreground text-xs sm:text-sm md:text-base lg:text-lg">
               {t("provider.home.no_results")}
             </p>
           </div>
         ) : (
-          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 pb-6">
+          <div data-tour="offers-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-2 sm:pb-4">
             {filteredAndSortedOffers.map((offer) => {
   // Handle images - might be array, JSON string, or undefined
   let imagesArray: any[] = [];

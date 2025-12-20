@@ -2,8 +2,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { axiosInstance } from "@/lib/axiosInstance";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,6 +24,7 @@ import { resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/u
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImage, shouldCompress } from "@/utils/imageCompression";
+import { ShoppingBag, ChevronRight, LogOut, Heart, MessageCircle, Settings } from "lucide-react";
 
 interface ProfileData {
   username: string;
@@ -180,7 +179,6 @@ const useProviderProfile = () => {
         defaultMessage: t("provider.profile.fetch_failed") || "Unable to load profile. Please try again later."
       });
       setError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -345,7 +343,6 @@ const EditProfileDialog: React.FC<{
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        toast.error(t("client.offers.detail.login_required"));
         return;
       }
 
@@ -417,7 +414,6 @@ const EditProfileDialog: React.FC<{
         action: "upload profile image",
         defaultMessage: "Unable to upload image. Please check the file and try again."
       });
-      toast.error(errorMsg);
       setLocalFile(null);
       setProfileImage(null);
     } finally {
@@ -428,23 +424,19 @@ const EditProfileDialog: React.FC<{
   const handleSave = async () => {
     // Validation
     if (!formData.username.trim()) {
-      toast.error(t("provider.profile.edit_dialog.username_required"));
       return;
     }
 
     if (!formData.phoneNumber.trim()) {
-      toast.error(t("provider.profile.edit_dialog.phone_required"));
       return;
     }
 
     const normalizedPhone = formData.phoneNumber.trim();
     if (!/^\d{8}$/.test(normalizedPhone)) {
-      toast.error(t("provider.profile.edit_dialog.phone_hint"));
       return;
     }
 
     if (!formData.mapsLink.trim()) {
-      toast.error(t("provider.profile.edit_dialog.maps_required"));
       return;
     }
 
@@ -480,14 +472,14 @@ const EditProfileDialog: React.FC<{
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("provider.profile.edit_dialog.title")}</DialogTitle>
+      <DialogContent className="sm:max-w-xl lg:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden bg-white p-4 sm:p-5 md:p-6">
+        <DialogHeader className="flex-shrink-0 mb-3 sm:mb-4">
+          <DialogTitle className="text-base sm:text-lg md:text-xl font-bold text-foreground">{t("provider.profile.edit_dialog.title")}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 flex-1 min-h-0 overflow-y-auto pr-1">
           {/* Username */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">
+            <label className="text-[10px] sm:text-xs font-medium text-foreground mb-1 block">
               {t("provider.profile.edit_dialog.username")} <span className="text-red-500">*</span>
             </label>
             <Input
@@ -499,13 +491,35 @@ const EditProfileDialog: React.FC<{
                 }))
               }
               placeholder={t("provider.profile.edit_dialog.store_name")}
+              className="text-xs sm:text-sm py-2 sm:py-2.5"
             />
-            <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.store_name_hint")}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{t("provider.profile.edit_dialog.store_name_hint")}</p>
           </div>
 
-          {/* Profile Image Upload */}
+          {/* Phone Number */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">
+            <label className="text-[10px] sm:text-xs font-medium text-foreground mb-1 block">
+              {t("provider.profile.edit_dialog.phone_number")} <span className="text-red-500">*</span>
+            </label>
+            <Input
+              value={formData.phoneNumber}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  phoneNumber: e.target.value,
+                }))
+              }
+              placeholder="12345678"
+              maxLength={8}
+              type="tel"
+              className="text-xs sm:text-sm py-2 sm:py-2.5"
+            />
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{t("provider.profile.edit_dialog.phone_hint")}</p>
+          </div>
+
+          {/* Profile Image Upload - Full Width */}
+          <div className="lg:col-span-2">
+            <label className="text-[10px] sm:text-xs font-medium text-foreground mb-1 block">
               {t("provider.profile.edit_dialog.profile_image")}
             </label>
             <FileUploader
@@ -519,21 +533,21 @@ const EditProfileDialog: React.FC<{
               }}
             >
               <FileInput>
-                <div className="flex flex-col items-center justify-center h-32 w-full border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
+                <div className="flex flex-col items-center justify-center h-24 w-full border-2 border-dashed border-border bg-white hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer">
                   {uploadingImage ? (
                     <>
                       <div className="animate-spin text-2xl mb-2">⏳</div>
-                      <p className="text-gray-600 text-sm">{t("provider.profile.edit_dialog.uploading")}</p>
+                      <p className="text-muted-foreground text-[10px] sm:text-xs">{t("provider.profile.edit_dialog.uploading")}</p>
                     </>
                   ) : profileImage || localFile ? (
                     <>
                       <div className="text-2xl mb-2">✓</div>
-                      <p className="text-gray-600 text-sm">{t("provider.profile.edit_dialog.image_ready")}</p>
+                      <p className="text-muted-foreground text-[10px] sm:text-xs">{t("provider.profile.edit_dialog.image_ready")}</p>
                     </>
                   ) : (
                     <>
                       <div className="text-2xl mb-2">📸</div>
-                      <p className="text-gray-600 text-sm">{t("provider.profile.edit_dialog.click_to_upload")}</p>
+                      <p className="text-muted-foreground text-[10px] sm:text-xs">{t("provider.profile.edit_dialog.click_to_upload")}</p>
                     </>
                   )}
                 </div>
@@ -582,7 +596,7 @@ const EditProfileDialog: React.FC<{
                           unoptimized={true}
                         />
                       </div>
-                      <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
+                      <div className={`absolute top-1 right-1 text-white text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full z-10 ${
                         isUploaded 
                           ? "bg-emerald-600" 
                           : uploadingImage 
@@ -596,32 +610,12 @@ const EditProfileDialog: React.FC<{
                 })()}
               </FileUploaderContent>
             </FileUploader>
-            <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.upload_logo")}</p>
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">
-              {t("provider.profile.edit_dialog.phone_number")} <span className="text-red-500">*</span>
-            </label>
-            <Input
-              value={formData.phoneNumber}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  phoneNumber: e.target.value,
-                }))
-              }
-              placeholder="12345678"
-              maxLength={8}
-              type="tel"
-            />
-            <p className="text-xs text-gray-500 mt-1">{t("provider.profile.edit_dialog.phone_hint")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("provider.profile.edit_dialog.upload_logo")}</p>
           </div>
 
           {/* Google Maps Link */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">
+            <label className="text-[10px] sm:text-xs font-medium text-foreground mb-1 block">
               {t("provider.profile.edit_dialog.maps_link")} <span className="text-red-500">*</span>
             </label>
             <Input
@@ -629,36 +623,43 @@ const EditProfileDialog: React.FC<{
               onChange={handleMapsLinkChange}
               onPaste={handlePaste}
               placeholder={t("provider.profile.edit_dialog.maps_placeholder")}
+              className="text-xs sm:text-sm py-2 sm:py-2.5"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
               {t("provider.profile.edit_dialog.maps_hint")}
             </p>
           </div>
 
           {/* Location Name */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">
+            <label className="text-[10px] sm:text-xs font-medium text-foreground mb-1 block">
               {t("provider.profile.edit_dialog.location_name")}
             </label>
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder={t("provider.profile.edit_dialog.location_auto")}
+              className="text-xs sm:text-sm py-2 sm:py-2.5"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
               {t("provider.profile.edit_dialog.location_hint")}
             </p>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="lg:col-span-2 gap-2 sm:gap-3 pt-4 border-t border-border bg-white flex-shrink-0 mt-auto">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={saving || uploadingImage}
+            className="w-full sm:w-auto"
           >
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={saving || uploadingImage}>
+          <Button 
+            onClick={handleSave} 
+            disabled={saving || uploadingImage}
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
             {saving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogFooter>
@@ -671,7 +672,16 @@ export default function ProviderProfile() {
   const router = useRouter();
   const { t } = useLanguage();
   const { profile, stats, loading, refetch } = useProviderProfile();
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Prevent overscroll bounce on mobile
+  useEffect(() => {
+    const body = document.body;
+    body.style.touchAction = "pan-x pan-y";
+    
+    return () => {
+      body.style.touchAction = "";
+    };
+  }, []);
 
   const getProfileImageSrc = () => {
     if (!profile?.profileImage) return DEFAULT_PROFILE_IMAGE;
@@ -749,7 +759,6 @@ export default function ProviderProfile() {
         }
       );
 
-      toast.success(t("provider.profile.edit_dialog.profile_updated"));
       // Refetch to get updated data
       await refetch();
     } catch (err: any) {
@@ -759,264 +768,103 @@ export default function ProviderProfile() {
         action: "update profile",
         defaultMessage: t("provider.profile.edit_dialog.update_failed") || "Unable to update profile. Please try again."
       });
-      toast.error(errorMsg);
       throw err;
     }
   };
 
   return (
-    <main className="flex flex-col items-center w-full">
-      <ToastContainer
-        position="top-right"
-        autoClose={1000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        limit={3}
-        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-        bodyClassName="text-sm font-medium"
-        progressClassName="bg-white/80"
-      />
+    <div className="h-[100dvh] overflow-hidden pb-20 sm:pb-24 lg:pb-6 px-4 pt-6 sm:pt-8 md:pt-10 lg:pt-12 flex flex-col">
+      <h1 className="font-display font-bold text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 flex-shrink-0">{t("profile.title") || "Profile"}</h1>
 
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
-        {/* Decorative soft shapes */}
-        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
-        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
-
-      {/* Profile Card */}
-      <div className="w-full mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-        {/* Profile Header Section */}
-        <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 px-6 md:px-8 py-6 md:py-8 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            {/* Profile Image */}
-            <div className="relative flex-shrink-0">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-lg ring-4 ring-emerald-100">
-                <Image
-                  src={sanitizeImageUrl(profileImageSrc)}
-                  alt="Store Logo"
-                  width={112}
-                  height={112}
-                  className="object-cover w-full h-full"
-                  unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(profileImageSrc))}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = DEFAULT_PROFILE_IMAGE;
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Store Details */}
-            <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}
-              </h1>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm md:text-base">
-                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-600">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{loading ? "..." : profile?.location || t("provider.profile.location")}</span>
-                </div>
-                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-600">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                  <span>{loading ? "..." : profile?.phoneNumber || t("provider.profile.phone_number")}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-              <Link href="/provider/publish" className="sm:w-auto">
-                <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  {t("provider.profile.create_offer")}
-                </Button>
-              </Link>
-              <Button
-                onClick={() => setIsEditModalOpen(true)}
-                variant="outline"
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                {t("provider.profile.edit_profile")}
-              </Button>
-            </div>
-          </div>
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+      {/* User Info */}
+      <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border border-border shadow-sm mb-3 sm:mb-4 flex items-center gap-3 sm:gap-4 flex-shrink-0">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg sm:text-xl md:text-2xl font-bold overflow-hidden flex-shrink-0">
+          <Image
+            src={sanitizeImageUrl(profileImageSrc)}
+            alt={profile?.username || "Store"}
+            width={64}
+            height={64}
+            className="w-full h-full object-cover"
+            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(profileImageSrc))}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = DEFAULT_PROFILE_IMAGE;
+            }}
+          />
         </div>
-
-        {/* Business Overview Section */}
-        <div className="p-6 md:p-8 border-t border-gray-100">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t("provider.profile.business_overview")}</h2>
-            <p className="text-sm text-gray-600">{t("provider.profile.business_overview_desc")}</p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Number of Offers */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 hover:shadow-lg transition-all">
-              <div className="flex items-start gap-4 mb-3">
-                <div className="w-14 h-14 rounded-xl bg-emerald-200 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-7 h-7 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-emerald-800 mb-1">{t("provider.profile.active_offers")}</p>
-                  <p className="text-4xl font-bold text-emerald-900 mb-1">
-                    {loading ? "..." : stats.totalOffers}
-                  </p>
-                  <p className="text-xs text-emerald-700">{t("provider.profile.offers_published")}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Number of Items */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all">
-              <div className="flex items-start gap-4 mb-3">
-                <div className="w-14 h-14 rounded-xl bg-blue-200 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-blue-800 mb-1">{t("provider.profile.total_items")}</p>
-                  <p className="text-4xl font-bold text-blue-900 mb-1">
-                    {loading ? "..." : stats.totalItems}
-                  </p>
-                  <p className="text-xs text-blue-700">{t("provider.profile.items_available")}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Generated Revenue */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-xl p-6 border border-amber-200 hover:shadow-lg transition-all">
-              <div className="flex items-start gap-4 mb-3">
-                <div className="w-14 h-14 rounded-xl bg-amber-200 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-7 h-7 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-amber-800 mb-1">{t("provider.profile.total_revenue")}</p>
-                  <p className="text-4xl font-bold text-amber-900 mb-1">
-                    {loading ? "..." : `${stats.revenue.toFixed(2)} dt`}
-                  </p>
-                  <p className="text-xs text-amber-700">{t("provider.profile.from_confirmed_orders")}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="flex-1 min-w-0">
+          <h2 className="font-bold text-base sm:text-lg md:text-xl truncate">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm truncate">{profile?.location || t("provider.profile.location")}</p>
         </div>
       </div>
 
-      {/* Environmental Impact Section */}
-      <div className="w-full max-w-2xl mx-auto mt-8">
-        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border-2 border-teal-200 rounded-3xl p-6 md:p-8 shadow-sm">
-          <div className="mb-6">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-teal-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-4xl">🌱</span>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-teal-900 mb-2">{t("provider.profile.environmental_impact")}</h2>
-                <p className="text-sm text-teal-700 mb-4">{t("provider.profile.contribution")}</p>
-                <Button
-                  onClick={() => router.push("/impact")}
-                  className="bg-teal-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-teal-700 text-sm"
-                >
-                  {t("provider.profile.learn_more")}
-                </Button>
-              </div>
-            </div>
-          </div>
+      {/* Impact Stats - Simplified */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
+        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-6 mb-1 sm:mb-2" />
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">{loading ? "..." : stats.totalOffers}</div>
+          <div className="text-[9px] sm:text-[10px] md:text-xs opacity-90 leading-tight">{t("provider.profile.active_offers") || "Active Offers"}</div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            {/* Meals Saved */}
-            <div className="bg-white rounded-xl p-5 border-2 border-teal-200 hover:border-teal-300 transition-all">
-              <div className="flex flex-col items-center text-center mb-2">
-                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
-                  <span className="text-3xl">🍽️</span>
-                </div>
-                <p className="text-sm font-semibold text-gray-700 mb-1">{t("provider.profile.meals_saved")}</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  {loading ? "..." : stats.totalMealsSaved}
-                </p>
-              </div>
-              <p className="text-xs text-gray-600 text-center leading-relaxed">
-                {t("provider.profile.food_rescued")}
-              </p>
-            </div>
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+          <Heart className="w-4 h-4 sm:w-5 sm:h-6 mb-1 sm:mb-2" />
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">{loading ? "..." : stats.totalMealsSaved}</div>
+          <div className="text-[9px] sm:text-[10px] md:text-xs opacity-90 leading-tight">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
+        </div>
 
-            {/* CO2 Saved */}
-            <div className="bg-white rounded-xl p-5 border-2 border-teal-200 hover:border-teal-300 transition-all">
-              <div className="flex flex-col items-center text-center mb-2">
-                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
-                  <span className="text-3xl">🌍</span>
-                </div>
-                <p className="text-sm font-semibold text-gray-700 mb-1">{t("provider.profile.co2_saved")}</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  {loading ? "..." : `${stats.co2Saved.toFixed(1)} kg`}
-                </p>
-              </div>
-              <p className="text-xs text-gray-600 text-center leading-relaxed">
-                {t("provider.profile.equivalent_trees", { trees: loading ? "..." : (stats.co2Saved / 21).toFixed(1) })}
-              </p>
-            </div>
-
-            {/* Water Saved */}
-            <div className="bg-white rounded-xl p-5 border-2 border-teal-200 hover:border-teal-300 transition-all">
-              <div className="flex flex-col items-center text-center mb-2">
-                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
-                  <span className="text-3xl">💧</span>
-                </div>
-                <p className="text-sm font-semibold text-gray-700 mb-1">{t("provider.profile.water_saved")}</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  {loading ? "..." : stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)} L
-                </p>
-              </div>
-              <p className="text-xs text-gray-600 text-center leading-relaxed">
-                {t("provider.profile.water_footprint")}
-              </p>
-            </div>
-          </div>
-
-          {/* Impact Message */}
-          {!loading && stats.totalMealsSaved > 0 && (
-            <div className="mt-6 p-5 bg-teal-100 rounded-xl border-2 border-teal-300">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">✨</span>
-                <p className="text-sm text-teal-900 font-medium flex-1">
-                  {t("provider.profile.impact_message", { 
-                    meals: stats.totalMealsSaved, 
-                    plural: stats.totalMealsSaved !== 1 ? "s" : "",
-                    co2: stats.co2Saved.toFixed(1),
-                    water: stats.waterSaved >= 1000 ? `${(stats.waterSaved / 1000).toFixed(1)}k` : stats.waterSaved.toFixed(0)
-                  })}
-                </p>
-              </div>
-            </div>
-          )}
+        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+          <svg className="w-4 h-4 sm:w-5 sm:h-6 mb-1 sm:mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
+          <div className="text-[9px] sm:text-[10px] md:text-xs opacity-90 leading-tight">{t("provider.profile.total_revenue") || "Revenue (dt)"}</div>
         </div>
       </div>
+
+      {/* Menu */}
+      <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+        <Link href="/provider/impact" className="block">
+          <MenuItem icon={Heart} label={t("nav.impact") || "Impact"} />
+        </Link>
+        <Link href="/provider/contact" className="block">
+          <MenuItem icon={MessageCircle} label={t("nav.contact") || "Contact"} />
+        </Link>
+        <Link href="/provider/profile/preferences" className="block">
+          <MenuItem icon={Settings} label={t("common.preferences") || "Preferences"} />
+        </Link>
       </div>
 
-      {/* Edit Profile Dialog */}
-      <EditProfileDialog
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        profile={profile}
-        onSave={handleSaveProfile}
-      />
-    </main>
+      {/* Sign Out */}
+      <button
+        onClick={() => {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          router.push("/");
+        }}
+        className="w-full flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 hover:bg-destructive/20 transition-all active:scale-[0.99] font-medium text-xs sm:text-sm mb-2 sm:mb-3"
+      >
+        <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+        {t("common.signOut") || "Sign Out"}
+      </button>
+      </div>
+    </div>
+  );
+}
+
+function MenuItem({ icon: Icon, label, onClick }: { icon: any, label: string, onClick?: () => void }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="w-full flex items-center justify-between p-2.5 sm:p-3 md:p-4 bg-white rounded-lg sm:rounded-xl border border-border hover:border-primary/50 transition-all group active:scale-[0.99]"
+    >
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-secondary/50 flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+          <Icon size={16} className="sm:w-5 sm:h-5" />
+        </div>
+        <span className="font-medium text-xs sm:text-sm md:text-base">{label}</span>
+      </div>
+      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+    </button>
   );
 }

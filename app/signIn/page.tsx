@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +16,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { GoogleLogin } from "@react-oauth/google";
 import { LocalStorage } from "@/lib/utils";
+import { Home } from "lucide-react";
 
 export default function SignIn() {
   const { t, language } = useLanguage();
@@ -536,91 +538,121 @@ export default function SignIn() {
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] overflow-x-hidden">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden">
         <div className="flex flex-col items-center gap-3">
-          <ReloadIcon className="h-6 w-6 animate-spin text-[#A8DADC]" />
-          <p className="text-gray-600 text-sm">Checking authentication...</p>
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">{t("common.loading") || "Checking authentication..."}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] overflow-x-hidden flex items-center justify-center py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden flex items-center justify-center py-8 sm:py-12 px-4">
       {/* Language Switcher - Fixed Position */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher variant="button" />
       </div>
 
-      <div className="w-full max-w-md mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Sign In Form */}
-        <main className="relative z-10 w-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg px-6 sm:px-8 py-8 sm:py-10 border border-[#f5eae0] text-center">
-          {/* Decorative soft blobs */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD6C9] rounded-full blur-2xl opacity-50 translate-x-8 -translate-y-8" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-50 -translate-x-8 translate-y-8" />
-          <div className="absolute bottom-10 right-10 w-20 h-20 bg-[#FAF1E2] rounded-full blur-xl opacity-60" />
+      {/* Back to Home Button - Fixed Position */}
+      <button
+        onClick={() => router.push("/")}
+        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-sm font-medium"
+        aria-label="Back to home"
+      >
+        <Home size={18} />
+        <span className="hidden sm:inline">{t("nav.home") || "Home"}</span>
+      </button>
 
-          {/* Header */}
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#344e41] mb-3 animate-fadeInDown">
-            {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
-          </h1>
-
-          <p className="text-gray-700 text-sm sm:text-base mb-4 font-medium animate-fadeInUp">
-            {!isNewUser
-              ? t("signin.description_new")
-              : t("signin.description_back")}
-          </p>
-
-          {/* Passwordless notice */}
-          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
-            <p className="text-sm text-blue-800 font-medium">
-              {t("signin.passwordless_notice")}
+      <div className="w-full max-w-md mx-auto">
+        {/* Sign In Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-border overflow-hidden">
+          {/* Header Section with Logo */}
+          <div className="bg-white px-6 sm:px-8 py-8 sm:py-10 text-center border-b border-border">
+            <button
+              onClick={() => router.push("/")}
+              className="inline-block mb-6 hover:opacity-90 transition-opacity"
+              aria-label="Go to home page"
+            >
+              <Image
+                src="/logo.png"
+                alt="Save The Plate"
+                width={100}
+                height={100}
+                className="object-contain cursor-pointer mx-auto"
+                priority
+              />
+            </button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {!isNewUser
+                ? t("signin.description_new")
+                : t("signin.description_back")}
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col items-center w-full space-y-4 relative z-10">
-            <Input
-              placeholder="name@example.com"
-              className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#A8DADC] focus:border-transparent"
-              type="email"
-              required
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          {/* Form Section */}
+          <div className="px-6 sm:px-8 py-6 sm:py-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  placeholder="name@example.com"
+                  className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-            {loading ? (
-              <Button
-                disabled
-                className="w-full bg-[#A8DADC] text-white font-semibold py-3 rounded-xl flex justify-center items-center"
-              >
-                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                {t("signin.sending")}
-              </Button>
-            ) : (
-              <Button
-                className="w-full bg-[#FFAE8A] hover:bg-[#ff9966] text-white font-semibold py-3 rounded-xl shadow-md transition-all duration-300"
-                type="submit"
-                id="sign-in-button"
-              >
-                {t("signin.sign_in_email")}
-              </Button>
-            )}
-          </form>
+              {loading ? (
+                <Button
+                  disabled
+                  className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg"
+                >
+                  <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                  {t("signin.sending")}
+                </Button>
+              ) : (
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                  type="submit"
+                  id="sign-in-button"
+                >
+                  {t("signin.sign_in_email")}
+                </Button>
+              )}
+            </form>
 
-          {/* Social Sign In - Google and Facebook */}
-          {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) && (
-            <>
-              {/* Separator */}
-              <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
+            {/* Social Sign In - Google and Facebook */}
+            {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) && (
+              <>
+                {/* Separator */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-white text-muted-foreground">
+                      {t("common.or") || "or"}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="w-full space-y-3 relative z-10">
+                <div className="space-y-3">
                 {/* Google Sign In - Temporarily commented out until logic is fixed */}
                 {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
                   <div className="w-full flex justify-center">
                     {googleLoading ? (
                       <Button
                         disabled
-                        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-gray-50"
+                        className="w-full bg-white border-2 border-border text-foreground font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-emerald-50"
                       >
                         <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                         {t("signin.google_signing_in") || "Signing in..."}
@@ -642,43 +674,41 @@ export default function SignIn() {
                   </div>
                 )} */}
 
-                {/* Facebook Sign In */}
-                {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
-                  <Button
-                    onClick={handleFacebookLogin}
-                    disabled={facebookLoading}
-                    className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 rounded-xl flex justify-center items-center gap-2 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {facebookLoading ? (
-                      <>
-                        <ReloadIcon className="h-4 w-4 animate-spin" />
-                        {t("signin.facebook_signing_in") || "Signing in with Facebook..."}
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                        {t("signin.facebook_sign_in") || "Sign in with Facebook"}
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
+                  {/* Facebook Sign In */}
+                  {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
+                    <Button
+                      onClick={handleFacebookLogin}
+                      disabled={facebookLoading}
+                      className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                    >
+                      {facebookLoading ? (
+                        <>
+                          <ReloadIcon className="h-5 w-5 animate-spin" />
+                          {t("signin.facebook_signing_in") || "Signing in with Facebook..."}
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                          {t("signin.facebook_sign_in") || "Sign in with Facebook"}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
 
-              {/* Separator */}
-              <Separator orientation="horizontal" className="mt-6 mb-3 bg-[#f0ece7]" />
-            </>
-          )}
+            {showAuthToast && <AuthToast />}
+            {showErrorToast && <ErrorToast message={errorMessage} />}
 
-          {showAuthToast && AuthToast}
-          {showErrorToast && <ErrorToast message={errorMessage} />}
-
-          {/* Spam folder reminder */}
-          <p className="mt-4 text-center font-medium text-xs sm:text-sm text-amber-700">
-            {t("signin.check_spam")}
-          </p>
-        </main>
+            {/* Spam folder reminder */}
+            <p className="mt-6 text-center font-medium text-xs sm:text-sm text-foreground">
+              {t("signin.check_spam")}
+            </p>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`

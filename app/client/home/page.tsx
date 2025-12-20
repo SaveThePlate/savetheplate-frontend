@@ -5,25 +5,198 @@ import Offers from "@/components/Offers";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, MapPin, ChevronRight, X, Utensils, Croissant, ShoppingCart, Package } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { ClientOfferCard } from "@/components/offerCard/ClientOfferCard";
+import { resolveImageSource } from "@/utils/imageUtils";
+import { isOfferExpired } from "@/components/offerCard/utils";
+import Link from "next/link";
+
+interface LocationData {
+  city: string;
+  state: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+interface Offer {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  quantity: number;
+  expirationDate: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
+  pickupLocation: string;
+  mapsLink?: string;
+  foodType?: "snack" | "meal" | "beverage" | "other";
+  taste?: "sweet" | "salty" | "both" | "neutral";
+  images?: { filename: string; alt?: string; url?: string; absoluteUrl?: string }[];
+  owner?: {
+    id: number;
+    username: string;
+    location?: string;
+    phoneNumber?: number;
+    mapsLink?: string;
+    profileImage?: string;
+  };
+  averageRating?: number;
+  totalRatings?: number;
+}
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [offers, setOffers] = useState<{ id: number; title: string; latitude: number; longitude: number }[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [locationData, setLocationData] = useState<LocationData | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const router = useRouter();
   const { t } = useLanguage();
   const isMountedRef = useRef(true);
 
+  // Reverse geocoding function to get city and state from coordinates
+  const reverseGeocode = React.useCallback(async (latitude: number, longitude: number): Promise<LocationData> => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const headers: any = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/reverse-geocode?lat=${latitude}&lon=${longitude}`,
+        { headers }
+      );
+      
+      return {
+        city: response.data.city || 'Unknown',
+        state: response.data.state || 'Unknown',
+        latitude,
+        longitude,
+      };
+    } catch (error: any) {
+      console.error("Reverse geocoding error:", error);
+      // Return Unknown instead of lat/lng so it doesn't display coordinates
+      return {
+        city: 'Unknown',
+        state: 'Unknown',
+        latitude,
+        longitude,
+      };
+    }
+  }, []);
+
+  // Request user location
+  const requestLocation = React.useCallback(async () => {
+    if (!navigator.geolocation) {
+      console.warn("Geolocation is not supported by this browser");
+      return;
+    }
+
+    setIsLoadingLocation(true);
+
+    // Set a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (isMountedRef.current) {
+        setIsLoadingLocation(false);
+        setLocationPermission('denied');
+        console.warn("Location request timed out");
+      }
+    }, 15000); // 15 second timeout
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        clearTimeout(timeoutId);
+        try {
+          const { latitude, longitude } = position.coords;
+          const location = await reverseGeocode(latitude, longitude);
+          
+          if (isMountedRef.current) {
+            // Only save if we got a valid location (not Unknown)
+            if (location.city !== 'Unknown' && location.state !== 'Unknown') {
+              setLocationData(location);
+              setLocationPermission('granted');
+              localStorage.setItem('userLocation', JSON.stringify(location));
+            } else {
+              // If geocoding failed, don't save Unknown location
+              setLocationPermission('denied');
+            }
+          }
+        } catch (error) {
+          console.error("Error getting location:", error);
+          if (isMountedRef.current) {
+            setLocationPermission('denied');
+          }
+        } finally {
+          if (isMountedRef.current) {
+            setIsLoadingLocation(false);
+          }
+        }
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        console.error("Geolocation error:", error);
+        if (isMountedRef.current) {
+          setIsLoadingLocation(false);
+          setLocationPermission('denied');
+        }
+      },
+      {
+        enableHighAccuracy: false, // Changed to false for faster response
+        timeout: 8000, // Reduced timeout to 8 seconds
+        maximumAge: 600000, // Accept cached location up to 10 minutes old
+      }
+    );
+  }, [reverseGeocode]);
+
   useEffect(() => {
     isMountedRef.current = true;
+    // Load saved location from localStorage on mount
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+      try {
+        const parsed = JSON.parse(savedLocation);
+        // Check if saved location is in lat/lng format (needs re-geocoding)
+        if (parsed.city && parsed.city.startsWith('Lat:') || parsed.state && parsed.state.startsWith('Lng:')) {
+          // If we have valid coordinates, re-geocode them
+          if (parsed.latitude && parsed.longitude) {
+            requestLocation();
+          } else {
+            // Invalid saved data, clear it and request new location
+            localStorage.removeItem('userLocation');
+            if (navigator.geolocation) {
+              requestLocation();
+            }
+          }
+        } else {
+          // Valid saved location
+          setLocationData(parsed);
+          setLocationPermission('granted');
+        }
+      } catch (e) {
+        // Invalid saved data, ignore and request new location
+        localStorage.removeItem('userLocation');
+        if (navigator.geolocation) {
+          requestLocation();
+        }
+      }
+    } else {
+      // Try to get location on mount if not saved
+      if (navigator.geolocation) {
+        requestLocation();
+      }
+    }
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [requestLocation]);
 
   // Fetch offers function
   const fetchOffers = React.useCallback(async () => {
@@ -43,7 +216,6 @@ const Home = () => {
         userId = tokenPayload?.id;
       } catch (error) {
         console.error("Error parsing token:", error);
-        // Try to get userId from API if token parsing fails
         try {
           const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
           userId = userResponse.data?.id;
@@ -52,11 +224,8 @@ const Home = () => {
         }
       }
 
-      // Add cache-busting timestamp to ensure fresh data
       const timestamp = Date.now();
 
-      // Fetch offers and pending orders in parallel for faster loading
-      // Use fetch instead of axios to avoid automatic cache-control headers
       const [offersResponse, ordersResponse] = await Promise.allSettled([
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, {
           method: 'GET',
@@ -64,8 +233,6 @@ const Home = () => {
             ...headers,
             'Content-Type': 'application/json',
           },
-          // Don't use credentials: 'include' - we use Bearer tokens, not cookies
-          // Using credentials with CORS requires specific origin, not wildcard
         }).then(res => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
@@ -75,9 +242,7 @@ const Home = () => {
 
       if (!isMountedRef.current) return;
 
-      // Process offers (critical - show immediately)
       if (offersResponse.status === "fulfilled") {
-        // fetch returns data directly, axios returns { data }
         const offersData = offersResponse.value;
         setOffers(offersData);
         setError(null);
@@ -92,7 +257,6 @@ const Home = () => {
         }
       }
 
-      // Process pending orders (non-critical - can fail silently)
       if (ordersResponse.status === "fulfilled") {
         const pending = (ordersResponse.value.data || []).filter(
           (o: any) => o.status === "pending"
@@ -123,94 +287,377 @@ const Home = () => {
     fetchOffers();
   }, [fetchOffers]);
 
-  return (
-    <main className="flex flex-col items-center w-full">
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
-        {/* Decorative soft shapes */}
-        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
-        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
+  // Filter products by search query
+  const searchFilteredProducts = searchQuery.trim()
+    ? offers.filter(p => {
+        const query = searchQuery.toLowerCase();
+        return (
+          p.title.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query) ||
+          (p.owner?.location || p.pickupLocation || "").toLowerCase().includes(query) ||
+          (p.foodType && p.foodType.toLowerCase().includes(query))
+        );
+      })
+    : null;
 
-        {/* Pending Orders Banner */}
-        {pendingCount > 0 && (
-          <div data-tour="pending-orders" className="bg-[#FFF5DA] border border-[#FFE7A0] text-[#7C5A00] rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
-            <div>
-              <p className="font-semibold text-base sm:text-lg">
-                🍱 {pendingCount === 1 
-                  ? t("home.pending_orders_single", { count: pendingCount })
-                  : t("home.pending_orders_plural", { count: pendingCount })}
-              </p>
-              <p className="text-sm text-[#A68200]">
-                {t("home.pending_reminder")}
-              </p>
+  const featuredProducts = offers.filter(p => !isOfferExpired(p.expirationDate) && p.quantity > 0).slice(0, 5);
+
+  // Category definitions with icons and foodType mapping - matching the rest of the app
+  const categories = [
+    {
+      name: t('offers.food_type_meal') || "Meals",
+      foodType: 'meal',
+      icon: Utensils,
+      color: 'bg-orange-100 text-orange-600',
+      count: offers.filter(p => p.foodType === 'meal' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+    },
+    {
+      name: t('offers.food_type_snack') || "Snacks",
+      foodType: 'snack',
+      icon: Croissant,
+      color: 'bg-yellow-100 text-yellow-600',
+      count: offers.filter(p => p.foodType === 'snack' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+    },
+    {
+      name: t('offers.food_type_beverage') || "Beverages",
+      foodType: 'beverage',
+      icon: ShoppingCart,
+      color: 'bg-blue-100 text-blue-600',
+      count: offers.filter(p => p.foodType === 'beverage' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+    },
+    {
+      name: t('offers.food_type_other') || "Other",
+      foodType: 'other',
+      icon: Package,
+      color: 'bg-emerald-100 text-emerald-600',
+      count: offers.filter(p => p.foodType === 'other' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+    },
+  ];
+
+  // Filter products by selected category
+  const categoryFilteredProducts = selectedCategory
+    ? offers.filter(p => p.foodType === selectedCategory && !isOfferExpired(p.expirationDate) && p.quantity > 0)
+    : null;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pb-24">
+        <div className="p-4 space-y-6 animate-pulse">
+          <div className="h-8 bg-muted rounded-lg w-1/3"></div>
+          <div className="h-40 bg-muted rounded-2xl w-full"></div>
+          <div className="space-y-4">
+            <div className="h-6 bg-muted rounded w-1/4"></div>
+            <div className="flex gap-4 overflow-hidden">
+              <div className="h-64 bg-muted rounded-2xl w-64 flex-shrink-0"></div>
+              <div className="h-64 bg-muted rounded-2xl w-64 flex-shrink-0"></div>
             </div>
-            <Button
-              onClick={() => {
-                const token = localStorage.getItem("accessToken");
-                if (!token) return router.push("/signIn");
-                try {
-                  const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-                  const uid = tokenPayload?.id;
-                  if (uid) {
-                    router.push(`/client/orders/${uid}`);
-                  } else {
-                    router.push("/client/orders");
-                  }
-                } catch {
-                  router.push("/client/orders");
-                }
-              }}
-              className="bg-[#FFAE8A] hover:bg-[#ff9966] text-white rounded-xl px-5 py-2.5 sm:py-2 transition-all duration-200 min-h-[44px] sm:min-h-0"
-            >
-              {t("home.view_orders")}
-            </Button>
-          </div>
-        )}
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="text-left space-y-1 sm:space-y-2 flex-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
-              {t("offers.available_offers")}
-            </h1>
-            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
-              {t("offers.discover_meals")}
-            </p>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {/* Offers List */}
-        <section data-tour="offers-section" className="relative min-h-[50vh]">
-          {loading ? (
-            <div className="flex justify-center items-center h-64 text-gray-500 bg-white/70 backdrop-blur-sm border border-[#f5eae0] rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8">
-              <Loader2 className="animate-spin w-6 h-6 mr-2" />
-              {t("common.loading")}
+  return (
+    <div className="min-h-screen pb-24">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-4 py-4">
+        {locationData && (
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={requestLocation}
+              disabled={isLoadingLocation}
+              className="flex items-center gap-2 text-emerald-600 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 active:scale-95"
+              title={locationPermission === 'granted' ? 'Update location' : 'Tap to enable location'}
+            >
+              {isLoadingLocation ? (
+                <>
+                  <Loader2 className="w-5 h-5 fill-current animate-spin" />
+                  <span className="font-bold text-foreground">{t("common.loading")}</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-5 h-5 fill-current" />
+                  <span className="font-bold text-foreground">
+                    {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' 
+                      ? `${locationData.city}, ${locationData.state}`
+                      : t("home.getLocation") || "Get Location"}
+                  </span>
+                  {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' && (
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </>
+              )}
+            </button>
+          </div>
+        )}
+        {!locationData && (
+          <div className="mb-4">
+            <button
+              onClick={requestLocation}
+              disabled={isLoadingLocation}
+              className="flex items-center gap-2 text-emerald-600 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 active:scale-95"
+            >
+              {isLoadingLocation ? (
+                <>
+                  <Loader2 className="w-5 h-5 fill-current animate-spin" />
+                  <span className="font-bold text-foreground">{t("common.loading")}</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-5 h-5 fill-current" />
+                  <span className="font-bold text-foreground">{t("home.getLocation") || "Get Location"}</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+        
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input 
+            type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("home.searchPlaceholder") || "Search for food, stores..."} 
+            className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border-none focus:ring-2 focus:ring-emerald-600/20 focus:outline-none transition-all placeholder:text-muted-foreground text-sm font-medium shadow-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white shadow-sm border border-border hover:bg-gray-50"
+            >
+              <X className="w-4 h-4 text-foreground" />
+            </button>
+          )}
+        </div>
+      </header>
+
+      <main className="space-y-8 pt-6">
+        {/* Search Results */}
+        {searchQuery.trim() && (
+          <section className="px-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold text-xl">
+                Search Results {searchFilteredProducts && `(${searchFilteredProducts.length})`}
+              </h3>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                {t("common.clear")}
+              </button>
             </div>
-          ) : error ? (
-            <div className="bg-white/70 backdrop-blur-sm border border-red-200 rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8">
-              <p className="text-center text-red-600">{error}</p>
+            {searchFilteredProducts && searchFilteredProducts.length > 0 ? (
+              <div className="space-y-4">
+                {searchFilteredProducts.map((offer) => {
+                  const firstImage = offer.images?.[0];
+                  const imageSrc = resolveImageSource(firstImage);
+                  return (
+                    <ClientOfferCard
+                      key={offer.id}
+                      offerId={offer.id}
+                      imageSrc={imageSrc}
+                      imageAlt={firstImage?.alt ?? offer.title}
+                      title={offer.title}
+                      description={offer.description}
+                      price={offer.price}
+                      originalPrice={offer.originalPrice}
+                      quantity={offer.quantity}
+                      expirationDate={offer.expirationDate}
+                      pickupStartTime={offer.pickupStartTime}
+                      pickupEndTime={offer.pickupEndTime}
+                      pickupLocation={offer.owner?.location || offer.pickupLocation}
+                      mapsLink={offer.owner?.mapsLink || offer.mapsLink}
+                      reserveLink={`/client/offers/${offer.id}`}
+                      foodType={offer.foodType}
+                      taste={offer.taste}
+                      owner={offer.owner}
+                      averageRating={offer.averageRating}
+                      totalRatings={offer.totalRatings}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-8 text-center border border-border border-dashed">
+                <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">{t("common.search")}: &quot;{searchQuery}&quot;</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Hero Section - Hide when searching */}
+        {!searchQuery.trim() && (
+          <section className="px-4">
+            <div 
+              className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-3xl p-6 text-white shadow-lg shadow-emerald-600/20 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl -ml-10 -mb-10 pointer-events-none"></div>
+              
+              <div className="relative z-10">
+                <h2 className="text-2xl font-display font-bold mb-2">{t("home.title") || "Save food, Save money"}</h2>
+                <p className="text-white/90 text-sm mb-6 max-w-[80%]">{t("home.subtitle") || "Help the planet by rescuing delicious unsold food from local shops."}</p>
+                <Link href="/client/home" className="inline-block bg-white text-emerald-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95">
+                  {t("home.browseBags") || "Discover Exclusive Offers"}
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Recommended - Grid on large screens, scroll on mobile */}
+        {!searchQuery.trim() && featuredProducts.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between px-4 mb-4">
+              <h3 className="font-display font-bold text-xl">{t("home.recommended") || "Recommended for you"}</h3>
+              <Link href="/client/home" className="text-emerald-600 text-sm font-semibold hover:underline">{t("home.seeAll") || "See all"}</Link>
+        </div>
+
+            <div className="flex lg:grid lg:grid-cols-2 xl:grid-cols-3 gap-4 overflow-x-auto lg:overflow-x-visible px-4 pb-4 hide-scrollbar snap-x snap-mandatory lg:snap-none">
+              {featuredProducts.map((offer) => {
+                const firstImage = offer.images?.[0];
+                const imageSrc = resolveImageSource(firstImage);
+                return (
+                  <div key={offer.id} className="w-[280px] lg:w-full flex-shrink-0 lg:flex-shrink snap-center">
+                    <ClientOfferCard
+                      offerId={offer.id}
+                      imageSrc={imageSrc}
+                      imageAlt={firstImage?.alt ?? offer.title}
+                      title={offer.title}
+                      description={offer.description}
+                      price={offer.price}
+                      originalPrice={offer.originalPrice}
+                      quantity={offer.quantity}
+                      expirationDate={offer.expirationDate}
+                      pickupStartTime={offer.pickupStartTime}
+                      pickupEndTime={offer.pickupEndTime}
+                      pickupLocation={offer.owner?.location || offer.pickupLocation}
+                      mapsLink={offer.owner?.mapsLink || offer.mapsLink}
+                      reserveLink={`/client/offers/${offer.id}`}
+                      foodType={offer.foodType}
+                      taste={offer.taste}
+                      owner={offer.owner}
+                      averageRating={offer.averageRating}
+                      totalRatings={offer.totalRatings}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Categories - Hide when searching */}
+        {!searchQuery.trim() && (
+          <section className="px-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold text-xl">{t("home.categories") || "Categories"}</h3>
+              {selectedCategory && (
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className="text-sm text-emerald-600 font-medium hover:underline flex items-center gap-1"
+                >
+                  <X size={14} />
+                  {t("home.clearFilter") || "Clear filter"}
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const isSelected = selectedCategory === category.foodType;
+                return (
+                  <div 
+                    key={category.foodType}
+                    onClick={() => setSelectedCategory(isSelected ? null : category.foodType)}
+                    className={`bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm cursor-pointer transition-all active:scale-[0.98] group ${
+                      isSelected 
+                        ? 'border-emerald-600 bg-emerald-50' 
+                        : 'border-border/50 hover:border-emerald-600/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${category.color} ${isSelected ? 'ring-2 ring-emerald-600 ring-offset-2' : ''}`}>
+                        <Icon size={20} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className={`font-semibold text-sm block truncate ${isSelected ? 'text-emerald-600' : ''}`}>{category.name}</span>
+                        <span className="text-xs text-muted-foreground">{category.count} available</span>
+                      </div>
+                    </div>
+                    {isSelected ? (
+                      <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                        <X size={12} className="text-white" />
+                      </div>
+                    ) : (
+                      <ChevronRight size={16} className="text-muted-foreground group-hover:text-emerald-600 transition-colors flex-shrink-0" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Filtered Products by Category - Hide when searching */}
+        {!searchQuery.trim() && selectedCategory && categoryFilteredProducts && (
+          <section className="px-4">
+            <h3 className="font-display font-bold text-xl mb-4">
+              {categories.find(c => c.foodType === selectedCategory)?.name}
+            </h3>
+            {categoryFilteredProducts.length > 0 ? (
+              <div className="space-y-4">
+                {categoryFilteredProducts.map((offer) => {
+                  const firstImage = offer.images?.[0];
+                  const imageSrc = resolveImageSource(firstImage);
+                  return (
+                    <ClientOfferCard
+                      key={offer.id}
+                      offerId={offer.id}
+                      imageSrc={imageSrc}
+                      imageAlt={firstImage?.alt ?? offer.title}
+                      title={offer.title}
+                      description={offer.description}
+                      price={offer.price}
+                      originalPrice={offer.originalPrice}
+                      quantity={offer.quantity}
+                      expirationDate={offer.expirationDate}
+                      pickupStartTime={offer.pickupStartTime}
+                      pickupEndTime={offer.pickupEndTime}
+                      pickupLocation={offer.owner?.location || offer.pickupLocation}
+                      mapsLink={offer.owner?.mapsLink || offer.mapsLink}
+                      reserveLink={`/client/offers/${offer.id}`}
+                      foodType={offer.foodType}
+                      taste={offer.taste}
+                      owner={offer.owner}
+                      averageRating={offer.averageRating}
+                      totalRatings={offer.totalRatings}
+                    />
+                  );
+                })}
             </div>
           ) : (
-            <Offers />
-          )}
-        </section>
-      </div>
+              <div className="bg-white rounded-xl p-8 text-center border border-border border-dashed">
+                <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">{t("home.noProductsInCategory") || "No products available in this category"}</p>
+              </div>
+            )}
+          </section>
+        )}
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(5px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-      `}</style>
-    </main>
+        {/* All Offers - Only show when not searching and no category selected */}
+        {!searchQuery.trim() && !selectedCategory && (
+          <section className="px-4 pb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold text-xl">{t("offers.available_offers") || "Available Offers"}</h3>
+            </div>
+            <Offers />
+          </section>
+        )}
+      </main>
+      </div>
   );
 };
 

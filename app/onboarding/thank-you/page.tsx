@@ -1,16 +1,24 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const ThankYouPage = () => {
   const router = useRouter();
   const { t } = useLanguage();
 
+  // Dismiss all toasts when the page loads
+  useEffect(() => {
+    toast.dismiss();
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 px-4 sm:px-6">
       {/* Language Switcher - Fixed Position */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher variant="button" />
@@ -22,6 +30,18 @@ const ThankYouPage = () => {
         <div className="pointer-events-none absolute -bottom-16 -right-6 w-40 h-40 rounded-full bg-[#C8E3F8] blur-3xl opacity-60" />
 
         <div className="relative z-10 w-full bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-[#f5eae0] px-6 py-8 sm:px-10 sm:py-10 text-center">
+          {/* Back Button - Inside the card */}
+          <div className="absolute top-6 left-6 sm:top-8 sm:left-8">
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/onboarding/fillDetails")}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full"
+              aria-label={t("common.back")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </div>
+
           <p className="text-xs font-semibold tracking-[0.25em] uppercase text-emerald-600 mb-3">
             {t("onboarding.all_set")}
           </p>

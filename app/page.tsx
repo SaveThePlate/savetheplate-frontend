@@ -97,7 +97,7 @@ const WelcomePage = () => {
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-600 text-sm">{t("common.loading")}</p>
@@ -118,7 +118,7 @@ const WelcomePage = () => {
         <div className="group cursor-pointer transition-transform duration-300 hover:scale-105">
           <Image
             src="/logo.png"
-            alt="Save the plate"
+            alt="Save The Plate"
             width={150}
             height={150}
             className="object-contain drop-shadow-xl sm:w-48 sm:h-48 md:w-56 md:h-56"

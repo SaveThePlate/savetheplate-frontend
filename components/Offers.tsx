@@ -551,20 +551,20 @@ const OffersPage = () => {
   if (loading)
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">{t("offers.loading")}</div>
+        <div className="text-xl text-muted-foreground">{t("offers.loading")}</div>
       </div>
     );
 
   if (error)
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-red-600">{error}</div>
+        <div className="text-xl text-destructive">{error}</div>
       </div>
     );
 
   // Skeleton loader component
   const OfferSkeleton = () => (
-    <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-full">
+    <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-border shadow-sm h-full">
       <Skeleton className="w-full h-48 sm:h-52" />
       <div className="flex flex-col flex-1 p-4 space-y-3">
         <Skeleton className="h-5 w-3/4" />
@@ -582,17 +582,17 @@ const OffersPage = () => {
       {/* Search Bar - White (Too Good To Go style) */}
       {!loading && offers.length > 0 && (
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
           <input
             type="text"
             placeholder={t("offers.search_placeholder_extended") || "Bakery, restaurant, shop..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-14 py-3.5 sm:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-teal-500 outline-none text-sm sm:text-base shadow-md transition-all"
+            className="w-full pl-12 pr-14 py-3.5 sm:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-emerald-600/20 outline-none text-sm sm:text-base shadow-sm transition-all"
           />
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
           >
             <SlidersHorizontal className="w-5 h-5" />
           </button>
@@ -601,14 +601,14 @@ const OffersPage = () => {
 
       {/* Filters Section - Collapsible */}
       {!loading && offers.length > 0 && showFilters && (
-        <div className="space-y-4 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div className="space-y-4 bg-white border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
           
           {/* Filters Section */}
           <div className="space-y-3">
             {/* Distance Filter */}
             {userLocation && (
-              <div className="pb-3 border-b border-gray-200">
-                <label className="block text-xs font-medium text-gray-600 mb-2">
+              <div className="pb-3 border-b border-border">
+                <label className="block text-xs font-medium text-foreground mb-2">
                   {t("offers.distance_filter") || "Maximum Distance"}
                 </label>
                 <div className="flex gap-2">
@@ -618,8 +618,8 @@ const OffersPage = () => {
                       onClick={() => setDistanceFilter(distance)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         distanceFilter === distance
-                          ? "bg-teal-600 text-white shadow-md"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "bg-white text-foreground hover:bg-emerald-50 border border-border"
                       }`}
                     >
                       {distance} km
@@ -630,7 +630,7 @@ const OffersPage = () => {
             )}
             {/* Status Filter - Button Group */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 min-w-[100px]">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground min-w-[100px]">
                 <Filter className="w-4 h-4" />
                 <span className="hidden sm:inline">Status:</span>
               </div>
@@ -646,7 +646,7 @@ const OffersPage = () => {
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       filter === option.value
                         ? "bg-emerald-600 text-white shadow-md scale-105"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                        : "bg-white text-foreground hover:bg-emerald-50 border border-border"
                     }`}
                   >
                     <span>{option.icon}</span>
@@ -661,14 +661,14 @@ const OffersPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {/* Food Type Filter */}
               <div className="relative">
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-foreground mb-1.5">
                   {t("offers.filter_food_type") || "Food Type"}
                 </label>
                 <div className="relative">
                   <select
                     value={foodTypeFilter}
                     onChange={(e) => setFoodTypeFilter(e.target.value as FoodTypeFilter)}
-                    className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
+                    className="w-full pl-4 pr-10 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
                   >
                     <option value="all">{t("offers.filter_all_types") || "All Types"}</option>
                     <option value="snack">🍪 {t("offers.food_type_snack") || "Snack"}</option>
@@ -676,20 +676,20 @@ const OffersPage = () => {
                     <option value="beverage">🥤 {t("offers.food_type_beverage") || "Beverage"}</option>
                     <option value="other">📦 {t("offers.food_type_other") || "Other"}</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
               {/* Taste Filter */}
               <div className="relative">
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-foreground mb-1.5">
                   {t("offers.filter_taste") || "Taste"}
                 </label>
                 <div className="relative">
                   <select
                     value={tasteFilter}
                     onChange={(e) => setTasteFilter(e.target.value as TasteFilter)}
-                    className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
+                    className="w-full pl-4 pr-10 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
                   >
                     <option value="all">{t("offers.filter_all_tastes") || "All Tastes"}</option>
                     <option value="sweet">🍰 {t("offers.taste_sweet") || "Sweet"}</option>
@@ -697,20 +697,20 @@ const OffersPage = () => {
                     <option value="both">🍬 {t("offers.taste_both") || "Both"}</option>
                     <option value="neutral">⚪ {t("offers.taste_neutral") || "Neutral"}</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
               {/* Sort Filter */}
               <div className="relative">
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                <label className="block text-xs font-medium text-foreground mb-1.5">
                   {t("offers.sort_by") || "Sort by"}
                 </label>
                 <div className="relative">
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortType)}
-                    className="w-full pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-gray-300 transition-colors"
+                    className="w-full pl-4 pr-10 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
                   >
                     <option value="newest">{t("offers.sort_newest") || "Newest First"}</option>
                     <option value="price_low">{t("offers.sort_price_low") || "Price: Low to High"}</option>
@@ -720,15 +720,15 @@ const OffersPage = () => {
                       <option value="distance">{t("offers.sort_distance") || "Distance: Nearest First"}</option>
                     )}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
             </div>
 
             {/* Active Filters Badges */}
             {(filter !== "all" || foodTypeFilter !== "all" || tasteFilter !== "all" || searchQuery) && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200">
-                <span className="text-xs font-medium text-gray-500">Active filters:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
+                <span className="text-xs font-medium text-muted-foreground">Active filters:</span>
                 {filter !== "all" && (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
                     <span>{filter === "available" ? "✅ Available" : "⚠️ Low Stock"}</span>
@@ -794,7 +794,7 @@ const OffersPage = () => {
                     setTasteFilter("all");
                     setSearchQuery("");
                   }}
-                  className="h-7 px-2 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-white border border-border rounded"
                 >
                   Clear all
                 </Button>
@@ -806,7 +806,7 @@ const OffersPage = () => {
 
       {/* Results Count */}
       {!loading && (
-        <div className="text-sm text-gray-600 px-1">
+        <div className="text-sm text-muted-foreground px-1">
           {filteredAndSortedOffers.length === 0 ? (
             <span>{t("offers.no_results") || "No offers found"}</span>
           ) : (
@@ -827,12 +827,12 @@ const OffersPage = () => {
       ) : filteredAndSortedOffers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <h3 className="text-xl font-semibold text-foreground mb-2">
             {searchQuery || filter !== "all" || foodTypeFilter !== "all" || tasteFilter !== "all"
               ? t("offers.no_results") || "No offers match your search"
               : t("offers.no_offers_moment") || "No offers available at the moment"}
           </h3>
-          <p className="text-gray-600 mb-4 max-w-md">
+          <p className="text-muted-foreground mb-4 max-w-md">
             {searchQuery || filter !== "all" || foodTypeFilter !== "all" || tasteFilter !== "all"
               ? t("offers.try_adjusting_filters") || "Try adjusting your search or filters to see more results."
               : t("offers.check_back_later") || "Check back later for new offers!"}

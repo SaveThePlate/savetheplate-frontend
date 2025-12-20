@@ -49,7 +49,13 @@
     "saved": "ÉCONOMISÉ",
     "item": "article",
     "items": "articles",
-    "optional": "Optionnel"
+    "optional": "Optionnel",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "preferences": "Préférences",
+    "clear": "Effacer",
+    "search": "Rechercher",
+    "or": "ou"
   },
   "landing": {
     "get_started": "Commencer",
@@ -97,7 +103,7 @@
     "happy_users": "Utilisateurs Heureux"
   },
   "signin": {
-    "welcome_new": "Bienvenue sur SaveThePlate ! 🥳",
+    "welcome_new": "Bienvenue sur SaveThePlate !",
     "welcome_back": "Content de vous revoir ! 🥰",
     "description_new": "Rejoignez-nous pour réduire le gaspillage alimentaire et sauver la planète, un repas à la fois 🌍",
     "description_back": "Nous sommes heureux de vous revoir ! Continuez à sauver des repas 🌿",
@@ -122,7 +128,18 @@
     "carbon_cleaner_than": "Plus propre que {percentage}% de tous les sites web dans le monde",
     "sustainable_energy": "Fonctionne avec de l'énergie durable",
     "learn_more": "En savoir plus sur notre impact carbone",
-    "carbon_badge": "🌱 Site Web Neutre en Carbone"
+    "carbon_badge": "🌱 Site Web Neutre en Carbone",
+    "title": "Sauvez la nourriture, Économisez de l'argent",
+    "subtitle": "Aidez la planète en sauvant de délicieux aliments invendus des magasins locaux.",
+    "browseBags": "Découvrir des Offres Exclusives",
+    "recommended": "Recommandé pour vous",
+    "seeAll": "Voir tout",
+    "newOnApp": "Nouveau sur l'application",
+    "categories": "Catégories",
+    "clearFilter": "Effacer le filtre",
+    "noProductsInCategory": "Aucun produit disponible dans cette catégorie",
+    "getLocation": "Obtenir la Localisation",
+    "searchPlaceholder": "Rechercher de la nourriture, des magasins..."
   },
   "provider": {
     "home": {
@@ -484,10 +501,10 @@
     "ripple_10000": "Repas sauvés = 15 000 kg de CO₂ évités"
   },
   "add_offer": {
-    "title": "Créer une Offre Personnalisée",
+    "title": "Créer une Offre",
     "subtitle": "Définissez votre propre titre, description, prix et photos. Parfait pour des articles spécifiques ou des promotions spéciales ! 💚",
     "tip": "💡 Astuce : Ajoutez des photos claires et des descriptions détaillées pour attirer plus de clients !",
-    "badge": "🌱 Créer une Offre Personnalisée",
+    "badge": "🌱 Créer une Offre",
     "offer_title": "Titre de l'Offre",
     "title_placeholder": "ex. : Lot de Pâtisseries Fraîches",
     "title_hint": "Un titre clair et descriptif aide les clients à trouver votre offre",
@@ -545,12 +562,14 @@
     "food_type_beverage": "🥤 Boisson",
     "food_type_other": "📦 Autre",
     "food_type_hint": "Quel type d'aliment est-ce ?",
+    "select_food_type": "Sélectionner le type d'aliment",
     "taste_label": "Profil de Goût",
     "taste_sweet": "🍰 Sucré",
     "taste_salty": "🧂 Salé",
     "taste_both": "🍬 Les Deux (Sucré & Salé)",
     "taste_neutral": "⚪ Neutre",
     "taste_hint": "Quel est le profil de goût ?",
+    "select_taste": "Sélectionner le goût",
     "error_upload_files": "Erreur lors du téléchargement des fichiers",
     "success_created": "Offre créée avec succès ! 🎉",
     "images_uploaded_success": "{count} image(s) téléchargée(s) avec succès !",
@@ -1041,5 +1060,67 @@
     "request_sent": "Demande de suppression soumise avec succès",
     "email_opened": "Ouverture de votre client e-mail...",
     "error": "Échec de l'envoi de la demande. Veuillez réessayer."
+  },
+  "auth": {
+    "signInRequired": "Connexion requise",
+    "signInToContinue": "Veuillez vous connecter pour continuer",
+    "signedOut": "Déconnecté",
+    "signedOutSuccess": "Vous avez été déconnecté avec succès"
+  },
+  "profile": {
+    "title": "Profil",
+    "mealsSaved": "Repas Sauvés",
+    "co2Saved": "kg CO₂ Économisés",
+    "moneySaved": "Argent Économisé",
+    "pendingProvider": "En attente de devenir un fournisseur",
+    "pendingProviderDesc": "Votre demande est en cours d'examen",
+    "accountDetails": "Détails du Compte",
+    "paymentMethods": "Méthodes de Paiement",
+    "helpSupport": "Aide & Support",
+    "providerDashboard": "Tableau de Bord Fournisseur",
+    "becomeProvider": "Devenir un Fournisseur",
+    "version": "Version"
+  },
+  "payment": {
+    "title": "Méthodes de Paiement",
+    "info": "Choisissez votre méthode de paiement préférée. Actuellement, le paiement en espèces est disponible lors de la collecte.",
+    "cash": "Espèces",
+    "cashDesc": "Payez en espèces lorsque vous récupérez votre commande",
+    "creditCard": "Carte de Crédit",
+    "creditCardDesc": "Payez en toute sécurité avec votre carte de crédit ou de débit",
+    "available": "Disponible",
+    "comingSoon": "Bientôt Disponible"
+  },
+  "preferences": {
+    "title": "Préférences",
+    "language": "Langue",
+    "chooseLanguage": "Choisissez votre langue préférée",
+    "languageChanged": "Langue changée en",
+    "languageUpdated": "Langue Mise à Jour",
+    "note": "Note :",
+    "noteText": "Changer la langue mettra à jour l'interface de l'application immédiatement."
+  },
+  "help": {
+    "title": "Besoin d'Aide ?",
+    "subtitle": "Nous sommes là pour vous aider avec toutes vos questions ou problèmes",
+    "contactUs": "Nous Contacter",
+    "contactUsDesc": "Contactez notre équipe de support",
+    "privacyPolicy": "Politique de Confidentialité",
+    "privacyPolicyDesc": "Découvrez comment nous protégeons vos données",
+    "emailSupport": "Support par Email",
+    "emailSupportDesc": "Envoyez-nous un email pour obtenir de l'aide",
+    "faq": "Questions Fréquemment Posées",
+    "faq1Question": "Comment passer une commande ?",
+    "faq1Answer": "Parcourez les offres disponibles, sélectionnez les articles que vous souhaitez et passez votre commande. Vous recevrez un code QR pour la collecte.",
+    "faq2Question": "Quand puis-je récupérer ma commande ?",
+    "faq2Answer": "Vérifiez la date limite de collecte sur votre commande. Assurez-vous de récupérer votre commande avant la date d'expiration.",
+    "faq3Question": "Quelles méthodes de paiement sont acceptées ?",
+    "faq3Answer": "Actuellement, nous acceptons les paiements en espèces lors de la collecte. D'autres options de paiement arrivent bientôt."
+  },
+  "toasts": {
+    "check_email": "Vérifiez votre email",
+    "login_link_sent": "Nous vous avons envoyé un lien de connexion. N'oubliez pas de vérifier vos spams également.",
+    "error": "Erreur",
+    "error_generic": "Une erreur s'est produite, veuillez réessayer."
   }
 }

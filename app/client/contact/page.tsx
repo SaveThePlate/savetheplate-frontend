@@ -2,12 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Mail, Phone, MapPin, Send, MessageSquare, User } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, User, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
-import { sanitizeErrorMessage } from "@/utils/errorUtils";
 
 const ContactPage = () => {
   const router = useRouter();
@@ -74,12 +71,10 @@ const ContactPage = () => {
     e.preventDefault();
     
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error(t("contact.fill_required"));
       return;
     }
 
     if (!formData.email.includes("@")) {
-      toast.error(t("contact.valid_email"));
       return;
     }
 
@@ -117,7 +112,6 @@ const ContactPage = () => {
           },
           { headers }
         );
-        toast.success(t("contact.message_sent"));
         setFormData({ name: "", email: "", subject: "", message: "" });
       } catch (backendError: any) {
         // If backend endpoint doesn't exist, use mailto as fallback
@@ -129,223 +123,199 @@ const ContactPage = () => {
             `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
           );
           window.location.href = `mailto:savetheplatetunisia@gmail.com?subject=${subject}&body=${body}`;
-          toast.success(t("contact.opening_email"));
         } else {
           throw backendError;
         }
       }
     } catch (error: any) {
       console.error("Error sending message:", error);
-      const errorMsg = sanitizeErrorMessage(error, {
-        action: "send message",
-        defaultMessage: t("contact.send_failed") || "Unable to send message. Please try again or email us directly."
-      });
-      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex flex-col items-center w-full">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        limit={3}
-        toastClassName="bg-emerald-600 text-white rounded-xl shadow-lg border-0 px-4 py-3"
-        bodyClassName="text-sm font-medium"
-        progressClassName="bg-white/80"
-      />
-
-      <div className="w-full mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-6xl pt-4 sm:pt-6 space-y-6 sm:space-y-8 relative">
-        {/* Decorative soft shapes */}
-        <div className="absolute top-0 left-[-4rem] w-40 h-40 bg-[#FFD6C9] rounded-full blur-3xl opacity-40 -z-10" />
-        <div className="absolute bottom-10 right-[-3rem] w-32 h-32 bg-[#C8E3F8] rounded-full blur-2xl opacity-40 -z-10" />
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="text-left space-y-1 sm:space-y-2 flex-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#344e41] tracking-tight">
-              {t("contact.title")}
-            </h1>
-            <p className="text-gray-600 text-xs sm:text-sm md:text-base font-medium">
-              {t("contact.subtitle")}
-            </p>
-          </div>
+    <div className="min-h-screen pb-24 px-4 pt-10">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => router.push("/client/profile")}
+          className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-emerald-50 transition-colors"
+        >
+          <ArrowLeft size={20} className="text-foreground" />
+        </button>
+        <div className="flex-1">
+          <h1 className="font-display font-bold text-lg sm:text-xl md:text-2xl mb-1">{t("contact.title")}</h1>
+          <p className="text-muted-foreground text-[10px] sm:text-xs md:text-sm">{t("contact.subtitle")}</p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Contact Information Cards */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6 text-emerald-600" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Contact Information Cards */}
+        <div className="lg:col-span-1 space-y-3">
+          <div className="bg-white rounded-xl p-4 border border-border shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{t("contact.email")}</h3>
+                  <h3 className="text-xs sm:text-sm font-semibold mb-1">{t("contact.email")}</h3>
                   <a
                     href="mailto:savetheplatetunisia@gmail.com"
-                    className="text-emerald-600 hover:text-emerald-700 text-sm"
+                    className="text-primary hover:text-primary/80 text-[10px] sm:text-xs md:text-sm"
                   >
                     savetheplatetunisia@gmail.com
                   </a>
                 </div>
               </div>
-            </div>
+          </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-amber-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{t("contact.location")}</h3>
-                  <p className="text-gray-600 text-sm">
-                    {t("contact.location_address")}
-                  </p>
-                </div>
+          <div className="bg-white rounded-xl p-4 border border-border shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-5 h-5 text-amber-600" />
               </div>
-            </div>
-
-            {/* Response Time Info */}
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border-2 border-emerald-200">
-              <div className="flex items-center gap-3 mb-2">
-                <MessageSquare className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-semibold text-emerald-900">{t("contact.response_time")}</h3>
+              <div>
+                <h3 className="text-xs sm:text-sm font-semibold mb-1">{t("contact.location")}</h3>
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                  {t("contact.location_address")}
+                </p>
               </div>
-              <p className="text-sm text-emerald-700">
-                {t("contact.response_time_message")}
-              </p>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Send className="w-6 h-6 text-emerald-600" />
-                {t("contact.send_message")}
-              </h2>
+          {/* Response Time Info */}
+          <div className="bg-white rounded-xl p-4 border border-border shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              <h3 className="text-xs sm:text-sm font-semibold">{t("contact.response_time")}</h3>
+            </div>
+            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+              {t("contact.response_time_message")}
+            </p>
+          </div>
+        </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Name */}
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    {t("contact.name")} <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      placeholder={t("contact.name_placeholder")}
-                    />
-                  </div>
-                </div>
+        {/* Contact Form */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl p-4 sm:p-5 border border-border shadow-sm">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
+              <Send className="w-5 h-5 text-primary" />
+              {t("contact.send_message")}
+            </h2>
 
-                {/* Email */}
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    {t("contact.email")} <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                      placeholder={t("contact.email_placeholder")}
-                    />
-                  </div>
-                </div>
-
-                {/* Subject */}
-                <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    {t("contact.subject")}
-                  </label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name */}
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-[10px] sm:text-xs md:text-sm font-medium mb-1.5"
+                >
+                  {t("contact.name")} <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
-                    id="subject"
-                    name="subject"
+                    id="name"
+                    name="name"
                     type="text"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                    placeholder={t("contact.subject_placeholder")}
-                  />
-                </div>
-
-                {/* Message */}
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    {t("contact.message")} <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
+                    value={formData.name}
                     onChange={handleInputChange}
                     required
-                    rows={6}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none transition-all"
-                    placeholder={t("contact.message_placeholder")}
+                    className="w-full pl-10 pr-4 py-2 sm:py-2.5 md:py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-xs sm:text-sm"
+                    placeholder={t("contact.name_placeholder")}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t("contact.characters", { count: formData.message.length })}
-                  </p>
                 </div>
+              </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              {/* Email */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-[10px] sm:text-xs md:text-sm font-medium mb-1.5"
                 >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      {t("contact.sending")}
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      {t("contact.send_message_button")}
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+                  {t("contact.email")} <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full pl-10 pr-4 py-2 sm:py-2.5 md:py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-xs sm:text-sm"
+                    placeholder={t("contact.email_placeholder")}
+                  />
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div>
+                <label
+                  htmlFor="subject"
+                  className="block text-[10px] sm:text-xs md:text-sm font-medium mb-1.5"
+                >
+                  {t("contact.subject")}
+                </label>
+                <input
+                  id="subject"
+                  name="subject"
+                  type="text"
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 sm:py-2.5 md:py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-xs sm:text-sm"
+                  placeholder={t("contact.subject_placeholder")}
+                />
+              </div>
+
+              {/* Message */}
+              <div>
+                <label
+                  htmlFor="message"
+                  className="block text-[10px] sm:text-xs md:text-sm font-medium mb-1.5"
+                >
+                  {t("contact.message")} <span className="text-destructive">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
+                  rows={5}
+                  className="w-full px-4 py-2.5 sm:py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none transition-all text-sm"
+                  placeholder={t("contact.message_placeholder")}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("contact.characters", { count: formData.message.length })}
+                </p>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 rounded-xl shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    {t("contact.sending")}
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    {t("contact.send_message_button")}
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

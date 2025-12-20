@@ -4,9 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import axios from "axios";
 import AddOffer from "@/components/AddOffer";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 
 const AddOfferPage = () => {
@@ -35,45 +32,33 @@ const AddOfferPage = () => {
     verifyToken();
   }, [router]);
 
+  // Prevent overscroll bounce on mobile (but allow touch for inputs)
+  useEffect(() => {
+    const body = document.body;
+    body.style.touchAction = "pan-x pan-y";
+    
+    return () => {
+      body.style.touchAction = "";
+    };
+  }, []);
+
   return (
-    <div className="w-full mx-auto px-3 sm:px-4 md:px-6 max-w-lg pt-4 sm:pt-6 flex flex-col items-center overflow-x-hidden">
-    <main className="relative w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-4 sm:p-6 md:p-10 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-gray-100 overflow-x-hidden">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        onClick={() => router.back()}
-        className="absolute top-4 left-4 flex items-center text-gray-500 hover:text-green-700 gap-2 text-sm sm:text-base transition-colors duration-200"
-      >
-        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span className="hidden sm:inline font-medium">{t("common.back")}</span>
-      </Button>
-
+    <div className="w-full min-h-[100dvh] mx-auto px-4 sm:px-6 max-w-2xl lg:max-w-4xl pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-20 sm:pb-24 lg:pb-6 flex flex-col items-center">
+    <main className="relative w-full max-w-2xl lg:max-w-4xl bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-border p-4 sm:p-6 md:p-8 flex flex-col min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100vh-8rem)] max-h-[calc(100dvh-8rem)] lg:max-h-[calc(100vh-8rem)]">
       {/* Header */}
-      <div className="flex flex-col items-center mt-6 mb-8 text-center">
-        <div className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm">
-          {t("add_offer.badge")}
+      <div className="flex flex-col items-center mb-4 text-center flex-shrink-0">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-2 sm:mb-3">
+          <span className="text-xl sm:text-2xl md:text-3xl">🍽️</span>
         </div>
-
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold text-foreground tracking-tight mb-1">
           {t("add_offer.title")}
         </h1>
-
-        <p className="text-gray-600 text-sm sm:text-base mt-3 max-w-md leading-relaxed">
-          {t("add_offer.subtitle")}
-        </p>
       </div>
 
       {/* Add Offer Form */}
-      <section className="space-y-6">
+      <section className="flex-1 min-h-0 overflow-hidden">
         <AddOffer />
       </section>
-
-      {/* Footer Message */}
-      <footer className="mt-8 text-center border-t border-gray-100 pt-6">
-        <p className="text-xs text-gray-400">
-          {t("add_offer.tip")}
-        </p>
-      </footer>
     </main>
     </div>
   );
