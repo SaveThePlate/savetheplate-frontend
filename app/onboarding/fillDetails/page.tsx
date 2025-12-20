@@ -230,7 +230,7 @@ const FillDetails = () => {
   // Show loading state while checking role
   if (checkingRole) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 px-4 sm:px-6">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-600 text-sm">{t("common.loading")}</p>
@@ -240,22 +240,10 @@ const FillDetails = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FBEAEA] via-[#EAF3FB] to-[#FFF8EE] px-4 sm:px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 px-4 sm:px-6">
       {/* Language Switcher - Fixed Position */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher variant="button" />
-      </div>
-
-      {/* Back Button - Fixed Position */}
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/onboarding")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white shadow-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">{t("common.back")}</span>
-        </Button>
       </div>
 
       <div className="relative w-full max-w-2xl">
@@ -264,6 +252,17 @@ const FillDetails = () => {
         <div className="pointer-events-none absolute -bottom-16 -right-6 w-40 h-40 rounded-full bg-[#C8E3F8] blur-3xl opacity-60" />
 
         <div className="relative z-10 w-full bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-[#f5eae0] px-6 py-8 sm:px-10 sm:py-10">
+          {/* Back Button - Inside the card */}
+          <div className="absolute top-6 left-6 sm:top-8 sm:left-8">
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/onboarding")}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full"
+              aria-label={t("common.back")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </div>
 
           {/* Header */}
           <div className="text-center mb-8 space-y-2">

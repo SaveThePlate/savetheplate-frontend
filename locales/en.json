@@ -54,7 +54,8 @@
     "signOut": "Sign Out",
     "preferences": "Preferences",
     "clear": "Clear",
-    "search": "Search"
+    "search": "Search",
+    "or": "or"
   },
   "landing": {
     "get_started": "Get Started",

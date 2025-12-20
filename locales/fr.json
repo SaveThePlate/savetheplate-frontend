@@ -54,7 +54,8 @@
     "signOut": "Se déconnecter",
     "preferences": "Préférences",
     "clear": "Effacer",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "or": "ou"
   },
   "landing": {
     "get_started": "Commencer",
