@@ -100,6 +100,14 @@ const Home = () => {
       return;
     }
 
+    // Check if location was previously unavailable to avoid repeated requests
+    const locationUnavailable = localStorage.getItem('locationUnavailable');
+    if (locationUnavailable === 'true') {
+      // Location was previously unavailable, skip request to reduce console noise
+      setLocationPermission('denied');
+      return;
+    }
+
     setIsLoadingLocation(true);
 
     // Set a timeout to prevent infinite loading
@@ -124,6 +132,8 @@ const Home = () => {
               setLocationData(location);
               setLocationPermission('granted');
               localStorage.setItem('userLocation', JSON.stringify(location));
+              // Clear the unavailable flag if location was successfully obtained
+              localStorage.removeItem('locationUnavailable');
             } else {
               // If geocoding failed, don't save Unknown location
               setLocationPermission('denied');
@@ -152,8 +162,10 @@ const Home = () => {
           // Don't log as error, just set permission state
         } else if (error.code === 2) {
           // Position unavailable - location services unavailable (expected on some devices)
-          // Only log as warning, not error
-          console.warn("Location unavailable:", error.message || "Position update is unavailable");
+          // Log as debug only (won't show in production console unless verbose mode)
+          console.debug("Location unavailable:", error.message || "Position update is unavailable");
+          // Remember that location is unavailable to avoid repeated requests
+          localStorage.setItem('locationUnavailable', 'true');
         } else if (error.code === 3) {
           // Timeout - request took too long (expected)
           console.warn("Location request timed out");
