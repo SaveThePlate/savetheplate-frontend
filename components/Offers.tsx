@@ -88,7 +88,17 @@ const OffersPage = () => {
           setLocationError(null);
         },
         (error) => {
-          console.log("Geolocation error:", error);
+          // Handle geolocation errors gracefully
+          // Code 1: PERMISSION_DENIED - user denied (expected)
+          // Code 2: POSITION_UNAVAILABLE - unavailable (expected)
+          // Code 3: TIMEOUT - timed out (expected)
+          if (error.code === 2) {
+            // Position unavailable - only log as debug, not error
+            console.debug("Location unavailable:", error.message || "Position update is unavailable");
+          } else if (error.code !== 1) {
+            // Only log non-permission-denied errors
+            console.log("Geolocation error:", error);
+          }
           setLocationError(error.message);
           // Don't show error to user - distance sorting just won't be available
         },

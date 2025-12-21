@@ -168,6 +168,28 @@ export const getImage = (filename?: string | null): string => {
       const urlObj = new URL(filename);
       const urlHost = urlObj.hostname;
       
+      // Fix malformed storage domains (e.g., leftover-be.ccdev.spacestorage -> leftover-be.ccdev.space)
+      if (urlHost.includes('.spacestorage')) {
+        const correctedHost = urlHost.replace('.spacestorage', '.space');
+        const pathname = urlObj.pathname;
+        
+        // If pathname already has /storage/, just fix the host
+        if (pathname && pathname.startsWith('/storage/')) {
+          return `https://${correctedHost}${pathname}`;
+        }
+        
+        // Extract filename from pathname (handles both /filename.png and /storage/filename.png)
+        const pathParts = pathname ? pathname.split('/').filter(p => p) : [];
+        if (pathParts.length > 0) {
+          const filenameFromPath = pathParts[pathParts.length - 1];
+          // Ensure /storage/ prefix is added
+          return `https://${correctedHost}/storage/${filenameFromPath}`;
+        }
+        
+        // If we can't extract filename, fall back to default image
+        return DEFAULT_BAG_IMAGE;
+      }
+      
       // Extract the current backend hostname
       let currentBackendHost = "";
       if (currentBackendUrl) {
@@ -193,8 +215,33 @@ export const getImage = (filename?: string | null): string => {
       if (urlMatch && currentBackendUrl) {
         return `${currentBackendUrl}${urlMatch[1]}`;
       }
+      
+      // If URL doesn't have /storage/ but is from the backend, try to extract filename
+      if (currentBackendHost && urlHost === currentBackendHost) {
+        const pathname = urlObj.pathname;
+        if (pathname && !pathname.startsWith('/storage/')) {
+          // Extract filename and add /storage/ prefix
+          const filenameFromPath = pathname.split('/').pop();
+          if (filenameFromPath) {
+            return `${currentBackendUrl}/storage/${filenameFromPath}`;
+          }
+        }
+      }
     } catch {
       // If URL parsing fails, try to extract storage path anyway
+      // Also check for malformed .spacestorage domain
+      if (filename.includes('.spacestorage')) {
+        const corrected = filename.replace('.spacestorage', '.space');
+        const urlMatch = corrected.match(/\/(storage\/.+)$/);
+        if (urlMatch && currentBackendUrl) {
+          return `${currentBackendUrl}${urlMatch[1]}`;
+        }
+        // Try to extract filename from the corrected URL
+        const filenameMatch = corrected.match(/\/([^\/]+\.(png|jpg|jpeg|gif|webp|svg))$/i);
+        if (filenameMatch && currentBackendUrl) {
+          return `${currentBackendUrl}/storage/${filenameMatch[1]}`;
+        }
+      }
       const urlMatch = filename.match(/\/(storage\/.+)$/);
       if (urlMatch && currentBackendUrl) {
         return `${currentBackendUrl}${urlMatch[1]}`;
