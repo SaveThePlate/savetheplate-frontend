@@ -119,12 +119,17 @@ const useProviderProfile = () => {
         axios.post(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
           { mapsLink },
-          { headers }
+          { 
+            headers,
+            timeout: 10000, // 10 second timeout for hosted apps
+          }
         ).then((locationRes) => {
           const extractedLocation = locationRes.data.locationName || location;
           setProfile((prev) => prev ? { ...prev, location: extractedLocation || "Location" } : null);
-        }).catch((err) => {
+        }).catch((err: any) => {
           console.error("Failed to extract location:", err);
+          // Silently fail for profile page - location extraction is non-critical here
+          // User can manually edit location if needed
         });
       }
       
@@ -294,7 +299,10 @@ const EditProfileDialog: React.FC<{
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
         { mapsLink: cleanedUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000, // 10 second timeout for hosted apps
+        }
       );
 
       const { locationName } = response.data;
@@ -302,8 +310,30 @@ const EditProfileDialog: React.FC<{
       if (locationName) {
         setLocation(locationName);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error extracting location name:", error);
+      
+      // Check for network/CORS errors that are common on hosted apps
+      const isNetworkError = 
+        error?.code === 'ECONNABORTED' || // Timeout
+        error?.code === 'ERR_NETWORK' || // Network error
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('NetworkError') ||
+        error?.message?.includes('CORS') ||
+        error?.response?.status === 502 ||
+        error?.response?.status === 503 ||
+        error?.response?.status === 504;
+      
+      // Only show error for network/server errors, not for 400/401/403 which might be expected
+      if (isNetworkError || (error?.response?.status >= 500)) {
+        // Silently log - user can manually edit location if needed
+        console.warn(
+          "Location extraction failed:",
+          isNetworkError 
+            ? "Network error - please check your connection"
+            : "Server error - please try again later"
+        );
+      }
       // Don't clear location on error - preserve user's manual edits
     }
   };

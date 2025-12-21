@@ -731,6 +731,7 @@
     "submit_details": "Soumettre les détails",
     "maps_required": "Veuillez fournir un lien Google Maps.",
     "phone_invalid": "Veuillez entrer un numéro de téléphone valide (8 chiffres).",
+    "location_extraction_error": "Impossible d'extraire l'emplacement. Veuillez vérifier votre connexion ou réessayer plus tard.",
     "details_success": "Détails soumis avec succès !",
     "details_error": "Une erreur s'est produite lors de l'ajout du restaurant.",
     "all_set": "Tout est prêt",
