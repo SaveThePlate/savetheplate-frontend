@@ -123,6 +123,7 @@ const FillDetails = () => {
         { 
           headers: { Authorization: `Bearer ${token}` },
           signal: abortController.signal,
+          timeout: 10000, // 10 second timeout for hosted apps
         }
       );
 
@@ -139,10 +140,32 @@ const FillDetails = () => {
       if (error.name === 'AbortError' || error.name === 'CanceledError') {
         return;
       }
+      
+      // Log error for debugging
       console.error("Error extracting location name:", error);
+      
+      // Check for network/CORS errors that are common on hosted apps
+      const isNetworkError = 
+        error?.code === 'ECONNABORTED' || // Timeout
+        error?.code === 'ERR_NETWORK' || // Network error
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('NetworkError') ||
+        error?.message?.includes('CORS') ||
+        error?.response?.status === 502 ||
+        error?.response?.status === 503 ||
+        error?.response?.status === 504;
+      
+      // Only show error toast for network/server errors, not for 400/401/403 which might be expected
+      if (isNetworkError || (error?.response?.status >= 500)) {
+        toast.error(
+          t("onboarding.location_extraction_error") || 
+          "Unable to extract location. Please check your connection or try again later.",
+          { duration: 3000 }
+        );
+      }
       // Don't clear location on error - preserve user's manual edits
     }
-  }, []);
+  }, [t]);
 
   const handleGoogleMapsLinkChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;

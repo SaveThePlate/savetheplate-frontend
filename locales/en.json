@@ -679,6 +679,7 @@
     "submit_details": "Submit details",
     "maps_required": "Please provide a Google Maps link.",
     "phone_invalid": "Please enter a valid phone number (8 digits).",
+    "location_extraction_error": "Unable to extract location. Please check your connection or try again later.",
     "details_success": "Details submitted successfully!",
     "details_error": "An error occurred while adding the restaurant.",
     "all_set": "You're all set",
