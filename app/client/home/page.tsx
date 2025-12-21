@@ -101,13 +101,33 @@ const Home = () => {
     }
 
     // Check if location was previously unavailable to avoid repeated requests
+    // This prevents triggering CoreLocation framework errors on iOS
     const locationUnavailable = localStorage.getItem('locationUnavailable');
     if (locationUnavailable === 'true') {
       // Location was previously unavailable, skip request to reduce console noise
+      // and prevent CoreLocation framework errors on iOS
       setLocationPermission('denied');
+      setIsLoadingLocation(false);
       return;
     }
 
+    // Also check if we have a cached location that's still valid
+    const cachedLocation = localStorage.getItem('userLocation');
+    if (cachedLocation) {
+      try {
+        const location = JSON.parse(cachedLocation);
+        // Use cached location if it's less than 24 hours old
+        const cacheAge = Date.now() - (location.timestamp || 0);
+        if (cacheAge < 24 * 60 * 60 * 1000) {
+          setLocationData(location);
+          setLocationPermission('granted');
+          setIsLoadingLocation(false);
+          return;
+        }
+      } catch (e) {
+        // Invalid cache, continue with new request
+      }
+    }
     setIsLoadingLocation(true);
 
     // Set a timeout to prevent infinite loading
@@ -129,9 +149,11 @@ const Home = () => {
           if (isMountedRef.current) {
             // Only save if we got a valid location (not Unknown)
             if (location.city !== 'Unknown' && location.state !== 'Unknown') {
+              // Add timestamp for cache validation
+              const locationWithTimestamp = { ...location, timestamp: Date.now() };
               setLocationData(location);
               setLocationPermission('granted');
-              localStorage.setItem('userLocation', JSON.stringify(location));
+              localStorage.setItem('userLocation', JSON.stringify(locationWithTimestamp));
               // Clear the unavailable flag if location was successfully obtained
               localStorage.removeItem('locationUnavailable');
             } else {
