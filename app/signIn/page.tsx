@@ -299,28 +299,81 @@ export default function SignIn() {
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
                        (window.innerWidth <= 768 && window.innerHeight <= 1024);
       
-      // On mobile devices, use OAuth redirect flow instead of FB.login()
-      // This prevents redirect to m.facebook.com and keeps users in the app
+      // On mobile devices, use OAuth flow that opens Facebook native app
+      // This allows users already logged into Facebook app to authenticate without re-entering credentials
       if (isMobile) {
-        console.log("Mobile device detected, using OAuth redirect flow");
+        console.log("Mobile device detected, using OAuth flow to open Facebook native app");
         
         // Build OAuth redirect URL
         const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
         const scope = encodeURIComponent('email,public_profile');
         const state = encodeURIComponent(Date.now().toString()); // Simple state for CSRF protection
         
-        // Use display=page to force full web version and prevent mobile redirect
-        // This ensures users stay in the app/webview instead of going to m.facebook.com
-        const facebookOAuthUrl = `https://www.facebook.com/v24.0/dialog/oauth?` +
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        
+        // Web OAuth fallback URL (used if native app is not installed)
+        const webOAuthUrl = `https://m.facebook.com/v24.0/dialog/oauth?` +
           `client_id=${appId}&` +
           `redirect_uri=${redirectUri}&` +
           `scope=${scope}&` +
           `state=${state}&` +
           `response_type=code&` +
-          `display=page`; // Force full web version, not mobile
+          `display=touch`;
         
-        // Redirect to Facebook OAuth
-        window.location.href = facebookOAuthUrl;
+        if (isIOS) {
+          // iOS: Try to open Facebook app using fb:// URL scheme
+          // Format: fb{appId}://authorize
+          // If the app is installed, iOS will open it automatically
+          const facebookAppUrl = `fb${appId}://authorize?` +
+            `client_id=${appId}&` +
+            `redirect_uri=${redirectUri}&` +
+            `scope=${scope}&` +
+            `state=${state}&` +
+            `response_type=code`;
+          
+          // Track if app opened (page becomes hidden)
+          let appOpened = false;
+          const startTime = Date.now();
+          
+          // Listen for page visibility change (indicates app opened)
+          const visibilityHandler = () => {
+            if (document.hidden) {
+              appOpened = true;
+            }
+          };
+          document.addEventListener('visibilitychange', visibilityHandler);
+          
+          // Try to open the Facebook app
+          window.location.href = facebookAppUrl;
+          
+          // Fallback: If app doesn't open within 2 seconds, use web OAuth
+          setTimeout(() => {
+            document.removeEventListener('visibilitychange', visibilityHandler);
+            // Only fallback if page is still visible (app didn't open)
+            if (!appOpened && document.visibilityState === 'visible') {
+              console.log("Facebook app not available, falling back to web OAuth");
+              window.location.href = webOAuthUrl;
+            }
+          }, 2000);
+          
+        } else if (isAndroid) {
+          // Android: Use intent:// URL to open Facebook app
+          // This will open the app if installed, otherwise fall back to web OAuth
+          const intentUrl = `intent://authorize?` +
+            `client_id=${appId}&` +
+            `redirect_uri=${redirectUri}&` +
+            `scope=${scope}&` +
+            `state=${state}&` +
+            `response_type=code` +
+            `#Intent;scheme=fb${appId};package=com.facebook.katana;S.browser_fallback_url=${encodeURIComponent(webOAuthUrl)};end`;
+          
+          window.location.href = intentUrl;
+        } else {
+          // Other mobile devices, use mobile web OAuth
+          window.location.href = webOAuthUrl;
+        }
+        
         return; // Don't set loading to false, as we're redirecting
       }
 
