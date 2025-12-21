@@ -142,7 +142,26 @@ const Home = () => {
       },
       (error) => {
         clearTimeout(timeoutId);
-        console.error("Geolocation error:", error);
+        
+        // Handle different error codes gracefully
+        // Code 1: PERMISSION_DENIED - user denied location access (expected)
+        // Code 2: POSITION_UNAVAILABLE - location unavailable (expected)
+        // Code 3: TIMEOUT - request timed out (expected)
+        if (error.code === 1) {
+          // Permission denied - user chose not to share location (expected behavior)
+          // Don't log as error, just set permission state
+        } else if (error.code === 2) {
+          // Position unavailable - location services unavailable (expected on some devices)
+          // Only log as warning, not error
+          console.warn("Location unavailable:", error.message || "Position update is unavailable");
+        } else if (error.code === 3) {
+          // Timeout - request took too long (expected)
+          console.warn("Location request timed out");
+        } else {
+          // Unknown error - log as error
+          console.error("Unexpected geolocation error:", error);
+        }
+        
         if (isMountedRef.current) {
           setIsLoadingLocation(false);
           setLocationPermission('denied');
