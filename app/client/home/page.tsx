@@ -128,7 +128,6 @@ const Home = () => {
         // Invalid cache, continue with new request
       }
     }
-
     setIsLoadingLocation(true);
 
     // Set a timeout to prevent infinite loading
