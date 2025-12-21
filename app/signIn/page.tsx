@@ -270,32 +270,12 @@ export default function SignIn() {
     setShowAuthToast(false);
 
     try {
-      // Check if Facebook SDK is loaded
-      if (typeof window === 'undefined' || !(window as any).FB) {
-        throw new Error("Facebook SDK not loaded. Please refresh the page and try again.");
-      }
-
-      // Verify SDK is initialized
-      if (!(window as any).FB.getLoginStatus) {
-        throw new Error("Facebook SDK is not fully initialized. Please wait a moment and try again.");
-      }
-
-      // Check for SDK initialization errors
-      const sdkError = (window as any).facebookSDKError;
-      if (sdkError) {
-        console.error("Facebook SDK initialization error detected:", sdkError);
-        throw new Error(sdkError);
-      }
-
-      // Log App ID for debugging (only in console, not exposed to user)
       const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-      if (appId) {
-        console.log("Attempting Facebook login with App ID:", appId);
-      } else {
-        console.warn("NEXT_PUBLIC_FACEBOOK_APP_ID is not set");
+      if (!appId) {
+        throw new Error("Facebook App ID is not configured. Please contact support.");
       }
 
-      // Check if we're on HTTPS (required for FB.login in production)
+      // Check if we're on HTTPS (required for Facebook login in production)
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const isHttps = window.location.protocol === 'https:';
       
@@ -314,6 +294,56 @@ export default function SignIn() {
         setFacebookLoading(false);
         return;
       }
+
+      // Detect if user is on mobile device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                       (window.innerWidth <= 768 && window.innerHeight <= 1024);
+      
+      // On mobile devices, use OAuth redirect flow instead of FB.login()
+      // This prevents redirect to m.facebook.com and keeps users in the app
+      if (isMobile) {
+        console.log("Mobile device detected, using OAuth redirect flow");
+        
+        // Build OAuth redirect URL
+        const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
+        const scope = encodeURIComponent('email,public_profile');
+        const state = encodeURIComponent(Date.now().toString()); // Simple state for CSRF protection
+        
+        // Use display=page to force full web version and prevent mobile redirect
+        // This ensures users stay in the app/webview instead of going to m.facebook.com
+        const facebookOAuthUrl = `https://www.facebook.com/v24.0/dialog/oauth?` +
+          `client_id=${appId}&` +
+          `redirect_uri=${redirectUri}&` +
+          `scope=${scope}&` +
+          `state=${state}&` +
+          `response_type=code&` +
+          `display=page`; // Force full web version, not mobile
+        
+        // Redirect to Facebook OAuth
+        window.location.href = facebookOAuthUrl;
+        return; // Don't set loading to false, as we're redirecting
+      }
+
+      // On desktop, use JavaScript SDK (FB.login)
+      // Check if Facebook SDK is loaded
+      if (typeof window === 'undefined' || !(window as any).FB) {
+        throw new Error("Facebook SDK not loaded. Please refresh the page and try again.");
+      }
+
+      // Verify SDK is initialized
+      if (!(window as any).FB.getLoginStatus) {
+        throw new Error("Facebook SDK is not fully initialized. Please wait a moment and try again.");
+      }
+
+      // Check for SDK initialization errors
+      const sdkError = (window as any).facebookSDKError;
+      if (sdkError) {
+        console.error("Facebook SDK initialization error detected:", sdkError);
+        throw new Error(sdkError);
+      }
+
+      // Log App ID for debugging (only in console, not exposed to user)
+      console.log("Attempting Facebook login with App ID:", appId);
 
       // Login with Facebook - use regular function, not async
       // Wrap in try-catch to handle errors from FB.login
