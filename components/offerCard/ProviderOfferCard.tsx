@@ -34,6 +34,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { Clock, MapPin, Package, Edit2, X, Check, Calendar } from "lucide-react";
+import { useBlobUrl } from "@/hooks/useBlobUrl";
 
 export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   offerId,
@@ -57,6 +58,8 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 }) => {
   const router = useRouter();
   const { t } = useLanguage();
+  const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
+  const blobUrlMapRef = useRef<Map<File, string>>(new Map());
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -255,6 +258,16 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     
     if (!files || files.length === 0) {
       if (isMountedRef.current) {
+        // Revoke blob URLs before clearing
+        if (localFiles) {
+          localFiles.forEach((file) => {
+            const blobUrl = blobUrlMapRef.current.get(file);
+            if (blobUrl) {
+              revokeBlobUrl(blobUrl);
+              blobUrlMapRef.current.delete(file);
+            }
+          });
+        }
         setLocalFiles(null);
         setUploadedImages([]);
       }
@@ -277,6 +290,16 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     } catch (error: any) {
       // Only update state and show error if component is still mounted and error is not from cancellation
       if (isMountedRef.current && error.name !== 'AbortError' && error.message !== 'Component unmounted') {
+        // Revoke blob URLs on error
+        if (localFiles) {
+          localFiles.forEach((file) => {
+            const blobUrl = blobUrlMapRef.current.get(file);
+            if (blobUrl) {
+              revokeBlobUrl(blobUrl);
+              blobUrlMapRef.current.delete(file);
+            }
+          });
+        }
         setLocalFiles(null);
         setUploadedImages([]);
         toast.error(t("offer_card.upload_failed"));
@@ -1113,7 +1136,15 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                                     imageSrc += `?t=${Date.now()}`;
                                   }
                                 } else {
-                                  imageSrc = URL.createObjectURL(file) || "";
+                                  // Get or create blob URL for this file
+                                  let blobUrl: string | null | undefined = blobUrlMapRef.current.get(file);
+                                  if (!blobUrl) {
+                                    blobUrl = createBlobUrl(file);
+                                    if (blobUrl) {
+                                      blobUrlMapRef.current.set(file, blobUrl);
+                                    }
+                                  }
+                                  imageSrc = blobUrl || "";
                                 }
                                 return (
                                   <FileUploaderItem

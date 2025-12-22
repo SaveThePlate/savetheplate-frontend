@@ -16,6 +16,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { compressImages, shouldCompress } from "@/utils/imageCompression";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { axiosInstance } from "@/lib/axiosInstance";
+import { useBlobUrl } from "@/hooks/useBlobUrl";
 
 type UploadedImage = {
   filename: string;
@@ -33,6 +34,7 @@ type Taste = "sweet" | "salty" | "both" | "neutral";
 
 const AddOffer: React.FC = () => {
   const { t } = useLanguage();
+  const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   
@@ -66,6 +68,7 @@ const AddOffer: React.FC = () => {
   const [localFiles, setLocalFiles] = useState<File[] | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const blobUrlMapRef = React.useRef<Map<File, string>>(new Map());
   const [offers, setOffers] = useState<{ price: number; title: string }[]>([]);
 
   useEffect(() => {
@@ -234,9 +237,20 @@ const AddOffer: React.FC = () => {
       const uploaded = await uploadFiles(files);
       setUploadedImages(uploaded);
       setLocalFiles(files);
+      // Once uploaded, we can keep the blob URLs for preview until component unmounts
+      // The hook will clean them up automatically
       // Removed success toast - user can see uploaded images in preview
     } catch (error: any) {
-      // Clear files on error
+      // Clear files on error and revoke blob URLs
+      if (localFiles) {
+        localFiles.forEach((file) => {
+          const blobUrl = blobUrlMapRef.current.get(file);
+          if (blobUrl) {
+            revokeBlobUrl(blobUrl);
+            blobUrlMapRef.current.delete(file);
+          }
+        });
+      }
       setLocalFiles(null);
       setUploadedImages([]);
     } finally {
@@ -246,6 +260,16 @@ const AddOffer: React.FC = () => {
 
   const handleImageUpload = async (newFiles: File[] | null) => {
     if (!newFiles || newFiles.length === 0) {
+      // Revoke any existing blob URLs before clearing
+      if (localFiles) {
+        localFiles.forEach((file) => {
+          const blobUrl = blobUrlMapRef.current.get(file);
+          if (blobUrl) {
+            revokeBlobUrl(blobUrl);
+            blobUrlMapRef.current.delete(file);
+          }
+        });
+      }
       setLocalFiles(null);
       setUploadedImages([]);
       return;
@@ -535,7 +559,15 @@ const AddOffer: React.FC = () => {
                         imageSrc += `?t=${Date.now()}`;
                       }
                     } else {
-                      imageSrc = URL.createObjectURL(file) || DEFAULT_BAG_IMAGE;
+                      // Get or create blob URL for this file
+                      let blobUrl: string | null | undefined = blobUrlMapRef.current.get(file);
+                      if (!blobUrl) {
+                        blobUrl = createBlobUrl(file);
+                        if (blobUrl) {
+                          blobUrlMapRef.current.set(file, blobUrl);
+                        }
+                      }
+                      imageSrc = blobUrl || DEFAULT_BAG_IMAGE;
                     }
                     
                     return (

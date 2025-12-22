@@ -447,8 +447,11 @@
     "fill_required": "Please fill in all required fields",
     "valid_email": "Please enter a valid email address",
     "message_sent": "Message sent successfully! We will get back to you soon.",
+    "send_success": "Message sent successfully! We'll get back to you soon.",
     "opening_email": "Opening your email client...",
-    "send_failed": "Failed to send message. Please try again or email us directly."
+    "send_failed": "Failed to send message. Please try again or email us directly.",
+    "email_subject_default": "Contact Request",
+    "email_body_template": "Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
   },
   "map": {
     "title": "Map",
@@ -691,7 +694,12 @@
   "callback": {
     "verifying": "Verifying your magic link...",
     "verify_failed": "Failed to verify magic link. Please try signing in again.",
-    "redirecting": "Redirecting to sign in..."
+    "redirecting": "Redirecting to sign in...",
+    "facebook_cancelled": "Facebook authentication was cancelled or failed.",
+    "facebook_user_denied": "You cancelled the Facebook login. Please try again if you want to sign in.",
+    "facebook_error": "Facebook authentication error: {error}",
+    "facebook_completing": "Completing Facebook authentication...",
+    "facebook_failed": "Failed to complete Facebook authentication. Please try again."
   },
   "create_magic_box": {
     "title": "Create Rescue Pack",
@@ -1060,7 +1068,9 @@
     "invalid_email": "Please enter a valid email address",
     "request_sent": "Deletion request submitted successfully",
     "email_opened": "Opening your email client...",
-    "error": "Failed to submit request. Please try again."
+    "error": "Failed to submit request. Please try again.",
+    "email_subject": "Data Deletion Request",
+    "email_body_template": "Hello,\n\nI would like to request deletion of my account and all associated data.\n\nEmail: {email}\n\nPlease delete all my personal data from your system.\n\nThank you."
   },
   "auth": {
     "signInRequired": "Sign in required",

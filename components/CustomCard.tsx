@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/dropFile";
+import { useBlobUrl } from "@/hooks/useBlobUrl";
 import {
   Credenza,
   CredenzaTrigger,
@@ -88,6 +89,8 @@ const CustomCard: FC<CustomCardProps> = ({
 }) => {
   const { t } = useLanguage();
   const router = useRouter();
+  const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
+  const blobUrlMapRef = React.useRef<Map<File, string>>(new Map());
   const [role, setRole] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -236,6 +239,16 @@ const CustomCard: FC<CustomCardProps> = ({
   // Handle image upload
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) {
+      // Revoke blob URLs before clearing
+      if (localFiles) {
+        localFiles.forEach((file) => {
+          const blobUrl = blobUrlMapRef.current.get(file);
+          if (blobUrl) {
+            revokeBlobUrl(blobUrl);
+            blobUrlMapRef.current.delete(file);
+          }
+        });
+      }
       setLocalFiles(null);
       setUploadedImages([]);
       return;
@@ -251,6 +264,16 @@ const CustomCard: FC<CustomCardProps> = ({
       setUploadedImages(uploaded);
       // Removed success toast - user can see uploaded images in preview
     } catch (error: any) {
+      // Revoke blob URLs on error
+      if (localFiles) {
+        localFiles.forEach((file) => {
+          const blobUrl = blobUrlMapRef.current.get(file);
+          if (blobUrl) {
+            revokeBlobUrl(blobUrl);
+            blobUrlMapRef.current.delete(file);
+          }
+        });
+      }
       setLocalFiles(null);
       setUploadedImages([]);
     } finally {
@@ -1005,8 +1028,15 @@ const CustomCard: FC<CustomCardProps> = ({
                               
                               console.log("Using uploaded image URL:", imageSrc); // Debug log
                             } else {
-                              // Use local file preview
-                              imageSrc = URL.createObjectURL(file) || "";
+                              // Get or create blob URL for this file
+                              let blobUrl: string | null | undefined = blobUrlMapRef.current.get(file);
+                              if (!blobUrl) {
+                                blobUrl = createBlobUrl(file);
+                                if (blobUrl) {
+                                  blobUrlMapRef.current.set(file, blobUrl);
+                                }
+                              }
+                              imageSrc = blobUrl || "";
                             }
                             
                             return (

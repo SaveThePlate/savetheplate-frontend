@@ -50,11 +50,11 @@ function FacebookAuthCallbackContent() {
             description: errorDescription,
           });
 
-          let errorMessage = "Facebook authentication was cancelled or failed.";
+          let errorMessage = t("callback.facebook_cancelled");
           if (errorReason === "user_denied") {
-            errorMessage = "You cancelled the Facebook login. Please try again if you want to sign in.";
+            errorMessage = t("callback.facebook_user_denied");
           } else if (errorDescription) {
-            errorMessage = `Facebook authentication error: ${errorDescription}`;
+            errorMessage = t("callback.facebook_error", { error: errorDescription });
           }
 
           setError(errorMessage);
@@ -151,9 +151,7 @@ function FacebookAuthCallbackContent() {
           message: err?.message,
         });
 
-        let errorMessage =
-          t("callback.verify_failed") ||
-          "Failed to complete Facebook authentication. Please try again.";
+        let errorMessage = t("callback.facebook_failed");
 
         if (err?.response?.status === 500) {
           const errorDetails = err?.response?.data;
@@ -189,7 +187,7 @@ function FacebookAuthCallbackContent() {
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground text-sm">
-            {t("callback.verifying") || "Completing Facebook authentication..."}
+            {t("callback.facebook_completing")}
           </p>
         </div>
       </div>
@@ -203,7 +201,7 @@ function FacebookAuthCallbackContent() {
         <div className="flex flex-col items-center gap-3 text-center max-w-md">
           <p className="text-red-600 font-semibold">{error}</p>
           <p className="text-gray-600 text-sm">
-            {t("callback.redirecting") || "Redirecting to sign in..."}
+            {t("callback.redirecting")}
           </p>
         </div>
       </div>

@@ -106,11 +106,12 @@ const ProfilePage = () => {
           <p className="text-muted-foreground mb-6">
             {t("auth.signInToContinue") || "Please sign in to continue"}
           </p>
-          <Link href="/signIn">
-            <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold">
-              {t("common.signIn") || "Sign In"}
-            </button>
-          </Link>
+          <button 
+            onClick={() => router.push("/signIn")}
+            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold"
+          >
+            {t("common.signIn") || "Sign In"}
+          </button>
         </div>
       </div>
     );

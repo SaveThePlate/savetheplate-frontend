@@ -41,9 +41,9 @@ const DataDeletionPage = () => {
       } catch (backendError: any) {
         // If backend endpoint doesn't exist, use email as fallback
         if (backendError?.response?.status === 404) {
-          const subject = encodeURIComponent("Data Deletion Request");
+          const subject = encodeURIComponent(t("data_deletion.email_subject"));
           const body = encodeURIComponent(
-            `I would like to request deletion of my account and all associated data.\n\nEmail: ${email}\n\nPlease delete all my personal data from your system.`
+            t("data_deletion.email_body_template", { email: email.trim() })
           );
           window.location.href = `mailto:savetheplatetunisia@gmail.com?subject=${subject}&body=${body}`;
           setSubmitted(true);

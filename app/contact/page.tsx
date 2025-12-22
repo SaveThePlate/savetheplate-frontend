@@ -110,7 +110,7 @@ const ContactPage = () => {
           {
             name: formData.name.trim(),
             email: formData.email.trim(),
-            subject: formData.subject.trim() || "Contact Form Submission",
+            subject: formData.subject.trim() || t("contact.email_subject_default"),
             message: formData.message.trim(),
             userRole: userRole || "GUEST",
             userId: userId,
@@ -123,10 +123,14 @@ const ContactPage = () => {
         // If backend endpoint doesn't exist, use mailto as fallback
         if (backendError?.response?.status === 404) {
           const subject = encodeURIComponent(
-            formData.subject || "Contact Form Submission"
+            formData.subject || t("contact.email_subject_default")
           );
           const body = encodeURIComponent(
-            `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+            t("contact.email_body_template", {
+              name: formData.name,
+              email: formData.email,
+              message: formData.message
+            })
           );
           window.location.href = `mailto:savetheplatetunisia@gmail.com?subject=${subject}&body=${body}`;
           toast.success(t("contact.opening_email"));
