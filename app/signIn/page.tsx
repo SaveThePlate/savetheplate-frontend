@@ -21,6 +21,8 @@ import { Home } from "lucide-react";
 export default function SignIn() {
   const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [showAuthToast, setShowAuthToast] = useState(false);
@@ -29,6 +31,13 @@ export default function SignIn() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
+  const [authMode, setAuthMode] = useState<"magic-link" | "password">("password");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showVerificationCode, setShowVerificationCode] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [signUpEmail, setSignUpEmail] = useState("");
 
   const clientApi = useOpenApiFetch();
   const router = useRouter();
@@ -94,6 +103,7 @@ export default function SignIn() {
     // Validate email format
     if (!email || !email.includes('@')) {
       setShowErrorToast(true);
+      setErrorMessage("Please enter a valid email address.");
       setShowAuthToast(false);
       return;
     }
@@ -103,53 +113,312 @@ export default function SignIn() {
     setShowAuthToast(false);
 
     try {
-      const resp = await clientApi.POST("/auth/send-magic-mail", {
-        body: { email },
-      });
+      // Form submission only handles password authentication
+      // Magic link is handled by the alternative button
+      if (isSignUp) {
+          // Sign up with password
+          if (!password || password.length < 8) {
+            setShowErrorToast(true);
+            setErrorMessage("Password must be at least 8 characters long.");
+            setLoading(false);
+            return;
+          }
+          if (!username || username.trim().length === 0) {
+            setShowErrorToast(true);
+            setErrorMessage("Username is required.");
+            setLoading(false);
+            return;
+          }
 
-      // Accept both 200 (OK) and 201 (Created) status codes
-      const status = resp.response?.status;
-      if (status === 200 || status === 201) {
-        setShowAuthToast(true);
-        setShowErrorToast(false);
-      } else {
-        console.error("Unexpected status code:", status, resp);
-        setShowErrorToast(true);
-        setShowAuthToast(false);
-      }
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
+            {
+              email,
+              password,
+              username,
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (response.data?.accessToken && response.data?.refreshToken) {
+            // Store tokens first (needed for verification flow)
+            LocalStorage.setItem("refresh-token", response.data.refreshToken);
+            LocalStorage.setItem("accessToken", response.data.accessToken);
+            LocalStorage.removeItem("remember");
+            
+            // Check if email is verified
+            const userEmailVerified = response.data.user?.emailVerified;
+            
+            if (!userEmailVerified) {
+              // Show verification code input instead of redirecting
+              setSignUpEmail(email);
+              setShowVerificationCode(true);
+              setShowAuthToast(true);
+              setShowErrorToast(false);
+              setLoading(false);
+              return;
+            }
+
+            // Email is verified, proceed with normal flow
+
+            const role = response.data.role || response.data.user?.role;
+            let redirectTo = '/onboarding';
+
+            if (role === 'PROVIDER') {
+              try {
+                const userDetails = await axios.get(
+                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                  { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
+                );
+                const { phoneNumber, mapsLink } = userDetails.data || {};
+                if (!phoneNumber || !mapsLink) {
+                  redirectTo = '/onboarding/fillDetails';
+                } else {
+                  redirectTo = '/provider/home';
+                }
+              } catch (error) {
+                console.error("Error fetching user details:", error);
+                redirectTo = '/onboarding/fillDetails';
+              }
+            } else if (role === 'PENDING_PROVIDER') {
+              redirectTo = '/onboarding/thank-you';
+            } else if (role === 'CLIENT') {
+              redirectTo = '/client/home';
+            }
+
+            router.push(redirectTo);
+          } else {
+            throw new Error("Invalid response from server");
+          }
+        } else {
+          // Sign in with password
+          if (!password) {
+            setShowErrorToast(true);
+            setErrorMessage("Password is required.");
+            setLoading(false);
+            return;
+          }
+
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`,
+            {
+              email,
+              password,
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (response.data?.accessToken && response.data?.refreshToken) {
+            LocalStorage.setItem("refresh-token", response.data.refreshToken);
+            LocalStorage.setItem("accessToken", response.data.accessToken);
+            LocalStorage.removeItem("remember");
+
+            const role = response.data.role || response.data.user?.role;
+            let redirectTo = '/onboarding';
+
+            if (role === 'PROVIDER') {
+              try {
+                const userDetails = await axios.get(
+                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                  { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
+                );
+                const { phoneNumber, mapsLink } = userDetails.data || {};
+                if (!phoneNumber || !mapsLink) {
+                  redirectTo = '/onboarding/fillDetails';
+                } else {
+                  redirectTo = '/provider/home';
+                }
+              } catch (error) {
+                console.error("Error fetching user details:", error);
+                redirectTo = '/onboarding/fillDetails';
+              }
+            } else if (role === 'PENDING_PROVIDER') {
+              redirectTo = '/onboarding/thank-you';
+            } else if (role === 'CLIENT') {
+              redirectTo = '/client/home';
+            }
+
+            router.push(redirectTo);
+          } else {
+            throw new Error("Invalid response from server");
+          }
+        }
       setLoading(false);
     } catch (err: any) {
-      console.error("Failed to send magic link:", err);
+      console.error("Authentication error:", err);
       
-      let userMessage = "There was an error sending the magic link. Please try again.";
+      // Use sanitizeErrorMessage for user-friendly messages
+      let userMessage = sanitizeErrorMessage(err, {
+        action: isSignUp ? "sign up" : "sign in",
+        defaultMessage: "Unable to sign in. Please check your credentials and try again."
+      });
       
-      // Check if it's a network error (502, CORS, etc.)
-      if (err?.isNetworkError || 
-          err?.status === 502 || 
-          err?.status === 503 ||
-          err?.message?.includes("Server is temporarily unavailable") ||
-          err?.message?.includes("Network error")) {
-        console.error("Network/Server error detected");
-        userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
-      }
-      // Check for CORS errors (usually happens when backend is down and Cloudflare returns 502 without CORS headers)
-      else if (err?.message?.includes("CORS") || 
-               err?.message?.includes("Access-Control") ||
-               err?.message?.includes("Failed to fetch")) {
-        console.error("CORS/Network error - likely backend is down");
-        userMessage = "Unable to connect to the server. Please check your connection and try again.";
-      }
-      // Check if it's an API error with response data
-      else if (err?.response?.data || err?.data) {
-        userMessage = sanitizeErrorMessage(err, {
-          action: "send magic link",
-          defaultMessage: "There was an error sending the magic link. Please try again."
-        });
+      // Handle 409 Conflict (user already exists) with specific message
+      if (err?.response?.status === 409) {
+        userMessage = "An account with this email already exists. Please sign in instead.";
+        // Immediately switch to sign-in mode if user was trying to sign up
+        if (isSignUp) {
+          setIsSignUp(false);
+          setPassword("");
+          setUsername("");
+          console.log("Switched to sign-in mode - user already exists");
+        }
       }
       
       setErrorMessage(userMessage);
       setShowErrorToast(true);
       setShowAuthToast(false);
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!verificationCode || verificationCode.length !== 6) {
+      setShowErrorToast(true);
+      setErrorMessage("Please enter a valid 6-digit code.");
+      return;
+    }
+
+    setVerifyingCode(true);
+    setShowErrorToast(false);
+
+    try {
+      // Ensure code is sent as a string and trimmed
+      const codeToSend = String(verificationCode).trim();
+      
+      console.log('Sending verification request:', {
+        email: signUpEmail,
+        codeLength: codeToSend.length,
+        code: codeToSend,
+      });
+      
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email-code`,
+        {
+          email: signUpEmail.trim(),
+          code: codeToSend,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.data?.verified) {
+        // Get the stored tokens from signup (should be there from signup)
+        const token = localStorage.getItem("accessToken");
+        
+        if (!token) {
+          // If no token, user might have refreshed or tokens expired
+          // Redirect to sign in - they'll need to sign in again
+          console.warn("No access token found after verification, redirecting to sign in");
+          setShowErrorToast(true);
+          setErrorMessage("Please sign in again to continue.");
+          setTimeout(() => {
+            router.push("/signIn");
+          }, 2000);
+          return;
+        }
+
+        // Fetch user details to get role
+        try {
+          const userDetails = await axios.get(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          const role = userDetails.data?.role;
+          let redirectTo = '/onboarding';
+
+          if (role === 'PROVIDER') {
+            const { phoneNumber, mapsLink } = userDetails.data || {};
+            if (!phoneNumber || !mapsLink) {
+              redirectTo = '/onboarding/fillDetails';
+            } else {
+              redirectTo = '/provider/home';
+            }
+          } else if (role === 'PENDING_PROVIDER') {
+            redirectTo = '/onboarding/thank-you';
+          } else if (role === 'CLIENT') {
+            redirectTo = '/client/home';
+          }
+
+          router.push(redirectTo);
+        } catch (userDetailsError: any) {
+          console.error("Error fetching user details after verification:", userDetailsError);
+          // If token is invalid, redirect to sign in
+          if (userDetailsError?.response?.status === 401 || userDetailsError?.response?.status === 403) {
+            setShowErrorToast(true);
+            setErrorMessage("Session expired. Please sign in again.");
+            setTimeout(() => {
+              router.push("/signIn");
+            }, 2000);
+          } else {
+            // Other error, still try to redirect to onboarding
+            router.push('/onboarding');
+          }
+        }
+      } else {
+        throw new Error("Verification failed");
+      }
+    } catch (err: any) {
+      console.error("Error verifying code:", err);
+      console.error("Error response:", err?.response?.data);
+      
+      // Extract error message from response
+      let errorMsg = "Invalid verification code. Please check and try again.";
+      
+      if (err?.response?.data) {
+        if (err.response.data.error) {
+          errorMsg = typeof err.response.data.error === 'string' 
+            ? err.response.data.error 
+            : err.response.data.error.message || errorMsg;
+        } else if (err.response.data.message) {
+          errorMsg = err.response.data.message;
+        }
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
+      
+      setErrorMessage(errorMsg);
+      setShowErrorToast(true);
+    } finally {
+      setVerifyingCode(false);
+    }
+  }
+
+  async function handleResendCode() {
+    try {
+      setLoading(true);
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/send-verification-email`,
+        { email: signUpEmail },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setShowAuthToast(true);
+      setShowErrorToast(false);
+      setErrorMessage("");
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.error || 
+                      "Failed to resend verification code. Please try again.";
+      setErrorMessage(errorMsg);
+      setShowErrorToast(true);
+    } finally {
       setLoading(false);
     }
   }
@@ -228,28 +497,11 @@ export default function SignIn() {
         credentialLength: credentialResponse?.credential?.length,
       });
       
-      let userMessage = "There was an error signing in with Google. Please try again.";
-      
-      // Handle 500 Internal Server Error specifically
-      if (err?.response?.status === 500) {
-        userMessage = "Server error during Google authentication. Please try again or contact support if the issue persists.";
-        console.error("Backend returned 500 error. This is a server-side issue. Response data:", err?.response?.data);
-      } else if (err?.isNetworkError || 
-          err?.status === 502 || 
-          err?.status === 503 ||
-          err?.message?.includes("Server is temporarily unavailable") ||
-          err?.message?.includes("Network error")) {
-        userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
-      } else if (err?.message?.includes("CORS") || 
-                 err?.message?.includes("Access-Control") ||
-                 err?.message?.includes("Failed to fetch")) {
-        userMessage = "Unable to connect to the server. Please check your connection and try again.";
-      } else if (err?.response?.data || err?.data) {
-        userMessage = sanitizeErrorMessage(err, {
-          action: "sign in with Google",
-          defaultMessage: "There was an error signing in with Google. Please try again."
-        });
-      }
+      // Use sanitizeErrorMessage for user-friendly messages
+      const userMessage = sanitizeErrorMessage(err, {
+        action: "sign in with Google",
+        defaultMessage: "Unable to sign in with Google. Please try again."
+      });
       
       setErrorMessage(userMessage);
       setShowErrorToast(true);
@@ -482,12 +734,13 @@ export default function SignIn() {
         "7. Try again"
       );
     }
-    // Generic error
+    // Generic error - use sanitizeErrorMessage for user-friendly messages
     else {
-      setErrorMessage(
-        t("signin.facebook_error") || 
-        "Facebook sign-in failed. " + (errorMessage ? `Error: ${errorMessage}` : "Please try again.")
-      );
+      const userFriendlyMessage = sanitizeErrorMessage(error, {
+        action: "sign in with Facebook",
+        defaultMessage: t("signin.facebook_error") || "Unable to sign in with Facebook. Please try again."
+      });
+      setErrorMessage(userFriendlyMessage);
     }
     
     setShowErrorToast(true);
@@ -563,44 +816,11 @@ export default function SignIn() {
           message: err?.message,
         });
         
-        let userMessage = "There was an error signing in with Facebook. Please try again.";
-        
-        if (err?.response?.status === 500) {
-          // Log backend error details for debugging
-          const errorDetails = err?.response?.data;
-          console.error("Backend Facebook auth error (500):", errorDetails);
-          
-          // Try to extract more detailed error message from backend response
-          let detailedError = '';
-          if (errorDetails?.message) {
-            if (typeof errorDetails.message === 'object') {
-              detailedError = JSON.stringify(errorDetails.message);
-            } else {
-              detailedError = errorDetails.message;
-            }
-          } else if (errorDetails?.error) {
-            detailedError = typeof errorDetails.error === 'string' 
-              ? errorDetails.error 
-              : JSON.stringify(errorDetails.error);
-          }
-          
-          userMessage = `Server error during Facebook authentication. ${detailedError ? `Error: ${detailedError}` : 'Please check the backend logs. The backend may be experiencing issues with Facebook OAuth configuration.'}`;
-        } else if (err?.isNetworkError || 
-            err?.status === 502 || 
-            err?.status === 503 ||
-            err?.message?.includes("Server is temporarily unavailable") ||
-            err?.message?.includes("Network error")) {
-          userMessage = "Server is temporarily unavailable. Please try again in a few moments.";
-        } else if (err?.message?.includes("CORS") || 
-                   err?.message?.includes("Access-Control") ||
-                   err?.message?.includes("Failed to fetch")) {
-          userMessage = "Unable to connect to the server. Please check your connection and try again.";
-        } else if (err?.response?.data || err?.data) {
-          userMessage = sanitizeErrorMessage(err, {
-            action: "sign in with Facebook",
-            defaultMessage: "There was an error signing in with Facebook. Please try again."
-          });
-        }
+        // Use sanitizeErrorMessage for user-friendly messages
+        const userMessage = sanitizeErrorMessage(err, {
+          action: "sign in with Facebook",
+          defaultMessage: "Unable to sign in with Facebook. Please try again."
+        });
         
         setErrorMessage(userMessage);
         setShowErrorToast(true);
@@ -622,9 +842,12 @@ export default function SignIn() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">{t("common.loading") || "Checking authentication..."}</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-emerald-200 rounded-full" />
+            <div className="absolute top-0 left-0 w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+          <p className="text-muted-foreground text-sm font-medium">{t("common.loading") || "Checking authentication..."}</p>
         </div>
       </div>
     );
@@ -640,7 +863,7 @@ export default function SignIn() {
       {/* Back to Home Button - Fixed Position */}
       <button
         onClick={() => router.push("/")}
-        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-sm font-medium"
+        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 text-sm font-medium"
         aria-label="Back to home"
       >
         <Home size={18} />
@@ -649,27 +872,27 @@ export default function SignIn() {
 
       <div className="w-full max-w-md mx-auto">
         {/* Sign In Card */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-border overflow-hidden">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
           {/* Header Section with Logo */}
-          <div className="bg-white px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 text-center border-b border-border">
+          <div className="bg-gradient-to-br from-emerald-50 to-white px-4 sm:px-6 lg:px-8 py-8 sm:py-10 text-center border-b border-border/50">
             <button
               onClick={() => router.push("/")}
-              className="inline-block mb-4 sm:mb-6 hover:opacity-90 transition-opacity"
+              className="inline-block mb-5 sm:mb-6 hover:opacity-90 transition-all duration-200 hover:scale-105"
               aria-label="Go to home page"
             >
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={80}
-                height={80}
-                className="sm:w-[100px] sm:h-[100px] object-contain cursor-pointer mx-auto"
+                width={90}
+                height={90}
+                className="sm:w-[110px] sm:h-[110px] object-contain cursor-pointer mx-auto drop-shadow-sm"
                 priority
               />
             </button>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-1 sm:mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
               {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
             </h1>
-            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base px-2">
+            <p className="text-muted-foreground text-sm sm:text-base px-2 leading-relaxed">
               {!isNewUser
                 ? t("signin.description_new")
                 : t("signin.description_back")}
@@ -677,58 +900,281 @@ export default function SignIn() {
           </div>
 
           {/* Form Section */}
-          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
-                  Email
+          <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {/* Verification Code Input */}
+            {showVerificationCode ? (
+              <div className="space-y-5 animate-fade-in">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
+                    <span className="text-3xl">📧</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+                    Verify Your Email
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    We&apos;ve sent a 6-digit verification code to <br />
+                    <strong className="text-emerald-600">{signUpEmail}</strong>
+                  </p>
+                </div>
+
+                <form onSubmit={handleVerifyCode} className="space-y-5">
+                  <div>
+                    <label htmlFor="verificationCode" className="block text-sm font-semibold text-foreground mb-3">
+                      Verification Code
+                    </label>
+                    <Input
+                      id="verificationCode"
+                      placeholder="000000"
+                      className="w-full px-4 py-4 text-lg border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all text-center text-3xl tracking-[0.5em] font-mono"
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={verificationCode}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setVerificationCode(value);
+                      }}
+                      autoFocus
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground text-center">
+                      Enter the 6-digit code from your email
+                    </p>
+                  </div>
+
+                  {verifyingCode ? (
+                    <Button
+                      disabled
+                      className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg"
+                    >
+                      <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                      Verifying...
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                      type="submit"
+                    >
+                      Verify Email
+                    </Button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={loading}
+                    className="w-full text-sm text-emerald-600 hover:text-emerald-700 font-medium disabled:opacity-50 transition-colors"
+                  >
+                    {loading ? "Sending..." : "Resend Code"}
+                  </button>
+                </form>
+
+                {showAuthToast && (
+                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-800 transition-all duration-300">
+                    Verification code sent! Please check your email.
+                  </div>
+                )}
+                {showErrorToast && <ErrorToast message={errorMessage} />}
+              </div>
+            ) : (
+              <>
+            {/* Sign Up / Sign In Toggle */}
+            <div className="flex gap-2 mb-6 p-1.5 bg-emerald-50/50 rounded-xl border border-emerald-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(false);
+                  setPassword("");
+                  setUsername("");
+                }}
+                className={`flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  !isSignUp
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "text-gray-700 hover:text-emerald-600 hover:bg-white"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(true);
+                  setPassword("");
+                }}
+                className={`flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  isSignUp
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "text-gray-700 hover:text-emerald-600 hover:bg-white"
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
+                  Email Address
                 </label>
                 <Input
                   id="email"
                   placeholder="name@example.com"
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
+                  className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                 />
+              </div>
+
+              <div className="space-y-5">
+                {isSignUp && (
+                  <div className="space-y-1.5">
+                    <label htmlFor="username" className="block text-sm font-semibold text-foreground mb-2">
+                      Username
+                    </label>
+                    <Input
+                      id="username"
+                      placeholder="john_doe"
+                      className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                      type="text"
+                      required
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      autoComplete="username"
+                    />
+                  </div>
+                )}
+                <div className="space-y-1.5">
+                  <label htmlFor="password" className="block text-sm font-semibold text-foreground mb-2">
+                    Password
+                  </label>
+                  <Input
+                    id="password"
+                    placeholder={isSignUp ? "At least 8 characters" : "Enter your password"}
+                    className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={isSignUp ? 8 : undefined}
+                    autoComplete={isSignUp ? "new-password" : "current-password"}
+                  />
+                  {isSignUp && (
+                    <p className="mt-1.5 text-xs text-muted-foreground flex items-center gap-1">
+                      <span>🔒</span>
+                      Password must be at least 8 characters long
+                    </p>
+                  )}
+                </div>
               </div>
 
               {loading ? (
                 <Button
                   disabled
-                  className="w-full bg-emerald-600 text-white font-semibold py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center text-sm sm:text-base shadow-lg"
+                  className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg mt-6"
                 >
-                  <ReloadIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  {t("signin.sending")}
+                  <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                  {isSignUp ? "Signing up..." : "Signing in..."}
                 </Button>
               ) : (
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base mt-6 transform hover:scale-[1.02] active:scale-[0.98]"
                   type="submit"
                   id="sign-in-button"
                 >
-                  {t("signin.sign_in_email")}
+                  {isSignUp ? "Create Account" : "Sign In"}
                 </Button>
               )}
             </form>
 
-            {/* Social Sign In - Google and Facebook */}
-            {(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_FACEBOOK_APP_ID) && (
-              <>
-                {/* Separator */}
-                <div className="relative my-4 sm:my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border"></div>
-                  </div>
-                  <div className="relative flex justify-center text-xs sm:text-sm">
-                    <span className="px-3 sm:px-4 bg-white text-muted-foreground">
-                      {t("common.or") || "or"}
-                    </span>
-                  </div>
+            {/* Alternative Authentication Options */}
+            <div>
+              {/* Separator */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/50"></div>
                 </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-muted-foreground font-medium">
+                    {t("common.or") || "or"}
+                  </span>
+                </div>
+              </div>
 
-                <div className="space-y-2.5 sm:space-y-3">
+              <div className="space-y-3">
+                {/* Magic Link - Passwordless Option */}
+                <Button
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!email || !email.includes('@')) {
+                      setShowErrorToast(true);
+                      setErrorMessage("Please enter a valid email address.");
+                      setShowAuthToast(false);
+                      return;
+                    }
+                    setAuthMode("magic-link");
+                    setMagicLinkLoading(true);
+                    setShowErrorToast(false);
+                    setShowAuthToast(false);
+                    try {
+                      const resp = await clientApi.POST("/auth/send-magic-mail", {
+                        body: { email },
+                      });
+                      
+                      // Check if response is successful
+                      // OpenApiFetch returns { data, response, error }
+                      // If there's no error, the request was successful
+                      if (resp.response && (resp.response.status === 200 || resp.response.status === 201)) {
+                        setShowAuthToast(true);
+                        setShowErrorToast(false);
+                        setMagicLinkLoading(false);
+                        return;
+                      }
+                      
+                      // If response exists but status is not 200/201, treat as error
+                      throw new Error("Unexpected response status");
+                    } catch (err: any) {
+                      console.error("Magic link error:", err);
+                      
+                      // Check if it's actually a successful response that was thrown
+                      // Sometimes OpenApiFetch might throw even on success
+                      if (err?.response?.status === 200 || err?.response?.status === 201) {
+                        setShowAuthToast(true);
+                        setShowErrorToast(false);
+                        setMagicLinkLoading(false);
+                        return;
+                      }
+                      
+                      // Use sanitizeErrorMessage for user-friendly messages
+                      const userMessage = sanitizeErrorMessage(err, {
+                        action: "send magic link",
+                        defaultMessage: "Unable to send magic link. Please check your email and try again."
+                      });
+                      
+                      setErrorMessage(userMessage);
+                      setShowErrorToast(true);
+                      setShowAuthToast(false);
+                    } finally {
+                      setMagicLinkLoading(false);
+                    }
+                  }}
+                  disabled={magicLinkLoading || loading || !email || !email.includes('@')}
+                  className="w-full bg-white border-2 border-emerald-200 hover:border-emerald-300 text-emerald-600 hover:text-emerald-700 font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {magicLinkLoading ? (
+                    <>
+                      <ReloadIcon className="h-5 w-5 animate-spin" />
+                      <span>{t("signin.sending") || "Sending..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xl">✨</span>
+                      <span>{t("signin.sign_in_email") || "Continue with Magic Link"}</span>
+                    </>
+                  )}
+                </Button>
+
                 {/* Google Sign In - Temporarily commented out until logic is fixed */}
                 {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
                   <div className="w-full flex justify-center">
@@ -757,72 +1203,41 @@ export default function SignIn() {
                   </div>
                 )} */}
 
-                  {/* Facebook Sign In */}
-                  {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
-                    <Button
-                      onClick={handleFacebookLogin}
-                      disabled={facebookLoading}
-                      className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                    >
-                      {facebookLoading ? (
-                        <>
-                          <ReloadIcon className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                          <span className="hidden sm:inline">{t("signin.facebook_signing_in") || "Signing in with Facebook..."}</span>
-                          <span className="sm:hidden">{t("signin.facebook_signing_in") || "Signing in..."}</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                          </svg>
-                          <span className="truncate">{t("signin.facebook_sign_in") || "Sign in with Facebook"}</span>
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
+                {/* Facebook Sign In */}
+                {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
+                  <Button
+                    onClick={handleFacebookLogin}
+                    disabled={facebookLoading}
+                    className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {facebookLoading ? (
+                      <>
+                        <ReloadIcon className="h-5 w-5 animate-spin" />
+                        <span>{t("signin.facebook_signing_in") || "Signing in with Facebook..."}</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        <span>{t("signin.facebook_sign_in") || "Continue with Facebook"}</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Toast Messages */}
+            <div className="mt-6 space-y-3">
+              {showAuthToast && <AuthToast />}
+              {showErrorToast && <ErrorToast message={errorMessage} />}
+            </div>
               </>
             )}
-
-            {showAuthToast && <AuthToast />}
-            {showErrorToast && <ErrorToast message={errorMessage} />}
-
-            {/* Spam folder reminder */}
-            <p className="mt-4 sm:mt-6 text-center font-medium text-[10px] sm:text-xs lg:text-sm text-foreground px-2">
-              {t("signin.check_spam")}
-            </p>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeInDown {
-          0% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes fadeInUp {
-          0% {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeInDown {
-          animation: fadeInDown 0.8s ease-in-out;
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-in-out;
-        }
-      `}</style>
     </div>
   );
 }
