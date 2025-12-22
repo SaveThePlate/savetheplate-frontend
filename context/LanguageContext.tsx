@@ -56,15 +56,23 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   const t = useCallback((key: string, params?: Record<string, any>): string => {
+    // Return empty string if translations haven't loaded yet
+    if (!translations || Object.keys(translations).length === 0) {
+      return "";
+    }
+    
     const keys = key.split(".");
     let value: any = translations;
     for (const k of keys) {
       value = value?.[k];
     }
-    let result = value || key;
+    
+    // If value is undefined, null, or empty string, return empty string
+    // This allows the || fallback pattern to work in components
+    let result = (value !== undefined && value !== null && value !== "") ? value : "";
     
     // Replace parameters like {orderId} with actual values
-    if (params) {
+    if (params && result) {
       Object.keys(params).forEach((param) => {
         result = result.replace(new RegExp(`\\{${param}\\}`, "g"), params[param]);
       });

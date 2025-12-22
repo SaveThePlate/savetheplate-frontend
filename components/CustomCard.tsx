@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,8 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/dropFile";
+import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { Check } from "lucide-react";
 import {
   Credenza,
   CredenzaTrigger,
@@ -29,6 +31,7 @@ import {
   CredenzaFooter,
   CredenzaClose,
 } from "@/components/ui/credenza";
+import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 
 // Small utility to generate a tiny SVG blur placeholder data URL.
@@ -88,12 +91,15 @@ const CustomCard: FC<CustomCardProps> = ({
 }) => {
   const { t } = useLanguage();
   const router = useRouter();
+  const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
+  const blobUrlMapRef = React.useRef<Map<File, string>>(new Map());
   const [role, setRole] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [localData, setLocalData] = useState({
     title,
     description,
@@ -236,6 +242,16 @@ const CustomCard: FC<CustomCardProps> = ({
   // Handle image upload
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) {
+      // Revoke blob URLs before clearing
+      if (localFiles) {
+        localFiles.forEach((file) => {
+          const blobUrl = blobUrlMapRef.current.get(file);
+          if (blobUrl) {
+            revokeBlobUrl(blobUrl);
+            blobUrlMapRef.current.delete(file);
+          }
+        });
+      }
       setLocalFiles(null);
       setUploadedImages([]);
       return;
@@ -251,6 +267,16 @@ const CustomCard: FC<CustomCardProps> = ({
       setUploadedImages(uploaded);
       // Removed success toast - user can see uploaded images in preview
     } catch (error: any) {
+      // Revoke blob URLs on error
+      if (localFiles) {
+        localFiles.forEach((file) => {
+          const blobUrl = blobUrlMapRef.current.get(file);
+          if (blobUrl) {
+            revokeBlobUrl(blobUrl);
+            blobUrlMapRef.current.delete(file);
+          }
+        });
+      }
       setLocalFiles(null);
       setUploadedImages([]);
     } finally {
@@ -354,7 +380,6 @@ const CustomCard: FC<CustomCardProps> = ({
       }
 
       const response = await axiosInstance.put(`/offers/${offerId}`, payload);
-      toast.success(t("custom_card.offer_updated"));
       setLocalData({
         ...localData,
         originalPrice: originalPriceValue !== undefined ? String(originalPriceValue) : "",
@@ -363,6 +388,8 @@ const CustomCard: FC<CustomCardProps> = ({
       setLocalFiles(null);
       setUploadedImages([]);
       setIsEditing(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
       // Pass the response data (updated offer) to onUpdate if available, otherwise use payload
       onUpdate?.(offerId, response.data || payload);
     } catch (err: any) {
@@ -437,7 +464,7 @@ const CustomCard: FC<CustomCardProps> = ({
           )}
 
           {/* Price Badge - top right */}
-          <div className="absolute top-2 right-2 bg-emerald-600 text-white font-semibold px-2.5 py-1.5 rounded-full text-xs shadow-md z-10">
+          <div className="absolute top-2 right-2 bg-primary text-primary-foreground font-semibold px-2.5 py-1.5 rounded-full text-xs shadow-md z-10">
             <div className="flex flex-col items-end leading-tight">
               <span className="font-bold text-sm">{localData.price} dt</span>
               {originalPrice && originalPrice > localData.price && (
@@ -455,7 +482,7 @@ const CustomCard: FC<CustomCardProps> = ({
 
           {/* Quantity Badge - top left */}
           {localData.quantity > 0 && !isExpired && (
-            <div className="absolute top-2 left-2 bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
+            <div className="absolute top-2 left-2 bg-success text-success-foreground px-2.5 py-1 rounded-full text-xs font-semibold shadow-md z-10">
               {localData.quantity} left
             </div>
           )}
@@ -588,7 +615,7 @@ const CustomCard: FC<CustomCardProps> = ({
                     href={mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-emerald-600 font-medium mt-1 inline-flex items-center gap-1"
+                    className="text-sm text-primary font-medium mt-1 inline-flex items-center gap-1"
                   >
                     View on Maps →
                   </a>
@@ -598,13 +625,17 @@ const CustomCard: FC<CustomCardProps> = ({
               {/* Action Buttons */}
               <div className="flex flex-col gap-2">
                 {!isExpired && localData.quantity > 0 && (
-                  <Link
-                    href={reserveLink}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
+                  <Button
+                    asChild
+                    variant="emerald"
+                    size="lg"
+                    className="w-full"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Order Now
-                  </Link>
+                    <Link href={reserveLink}>
+                      Order Now
+                    </Link>
+                  </Button>
                 )}
                 {isExpired && (
                   <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-500 font-semibold rounded-xl">
@@ -643,7 +674,7 @@ const CustomCard: FC<CustomCardProps> = ({
         )}
 
         {/* 💰 Price Badge */}
-        <div className="absolute top-2 right-2 bg-emerald-600 text-white font-semibold px-2 py-1 rounded-full text-xs shadow-md">
+        <div className="absolute top-2 right-2 bg-primary text-primary-foreground font-semibold px-2 py-1 rounded-full text-xs shadow-md">
           <div className="flex flex-col items-end leading-tight">
             <span className="font-bold text-sm">{localData.price} dt</span>
             {originalPrice && originalPrice > localData.price && (
@@ -663,7 +694,7 @@ const CustomCard: FC<CustomCardProps> = ({
         <div
           className={`absolute bottom-2 right-2 px-2 py-0.5 text-xs font-medium rounded-full shadow-md ${
             localData.quantity > 0
-              ? "bg-green-100 text-green-800"
+              ? "bg-success/20 text-success"
               : "bg-red-100 text-red-600"
           }`}
         >
@@ -715,7 +746,7 @@ const CustomCard: FC<CustomCardProps> = ({
                 href={mapsLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-teal-50 text-teal-700 font-medium rounded-2xl text-left"
+                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-accent/10 text-accent font-medium rounded-2xl text-left"
               >
                 <span className="text-lg">📍</span>
                 <span className="truncate">{pickupLocation || "View on Map"}</span>
@@ -738,7 +769,7 @@ const CustomCard: FC<CustomCardProps> = ({
             ) : localData.quantity > 0 ? (
               <Link
                 href={reserveLink}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-teal-600 text-white font-semibold rounded-lg shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-accent text-accent-foreground font-semibold rounded-lg shadow-sm"
               >
                 Order
               </Link>
@@ -848,7 +879,7 @@ const CustomCard: FC<CustomCardProps> = ({
                         name="title"
                         value={localData.title}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                        className="w-full px-4 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                         disabled={loading}
                         placeholder="Enter offer title"
                       />
@@ -915,7 +946,7 @@ const CustomCard: FC<CustomCardProps> = ({
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">dt</span>
                         </div>
                         {localData.originalPrice && parseFloat(localData.originalPrice as any) > parseFloat(localData.price as any) && (
-                          <p className="text-xs text-emerald-600 font-medium">
+                          <p className="text-xs text-primary font-medium">
                             Save {((1 - parseFloat(localData.price as any) / parseFloat(localData.originalPrice as any)) * 100).toFixed(0)}%
                           </p>
                         )}
@@ -934,7 +965,7 @@ const CustomCard: FC<CustomCardProps> = ({
                         name="quantity"
                         value={localData.quantity}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                        className="w-full px-4 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                         disabled={loading}
                         placeholder="0"
                         required
@@ -944,7 +975,7 @@ const CustomCard: FC<CustomCardProps> = ({
                     {/* Images Upload */}
                     <div className="space-y-1.5">
                       <label className="text-sm font-semibold text-gray-700">
-                        Images {uploadedImages.length > 0 && <span className="text-emerald-600">({uploadedImages.length} uploaded)</span>}
+                        Images {uploadedImages.length > 0 && <span className="text-primary">({uploadedImages.length} uploaded)</span>}
                       </label>
                       <FileUploader
                         value={localFiles || []}
@@ -1005,8 +1036,15 @@ const CustomCard: FC<CustomCardProps> = ({
                               
                               console.log("Using uploaded image URL:", imageSrc); // Debug log
                             } else {
-                              // Use local file preview
-                              imageSrc = URL.createObjectURL(file) || "";
+                              // Get or create blob URL for this file
+                              let blobUrl: string | null | undefined = blobUrlMapRef.current.get(file);
+                              if (!blobUrl) {
+                                blobUrl = createBlobUrl(file);
+                                if (blobUrl) {
+                                  blobUrlMapRef.current.set(file, blobUrl);
+                                }
+                              }
+                              imageSrc = blobUrl || "";
                             }
                             
                             return (
@@ -1014,7 +1052,7 @@ const CustomCard: FC<CustomCardProps> = ({
                                 key={`preview-${index}`}
                                 index={index}
                                 className={`size-24 p-0 rounded-xl overflow-hidden border-2 shadow-sm relative ${
-                                  isUploaded ? "border-emerald-600" : "border-yellow-400"
+                                  isUploaded ? "border-primary" : "border-warning"
                                 }`}
                               >
                                 <div className="w-full h-full flex items-center justify-center">
@@ -1029,10 +1067,10 @@ const CustomCard: FC<CustomCardProps> = ({
                                 </div>
                                 <div className={`absolute top-1 right-1 text-white text-xs px-1.5 py-0.5 rounded-full z-10 ${
                                   isUploaded 
-                                    ? "bg-emerald-600" 
+                                    ? "bg-primary" 
                                     : uploadingImages 
-                                    ? "bg-yellow-500" 
-                                    : "bg-yellow-400"
+                                    ? "bg-warning" 
+                                    : "bg-warning/80"
                                 }`}>
                                   {isUploaded ? "✓" : uploadingImages ? "⏳" : "📤"}
                                 </div>
@@ -1050,7 +1088,7 @@ const CustomCard: FC<CustomCardProps> = ({
                   </CredenzaBody>
 
                   <CredenzaFooter className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
-                    <button 
+                    <Button 
                       onClick={() => {
                         setIsEditing(false);
                         // Reset form data to original values
@@ -1067,18 +1105,30 @@ const CustomCard: FC<CustomCardProps> = ({
                         setUploadedImages([]);
                         setUploadingImages(false);
                       }}
-                      className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                      variant="outline"
                       disabled={loading}
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={handleEdit}
                       disabled={loading || uploadingImages}
-                      className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      variant="emerald"
+                      className="flex items-center justify-center gap-2"
                     >
-                      {loading ? "Saving..." : uploadingImages ? "Uploading..." : "Save Changes"}
-                    </button>
+                      {saveSuccess ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Saved
+                        </>
+                      ) : loading ? (
+                        "Saving..."
+                      ) : uploadingImages ? (
+                        "Uploading..."
+                      ) : (
+                        "Save Changes"
+                      )}
+                    </Button>
                   </CredenzaFooter>
                 </CredenzaContent>
               </Credenza>
@@ -1088,9 +1138,9 @@ const CustomCard: FC<CustomCardProps> = ({
             <div className="flex-1">
               <Credenza open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
                 <CredenzaTrigger asChild>
-                  <button className="w-full bg-red-500 text-white px-3 py-2 rounded-lg font-medium">
+                  <Button variant="destructive" className="w-full">
                     Delete
-                  </button>
+                  </Button>
                 </CredenzaTrigger>
 
                 <CredenzaContent className="bg-white rounded-3xl shadow-xl p-6 max-w-sm mx-auto border border-gray-100">
@@ -1109,18 +1159,18 @@ const CustomCard: FC<CustomCardProps> = ({
                   </CredenzaBody>
 
                   <CredenzaFooter className="flex justify-end gap-3 mt-4">
-                    <button 
+                    <Button 
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="px-4 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200"
+                      variant="outline"
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={handleDelete}
-                      className="px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600"
+                      variant="destructive"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </CredenzaFooter>
                 </CredenzaContent>
               </Credenza>

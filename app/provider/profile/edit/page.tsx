@@ -7,8 +7,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import axios from "axios";
 import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   FileInput,
   FileUploader,
@@ -18,6 +16,7 @@ import {
 import { sanitizeImageUrl, shouldUnoptimizeImage, resolveImageSource } from "@/utils/imageUtils";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImage, shouldCompress } from "@/utils/imageCompression";
+import { useBlobUrl } from "@/hooks/useBlobUrl";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
@@ -32,6 +31,8 @@ interface ProfileData {
 export default function EditProviderProfile() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
+  const profileBlobUrlRef = React.useRef<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -189,6 +190,11 @@ export default function EditProviderProfile() {
   // Handle profile image upload
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) {
+      // Revoke blob URL when clearing
+      if (profileBlobUrlRef.current) {
+        revokeBlobUrl(profileBlobUrlRef.current);
+        profileBlobUrlRef.current = null;
+      }
       setLocalFile(null);
       setProfileImage(null);
       return;
@@ -247,8 +253,18 @@ export default function EditProviderProfile() {
       }
 
       setProfileImage(filename);
+      // Revoke blob URL once image is uploaded
+      if (profileBlobUrlRef.current) {
+        revokeBlobUrl(profileBlobUrlRef.current);
+        profileBlobUrlRef.current = null;
+      }
     } catch (error: any) {
       console.error("Error uploading image:", error);
+      // Revoke blob URL on error
+      if (profileBlobUrlRef.current) {
+        revokeBlobUrl(profileBlobUrlRef.current);
+        profileBlobUrlRef.current = null;
+      }
       setLocalFile(null);
       setProfileImage(null);
     } finally {
@@ -337,8 +353,11 @@ export default function EditProviderProfile() {
         return `${backendUrl}/storage/${profileImage.replace(/^\/storage\//, '')}`;
       }
     } else if (localFile) {
-      // Show local preview
-      return URL.createObjectURL(localFile);
+      // Show local preview - get or create blob URL
+      if (!profileBlobUrlRef.current) {
+        profileBlobUrlRef.current = createBlobUrl(localFile);
+      }
+      return profileBlobUrlRef.current || DEFAULT_PROFILE_IMAGE;
     } else if (profile?.profileImage) {
       // Show existing profile image
       if (typeof profile.profileImage === "string") {
@@ -360,30 +379,28 @@ export default function EditProviderProfile() {
   }
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-24 lg:pb-6 px-4 pt-4 sm:pt-6 md:pt-8 lg:pt-10">
+    <div className="min-h-screen pb-24 px-4 pt-10">
       {/* Header */}
-      <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.push("/provider/profile")}
-          className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-emerald-50 transition-colors flex-shrink-0"
+          className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-emerald-50 transition-colors"
         >
           <ArrowLeft size={20} className="text-foreground" />
         </button>
-        <h1 className="font-display font-bold text-xl sm:text-2xl md:text-3xl">
-          {t("provider.profile.edit_dialog.title") || "Edit Profile"}
-        </h1>
+        <h1 className="font-display font-bold text-3xl">{t("provider.profile.edit_dialog.title") || "Edit Profile"}</h1>
       </div>
 
       {/* Form Card */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border shadow-sm max-w-2xl mx-auto">
-        <div className="space-y-4 sm:space-y-6">
+      <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6">
+        <div className="space-y-4">
           {/* Profile Image Upload */}
           <div>
-            <label className="block text-sm sm:text-base font-semibold text-foreground mb-2 sm:mb-3">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {t("provider.profile.edit_dialog.profile_image") || "Profile Image"}
             </label>
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                 <Image
                   src={sanitizeImageUrl(getProfileImageSrc())}
                   alt={formData.username || "Profile"}
@@ -464,10 +481,10 @@ export default function EditProviderProfile() {
 
           {/* Username */}
           <div>
-            <label className="block text-sm sm:text-base font-semibold text-foreground mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {t("provider.profile.edit_dialog.username") || "Store Name"} <span className="text-red-500">*</span>
             </label>
-            <Input
+            <input
               value={formData.username}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -476,17 +493,17 @@ export default function EditProviderProfile() {
                 }))
               }
               placeholder={t("provider.profile.edit_dialog.store_name") || "Your store name"}
-              className="text-sm sm:text-base py-2.5 sm:py-3"
+              className="w-full p-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:outline-none text-foreground bg-white"
             />
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{t("provider.profile.edit_dialog.store_name_hint") || "This is how customers will see your store"}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("provider.profile.edit_dialog.store_name_hint") || "This is how customers will see your store"}</p>
           </div>
 
           {/* Phone Number */}
           <div>
-            <label className="block text-sm sm:text-base font-semibold text-foreground mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {t("provider.profile.edit_dialog.phone_number") || "Phone Number"} <span className="text-red-500">*</span>
             </label>
-            <Input
+            <input
               value={formData.phoneNumber}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -497,61 +514,60 @@ export default function EditProviderProfile() {
               placeholder="12345678"
               maxLength={8}
               type="tel"
-              className="text-sm sm:text-base py-2.5 sm:py-3"
+              className="w-full p-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:outline-none text-foreground bg-white"
             />
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{t("provider.profile.edit_dialog.phone_hint") || "8 digits (e.g., 12345678)"}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("provider.profile.edit_dialog.phone_hint") || "8 digits (e.g., 12345678)"}</p>
           </div>
 
           {/* Google Maps Link */}
           <div>
-            <label className="block text-sm sm:text-base font-semibold text-foreground mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {t("provider.profile.edit_dialog.maps_link") || "Google Maps Link"} <span className="text-red-500">*</span>
             </label>
-            <Input
+            <input
               value={formData.mapsLink}
               onChange={handleMapsLinkChange}
               onPaste={handlePaste}
               placeholder={t("provider.profile.edit_dialog.maps_placeholder") || "Paste your Google Maps link here"}
-              className="text-sm sm:text-base py-2.5 sm:py-3"
+              className="w-full p-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:outline-none text-foreground bg-white"
             />
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t("provider.profile.edit_dialog.maps_hint") || "Paste your store's Google Maps link"}
             </p>
           </div>
 
           {/* Location Name */}
           <div>
-            <label className="block text-sm sm:text-base font-semibold text-foreground mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               {t("provider.profile.edit_dialog.location_name") || "Location Name"}
             </label>
-            <Input
+            <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder={t("provider.profile.edit_dialog.location_auto") || "Auto-filled from Maps link"}
-              className="text-sm sm:text-base py-2.5 sm:py-3"
+              className="w-full p-3 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:outline-none text-foreground bg-white"
             />
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t("provider.profile.edit_dialog.location_hint") || "Location will be auto-extracted from Maps link"}
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-            <Button
-              variant="outline"
+          <div className="flex gap-2 pt-4">
+            <button
               onClick={() => router.push("/provider/profile")}
               disabled={saving || uploadingImage}
-              className="w-full sm:w-auto"
+              className="flex-1 py-3 rounded-xl bg-secondary text-foreground font-medium hover:bg-secondary/80 transition-colors disabled:opacity-50"
             >
               {t("common.cancel") || "Cancel"}
-            </Button>
-            <Button 
+            </button>
+            <button 
               onClick={handleSave} 
               disabled={saving || uploadingImage || !formData.username.trim() || !formData.phoneNumber.trim() || !formData.mapsLink.trim()}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               {saving ? t("common.saving") || "Saving..." : t("common.save") || "Save"}
-            </Button>
+            </button>
           </div>
         </div>
       </div>

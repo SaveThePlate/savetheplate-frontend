@@ -6,6 +6,7 @@ import axios from "axios";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import CarbonFootprint from "@/components/CarbonFootprint";
+import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
   Leaf, 
@@ -97,10 +98,10 @@ const WelcomePage = () => {
   // Show loading state while checking authentication
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/5">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-600 text-sm">{t("common.loading")}</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -130,16 +131,16 @@ const WelcomePage = () => {
       {/* Hero Section - Compact Design */}
       <section className="relative pt-2 pb-8 sm:pt-4 sm:pb-12 lg:pt-6 lg:pb-16 px-4 sm:px-6 lg:px-8">
         {/* Subtle Decorative Background Elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-200 rounded-full blur-3xl opacity-30 -z-10" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-teal-200 rounded-full blur-3xl opacity-25 -z-10" />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl opacity-30 -z-10" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/20 rounded-full blur-3xl opacity-25 -z-10" />
 
         <div className="w-full mx-auto max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-center">
             {/* Left: Content - Takes 3 columns */}
             <div className="lg:col-span-3 text-center lg:text-left space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-[#1B4332] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-foreground leading-tight">
                 {t("landing.welcome_title")}{" "}
-                <span className="text-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                <span className="text-primary bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {t("landing.welcome_subtitle")}
                 </span>
               </h1>
@@ -149,27 +150,31 @@ const WelcomePage = () => {
 
               {/* CTA Buttons - Inline */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">
-                <button
+                <Button
                   onClick={handleGetStarted}
-                  className="group px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base transform hover:scale-105"
+                  variant="emerald"
+                  size="lg"
+                  className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg hover:shadow-xl transform hover:scale-105 font-bold"
                 >
                   {t("landing.get_started")}
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleSignIn}
-                  className="px-6 py-3 sm:px-8 sm:py-4 bg-white/90 backdrop-blur-sm hover:bg-white text-emerald-700 font-bold rounded-lg border-2 border-emerald-600 shadow-md hover:shadow-lg transition-all duration-300 text-sm sm:text-base transform hover:scale-105"
+                  variant="outline"
+                  size="lg"
+                  className="bg-white/90 backdrop-blur-sm hover:bg-white text-primary border-2 border-primary shadow-md hover:shadow-lg transform hover:scale-105 font-bold"
                 >
                   {t("landing.sign_in")}
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* Right: Illustration - Takes 2 columns, more compact */}
             <div className="lg:col-span-2 relative">
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-emerald-100 p-6 sm:p-8 overflow-hidden">
-                <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-100 rounded-full blur-2xl opacity-40" />
-                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-teal-100 rounded-full blur-2xl opacity-40" />
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-primary/20 p-6 sm:p-8 overflow-hidden">
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-2xl opacity-40" />
+                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-accent/20 rounded-full blur-2xl opacity-40" />
                 
                 <div className="relative z-10 flex flex-col items-center">
                   <Image
@@ -180,7 +185,7 @@ const WelcomePage = () => {
                     className="mx-auto animate-float mb-4 w-auto h-auto"
                     priority
                   />
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-200 w-full">
+                  <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl p-4 border-2 border-primary/20 w-full">
                     <p className="text-center text-gray-800 font-semibold text-sm sm:text-base">
                       &quot;{t("landing.quote")}&quot;
                     </p>
@@ -206,9 +211,9 @@ const WelcomePage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {/* Feature 1 */}
-            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-5 border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-3">
-                <DollarSign className="w-6 h-6 text-emerald-700" />
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-5 border-2 border-primary/20 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <DollarSign className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.save_money_title")}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
@@ -217,9 +222,9 @@ const WelcomePage = () => {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-5 border-2 border-teal-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center mb-3">
-                <Leaf className="w-6 h-6 text-teal-700" />
+            <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-xl p-5 border-2 border-accent/20 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
+                <Leaf className="w-6 h-6 text-accent" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.save_planet_title")}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
@@ -288,8 +293,8 @@ const WelcomePage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             {/* Step 1 */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-emerald-200 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-primary/20 text-center">
+              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 1
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step1_title")}</h3>
@@ -299,8 +304,8 @@ const WelcomePage = () => {
             </div>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-emerald-200 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-primary/20 text-center">
+              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 2
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step2_title")}</h3>
@@ -310,8 +315,8 @@ const WelcomePage = () => {
             </div>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-emerald-200 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-primary/20 text-center">
+              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 3
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step3_title")}</h3>
@@ -355,7 +360,7 @@ const WelcomePage = () => {
                 </ul>
                 <button
                   onClick={handleGetStarted}
-                  className="px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-emerald-700 font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
+                  className="px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
                 >
                   {t("landing.start_listing")}
                 </button>
@@ -386,13 +391,15 @@ const WelcomePage = () => {
           <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
             {t("landing.ready_desc")}
           </p>
-          <button
+          <Button
             onClick={handleGetStarted}
-            className="px-8 py-3 sm:px-10 sm:py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto text-sm sm:text-base"
+            variant="emerald"
+            size="lg"
+            className="shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto"
           >
             {t("landing.get_started_now")}
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
+          </Button>
         </div>
       </section>
 

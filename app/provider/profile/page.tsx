@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -24,7 +25,8 @@ import { resolveImageSource, shouldUnoptimizeImage, sanitizeImageUrl } from "@/u
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImage, shouldCompress } from "@/utils/imageCompression";
-import { ShoppingBag, ChevronRight, LogOut, Heart, MessageCircle, Settings } from "lucide-react";
+import { ShoppingBag, ChevronRight, LogOut, Heart, MessageCircle, Settings, User, HelpCircle } from "lucide-react";
+import { useBlobUrl } from "@/hooks/useBlobUrl";
 
 interface ProfileData {
   username: string;
@@ -210,6 +212,8 @@ const EditProfileDialog: React.FC<{
   }) => Promise<void>;
 }> = ({ open, onOpenChange, profile, onSave }) => {
   const { t } = useLanguage();
+  const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
+  const profileBlobUrlRef = React.useRef<string | null>(null);
   const [formData, setFormData] = useState({
     username: "",
     phoneNumber: "",
@@ -360,6 +364,11 @@ const EditProfileDialog: React.FC<{
   // Handle profile image upload - using same method as AddOffer
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) {
+      // Revoke blob URL when clearing
+      if (profileBlobUrlRef.current) {
+        revokeBlobUrl(profileBlobUrlRef.current);
+        profileBlobUrlRef.current = null;
+      }
       setLocalFile(null);
       setProfileImage(null);
       return;
@@ -436,6 +445,11 @@ const EditProfileDialog: React.FC<{
       console.log("✅ Upload successful! Setting profile image to:", filename);
       console.log("✅ Upload response full:", uploaded);
       setProfileImage(filename);
+      // Revoke blob URL once image is uploaded
+      if (profileBlobUrlRef.current) {
+        revokeBlobUrl(profileBlobUrlRef.current);
+        profileBlobUrlRef.current = null;
+      }
       // Removed success toast - user can see the image in preview
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -444,6 +458,11 @@ const EditProfileDialog: React.FC<{
         action: "upload profile image",
         defaultMessage: "Unable to upload image. Please check the file and try again."
       });
+      // Revoke blob URL on error
+      if (profileBlobUrlRef.current) {
+        revokeBlobUrl(profileBlobUrlRef.current);
+        profileBlobUrlRef.current = null;
+      }
       setLocalFile(null);
       setProfileImage(null);
     } finally {
@@ -505,6 +524,9 @@ const EditProfileDialog: React.FC<{
       <DialogContent className="sm:max-w-xl lg:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden bg-white p-4 sm:p-5 md:p-6">
         <DialogHeader className="flex-shrink-0 mb-3 sm:mb-4">
           <DialogTitle className="text-base sm:text-lg md:text-xl font-bold text-foreground">{t("provider.profile.edit_dialog.title")}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("provider.profile.edit_dialog.title")}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 flex-1 min-h-0 overflow-y-auto pr-1">
           {/* Username */}
@@ -603,8 +625,11 @@ const EditProfileDialog: React.FC<{
                       imageSrc += `?t=${Date.now()}`;
                     }
                   } else {
-                    // Use local file preview
-                    imageSrc = URL.createObjectURL(localFile);
+                    // Use local file preview - get or create blob URL
+                    if (!profileBlobUrlRef.current) {
+                      profileBlobUrlRef.current = createBlobUrl(localFile);
+                    }
+                    imageSrc = profileBlobUrlRef.current || "";
                   }
                   
                   const isUploaded = !!profileImage;
@@ -703,15 +728,6 @@ export default function ProviderProfile() {
   const { t } = useLanguage();
   const { profile, stats, loading, refetch } = useProviderProfile();
 
-  // Prevent overscroll bounce on mobile
-  useEffect(() => {
-    const body = document.body;
-    body.style.touchAction = "pan-x pan-y";
-    
-    return () => {
-      body.style.touchAction = "";
-    };
-  }, []);
 
   const getProfileImageSrc = () => {
     if (!profile?.profileImage) return DEFAULT_PROFILE_IMAGE;
@@ -803,13 +819,12 @@ export default function ProviderProfile() {
   };
 
   return (
-    <div className="h-[100dvh] overflow-hidden pb-20 sm:pb-24 lg:pb-6 px-4 pt-6 sm:pt-8 md:pt-10 lg:pt-12 flex flex-col">
-      <h1 className="font-display font-bold text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 flex-shrink-0">{t("profile.title") || "Profile"}</h1>
+    <div className="min-h-screen pb-24 px-4 pt-10">
+      <h1 className="font-display font-bold text-3xl mb-8">{t("profile.title") || "Profile"}</h1>
 
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1">
       {/* User Info */}
-      <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border border-border shadow-sm mb-3 sm:mb-4 flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg sm:text-xl md:text-2xl font-bold overflow-hidden flex-shrink-0">
+      <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6 flex items-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden">
           <Image
             src={sanitizeImageUrl(profileImageSrc)}
             alt={profile?.username || "Store"}
@@ -823,60 +838,51 @@ export default function ProviderProfile() {
             }}
           />
         </div>
-        <div className="flex-1 min-w-0">
-          <h2 className="font-bold text-base sm:text-lg md:text-xl truncate">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
-          <p className="text-muted-foreground text-xs sm:text-sm truncate">{profile?.location || t("provider.profile.location")}</p>
+        <div className="flex-1">
+          <h2 className="font-bold text-lg sm:text-xl">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm">{profile?.location || t("provider.profile.location")}</p>
         </div>
       </div>
 
-      {/* Impact Stats - Simplified */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-6 mb-1 sm:mb-2" />
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">{loading ? "..." : stats.totalOffers}</div>
-          <div className="text-[9px] sm:text-[10px] md:text-xs opacity-90 leading-tight">{t("provider.profile.active_offers") || "Active Offers"}</div>
+      {/* Impact Stats */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <ShoppingBag className="w-6 h-6 mb-2" />
+          <div className="text-2xl font-bold">{loading ? "..." : stats.totalOffers}</div>
+          <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.active_offers") || "Active Offers"}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-          <Heart className="w-4 h-4 sm:w-5 sm:h-6 mb-1 sm:mb-2" />
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">{loading ? "..." : stats.totalMealsSaved}</div>
-          <div className="text-[9px] sm:text-[10px] md:text-xs opacity-90 leading-tight">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+          <Heart className="w-6 h-6 mb-2" />
+          <div className="text-2xl font-bold">{loading ? "..." : stats.totalMealsSaved}</div>
+          <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-          <svg className="w-4 h-4 sm:w-5 sm:h-6 mb-1 sm:mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+          <svg className="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
-          <div className="text-[9px] sm:text-[10px] md:text-xs opacity-90 leading-tight">{t("provider.profile.total_revenue") || "Revenue (dt)"}</div>
+          <div className="text-2xl font-bold">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
+          <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.total_revenue") || "Revenue (dt)"}</div>
         </div>
-      </div>
-
-      {/* Edit Profile Button */}
-      <div className="mb-3 sm:mb-4">
-        <Link href="/provider/profile/edit" className="block">
-          <button className="w-full flex items-center justify-between p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border transition-all group active:scale-[0.99]">
-            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <Settings size={16} className="sm:w-5 sm:h-5" />
-              </div>
-              <span className="font-medium text-xs sm:text-sm md:text-base">{t("provider.profile.edit_profile") || "Edit Personal Details"}</span>
-            </div>
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 group-hover:text-white transition-colors" />
-          </button>
-        </Link>
       </div>
 
       {/* Menu */}
-      <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+      <div className="space-y-2 mb-6">
+        <Link href="/provider/profile/account-details" className="block">
+          <MenuItem icon={User} label={t("profile.accountDetails") || "Account Details"} />
+        </Link>
+        <Link href="/provider/profile/preferences" className="block">
+          <MenuItem icon={Settings} label={t("common.preferences") || "Preferences"} />
+        </Link>
         <Link href="/provider/impact" className="block">
           <MenuItem icon={Heart} label={t("nav.impact") || "Impact"} />
         </Link>
         <Link href="/provider/contact" className="block">
           <MenuItem icon={MessageCircle} label={t("nav.contact") || "Contact"} />
         </Link>
-        <Link href="/provider/profile/preferences" className="block">
-          <MenuItem icon={Settings} label={t("common.preferences") || "Preferences"} />
+        <Link href="/provider/profile/help-support" className="block">
+          <MenuItem icon={HelpCircle} label={t("profile.helpSupport") || "Help & Support"} />
         </Link>
       </div>
 
@@ -887,12 +893,11 @@ export default function ProviderProfile() {
           localStorage.removeItem("refreshToken");
           router.push("/");
         }}
-        className="w-full flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 hover:bg-destructive/20 transition-all active:scale-[0.99] font-medium text-xs sm:text-sm mb-2 sm:mb-3"
+        className="w-full flex items-center justify-center gap-3 p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 hover:bg-destructive/20 transition-all active:scale-[0.99] font-medium"
       >
-        <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+        <LogOut className="w-5 h-5" />
         {t("common.signOut") || "Sign Out"}
       </button>
-      </div>
     </div>
   );
 }
@@ -901,15 +906,15 @@ function MenuItem({ icon: Icon, label, onClick }: { icon: any, label: string, on
   return (
     <button 
       onClick={onClick}
-      className="w-full flex items-center justify-between p-2.5 sm:p-3 md:p-4 bg-white rounded-lg sm:rounded-xl border border-border hover:border-primary/50 transition-all group active:scale-[0.99]"
+      className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-border hover:border-primary/50 transition-all group active:scale-[0.99]"
     >
-      <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-secondary/50 flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-          <Icon size={16} className="sm:w-5 sm:h-5" />
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-full bg-secondary/50 flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+          <Icon size={20} />
         </div>
-        <span className="font-medium text-xs sm:text-sm md:text-base">{label}</span>
+        <span className="font-medium">{label}</span>
       </div>
-      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
     </button>
   );
 }

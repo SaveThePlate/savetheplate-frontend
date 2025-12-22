@@ -40,6 +40,7 @@
     "available": "disponible",
     "left": "restant",
     "today": "Aujourd'hui",
+    "tomorrow": "Demain",
     "yesterday": "Hier",
     "between": "entre",
     "at": "à",
@@ -55,7 +56,8 @@
     "preferences": "Préférences",
     "clear": "Effacer",
     "search": "Rechercher",
-    "or": "ou"
+    "or": "ou",
+    "done": "Terminé"
   },
   "landing": {
     "get_started": "Commencer",
@@ -447,8 +449,11 @@
     "fill_required": "Veuillez remplir tous les champs requis",
     "valid_email": "Veuillez entrer une adresse email valide",
     "message_sent": "Message envoyé avec succès ! Nous vous répondrons bientôt.",
+    "send_success": "Message envoyé avec succès ! Nous vous répondrons bientôt.",
     "opening_email": "Ouverture de votre client email...",
-    "send_failed": "Échec de l'envoi du message. Veuillez réessayer ou nous envoyer un email directement."
+    "send_failed": "Échec de l'envoi du message. Veuillez réessayer ou nous envoyer un email directement.",
+    "email_subject_default": "Demande de Contact",
+    "email_body_template": "Nom : {name}\nEmail : {email}\n\nMessage :\n{message}"
   },
   "map": {
     "title": "Carte",
@@ -663,17 +668,26 @@
     "confirm_deletion": "Confirmer la Suppression",
     "delete_message": "Êtes-vous sûr de vouloir supprimer cette offre ? Cette action ne peut pas être annulée.",
     "edit_offer": "Modifier l'Offre",
+    "edit_description": "Mettez à jour les détails de votre offre ci-dessous",
     "update_details": "Mettez à jour les détails de votre offre ci-dessous",
+    "basic_info": "Informations de Base",
+    "pricing": "Tarification",
+    "availability": "Disponibilité",
+    "available": "disponible",
     "title_label": "Titre",
+    "title_placeholder": "Entrez le titre de l'offre",
     "description_label": "Description",
+    "description_placeholder": "Décrivez votre offre...",
     "price_label": "Prix",
     "commission_notice": "ℹ️ Note : Une commission de 1 dinar sera automatiquement ajoutée à votre prix. Prix final : {price} + 1 dt = {finalPrice} dt",
     "original_price_label": "Prix Original",
+    "food_type": "Type d'Aliment",
     "food_type_label": "Type d'Aliment",
     "food_type_snack": "🍪 Collation",
     "food_type_meal": "🍽️ Repas",
     "food_type_beverage": "🥤 Boisson",
     "food_type_other": "📦 Autre",
+    "taste": "Goût",
     "taste_label": "Profil de Goût",
     "taste_sweet": "🍰 Sucré",
     "taste_salty": "🧂 Salé",
@@ -701,7 +715,8 @@
     "uploading_images": "Téléchargement des images...",
     "view_on_map": "Voir sur Maps",
     "provider": "Fournisseur",
-    "save_percentage": "Économisez {percentage}%"
+    "save_percentage": "Économisez {percentage}%",
+    "location_from_profile": "Défini dans votre profil"
   },
   "onboarding": {
     "step_1_of_2": "Étape 1 sur 2",
@@ -899,7 +914,12 @@
   "callback": {
     "verifying": "Vérification de votre lien magique...",
     "verify_failed": "Échec de la vérification du lien magique. Veuillez réessayer de vous connecter.",
-    "redirecting": "Redirection vers la connexion..."
+    "redirecting": "Redirection vers la connexion...",
+    "facebook_cancelled": "L'authentification Facebook a été annulée ou a échoué.",
+    "facebook_user_denied": "Vous avez annulé la connexion Facebook. Veuillez réessayer si vous souhaitez vous connecter.",
+    "facebook_error": "Erreur d'authentification Facebook : {error}",
+    "facebook_completing": "Finalisation de l'authentification Facebook...",
+    "facebook_failed": "Échec de la finalisation de l'authentification Facebook. Veuillez réessayer."
   },
   "tour": {
     "back": "Retour",
@@ -1060,7 +1080,9 @@
     "invalid_email": "Veuillez entrer une adresse e-mail valide",
     "request_sent": "Demande de suppression soumise avec succès",
     "email_opened": "Ouverture de votre client e-mail...",
-    "error": "Échec de l'envoi de la demande. Veuillez réessayer."
+    "error": "Échec de l'envoi de la demande. Veuillez réessayer.",
+    "email_subject": "Demande de Suppression des Données",
+    "email_body_template": "Bonjour,\n\nJe souhaite demander la suppression de mon compte et de toutes les données associées.\n\nEmail : {email}\n\nVeuillez supprimer toutes mes données personnelles de votre système.\n\nMerci."
   },
   "auth": {
     "signInRequired": "Connexion requise",

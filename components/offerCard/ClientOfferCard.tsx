@@ -20,6 +20,7 @@ import {
   CredenzaClose,
 } from "@/components/ui/credenza";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
+import { Button } from "@/components/ui/button";
 import { X, Star, MapPin, Clock, Package } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -182,8 +183,8 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
           {/* Rating - Bottom Left (Light Green Star + Number) */}
           {displayRating ? (
             <div className="flex items-center gap-1 sm:gap-1.5">
-              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 fill-emerald-400 text-emerald-400" />
-              <span className="text-xs sm:text-sm md:text-base font-semibold text-emerald-600">
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 fill-primary text-primary" />
+              <span className="text-xs sm:text-sm md:text-base font-semibold text-primary">
                 {displayRating}
               </span>
             </div>
@@ -226,13 +227,16 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
             {t("common.expired")}
           </div>
         ) : quantity > 0 ? (
-          <Link
-            href={reserveLink}
+          <Button
+            asChild
+            variant="emerald"
+            className="flex-1 hover:scale-[1.02] transition-all duration-200"
             onClick={(e) => e.stopPropagation()} // Prevent card click when clicking order button
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl shadow-sm hover:bg-emerald-700 hover:shadow-md hover:scale-[1.02] transition-all duration-200 text-sm sm:text-base"
           >
-            {t("common.order_now")}
-          </Link>
+            <Link href={reserveLink}>
+              {t("common.order_now")}
+            </Link>
+          </Button>
         ) : (
           <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-muted text-muted-foreground rounded-xl font-semibold text-sm">
             {t("common.sold_out")}
@@ -309,8 +313,8 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                   {/* Rating */}
                   {displayRating ? (
                     <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-emerald-400 text-emerald-400" />
-                      <span className="text-xs font-semibold text-emerald-600">
+                      <Star className="w-3 h-3 fill-primary text-primary" />
+                      <span className="text-xs font-semibold text-primary">
                         {displayRating}
                       </span>
                       {totalRatings && totalRatings > 0 && (
@@ -345,19 +349,19 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                       <span className="text-[10px] text-muted-foreground line-through">
                         {originalPrice.toFixed(2)} dt
                       </span>
-                      <span className="text-xl sm:text-2xl font-bold text-emerald-600">
+                      <span className="text-xl sm:text-2xl font-bold text-primary">
                         {price.toFixed(2)} dt
                       </span>
                     </div>
                     <div className="flex-1" />
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-md px-2 py-0.5">
-                      <span className="text-[10px] font-bold text-emerald-700">
+                    <div className="bg-primary/10 border border-primary/20 rounded-md px-2 py-0.5">
+                      <span className="text-[10px] font-bold text-primary">
                         {Math.round(((originalPrice - price) / originalPrice) * 100)}% {t("offers.save") || "SAVED"}
                       </span>
                     </div>
                   </>
                 ) : (
-                  <span className="text-xl sm:text-2xl font-bold text-emerald-600">
+                  <span className="text-xl sm:text-2xl font-bold text-primary">
                     {price.toFixed(2)} dt
                   </span>
                 )}
@@ -388,7 +392,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                     <p className="text-[10px] text-muted-foreground">
                       <span className="font-medium">{formattedDate === "Today" ? t("common.today") : formattedDate}</span>
                       {formattedTime && (
-                        <span className="text-emerald-600 font-semibold ml-1">
+                        <span className="text-primary font-semibold ml-1">
                           {formattedTime.includes(" - ") ? formattedTime : ` ${t("common.at")} ${formattedTime}`}
                         </span>
                       )}
@@ -410,7 +414,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                         href={owner?.mapsLink || mapsLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10px] text-emerald-600 font-medium hover:underline inline-flex items-center gap-0.5 break-words"
+                        className="text-[10px] text-primary font-medium hover:underline inline-flex items-center gap-0.5 break-words"
                       >
                         {pickupLocation}
                         <span className="text-[8px] flex-shrink-0">↗</span>
@@ -420,9 +424,9 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                 )}
 
                 {/* Quantity Available */}
-                <div className="flex items-start gap-2 p-2 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
-                    <Package className="w-3.5 h-3.5 text-green-700" />
+                <div className="flex items-start gap-2 p-2 bg-success/10 rounded-lg border border-success/20">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
+                    <Package className="w-3.5 h-3.5 text-success" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-semibold text-foreground mb-0.5">
@@ -441,13 +445,17 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         {/* Fixed Bottom Action Bar */}
         <div className="bg-white p-2.5 sm:p-3 flex-shrink-0">
           {!expired && quantity > 0 ? (
-            <Link
-              href={reserveLink}
+            <Button
+              asChild
+              variant="emerald"
+              size="lg"
+              className="w-full shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] font-bold"
               onClick={() => setIsModalOpen(false)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm sm:text-base font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             >
-              {t("common.order_now") || "Reserve Now"}
-            </Link>
+              <Link href={reserveLink}>
+                {t("common.order_now") || "Reserve Now"}
+              </Link>
+            </Button>
           ) : expired ? (
             <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-muted-foreground text-sm sm:text-base font-semibold rounded-xl border border-border">
               {t("common.expired")}

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import SharedLayout from "@/components/SharedLayout";
 import RouteGuard from "@/components/RouteGuard";
+import { Button } from "@/components/ui/button";
 
 const ImpactPage = () => {
   const router = useRouter();
@@ -257,35 +258,39 @@ const ImpactPage = () => {
             {!loading && (
               <>
                 {userRole === "CLIENT" && (
-                  <button
+                  <Button
                     onClick={() => router.push("/client/home")}
-                    className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+                    variant="emerald"
+                    size="lg"
                   >
                     {t("impact.browse_offers")}
-                  </button>
+                  </Button>
                 )}
                 {userRole === "PROVIDER" && (
-                  <button
+                  <Button
                     onClick={() => router.push("/provider/publish")}
-                    className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+                    variant="teal"
+                    size="lg"
                   >
                     {t("impact.list_surplus")}
-                  </button>
+                  </Button>
                 )}
                 {!userRole && (
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <button
+                    <Button
                       onClick={() => router.push("/client/home")}
-                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+                      variant="emerald"
+                      size="lg"
                     >
                       {t("impact.browse_offers")}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => router.push("/provider/publish")}
-                      className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+                      variant="teal"
+                      size="lg"
                     >
                       {t("impact.list_surplus")}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </>
