@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, User, Mail, Phone, CheckCircle2, XCircle, Send } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, CheckCircle2, XCircle, Send, Check } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import axios from "axios";
@@ -28,6 +28,7 @@ export default function AccountDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<{ username: string; phoneNumber: number | null }>({ username: "", phoneNumber: null });
   const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sendingVerification, setSendingVerification] = useState(false);
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
@@ -90,7 +91,8 @@ export default function AccountDetails() {
       setUsername(formData.username);
       setPhoneNumber(formData.phoneNumber);
       setIsEditing(false);
-      toast.success(t("common.saved") || "Saved successfully");
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
     } catch (err: any) {
       console.error(err?.response?.data || err?.message || err);
       toast.error(err?.response?.data?.error || "Failed to save");
@@ -269,9 +271,18 @@ export default function AccountDetails() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isSaving ? t("common.saving") || "Saving..." : t("common.save") || "Save"}
+                {saveSuccess ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    {t("common.saved") || "Saved"}
+                  </>
+                ) : isSaving ? (
+                  t("common.saving") || "Saving..."
+                ) : (
+                  t("common.save") || "Save"
+                )}
               </button>
               <button
                 onClick={() => {

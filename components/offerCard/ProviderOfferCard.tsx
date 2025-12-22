@@ -65,6 +65,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Track mounted state to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -451,7 +452,6 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       console.log("✅ Response images:", response.data?.images);
       console.log("✅ Images is array?", Array.isArray(response.data?.images));
       
-      toast.success(t("offer_card.offer_updated"));
       setLocalData({
         ...localData,
         originalPrice: originalPriceValue !== undefined ? String(originalPriceValue) : "",
@@ -459,6 +459,12 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       setLocalFiles(null);
       setUploadedImages([]);
       setIsEditing(false);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          setSaveSuccess(false);
+        }
+      }, 2000);
       // Pass the response data (updated offer) to onUpdate if available, otherwise use payload
       onUpdate?.(offerId, response.data || payload);
     } catch (err: any) {
@@ -1212,9 +1218,20 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                     <button
                       onClick={handleEdit}
                       disabled={loading || uploadingImages}
-                      className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {loading ? t("common.saving") : uploadingImages ? t("offer_card.uploading") : t("offer_card.save_changes")}
+                      {saveSuccess ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          {t("common.saved") || "Saved"}
+                        </>
+                      ) : loading ? (
+                        t("common.saving")
+                      ) : uploadingImages ? (
+                        t("offer_card.uploading")
+                      ) : (
+                        t("offer_card.save_changes")
+                      )}
                     </button>
                   </div>
                 </div>

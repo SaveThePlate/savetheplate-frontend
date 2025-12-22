@@ -19,6 +19,7 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { Check } from "lucide-react";
 import {
   Credenza,
   CredenzaTrigger,
@@ -97,6 +98,7 @@ const CustomCard: FC<CustomCardProps> = ({
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [localData, setLocalData] = useState({
     title,
     description,
@@ -377,7 +379,6 @@ const CustomCard: FC<CustomCardProps> = ({
       }
 
       const response = await axiosInstance.put(`/offers/${offerId}`, payload);
-      toast.success(t("custom_card.offer_updated"));
       setLocalData({
         ...localData,
         originalPrice: originalPriceValue !== undefined ? String(originalPriceValue) : "",
@@ -386,6 +387,8 @@ const CustomCard: FC<CustomCardProps> = ({
       setLocalFiles(null);
       setUploadedImages([]);
       setIsEditing(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
       // Pass the response data (updated offer) to onUpdate if available, otherwise use payload
       onUpdate?.(offerId, response.data || payload);
     } catch (err: any) {
@@ -1105,9 +1108,20 @@ const CustomCard: FC<CustomCardProps> = ({
                     <button
                       onClick={handleEdit}
                       disabled={loading || uploadingImages}
-                      className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {loading ? "Saving..." : uploadingImages ? "Uploading..." : "Save Changes"}
+                      {saveSuccess ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Saved
+                        </>
+                      ) : loading ? (
+                        "Saving..."
+                      ) : uploadingImages ? (
+                        "Uploading..."
+                      ) : (
+                        "Save Changes"
+                      )}
                     </button>
                   </CredenzaFooter>
                 </CredenzaContent>
