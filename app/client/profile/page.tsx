@@ -56,6 +56,7 @@ const ProfilePage = () => {
         if (!token) {
           setIsAuthenticated(false);
           setLoading(false);
+          router.push("/signIn");
           return;
         }
 
@@ -76,6 +77,8 @@ const ProfilePage = () => {
       } catch (err) {
         console.error("Failed to fetch profile:", err);
         setIsAuthenticated(false);
+        // Redirect to sign in if authentication fails
+        router.push("/signIn");
       } finally {
         setLoading(false);
       }
@@ -98,25 +101,9 @@ const ProfilePage = () => {
     return sum;
   }, 0);
 
+  // Redirect will be handled by useEffect, but show loading while redirecting
   if (!isAuthenticated && !loading) {
-    return (
-      <div className="min-h-screen pb-24 px-4 pt-10 flex flex-col items-center justify-center">
-        <div className="text-center max-w-sm">
-          <User className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="font-display font-bold text-2xl mb-2">{t("auth.signInRequired") || "Sign in required"}</h2>
-          <p className="text-muted-foreground mb-6">
-            {t("auth.signInToContinue") || "Please sign in to continue"}
-          </p>
-          <Button 
-            onClick={() => router.push("/signIn")}
-            className="w-full"
-            size="lg"
-          >
-            {t("common.signIn") || "Sign In"}
-          </Button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (loading || !user) {
