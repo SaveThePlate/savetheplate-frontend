@@ -8,6 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeImageUrl, shouldUnoptimizeImage } from "@/utils/imageUtils";
 import { User, Settings, CreditCard, HelpCircle, ChevronRight, LogOut, Store, Leaf, ShoppingBag, Award, Clock, Heart, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
@@ -106,12 +107,13 @@ const ProfilePage = () => {
           <p className="text-muted-foreground mb-6">
             {t("auth.signInToContinue") || "Please sign in to continue"}
           </p>
-          <button 
+          <Button 
             onClick={() => router.push("/signIn")}
-            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold"
+            className="w-full"
+            size="lg"
           >
             {t("common.signIn") || "Sign In"}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -165,19 +167,19 @@ const ProfilePage = () => {
 
       {/* Impact Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-gradient-to-br from-primary to-primary/90 rounded-xl p-4 text-primary-foreground animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
           <Leaf className="w-6 h-6 mb-2" />
           <div className="text-2xl font-bold">{mealsSaved}</div>
           <div className="text-[10px] sm:text-xs opacity-90">{t("profile.mealsSaved") || "Meals Saved"}</div>
           </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+        <div className="bg-gradient-to-br from-info to-info/90 rounded-xl p-4 text-info-foreground animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 shadow-sm">
           <Award className="w-6 h-6 mb-2" />
           <div className="text-2xl font-bold">{co2Saved.toFixed(1)}</div>
           <div className="text-[10px] sm:text-xs opacity-90">{t("profile.co2Saved") || "kg CO₂ Saved"}</div>
               </div>
 
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+        <div className="bg-gradient-to-br from-warning to-warning/90 rounded-xl p-4 text-warning-foreground animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 shadow-sm">
           <ShoppingBag className="w-6 h-6 mb-2" />
           <div className="text-2xl font-bold">{moneySaved.toFixed(2)} dt</div>
           <div className="text-[10px] sm:text-xs opacity-90">{t("profile.moneySaved") || "Money Saved"}</div>
@@ -226,13 +228,15 @@ const ProfilePage = () => {
             </div>
 
       {/* Sign Out */}
-      <button
+      <Button
         onClick={handleSignOut}
-        className="w-full flex items-center justify-center gap-3 p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 hover:bg-destructive/20 transition-all active:scale-[0.99] font-medium"
+        variant="outline"
+        className="w-full flex items-center justify-center gap-3 bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20"
+        size="lg"
       >
         <LogOut className="w-5 h-5" />
         {t("common.signOut") || "Sign Out"}
-      </button>
+      </Button>
       
       <div className="mt-12 text-center">
         <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">{t("profile.version") || "Version"} 2.4.0 (Build 182)</p>
@@ -243,9 +247,10 @@ const ProfilePage = () => {
 
 function MenuItem({ icon: Icon, label, onClick }: { icon: any, label: string, onClick?: () => void }) {
   return (
-    <button 
+    <Button 
       onClick={onClick}
-      className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-border hover:border-primary/50 transition-all group active:scale-[0.99]"
+      variant="outline"
+      className="w-full flex items-center justify-between p-4 bg-white hover:border-primary/50 group"
     >
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-full bg-secondary/50 flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
@@ -254,7 +259,7 @@ function MenuItem({ icon: Icon, label, onClick }: { icon: any, label: string, on
         <span className="font-medium">{label}</span>
       </div>
       <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-    </button>
+    </Button>
   );
 }
 

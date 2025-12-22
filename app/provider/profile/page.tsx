@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -523,6 +524,9 @@ const EditProfileDialog: React.FC<{
       <DialogContent className="sm:max-w-xl lg:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden bg-white p-4 sm:p-5 md:p-6">
         <DialogHeader className="flex-shrink-0 mb-3 sm:mb-4">
           <DialogTitle className="text-base sm:text-lg md:text-xl font-bold text-foreground">{t("provider.profile.edit_dialog.title")}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("provider.profile.edit_dialog.title")}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 flex-1 min-h-0 overflow-y-auto pr-1">
           {/* Username */}

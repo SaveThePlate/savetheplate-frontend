@@ -43,6 +43,7 @@
     "available": "available",
     "left": "left",
     "today": "Today",
+    "tomorrow": "Tomorrow",
     "yesterday": "Yesterday",
     "between": "between",
     "at": "at",
@@ -55,7 +56,8 @@
     "preferences": "Preferences",
     "clear": "Clear",
     "search": "Search",
-    "or": "or"
+    "or": "or",
+    "done": "Done"
   },
   "landing": {
     "get_started": "Get Started",

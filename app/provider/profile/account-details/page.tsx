@@ -21,6 +21,7 @@ import { useBlobUrl } from "@/hooks/useBlobUrl";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -760,11 +761,11 @@ export default function AccountDetails() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Verify Your Email</DialogTitle>
+            <DialogDescription>
+              Enter the 6-digit verification code sent to <strong>{email}</strong>
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">
-              Enter the 6-digit verification code sent to <strong>{email}</strong>
-            </p>
             <div>
               <input
                 type="text"

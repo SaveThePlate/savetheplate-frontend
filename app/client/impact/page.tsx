@@ -6,6 +6,7 @@ import axios from "axios";
 import { ArrowLeft, Leaf, Droplet, Cloud, TreePine, Calculator, Info, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 const ImpactPage = () => {
   const router = useRouter();
@@ -42,7 +43,7 @@ const ImpactPage = () => {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.push("/client/profile")}
-          className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-emerald-50 transition-colors"
+          className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-primary/5 transition-colors"
         >
           <ArrowLeft size={20} className="text-foreground" />
         </button>
@@ -77,7 +78,7 @@ const ImpactPage = () => {
         {/* Metrics Explanation */}
         <div className="space-y-4 mb-6">
           <h2 className="text-lg sm:text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-emerald-600" />
+            <Calculator className="w-5 h-5 text-primary" />
             {t("impact.calculation_title")}
           </h2>
 
@@ -160,27 +161,27 @@ const ImpactPage = () => {
         {/* Your Role Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* For Clients */}
-          <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border-2 border-emerald-200">
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-4 border-2 border-primary/20">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-primary" />
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-emerald-900">{t("impact.for_customers")}</h3>
+              <h3 className="text-base sm:text-lg font-bold text-foreground">{t("impact.for_customers")}</h3>
             </div>
-            <p className="text-xs sm:text-sm text-emerald-800 mb-3">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3">
               {t("impact.for_customers_description")}
             </p>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-emerald-700">
+            <ul className="space-y-1.5 text-xs sm:text-sm text-foreground">
               <li className="flex items-start gap-2">
-                <span className="text-emerald-600 mt-0.5">✓</span>
+                <span className="text-primary mt-0.5">✓</span>
                 <span>{t("impact.customer_1")}</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-emerald-600 mt-0.5">✓</span>
+                <span className="text-primary mt-0.5">✓</span>
                 <span>{t("impact.customer_2")}</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-emerald-600 mt-0.5">✓</span>
+                <span className="text-primary mt-0.5">✓</span>
                 <span>{t("impact.customer_3")}</span>
               </li>
             </ul>
@@ -250,35 +251,39 @@ const ImpactPage = () => {
             {!loading && (
               <>
                 {userRole === "CLIENT" && (
-                  <button
+                  <Button
                     onClick={() => router.push("/client/home")}
-                    className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+                    variant="emerald"
+                    size="lg"
                   >
                     {t("impact.browse_offers")}
-                  </button>
+                  </Button>
                 )}
                 {userRole === "PROVIDER" && (
-                  <button
+                  <Button
                     onClick={() => router.push("/provider/publish")}
-                    className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+                    variant="teal"
+                    size="lg"
                   >
                     {t("impact.list_surplus")}
-                  </button>
+                  </Button>
                 )}
                 {!userRole && (
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <button
+                    <Button
                       onClick={() => router.push("/client/home")}
-                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+                      variant="emerald"
+                      size="lg"
                     >
                       {t("impact.browse_offers")}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => router.push("/provider/publish")}
-                      className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+                      variant="teal"
+                      size="lg"
                     >
                       {t("impact.list_surplus")}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </>
