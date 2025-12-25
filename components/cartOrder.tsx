@@ -26,6 +26,12 @@ import {
   Star
 } from "lucide-react";
 import RatingDialog from "./RatingDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface CartOrderProps {
   order: {
@@ -74,7 +80,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_IMAGE);
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [fallbacks, setFallbacks] = useState<string[]>([DEFAULT_IMAGE]);
-  const [showQRCode, setShowQRCode] = useState(false);
+  const [showQRCodeModal, setShowQRCodeModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false); // For confirmed/cancelled orders
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [hasRated, setHasRated] = useState(false);
@@ -499,16 +505,11 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200">
             {currentStatus === "pending" && order.qrCodeToken && (
               <button
-                onClick={() => setShowQRCode(!showQRCode)}
+                onClick={() => setShowQRCodeModal(true)}
                 className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base min-w-0"
               >
                 <QrCode className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                <span className="truncate">{showQRCode ? t("cart_order.hide_qr") : t("cart_order.show_qr")}</span>
-                {showQRCode ? (
-                  <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                )}
+                <span className="truncate">{t("cart_order.show_qr")}</span>
               </button>
             )}
             {currentStatus === "pending" && (
@@ -548,16 +549,6 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
           </div>
         )}
 
-        {/* QR Code Section (Collapsible) */}
-        {currentStatus === "pending" && order.qrCodeToken && showQRCode && (
-          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 animate-in slide-in-from-top-2 duration-300">
-            <OrderQRCode
-              qrCodeToken={order.qrCodeToken}
-              orderId={order.id}
-              orderTitle={offer.title}
-            />
-          </div>
-        )}
       </div>
 
       {/* Rating Dialog */}
@@ -576,6 +567,26 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
             }, 1500);
           }}
         />
+      )}
+
+      {/* QR Code Modal */}
+      {currentStatus === "pending" && order.qrCodeToken && (
+        <Dialog open={showQRCodeModal} onOpenChange={setShowQRCodeModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center">
+                {t("order_qr.pickup_qr_code")}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <OrderQRCode
+                qrCodeToken={order.qrCodeToken}
+                orderId={order.id}
+                orderTitle={offer.title}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

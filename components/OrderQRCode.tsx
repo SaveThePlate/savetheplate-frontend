@@ -58,11 +58,8 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({
   }
 
   return (
-    <div className="p-6 bg-white rounded-xl border-2 border-gray-200 shadow-sm">
+    <div className="w-full">
       <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          {t("order_qr.pickup_qr_code")}
-        </h3>
         <p className="text-sm text-gray-600">
           {t("order_qr.instructions")}
         </p>
