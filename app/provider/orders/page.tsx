@@ -635,176 +635,203 @@ const OrderCard: React.FC<{
   };
 
   return (
-    <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden bg-white">
-      <CardContent className="p-0">
-        <div className="p-3 sm:p-4 md:p-6">
-          <div className="flex items-start gap-3 sm:gap-4 md:gap-6">
-            {/* Offer Image */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg sm:rounded-xl overflow-hidden relative flex-shrink-0 bg-gray-100 shadow-sm">
-              <Image
-                src={sanitizeImageUrl(currentImageSrc)}
-                alt={offer?.title || "Offer image"}
-                fill
-                sizes="96px"
-                className="object-cover"
-                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImageSrc))}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  let imageSource: any = null;
-                  
-                  if (offer?.images) {
-                    if (typeof offer.images === "string") {
-                      try {
-                        const parsed = JSON.parse(offer.images);
-                        imageSource = Array.isArray(parsed) ? parsed[0] : parsed;
-                      } catch {
-                        imageSource = offer.images;
-                      }
-                    } else if (Array.isArray(offer.images) && offer.images.length > 0) {
-                      imageSource = offer.images[0];
-                    }
+    <Card className={`border-2 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden bg-white flex flex-col h-full ${
+      order.status === "pending" ? "border-yellow-200 hover:border-yellow-300" :
+      order.status === "confirmed" ? "border-emerald-200 hover:border-emerald-300" :
+      "border-gray-200 hover:border-gray-300"
+    }`}>
+      <CardContent className="p-0 flex flex-col h-full">
+        {/* Status Header */}
+        <div className={`${status.bg} ${status.border} border-b-2 px-4 py-2.5 flex items-center justify-between`}>
+          <div className="flex items-center gap-2">
+            <StatusIcon size={18} className={`${status.text} flex-shrink-0`} />
+            <span className={`font-bold text-sm ${status.text}`}>
+              {status.label}
+            </span>
+          </div>
+          {order.status === "pending" && isPickupToday && (
+            <Badge className="bg-red-500 text-white text-xs font-semibold animate-pulse">
+              {t("provider.pickup_today") || "Today!"}
+            </Badge>
+          )}
+        </div>
+
+        {/* Image - Full width on larger screens, horizontal on mobile */}
+        <div className="lg:h-48 xl:h-52 relative bg-gray-100 overflow-hidden">
+          <Image
+            src={sanitizeImageUrl(currentImageSrc)}
+            alt={offer?.title || "Offer image"}
+            fill
+            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            className="object-cover"
+            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImageSrc))}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              let imageSource: any = null;
+              
+              if (offer?.images) {
+                if (typeof offer.images === "string") {
+                  try {
+                    const parsed = JSON.parse(offer.images);
+                    imageSource = Array.isArray(parsed) ? parsed[0] : parsed;
+                  } catch {
+                    imageSource = offer.images;
                   }
-                  
-                  const fallbacks = getImageFallbacks(imageSource);
-                  const currentIndex = fallbacks.indexOf(currentImageSrc);
-                  if (currentIndex < fallbacks.length - 1) {
-                    setCurrentImageSrc(fallbacks[currentIndex + 1]);
-                  } else {
-                    target.src = DEFAULT_IMAGE;
-                    setCurrentImageSrc(DEFAULT_IMAGE);
-                  }
-                }}
-              />
+                } else if (Array.isArray(offer.images) && offer.images.length > 0) {
+                  imageSource = offer.images[0];
+                }
+              }
+              
+              const fallbacks = getImageFallbacks(imageSource);
+              const currentIndex = fallbacks.indexOf(currentImageSrc);
+              if (currentIndex < fallbacks.length - 1) {
+                setCurrentImageSrc(fallbacks[currentIndex + 1]);
+              } else {
+                target.src = DEFAULT_IMAGE;
+                setCurrentImageSrc(DEFAULT_IMAGE);
+              }
+            }}
+          />
+        </div>
+
+        {/* Content - Flex column to push actions to bottom */}
+        <div className="p-4 sm:p-5 flex-1 flex flex-col">
+          {/* Title and Badge - Mobile horizontal, Desktop vertical */}
+          <div className="mb-4">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+              {offer?.title || t("provider.offer_fallback")}
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge 
+                variant="outline" 
+                className={`${status.bg} ${status.text} ${status.border} border-2 flex items-center gap-1.5 px-3 py-1`}
+              >
+                <StatusIcon size={14} />
+                <span className="font-semibold text-xs">{status.label}</span>
+              </Badge>
+              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                <Package size={16} className="text-gray-400" />
+                <span className="font-semibold text-gray-900">{order.quantity}</span>
+                <span>{order.quantity === 1 ? t("provider.item") : t("provider.items")}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Customer Info - Better organized for larger screens */}
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 space-y-2.5 flex-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <UserIcon size={18} className="text-emerald-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-500 mb-0.5">{t("provider.ordered_by")}</p>
+                <p className="font-semibold text-sm text-gray-900 truncate">
+                  {user?.username || `User ${order.userId}`}
+                </p>
+              </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3 sm:gap-4 mb-2 sm:mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-1 truncate">
-                    {offer?.title || t("provider.offer_fallback")}
-                  </h3>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge 
-                      variant="outline" 
-                      className={`${status.bg} ${status.text} ${status.border} border-2 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1`}
-                    >
-                      <StatusIcon size={12} className="sm:w-3.5 sm:h-3.5" />
-                      <span className="font-semibold text-[10px] sm:text-xs">{status.label}</span>
-                    </Badge>
-                  </div>
+            {user?.phoneNumber && (
+              <button
+                onClick={handlePhoneClick}
+                className="flex items-center gap-2.5 text-sm text-emerald-600 hover:text-emerald-700 transition-colors group w-full"
+              >
+                <div className="w-9 h-9 rounded-full bg-emerald-50 group-hover:bg-emerald-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                  <Phone size={18} className="text-emerald-600" />
                 </div>
+                <span className="font-medium truncate">
+                  {typeof user.phoneNumber === 'number' 
+                    ? user.phoneNumber.toString() 
+                    : user.phoneNumber}
+                </span>
+              </button>
+            )}
+
+            {user?.location && (
+              <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <MapPin size={18} className="text-blue-600" />
+                </div>
+                <span className="truncate">{user.location}</span>
               </div>
+            )}
 
-              {/* Customer Info */}
-              <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
-                  <UserIcon size={14} className="sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-600">{t("provider.ordered_by")}</span>
-                  <span className="font-semibold text-gray-900 truncate">
-                    {user?.username || `User ${order.userId}`}
-                  </span>
-                </div>
+            <div className="flex items-center gap-2 text-xs text-gray-600 pt-2 border-t border-gray-200">
+              <Clock size={14} className="text-gray-400" />
+              <span>{t("provider.ordered_on")} {formatDate(order.createdAt)}</span>
+            </div>
+          </div>
 
-                {user?.phoneNumber && (
-                  <button
-                    onClick={handlePhoneClick}
-                    className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base text-emerald-600 hover:text-emerald-700 transition-colors group"
-                  >
-                    <Phone size={14} className="sm:w-4 sm:h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
-                    <span className="font-medium truncate">
-                      {typeof user.phoneNumber === 'number' 
-                        ? user.phoneNumber.toString() 
-                        : user.phoneNumber}
-                    </span>
-                  </button>
-                )}
-
-                {user?.location && (
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base text-gray-600">
-                    <MapPin size={14} className="sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                    <span className="truncate">{user.location}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-gray-600 flex-wrap">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Package size={14} className="sm:w-4 sm:h-4 text-gray-400" />
-                    <span>
-                      <span className="font-semibold text-gray-900">{order.quantity}</span> {order.quantity === 1 ? t("provider.item") : t("provider.items")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Clock size={14} className="sm:w-4 sm:h-4 text-gray-400" />
-                    <span className="text-[10px] sm:text-xs md:text-sm">
-                      <span className="font-medium">{t("provider.ordered_on")}</span> {formatDate(order.createdAt)}
-                    </span>
-                  </div>
-                </div>
+          {/* Expandable Details */}
+          {isExpanded && (
+            <div className="mb-4 pt-4 border-t-2 border-gray-200 space-y-3 bg-gray-50 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("provider.order_number")}</span>
+                <span className="text-sm font-bold text-gray-900">#{order.id}</span>
               </div>
-
-              {/* Expandable Details */}
-              {isExpanded && (
-                <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium text-gray-700">{t("provider.order_number")}</span>
-                    <span className="ml-1">{order.id}</span>
+              {pickupDeadline && (
+                <div className="flex items-start gap-2.5">
+                  <Clock size={18} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("provider.pickup_deadline_label")}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {isPickupToday ? (
+                        <span className="text-amber-600 font-bold">{t("common.today")}</span>
+                      ) : (
+                        <span>{pickupDeadline.date}</span>
+                      )}
+                      {pickupDeadline.time && (
+                        <span className="ml-1">
+                          {pickupDeadline.time.includes(" - ") 
+                            ? `${t("common.between")} ${pickupDeadline.time}` 
+                            : `${t("common.at")} ${pickupDeadline.time}`}
+                        </span>
+                      )}
+                    </p>
                   </div>
-                  {pickupDeadline && (
-                    <div>
-                      <span className="font-medium text-gray-700">{t("provider.pickup_deadline_label")} </span>
-                      <span>
-                        {isPickupToday ? t("common.today") : pickupDeadline.date}
-                        {pickupDeadline.time && (pickupDeadline.time.includes(" - ") 
-                          ? ` ${t("common.between")} ${pickupDeadline.time}` 
-                          : ` ${t("common.at")} ${pickupDeadline.time}`)}
-                      </span>
-                    </div>
-                  )}
-                  {offer?.pickupLocation && (
-                    <div className="flex items-start gap-1.5 sm:gap-2">
-                      <MapPin size={14} className="sm:w-4 sm:h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-medium text-gray-700">{t("provider.pickup_location_label")} </span>
-                        <span>{offer.pickupLocation}</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
-
-              {/* Actions */}
-              <div className="flex items-center justify-between gap-2 sm:gap-3 mt-3 sm:mt-4">
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="flex items-center gap-1 text-xs sm:text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
-                >
-                  {isExpanded ? (
-                    <>
-                      <ChevronUp size={14} className="sm:w-4 sm:h-4" />
-                      <span>{t("provider.show_less")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={14} className="sm:w-4 sm:h-4" />
-                      <span>{t("provider.show_details")}</span>
-                    </>
-                  )}
-                </button>
-
-                {order.status === "pending" && onScanClick && (
-                  <Button
-                    onClick={onScanClick}
-                    size="sm"
-                    className="gap-1.5 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm"
-                  >
-                    <QrCode size={14} className="sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{t("provider.scan_qr")}</span>
-                    <span className="sm:hidden">{t("provider.scan_mobile")}</span>
-                  </Button>
-                )}
-              </div>
+              {offer?.pickupLocation && (
+                <div className="flex items-start gap-2.5">
+                  <MapPin size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{t("provider.pickup_location_label")}</p>
+                    <p className="text-sm font-medium text-gray-900">{offer.pickupLocation}</p>
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+
+          {/* Actions - Pushed to bottom */}
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-200 mt-auto">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-emerald-50"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp size={16} />
+                  <span>{t("provider.show_less")}</span>
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={16} />
+                  <span>{t("provider.show_details")}</span>
+                </>
+              )}
+            </button>
+
+            {order.status === "pending" && onScanClick && (
+              <Button
+                onClick={onScanClick}
+                size="sm"
+                className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-5 py-2 font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                <QrCode size={16} />
+                <span>{t("provider.scan_qr")}</span>
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

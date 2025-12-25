@@ -73,17 +73,70 @@ const Home = () => {
 
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/reverse-geocode?lat=${latitude}&lon=${longitude}`,
-        { headers }
+        { 
+          headers,
+          timeout: 10000, // 10 second timeout
+        }
       );
       
+      console.log('Reverse geocode response:', response.data);
+      
+      // Handle different response structures
+      let city = 'Unknown';
+      let state = 'Unknown';
+      
+      // Try direct city/state properties first
+      if (response.data?.city) {
+        city = response.data.city;
+      }
+      if (response.data?.state) {
+        state = response.data.state;
+      }
+      
+      // If we have locationName, try to parse it
+      if ((city === 'Unknown' || state === 'Unknown') && response.data?.locationName) {
+        const locationParts = response.data.locationName.split(',').map((part: string) => part.trim());
+        if (locationParts.length >= 1 && city === 'Unknown') {
+          city = locationParts[0];
+        }
+        if (locationParts.length >= 2 && state === 'Unknown') {
+          state = locationParts[1];
+        }
+      }
+      
+      console.log('Parsed location:', { city, state });
+      
+      // Return the location data
       return {
-        city: response.data.city || 'Unknown',
-        state: response.data.state || 'Unknown',
+        city: city || 'Unknown',
+        state: state || 'Unknown',
         latitude,
         longitude,
       };
     } catch (error: any) {
       console.error("Reverse geocoding error:", error);
+      
+      // Check for network/CORS errors
+      const isNetworkError = 
+        error?.code === 'ECONNABORTED' || // Timeout
+        error?.code === 'ERR_NETWORK' || // Network error
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('NetworkError') ||
+        error?.message?.includes('CORS') ||
+        error?.response?.status === 502 ||
+        error?.response?.status === 503 ||
+        error?.response?.status === 504;
+      
+      // Log network errors for debugging
+      if (isNetworkError || (error?.response?.status >= 500)) {
+        console.warn(
+          "Location extraction failed:",
+          isNetworkError 
+            ? "Network error - please check your connection"
+            : "Server error - please try again later"
+        );
+      }
+      
       // Return Unknown instead of lat/lng so it doesn't display coordinates
       return {
         city: 'Unknown',
@@ -148,24 +201,35 @@ const Home = () => {
           const location = await reverseGeocode(latitude, longitude);
           
           if (isMountedRef.current) {
-            // Only save if we got a valid location (not Unknown)
+            // Always set location data, even if geocoding returned Unknown
+            // This allows the UI to show that location was attempted
+            setLocationData(location);
+            
+            // Only save to cache if we got a valid location (not Unknown)
             if (location.city !== 'Unknown' && location.state !== 'Unknown') {
               // Add timestamp for cache validation
               const locationWithTimestamp = { ...location, timestamp: Date.now() };
-              setLocationData(location);
               setLocationPermission('granted');
               localStorage.setItem('userLocation', JSON.stringify(locationWithTimestamp));
               // Clear the unavailable flag if location was successfully obtained
               localStorage.removeItem('locationUnavailable');
             } else {
-              // If geocoding failed, don't save Unknown location
+              // If geocoding failed, still show location was attempted but mark as denied
               setLocationPermission('denied');
+              // Don't save Unknown location to cache
             }
           }
         } catch (error) {
           console.error("Error getting location:", error);
           if (isMountedRef.current) {
             setLocationPermission('denied');
+            // Set location data with Unknown so UI can show something
+            setLocationData({
+              city: 'Unknown',
+              state: 'Unknown',
+              latitude: undefined,
+              longitude: undefined,
+            });
           }
         } finally {
           if (isMountedRef.current) {
@@ -440,6 +504,8 @@ const Home = () => {
                   <span className="font-bold text-foreground">
                     {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' 
                       ? `${locationData.city}, ${locationData.state}`
+                      : locationData.latitude && locationData.longitude
+                      ? `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`
                       : t("home.getLocation") || "Get Location"}
                   </span>
                   {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' && (
