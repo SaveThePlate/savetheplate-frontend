@@ -301,7 +301,11 @@
   },
   "client": {
     "home": {
-      "fetch_offers_failed": "Failed to fetch offers. Please try again later."
+      "fetch_offers_failed": "Failed to fetch offers. Please try again later.",
+      "pickup_reminder_title": "Don't forget to pick up your order!",
+      "pickup_reminder_message": "You have {count} pending order{plural} waiting for pickup.",
+      "pickup_reminder_message_singular": "You have 1 pending order waiting for pickup.",
+      "view_orders": "View Orders"
     },
     "offers": {
       "detail": {

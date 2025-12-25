@@ -5,7 +5,7 @@ import Offers from "@/components/Offers";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Loader2, Search, MapPin, ChevronRight, X, Utensils, Croissant, ShoppingCart, Package } from "lucide-react";
+import { Loader2, Search, MapPin, ChevronRight, X, Utensils, Croissant, ShoppingCart, Package, Clock, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { ClientOfferCard } from "@/components/offerCard/ClientOfferCard";
@@ -52,6 +52,7 @@ const Home = () => {
   const [error, setError] = useState<string | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [userId, setUserId] = useState<number | null>(null);
   const [locationData, setLocationData] = useState<LocationData | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | null>(null);
@@ -263,15 +264,21 @@ const Home = () => {
       }
 
       const headers = { Authorization: `Bearer ${token}` };
-      let userId: string | undefined;
+      let currentUserId: string | undefined;
       try {
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        userId = tokenPayload?.id;
+        currentUserId = tokenPayload?.id;
+        if (isMountedRef.current) {
+          setUserId(Number(currentUserId));
+        }
       } catch (error) {
         console.error("Error parsing token:", error);
         try {
           const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
-          userId = userResponse.data?.id;
+          currentUserId = userResponse.data?.id;
+          if (isMountedRef.current) {
+            setUserId(Number(currentUserId));
+          }
         } catch (apiError) {
           console.error("Error fetching user info:", apiError);
         }
@@ -290,7 +297,7 @@ const Home = () => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
         }),
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}?t=${timestamp}`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${currentUserId}?t=${timestamp}`, { headers }),
       ]);
 
       if (!isMountedRef.current) return;
@@ -484,6 +491,36 @@ const Home = () => {
           )}
         </div>
       </header>
+
+      {/* Pickup Reminder Banner */}
+      {pendingCount > 0 && (
+        <div className="px-4 pt-4">
+          <Link
+            href={userId ? `/client/orders/${userId}` : "/client/orders"}
+            className="block bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-6 h-6 text-amber-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-lg text-amber-900 mb-1">
+                  {t("client.home.pickup_reminder_title") || "Don't forget to pick up your order!"}
+                </h3>
+                <p className="text-sm text-amber-800 mb-3">
+                  {pendingCount === 1
+                    ? t("client.home.pickup_reminder_message_singular") || "You have 1 pending order waiting for pickup."
+                    : t("client.home.pickup_reminder_message", { count: pendingCount, plural: "s" }) || `You have ${pendingCount} pending orders waiting for pickup.`}
+                </p>
+                <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
+                  <span>{t("client.home.view_orders") || "View Orders"}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
 
       <main className="space-y-8 pt-6">
         {/* Search Results */}

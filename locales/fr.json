@@ -301,7 +301,11 @@
   },
   "client": {
     "home": {
-      "fetch_offers_failed": "Échec du chargement des offres. Veuillez réessayer plus tard."
+      "fetch_offers_failed": "Échec du chargement des offres. Veuillez réessayer plus tard.",
+      "pickup_reminder_title": "N'oubliez pas de récupérer votre commande !",
+      "pickup_reminder_message": "Vous avez {count} commande{plural} en attente à récupérer.",
+      "pickup_reminder_message_singular": "Vous avez 1 commande en attente à récupérer.",
+      "view_orders": "Voir les Commandes"
     },
     "offers": {
       "detail": {
