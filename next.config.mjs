@@ -48,8 +48,13 @@ const nextConfig = {
       },
       // Production backend
       { 
+        protocol: 'http', 
+        hostname: 'savetheplate.tn', 
+        pathname: '/storage/**' 
+      },
+      { 
         protocol: 'https', 
-        hostname: 'leftover-be.ccdev.space', 
+        hostname: 'savetheplate.tn', 
         pathname: '/storage/**' 
       },
       // Facebook CDN for profile images
@@ -113,7 +118,7 @@ const nextConfig = {
   },
 
   async headers() {
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://leftover-be.ccdev.space').replace(/\/$/, '');
+    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://savetheplate.tn').replace(/\/$/, '');
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",

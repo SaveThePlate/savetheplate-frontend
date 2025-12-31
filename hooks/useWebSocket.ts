@@ -52,7 +52,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         
         if (!isMountedRef.current) return;
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://savetheplate.tn";
         // Socket.IO client automatically handles protocol conversion (http -> ws, https -> wss)
         // Use the full backend URL and explicitly set the path to match the server configuration
         const wsUrl = backendUrl.replace(/\/$/, ""); // Remove trailing slash if present

@@ -14,7 +14,7 @@ const getaccessToken = () => {
 // Use direct backend URL (CORS is configured on backend)
 const getBaseUrl = () => {
   // Use direct backend URL for both browser and server
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "https://leftover-be.ccdev.space";
+  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://savetheplate.tn";
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
