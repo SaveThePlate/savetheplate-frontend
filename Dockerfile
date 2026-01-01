@@ -38,10 +38,9 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY .env.${APP_ENVIRONMENT} .env
-
-RUN rm .env.local
-RUN rm .env.staging
+# Copy environment file if it exists, otherwise it will be provided at runtime
+# Note: For production, .env files should be provided at runtime via volume mount
+RUN if [ -f .env.${APP_ENVIRONMENT} ]; then cp .env.${APP_ENVIRONMENT} .env; fi || true
 
 # RUN npm install sharp
 # RUN npm install --platform=linux --arch=armv6 --verbose sharp
