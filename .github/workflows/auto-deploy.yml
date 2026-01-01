@@ -1,4 +1,4 @@
-name: 🚀 Auto Deploy Frontend (Git Pull)
+name: 🚀 Auto Deploy Frontend (Docker Hub)
 
 on:
   push:
@@ -7,11 +7,35 @@ on:
       - 'master'
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: savetheplate-frontend
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
-    name: 🚀 Deploy Frontend to Server
+    name: 🏗️ Build and Deploy Frontend
     steps:
+      - name: 🧪 Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🏗️ Build Docker image
+        working-directory: ./leftover-frontend
+        run: |
+          docker build --build-arg ENVIRONMENT=production -t ${DOCKER_USERNAME}/${IMAGE_NAME}:latest --target runner .
+          docker tag ${DOCKER_USERNAME}/${IMAGE_NAME}:latest ${DOCKER_USERNAME}/${IMAGE_NAME}:${{ github.sha }}
+
+      - name: 📤 Push to Docker Hub
+        run: |
+          docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:latest
+          docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${{ github.sha }}
+
       - name: 🚀 Deploy to production server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -23,51 +47,28 @@ jobs:
           command_timeout: 10m
           script: |
             set -e
-            echo "📥 Pulling latest frontend changes from git..."
+            echo "🐳 Pulling latest Docker image from Docker Hub..."
             
-            # Navigate to frontend directory on server
-            cd /var/www/save-the-plate/frontend || exit 1
+            # Login to Docker Hub
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             
-            # Pull latest changes
-            git fetch origin
-            git reset --hard origin/main || git reset --hard origin/master
-            git pull origin main || git pull origin master
+            # Pull latest image
+            docker pull ${DOCKER_USERNAME}/${IMAGE_NAME}:latest
             
-            echo "✅ Git pull completed!"
+            echo "🛑 Stopping old container..."
+            docker stop ${IMAGE_NAME} 2>/dev/null || true
+            docker rm ${IMAGE_NAME} 2>/dev/null || true
             
-            # Install dependencies if needed
-            if [ -f "package.json" ]; then
-              echo "📦 Installing dependencies..."
-              npm install --production || yarn install --production || true
-            fi
+            echo "🚀 Starting new container..."
+            docker run -d \
+              --name ${IMAGE_NAME} \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              ${DOCKER_USERNAME}/${IMAGE_NAME}:latest
             
-            # Build if needed (Next.js, React, etc.)
-            if [ -f "package.json" ] && grep -q '"build"' package.json; then
-              echo "🏗️ Building frontend..."
-              npm run build || yarn build || true
-            fi
-            
-            # If using Docker Compose, restart frontend service
-            if [ -f "/var/www/save-the-plate/docker-compose.yml" ] || [ -f "/var/www/save-the-plate/docker-compose.yaml" ]; then
-              echo "🐳 Restarting Docker containers..."
-              cd /var/www/save-the-plate
-              docker-compose restart frontend || docker-compose up -d frontend || true
-              cd frontend
-            fi
-            
-            # If using PM2, restart frontend service
-            if command -v pm2 &> /dev/null; then
-              echo "🔄 Restarting PM2 frontend service..."
-              pm2 restart frontend || pm2 restart savetheplate-frontend || pm2 restart all || true
-              echo "✅ PM2 service restarted!"
-            fi
-            
-            # If using Docker directly, restart container
-            if docker ps -a | grep -q "savetheplate-frontend\|leftover-frontend"; then
-              echo "🐳 Restarting Docker container..."
-              docker restart savetheplate-frontend 2>/dev/null || \
-              docker restart leftover-frontend 2>/dev/null || true
-            fi
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
             
             echo "✅ Frontend deployment complete!"
+            docker ps | grep ${IMAGE_NAME} || echo "⚠️  Container may not be running"
 
