@@ -41,9 +41,12 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy environment file if it exists, otherwise it will be provided at runtime
-# Note: For production, .env files should be provided at runtime via volume mount
-RUN if [ -f .env.${APP_ENVIRONMENT} ]; then cp .env.${APP_ENVIRONMENT} .env; fi || true
+# Security: Do NOT copy .env files into the image
+# Environment variables should be provided at runtime via:
+# - docker run --env-file .env
+# - docker-compose environment variables
+# - Kubernetes secrets/configmaps
+# Note: .dockerignore should prevent .env files from being copied, but we explicitly avoid copying them here
 
 # Rendre post-build.sh exécutable
 RUN chmod +x post-build.sh
