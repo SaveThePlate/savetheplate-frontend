@@ -14,7 +14,11 @@ const getaccessToken = () => {
 // Use direct backend URL (CORS is configured on backend)
 const getBaseUrl = () => {
   // Use direct backend URL for both browser and server
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://savetheplate.tn";
+  // Default to HTTPS in production to avoid browser security warnings
+  const defaultUrl = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    ? "https://savetheplate.tn"
+    : process.env.NEXT_PUBLIC_BACKEND_URL || "https://savetheplate.tn";
+  return defaultUrl;
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export

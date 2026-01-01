@@ -5,8 +5,24 @@ import axios from "axios";
  * This prevents conflicts with other libraries that might set global tokens
  */
 const createAxiosInstance = () => {
+  // Get backend URL, defaulting to HTTPS in production
+  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+  
+  // If no URL is set, use HTTPS for production
+  if (!backendUrl && typeof window !== 'undefined') {
+    // In browser, use current protocol to match the page
+    const protocol = window.location.protocol === 'https:' ? 'https:' : 'https:';
+    backendUrl = `${protocol}//savetheplate.tn`;
+  } else if (!backendUrl) {
+    // Server-side default to HTTPS
+    backendUrl = "https://savetheplate.tn";
+  }
+  
+  // Ensure URL doesn't end with slash
+  backendUrl = backendUrl.replace(/\/$/, "");
+  
   const instance = axios.create({
-    baseURL: (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, ""),
+    baseURL: backendUrl,
     headers: { "Content-Type": "application/json" },
   });
 

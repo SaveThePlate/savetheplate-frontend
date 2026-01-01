@@ -118,7 +118,7 @@ const nextConfig = {
   },
 
   async headers() {
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://savetheplate.tn').replace(/\/$/, '');
+    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://savetheplate.tn').replace(/\/$/, '');
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",

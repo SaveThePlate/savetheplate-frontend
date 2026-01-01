@@ -87,8 +87,8 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
         {/* Resource hints for performance */}
-        <link rel="preconnect" href={process.env.NEXT_PUBLIC_BACKEND_URL || "http://savetheplate.tn"} />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BACKEND_URL || "http://savetheplate.tn"} />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://savetheplate.tn"} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BACKEND_URL || "https://savetheplate.tn"} />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://connect.facebook.net" />
