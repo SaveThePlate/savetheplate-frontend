@@ -117,7 +117,12 @@
     "google_error": "La connexion Google a été annulée ou a échoué. Veuillez réessayer.",
     "facebook_sign_in": "Se connecter avec Facebook",
     "facebook_signing_in": "Connexion avec Facebook...",
-    "facebook_error": "La connexion Facebook a été annulée ou a échoué. Veuillez réessayer."
+    "facebook_error": "La connexion Facebook a été annulée ou a échoué. Veuillez réessayer.",
+    "error_invalid_credentials": "Email ou mot de passe invalide. Veuillez vérifier vos identifiants et réessayer.",
+    "error_signup_failed": "Impossible de créer le compte. Veuillez vérifier vos informations et réessayer.",
+    "error_account_exists": "Un compte avec cet email existe déjà. Veuillez vous connecter à la place.",
+    "error_verify_code": "Code de vérification invalide. Veuillez vérifier et réessayer.",
+    "error_resend_code": "Échec de l'envoi du code de vérification. Veuillez réessayer."
   },
   "home": {
     "pending_orders_single": "Vous avez {count} commande en attente.",
@@ -1149,5 +1154,27 @@
     "login_link_sent": "Nous vous avons envoyé un lien de connexion. N'oubliez pas de vérifier vos spams également.",
     "error": "Erreur",
     "error_generic": "Une erreur s'est produite, veuillez réessayer."
+  },
+  "errors": {
+    "invalid_request": "Requête invalide. Veuillez vérifier votre saisie et réessayer.",
+    "session_expired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "no_permission": "Vous n'avez pas la permission de {action}.",
+    "item_not_found": "L'élément demandé n'a pas été trouvé.",
+    "conflict": "Cette action entre en conflit avec les données actuelles. Veuillez actualiser et réessayer.",
+    "invalid_data": "Données invalides. Veuillez vérifier votre saisie.",
+    "too_many_requests": "Trop de requêtes. Veuillez attendre un moment et réessayer.",
+    "server_error": "Erreur du serveur. Veuillez réessayer dans un instant.",
+    "server_unavailable": "Le serveur est temporairement indisponible. Veuillez réessayer plus tard.",
+    "request_timeout": "La requête a expiré. Veuillez réessayer.",
+    "network_error": "Impossible de se connecter au serveur. Veuillez vérifier votre connexion Internet et réessayer.",
+    "connection_error": "Erreur de connexion. Veuillez réessayer plus tard.",
+    "unable_to_action": "Impossible de {action}. Veuillez réessayer plus tard.",
+    "unable_to_load": "Impossible de charger {resource}. Veuillez réessayer plus tard.",
+    "unable_to_create": "Impossible de créer {resource}. Veuillez vérifier votre saisie et réessayer.",
+    "unable_to_update": "Impossible de mettre à jour {resource}. Veuillez réessayer.",
+    "unable_to_delete": "Impossible de supprimer {resource}. Veuillez réessayer.",
+    "unable_to_upload": "Impossible de télécharger {resource}. Veuillez vérifier le fichier et réessayer.",
+    "unable_to_order": "Impossible de passer la commande. Veuillez réessayer.",
+    "unable_to_cancel": "Impossible d'annuler. Veuillez réessayer."
   }
 }

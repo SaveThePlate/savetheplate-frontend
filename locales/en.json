@@ -117,7 +117,12 @@
     "google_error": "Google sign-in was cancelled or failed. Please try again.",
     "facebook_sign_in": "Sign in with Facebook",
     "facebook_signing_in": "Signing in with Facebook...",
-    "facebook_error": "Facebook sign-in was cancelled or failed. Please try again."
+    "facebook_error": "Facebook sign-in was cancelled or failed. Please try again.",
+    "error_invalid_credentials": "Invalid email or password. Please check your credentials and try again.",
+    "error_signup_failed": "Unable to create account. Please check your information and try again.",
+    "error_account_exists": "An account with this email already exists. Please sign in instead.",
+    "error_verify_code": "Invalid verification code. Please check and try again.",
+    "error_resend_code": "Failed to resend verification code. Please try again."
   },
   "home": {
     "pending_orders_single": "You have {count} pending order.",
@@ -1139,5 +1144,27 @@
     "login_link_sent": "We sent you a login link. Be sure to check your spam too.",
     "error": "Error",
     "error_generic": "There was an error, please try again."
+  },
+  "errors": {
+    "invalid_request": "Invalid request. Please check your input and try again.",
+    "session_expired": "Your session has expired. Please sign in again.",
+    "no_permission": "You don't have permission to {action}.",
+    "item_not_found": "The requested item was not found.",
+    "conflict": "This action conflicts with current data. Please refresh and try again.",
+    "invalid_data": "Invalid data provided. Please check your input.",
+    "too_many_requests": "Too many requests. Please wait a moment and try again.",
+    "server_error": "Server error. Please try again in a moment.",
+    "server_unavailable": "Server is temporarily unavailable. Please try again later.",
+    "request_timeout": "Request timed out. Please try again.",
+    "network_error": "Unable to connect to the server. Please check your internet connection and try again.",
+    "connection_error": "Connection error. Please try again later.",
+    "unable_to_action": "Unable to {action}. Please try again later.",
+    "unable_to_load": "Unable to load {resource}. Please try again later.",
+    "unable_to_create": "Unable to create {resource}. Please check your input and try again.",
+    "unable_to_update": "Unable to update {resource}. Please try again.",
+    "unable_to_delete": "Unable to delete {resource}. Please try again.",
+    "unable_to_upload": "Unable to upload {resource}. Please check the file and try again.",
+    "unable_to_order": "Unable to place order. Please try again.",
+    "unable_to_cancel": "Unable to cancel. Please try again."
   }
 }

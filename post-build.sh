@@ -17,11 +17,26 @@ if [ -d "public" ] && [ -d ".next/standalone" ]; then
 fi
 
 # Installer sharp dans standalone (requis pour l'optimisation d'images)
+# Note: Avec unoptimized: true dans next.config.mjs, sharp n'est pas strictement nécessaire
+# mais on l'installe quand même pour éviter les warnings
 if [ -d ".next/standalone" ]; then
+    echo "Installation de sharp dans standalone..."
     cd .next/standalone
-    npm install sharp --legacy-peer-deps --no-save 2>/dev/null
+    
+    # Essayer d'installer sharp avec différentes méthodes
+    if npm install sharp --legacy-peer-deps --no-save --force 2>&1 | tee /tmp/sharp-install.log; then
+        echo "✓ Sharp installé avec succès dans standalone"
+    else
+        echo "⚠ Échec de l'installation de sharp (non critique si unoptimized: true)"
+        # Vérifier si sharp existe déjà dans node_modules parent
+        if [ -d "../../node_modules/sharp" ]; then
+            echo "Tentative de copie de sharp depuis node_modules parent..."
+            mkdir -p node_modules
+            cp -r ../../node_modules/sharp node_modules/ 2>/dev/null && echo "✓ Sharp copié depuis node_modules parent" || echo "⚠ Échec de la copie"
+        fi
+    fi
+    
     cd ../..
-    echo "✓ Sharp installé dans standalone"
 fi
 
 echo "✓ Post-build terminé"

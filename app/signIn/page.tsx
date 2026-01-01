@@ -255,15 +255,39 @@ export default function SignIn() {
     } catch (err: any) {
       console.error("Authentication error:", err);
       
+      // Determine if this is a sign-in or sign-up error
+      const isSignInError = !isSignUp;
+      
       // Use sanitizeErrorMessage for user-friendly messages
       let userMessage = sanitizeErrorMessage(err, {
         action: isSignUp ? "sign up" : "sign in",
-        defaultMessage: "Unable to sign in. Please check your credentials and try again."
+        defaultMessage: isSignInError 
+          ? t("signin.error_invalid_credentials") || "Invalid email or password. Please check your credentials and try again."
+          : t("signin.error_signup_failed") || "Unable to create account. Please check your information and try again.",
+        t: t
       });
       
-      // Handle 409 Conflict (user already exists) with specific message
-      if (err?.response?.status === 409) {
-        userMessage = "An account with this email already exists. Please sign in instead.";
+      // Handle specific error cases with clearer messages
+      if (err?.response?.status === 404) {
+        // 404 on auth endpoint usually means wrong credentials or endpoint doesn't exist
+        userMessage = t("signin.error_invalid_credentials") || "Invalid email or password. Please check your credentials and try again.";
+      } else if (err?.response?.status === 401) {
+        // 401 means unauthorized - wrong credentials
+        userMessage = t("signin.error_invalid_credentials") || "Invalid email or password. Please check your credentials and try again.";
+      } else if (err?.response?.status === 400) {
+        // 400 could be validation error or wrong credentials
+        const backendMsg = err?.response?.data?.message || err?.response?.data?.error || '';
+        if (backendMsg.toLowerCase().includes('password') || 
+            backendMsg.toLowerCase().includes('credential') ||
+            backendMsg.toLowerCase().includes('invalid')) {
+          userMessage = t("signin.error_invalid_credentials") || "Invalid email or password. Please check your credentials and try again.";
+        } else if (isSignUp && backendMsg) {
+          // For sign-up, show the backend message if it's user-friendly
+          userMessage = backendMsg;
+        }
+      } else if (err?.response?.status === 409) {
+        // 409 Conflict - user already exists
+        userMessage = t("signin.error_account_exists") || "An account with this email already exists. Please sign in instead.";
         // Immediately switch to sign-in mode if user was trying to sign up
         if (isSignUp) {
           setIsSignUp(false);
@@ -376,22 +400,14 @@ export default function SignIn() {
       console.error("Error verifying code:", err);
       console.error("Error response:", err?.response?.data);
       
-      // Extract error message from response
-      let errorMsg = "Invalid verification code. Please check and try again.";
+      // Use sanitizeErrorMessage for user-friendly messages
+      const userMessage = sanitizeErrorMessage(err, {
+        action: "verify email code",
+        defaultMessage: t("signin.error_verify_code") || "Invalid verification code. Please check and try again.",
+        t: t
+      });
       
-      if (err?.response?.data) {
-        if (err.response.data.error) {
-          errorMsg = typeof err.response.data.error === 'string' 
-            ? err.response.data.error 
-            : err.response.data.error.message || errorMsg;
-        } else if (err.response.data.message) {
-          errorMsg = err.response.data.message;
-        }
-      } else if (err?.message) {
-        errorMsg = err.message;
-      }
-      
-      setErrorMessage(errorMsg);
+      setErrorMessage(userMessage);
       setShowErrorToast(true);
     } finally {
       setVerifyingCode(false);
@@ -414,9 +430,13 @@ export default function SignIn() {
       setShowErrorToast(false);
       setErrorMessage("");
     } catch (err: any) {
-      const errorMsg = err?.response?.data?.error || 
-                      "Failed to resend verification code. Please try again.";
-      setErrorMessage(errorMsg);
+      // Use sanitizeErrorMessage for user-friendly messages
+      const userMessage = sanitizeErrorMessage(err, {
+        action: "resend verification code",
+        defaultMessage: t("signin.error_resend_code") || "Failed to resend verification code. Please try again.",
+        t: t
+      });
+      setErrorMessage(userMessage);
       setShowErrorToast(true);
     } finally {
       setLoading(false);
@@ -500,7 +520,8 @@ export default function SignIn() {
       // Use sanitizeErrorMessage for user-friendly messages
       const userMessage = sanitizeErrorMessage(err, {
         action: "sign in with Google",
-        defaultMessage: "Unable to sign in with Google. Please try again."
+        defaultMessage: "Unable to sign in with Google. Please try again.",
+        t: t
       });
       
       setErrorMessage(userMessage);
@@ -738,7 +759,8 @@ export default function SignIn() {
     else {
       const userFriendlyMessage = sanitizeErrorMessage(error, {
         action: "sign in with Facebook",
-        defaultMessage: t("signin.facebook_error") || "Unable to sign in with Facebook. Please try again."
+        defaultMessage: t("signin.facebook_error") || "Unable to sign in with Facebook. Please try again.",
+        t: t
       });
       setErrorMessage(userFriendlyMessage);
     }
@@ -819,7 +841,8 @@ export default function SignIn() {
         // Use sanitizeErrorMessage for user-friendly messages
         const userMessage = sanitizeErrorMessage(err, {
           action: "sign in with Facebook",
-          defaultMessage: "Unable to sign in with Facebook. Please try again."
+          defaultMessage: "Unable to sign in with Facebook. Please try again.",
+          t: t
         });
         
         setErrorMessage(userMessage);
@@ -1149,7 +1172,8 @@ export default function SignIn() {
                       // Use sanitizeErrorMessage for user-friendly messages
                       const userMessage = sanitizeErrorMessage(err, {
                         action: "send magic link",
-                        defaultMessage: "Unable to send magic link. Please check your email and try again."
+                        defaultMessage: "Unable to send magic link. Please check your email and try again.",
+                        t: t
                       });
                       
                       setErrorMessage(userMessage);

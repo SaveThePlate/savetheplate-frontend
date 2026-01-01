@@ -51,22 +51,61 @@ export function sanitizeErrorMessage(
   context: {
     action?: string; // e.g., "fetch offers", "update profile", "create offer"
     defaultMessage?: string;
+    t?: (key: string, params?: Record<string, string>) => string; // Translation function
   } = {}
 ): string {
-  const { action = "perform this action", defaultMessage } = context;
+  const { action = "perform this action", defaultMessage, t } = context;
+  
+  // Helper function to get translated message with fallback
+  const getTranslated = (key: string, params?: Record<string, string>, fallback?: string): string => {
+    if (t) {
+      try {
+        const translated = t(key, params);
+        // If translation returns the key itself (no translation found), use fallback
+        if (translated === key && fallback) {
+          return fallback;
+        }
+        return translated;
+      } catch {
+        return fallback || key;
+      }
+    }
+    return fallback || key;
+  };
   
   // Check for specific HTTP status codes
   if (error?.response?.status) {
     const status = error.response.status;
     
+    // Check if this is an authentication-related action
+    const isAuthAction = action?.toLowerCase().includes('sign in') || 
+                         action?.toLowerCase().includes('sign in') ||
+                         action?.toLowerCase().includes('sign up') ||
+                         action?.toLowerCase().includes('login') ||
+                         action?.toLowerCase().includes('authenticate');
+    
     switch (status) {
       case 400:
-        return `Invalid request. Please check your input and try again.`;
+        // For auth actions, provide more specific message
+        if (isAuthAction) {
+          return getTranslated('signin.error_invalid_credentials', undefined, 'Invalid email or password. Please check your credentials and try again.');
+        }
+        return getTranslated('errors.invalid_request', undefined, 'Invalid request. Please check your input and try again.');
       case 401:
-        return `Your session has expired. Please sign in again.`;
+        // For auth actions, provide more specific message
+        if (isAuthAction) {
+          return getTranslated('signin.error_invalid_credentials', undefined, 'Invalid email or password. Please check your credentials and try again.');
+        }
+        return getTranslated('errors.session_expired', undefined, 'Your session has expired. Please sign in again.');
       case 403:
-        return `You don't have permission to ${action}.`;
+        return getTranslated('errors.no_permission', { action }, `You don't have permission to ${action}.`);
       case 404:
+        // For auth endpoints, 404 means endpoint doesn't exist or user not found
+        // Check if this is an auth-related request
+        const url = error?.config?.url || error?.request?.responseURL || '';
+        if (url.includes('/auth/') || isAuthAction) {
+          return getTranslated('signin.error_invalid_credentials', undefined, 'Invalid email or password. Please check your credentials and try again.');
+        }
         // Try to get more specific error message from backend
         if (error?.response?.data?.message) {
           const backendMsg = error.response.data.message;
@@ -74,20 +113,23 @@ export function sanitizeErrorMessage(
             return backendMsg;
           }
         }
-        return `The requested item was not found.`;
+        return getTranslated('errors.item_not_found', undefined, 'The requested item was not found.');
       case 409:
-        return `This action conflicts with current data. Please refresh and try again.`;
+        return getTranslated('errors.conflict', undefined, 'This action conflicts with current data. Please refresh and try again.');
       case 422:
-        return `Invalid data provided. Please check your input.`;
+        if (isAuthAction) {
+          return getTranslated('signin.error_invalid_credentials', undefined, 'Invalid email or password. Please check your credentials and try again.');
+        }
+        return getTranslated('errors.invalid_data', undefined, 'Invalid data provided. Please check your input.');
       case 429:
-        return `Too many requests. Please wait a moment and try again.`;
+        return getTranslated('errors.too_many_requests', undefined, 'Too many requests. Please wait a moment and try again.');
       case 500:
-        return `Server error. Please try again in a moment.`;
+        return getTranslated('errors.server_error', undefined, 'Server error. Please try again in a moment.');
       case 502:
       case 503:
-        return `Server is temporarily unavailable. Please try again later.`;
+        return getTranslated('errors.server_unavailable', undefined, 'Server is temporarily unavailable. Please try again later.');
       case 504:
-        return `Request timed out. Please try again.`;
+        return getTranslated('errors.request_timeout', undefined, 'Request timed out. Please try again.');
     }
   }
   
@@ -96,13 +138,13 @@ export function sanitizeErrorMessage(
       error?.message?.includes("Failed to fetch") ||
       error?.message?.includes("NetworkError") ||
       error?.message?.includes("Network request failed")) {
-    return `Unable to connect to the server. Please check your internet connection and try again.`;
+    return getTranslated('errors.network_error', undefined, 'Unable to connect to the server. Please check your internet connection and try again.');
   }
   
   // Check for CORS errors
   if (error?.message?.includes("CORS") || 
       error?.message?.includes("Access-Control")) {
-    return `Connection error. Please try again later.`;
+    return getTranslated('errors.connection_error', undefined, 'Connection error. Please try again later.');
   }
   
   // Try to extract user-friendly message from backend
@@ -138,7 +180,7 @@ export function sanitizeErrorMessage(
   }
   
   // Generic fallback based on action
-  return `Unable to ${action}. Please try again later.`;
+  return getTranslated('errors.unable_to_action', { action }, `Unable to ${action}. Please try again later.`);
 }
 
 /**
@@ -146,16 +188,33 @@ export function sanitizeErrorMessage(
  */
 export function getActionErrorMessage(
   action: 'fetch' | 'create' | 'update' | 'delete' | 'upload' | 'order' | 'cancel',
-  resource: string
+  resource: string,
+  t?: (key: string, params?: Record<string, string>) => string
 ): string {
+  // Helper function to get translated message with fallback
+  const getTranslated = (key: string, params?: Record<string, string>, fallback?: string): string => {
+    if (t) {
+      try {
+        const translated = t(key, params);
+        if (translated === key && fallback) {
+          return fallback;
+        }
+        return translated;
+      } catch {
+        return fallback || key;
+      }
+    }
+    return fallback || key;
+  };
+  
   const actionMap = {
-    fetch: `Unable to load ${resource}. Please try again later.`,
-    create: `Unable to create ${resource}. Please check your input and try again.`,
-    update: `Unable to update ${resource}. Please try again.`,
-    delete: `Unable to delete ${resource}. Please try again.`,
-    upload: `Unable to upload ${resource}. Please check the file and try again.`,
-    order: `Unable to place order. Please try again.`,
-    cancel: `Unable to cancel. Please try again.`,
+    fetch: getTranslated('errors.unable_to_load', { resource }, `Unable to load ${resource}. Please try again later.`),
+    create: getTranslated('errors.unable_to_create', { resource }, `Unable to create ${resource}. Please check your input and try again.`),
+    update: getTranslated('errors.unable_to_update', { resource }, `Unable to update ${resource}. Please try again.`),
+    delete: getTranslated('errors.unable_to_delete', { resource }, `Unable to delete ${resource}. Please try again.`),
+    upload: getTranslated('errors.unable_to_upload', { resource }, `Unable to upload ${resource}. Please check the file and try again.`),
+    order: getTranslated('errors.unable_to_order', undefined, 'Unable to place order. Please try again.'),
+    cancel: getTranslated('errors.unable_to_cancel', undefined, 'Unable to cancel. Please try again.'),
   };
   
   return actionMap[action];
