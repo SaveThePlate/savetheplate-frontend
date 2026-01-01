@@ -226,15 +226,21 @@ const OffersPage = () => {
                     return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
                   }
                 } catch {
-                  // If URL parsing fails, try to normalize anyway
-                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                  // If URL parsing fails, try to normalize anyway (support both /store/ and /storage/)
+                  const match = img.absoluteUrl.match(/\/(store\/.+)$/) || img.absoluteUrl.match(/\/(storage\/.+)$/);
                   if (match && backendOrigin) {
-                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                    const path = match[1].replace(/^storage\//, 'store/');
+                    return { ...img, absoluteUrl: `${backendOrigin}/${path}` };
                   }
                 }
               }
               // If it's a relative storage path, prepend current backend
-              else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+              else if (img.absoluteUrl.startsWith("/store/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+              } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                // Legacy support: convert /storage/ to /store/
+                const storePath = img.absoluteUrl.replace("/storage/", "/store/");
+                return { ...img, absoluteUrl: `${backendOrigin}${storePath}` };
                 return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
               }
             }

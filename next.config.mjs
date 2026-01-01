@@ -39,23 +39,23 @@ const nextConfig = {
       { 
         protocol: 'http', 
         hostname: 'localhost',
-        pathname: '/storage/**',
+        pathname: '/store/**',
       },
       { 
         protocol: 'http', 
         hostname: '127.0.0.1',
-        pathname: '/storage/**',
+        pathname: '/store/**',
       },
       // Production backend
       { 
         protocol: 'http', 
         hostname: 'savetheplate.tn', 
-        pathname: '/storage/**' 
+        pathname: '/store/**' 
       },
       { 
         protocol: 'https', 
         hostname: 'savetheplate.tn', 
-        pathname: '/storage/**' 
+        pathname: '/store/**' 
       },
       // Facebook CDN for profile images
       {
@@ -70,12 +70,12 @@ const nextConfig = {
       { 
         protocol: 'http', 
         hostname: '**', 
-        pathname: '/storage/**' 
+        pathname: '/store/**' 
       },
       { 
         protocol: 'https', 
         hostname: '**', 
-        pathname: '/storage/**' 
+        pathname: '/store/**' 
       },
     ],
     unoptimized: true, // Disable optimization if sharp is not available (set to false when sharp is installed)

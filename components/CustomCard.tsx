@@ -204,16 +204,20 @@ const CustomCard: FC<CustomCardProps> = ({
       
       const mapped = data.map((item) => {
         const filename = item.filename || item.path || "";
-        const url = item.url || `/storage/${filename}`;
+        const url = item.url || `/store/${filename}`;
         
         let absoluteUrl = item.absoluteUrl;
         if (!absoluteUrl) {
           if (url.startsWith("http://") || url.startsWith("https://")) {
             absoluteUrl = url;
-          } else if (url.startsWith("/storage/") && backendUrl) {
+          } else if (url.startsWith("/store/") && backendUrl) {
             absoluteUrl = `${backendUrl}${url}`;
+          } else if (url.startsWith("/storage/") && backendUrl) {
+            // Legacy support: convert /storage/ to /store/
+            const storePath = url.replace("/storage/", "/store/");
+            absoluteUrl = `${backendUrl}${storePath}`;
           } else if (backendUrl) {
-            absoluteUrl = `${backendUrl}/storage/${filename}`;
+            absoluteUrl = `${backendUrl}/store/${filename}`;
           } else {
             absoluteUrl = url;
           }
@@ -354,7 +358,7 @@ const CustomCard: FC<CustomCardProps> = ({
           filename: img.filename,
           url: img.url,
           absoluteUrl: img.absoluteUrl,
-          original: img.url.startsWith("/") && !img.url.startsWith("/storage/") 
+          original: img.url.startsWith("/") && !img.url.startsWith("/store/") && !img.url.startsWith("/storage/") 
             ? { url: img.url }
             : undefined,
         }));
@@ -1023,10 +1027,15 @@ const CustomCard: FC<CustomCardProps> = ({
                               // If we have a relative URL, construct absolute URL
                               if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
                                 const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
-                                imageSrc = `${backendUrl}/storage/${imageSrc}`;
-                              } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                                imageSrc = `${backendUrl}/store/${imageSrc}`;
+                              } else if (imageSrc && imageSrc.startsWith("/store/")) {
                                 const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
                                 imageSrc = `${backendUrl}${imageSrc}`;
+                              } else if (imageSrc && imageSrc.startsWith("/storage/")) {
+                                // Legacy support: convert /storage/ to /store/
+                                const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                const storePath = imageSrc.replace("/storage/", "/store/");
+                                imageSrc = `${backendUrl}${storePath}`;
                               }
                               
                               // Add cache buster to ensure fresh image

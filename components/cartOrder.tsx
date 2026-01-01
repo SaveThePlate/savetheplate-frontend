@@ -163,12 +163,19 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
                     return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
                   }
                 } catch {
-                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                  // Support both /store/ and /storage/ for backward compatibility
+                  const match = img.absoluteUrl.match(/\/(store\/.+)$/) || img.absoluteUrl.match(/\/(storage\/.+)$/);
                   if (match && backendOrigin) {
-                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                    const path = match[1].replace(/^storage\//, 'store/');
+                    return { ...img, absoluteUrl: `${backendOrigin}/${path}` };
                   }
                 }
+              } else if (img.absoluteUrl.startsWith("/store/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
               } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                // Legacy support: convert /storage/ to /store/
+                const storePath = img.absoluteUrl.replace("/storage/", "/store/");
+                return { ...img, absoluteUrl: `${backendOrigin}${storePath}` };
                 return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
               }
             }

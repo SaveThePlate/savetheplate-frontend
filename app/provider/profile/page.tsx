@@ -424,7 +424,7 @@ const EditProfileDialog: React.FC<{
 
       const uploaded = data[0];
       
-      // Extract filename - normalize to include /storage/ prefix for backend storage
+      // Extract filename - normalize to include /store/ prefix for backend storage
       let filename = uploaded.filename || uploaded.path || "";
       
       if (!filename) {
@@ -432,14 +432,14 @@ const EditProfileDialog: React.FC<{
         throw new Error("Could not extract filename from upload response");
       }
 
-      // Normalize filename: if it's a bare filename (no leading slash), add /storage/ prefix
+      // Normalize filename: if it's a bare filename (no leading slash), add /store/ prefix
       // This ensures getImage() will correctly resolve it to the backend URL
       if (filename && !filename.startsWith("/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        filename = `/storage/${filename}`;
-      } else if (filename && !filename.startsWith("/storage/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        // If it starts with / but not /storage/, check if it should be /storage/
-        // For backend storage files, we want /storage/ prefix
-        filename = `/storage${filename}`;
+        filename = `/store/${filename}`;
+      } else if (filename && !filename.startsWith("/store/") && !filename.startsWith("/storage/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
+        // If it starts with / but not /store/, check if it should be /store/
+        // For backend storage files, we want /store/ prefix (legacy /storage/ also supported)
+        filename = `/store${filename}`;
       }
 
       console.log("✅ Upload successful! Setting profile image to:", filename);
@@ -613,10 +613,14 @@ const EditProfileDialog: React.FC<{
                     const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
                     if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
                       imageSrc = profileImage;
-                    } else if (profileImage.startsWith("/storage/") && backendUrl) {
+                    } else if (profileImage.startsWith("/store/") && backendUrl) {
                       imageSrc = `${backendUrl}${profileImage}`;
+                    } else if (profileImage.startsWith("/storage/") && backendUrl) {
+                      // Legacy support: convert /storage/ to /store/
+                      const storePath = profileImage.replace("/storage/", "/store/");
+                      imageSrc = `${backendUrl}${storePath}`;
                     } else if (backendUrl) {
-                      imageSrc = `${backendUrl}/storage/${profileImage.replace(/^\/storage\//, '')}`;
+                      imageSrc = `${backendUrl}/store/${profileImage.replace(/^\/store\//, '').replace(/^\/storage\//, '')}`;
                     } else {
                       imageSrc = profileImage;
                     }

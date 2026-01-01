@@ -21,7 +21,7 @@ const getImage = (filename: string | null): string => {
   if (!filename) return DEFAULT_BAG_IMAGE;
   const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
   if (backendUrl) {
-    return `${backendUrl}/storage/${filename}`;
+    return `${backendUrl}/store/${filename}`;
   }
   return DEFAULT_BAG_IMAGE;
 };

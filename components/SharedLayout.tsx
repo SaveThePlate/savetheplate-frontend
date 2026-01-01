@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Home, ShoppingBag, User, LogOut, Menu, X, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -32,8 +32,8 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
           console.warn("Error parsing token:", parseError);
           // Try to get userId from API if token parsing fails
           try {
-            const userResponse = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            const userResponse = await axiosInstance.get(
+              `/users/me`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             if (userResponse.data?.id) {
@@ -45,8 +45,8 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
         }
 
         try {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+          const response = await axiosInstance.get(
+            `/users/get-role`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }

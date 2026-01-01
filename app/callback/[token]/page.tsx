@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { LocalStorage } from "@/lib/utils";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -29,8 +29,8 @@ function AuthCallback() {
         if (accessToken && token.length > 50) {
           // This might be an order QR token, check if user is a provider
           try {
-            const testResponse = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/qr/${token}`,
+            const testResponse = await axiosInstance.get(
+              `/orders/qr/${token}`,
               { headers: { Authorization: `Bearer ${accessToken}` } }
             );
             // If this succeeds, it's an order token and user is logged in as provider
@@ -71,8 +71,8 @@ function AuthCallback() {
           // Check if provider has submitted location details
           // If not, redirect to fillDetails page to complete their information
           try {
-            const userDetails = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            const userDetails = await axiosInstance.get(
+              `/users/me`,
               { headers: { Authorization: `Bearer ${resp.data.accessToken}` } }
             );
             const { phoneNumber, mapsLink } = userDetails.data || {};

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import CarbonFootprint from "@/components/CarbonFootprint";
@@ -35,8 +35,8 @@ const WelcomePage = () => {
       }
 
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        const response = await axiosInstance.get(
+          `/users/get-role`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -48,8 +48,8 @@ const WelcomePage = () => {
           // If they have details, redirect to provider home
           // If not, allow them to stay on landing page (they can navigate to onboarding manually)
           try {
-            const userDetails = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            const userDetails = await axiosInstance.get(
+              `/users/me`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             const { phoneNumber, mapsLink } = userDetails.data || {};

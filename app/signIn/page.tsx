@@ -9,7 +9,6 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import useOpenApiFetch from "@/lib/OpenApiFetch";
 import { AuthToast, ErrorToast } from "@/components/Toasts";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
@@ -53,8 +52,8 @@ export default function SignIn() {
       }
 
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        const response = await axiosInstance.get(
+          `/users/get-role`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -65,8 +64,8 @@ export default function SignIn() {
           // Check if provider has submitted location details
           // If not, redirect to fillDetails page to complete their information
           try {
-            const userDetails = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            const userDetails = await axiosInstance.get(
+              `/users/me`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             const { phoneNumber, mapsLink } = userDetails.data || {};
@@ -130,7 +129,7 @@ export default function SignIn() {
             return;
           }
 
-          const response = await axios.post(
+          const response = await axiosInstance.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
             {
               email,
@@ -170,7 +169,7 @@ export default function SignIn() {
 
             if (role === 'PROVIDER') {
               try {
-                const userDetails = await axios.get(
+                const userDetails = await axiosInstance.get(
                   `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
                   { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
                 );
@@ -203,7 +202,7 @@ export default function SignIn() {
             return;
           }
 
-          const response = await axios.post(
+          const response = await axiosInstance.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`,
             {
               email,
@@ -226,7 +225,7 @@ export default function SignIn() {
 
             if (role === 'PROVIDER') {
               try {
-                const userDetails = await axios.get(
+                const userDetails = await axiosInstance.get(
                   `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
                   { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
                 );
@@ -326,7 +325,7 @@ export default function SignIn() {
         code: codeToSend,
       });
       
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email-code`,
         {
           email: signUpEmail.trim(),
@@ -357,7 +356,7 @@ export default function SignIn() {
 
         // Fetch user details to get role
         try {
-          const userDetails = await axios.get(
+          const userDetails = await axiosInstance.get(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -417,7 +416,7 @@ export default function SignIn() {
   async function handleResendCode() {
     try {
       setLoading(true);
-      await axios.post(
+      await axiosInstance.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/send-verification-email`,
         { email: signUpEmail },
         {
@@ -455,7 +454,7 @@ export default function SignIn() {
       }
 
       // Send Google credential to backend
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`,
         {
           credential: credentialResponse.credential,
@@ -482,7 +481,7 @@ export default function SignIn() {
         if (role === 'PROVIDER') {
           // Check if provider has submitted location details
           try {
-            const userDetails = await axios.get(
+            const userDetails = await axiosInstance.get(
               `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
               { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
             );
@@ -776,7 +775,7 @@ export default function SignIn() {
       // Send Facebook access token to backend
       // Use axios directly (not axiosInstance) since we're authenticating - no token needed
       try {
-        const backendResponse = await axios.post(
+        const backendResponse = await axiosInstance.post(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/facebook`,
           {
             accessToken: accessToken,
@@ -804,7 +803,7 @@ export default function SignIn() {
           // If user has a valid role, determine redirect
           if (role === 'PROVIDER') {
             try {
-              const userDetails = await axios.get(
+              const userDetails = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
                 { headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` } }
               );

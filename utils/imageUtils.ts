@@ -59,12 +59,12 @@ export const shouldUnoptimizeImage = (url: string | null | undefined): boolean =
   
   // All backend storage images should be unoptimized to avoid upstream fetch issues
   // Check this FIRST before other checks to ensure we catch all storage URLs
-  if (url.includes('/storage/')) {
+  if (url.includes('/store/')) {
     return true;
   }
   
-  // Public assets (starting with / and not /storage/) can be optimized
-  if (url.startsWith('/') && !url.startsWith('/storage/')) {
+  // Public assets (starting with / and not /store/) can be optimized
+  if (url.startsWith('/') && !url.startsWith('/store/')) {
     return false;
   }
   
@@ -153,7 +153,7 @@ export const resolveImageSource = (imageSource: ImageSource | string | null | un
  * Resolves a filename/URL to a usable image path
  * Handles:
  * - Full URLs (http/https) - normalize to current environment's backend URL
- * - Backend storage paths (/storage/...) - prepend current backend URL
+ * - Backend storage paths (/store/...) - prepend current backend URL
  * - Frontend public assets (/) - return as-is
  * - Bare filenames - use current backend storage
  */
@@ -173,17 +173,17 @@ export const getImage = (filename?: string | null): string => {
         const correctedHost = urlHost.replace('.spacestorage', '.space');
         const pathname = urlObj.pathname;
         
-        // If pathname already has /storage/, just fix the host
-        if (pathname && pathname.startsWith('/storage/')) {
+        // If pathname already has /store/, just fix the host
+        if (pathname && pathname.startsWith('/store/')) {
           return `https://${correctedHost}${pathname}`;
         }
         
-        // Extract filename from pathname (handles both /filename.png and /storage/filename.png)
+        // Extract filename from pathname (handles both /filename.png and /store/filename.png)
         const pathParts = pathname ? pathname.split('/').filter(p => p) : [];
         if (pathParts.length > 0) {
           const filenameFromPath = pathParts[pathParts.length - 1];
-          // Ensure /storage/ prefix is added
-          return `https://${correctedHost}/storage/${filenameFromPath}`;
+          // Ensure /store/ prefix is added
+          return `https://${correctedHost}/store/${filenameFromPath}`;
         }
         
         // If we can't extract filename, fall back to default image
@@ -211,19 +211,22 @@ export const getImage = (filename?: string | null): string => {
       }
       
       // Same backend or localhost - normalize to current backend URL
-      const urlMatch = filename.match(/\/(storage\/.+)$/);
+      // Support both /storage/ (legacy) and /store/ (new) for backward compatibility
+      const urlMatch = filename.match(/\/(store\/.+)$/) || filename.match(/\/(storage\/.+)$/);
       if (urlMatch && currentBackendUrl) {
-        return `${currentBackendUrl}${urlMatch[1]}`;
+        // Convert /storage/ to /store/ if needed
+        const path = urlMatch[1].replace(/^storage\//, 'store/');
+        return `${currentBackendUrl}/${path}`;
       }
       
-      // If URL doesn't have /storage/ but is from the backend, try to extract filename
+      // If URL doesn't have /store/ but is from the backend, try to extract filename
       if (currentBackendHost && urlHost === currentBackendHost) {
         const pathname = urlObj.pathname;
-        if (pathname && !pathname.startsWith('/storage/')) {
-          // Extract filename and add /storage/ prefix
+        if (pathname && !pathname.startsWith('/store/') && !pathname.startsWith('/storage/')) {
+          // Extract filename and add /store/ prefix
           const filenameFromPath = pathname.split('/').pop();
           if (filenameFromPath) {
-            return `${currentBackendUrl}/storage/${filenameFromPath}`;
+            return `${currentBackendUrl}/store/${filenameFromPath}`;
           }
         }
       }
@@ -232,19 +235,23 @@ export const getImage = (filename?: string | null): string => {
       // Also check for malformed .spacestorage domain
       if (filename.includes('.spacestorage')) {
         const corrected = filename.replace('.spacestorage', '.space');
-        const urlMatch = corrected.match(/\/(storage\/.+)$/);
+        // Support both /store/ and /storage/ for backward compatibility
+        const urlMatch = corrected.match(/\/(store\/.+)$/) || corrected.match(/\/(storage\/.+)$/);
         if (urlMatch && currentBackendUrl) {
-          return `${currentBackendUrl}${urlMatch[1]}`;
+          const path = urlMatch[1].replace(/^storage\//, 'store/');
+          return `${currentBackendUrl}/${path}`;
         }
         // Try to extract filename from the corrected URL
         const filenameMatch = corrected.match(/\/([^\/]+\.(png|jpg|jpeg|gif|webp|svg))$/i);
         if (filenameMatch && currentBackendUrl) {
-          return `${currentBackendUrl}/storage/${filenameMatch[1]}`;
+          return `${currentBackendUrl}/store/${filenameMatch[1]}`;
         }
       }
-      const urlMatch = filename.match(/\/(storage\/.+)$/);
+      // Support both /store/ and /storage/ for backward compatibility
+      const urlMatch = filename.match(/\/(store\/.+)$/) || filename.match(/\/(storage\/.+)$/);
       if (urlMatch && currentBackendUrl) {
-        return `${currentBackendUrl}${urlMatch[1]}`;
+        const path = urlMatch[1].replace(/^storage\//, 'store/');
+        return `${currentBackendUrl}/${path}`;
       }
     }
     // If we can't extract storage path, return as-is
@@ -252,18 +259,24 @@ export const getImage = (filename?: string | null): string => {
   }
 
   // Backend storage path - prepend current backend origin
-  if (filename.startsWith("/storage/")) {
+  // Support both /store/ (new) and /storage/ (legacy) for backward compatibility
+  if (filename.startsWith("/store/")) {
     return currentBackendUrl ? `${currentBackendUrl}${filename}` : filename;
   }
+  if (filename.startsWith("/storage/")) {
+    // Convert legacy /storage/ to /store/
+    const storePath = filename.replace("/storage/", "/store/");
+    return currentBackendUrl ? `${currentBackendUrl}${storePath}` : storePath;
+  }
 
-  // Frontend public asset (leading slash, not /storage/) - return as-is
+  // Frontend public asset (leading slash, not /store/ or /storage/) - return as-is
   if (filename.startsWith("/")) {
     return filename;
   }
 
   // Bare filename - use current backend storage
   if (currentBackendUrl) {
-    return `${currentBackendUrl}/storage/${filename}`;
+    return `${currentBackendUrl}/store/${filename}`;
   }
   
   // Fallback to public folder if no backend URL
@@ -289,8 +302,13 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
     let extractedFilename: string | null = null;
     
     // Try to extract filename from various URL formats
-    if (resolved.includes("/storage/")) {
+    // Support both /store/ and /storage/ for backward compatibility
+    if (resolved.includes("/store/")) {
+      extractedFilename = resolved.split("/store/").pop() || null;
+    } else if (resolved.includes("/storage/")) {
       extractedFilename = resolved.split("/storage/").pop() || null;
+    } else if (imageSource.includes("/store/")) {
+      extractedFilename = imageSource.split("/store/").pop() || null;
     } else if (imageSource.includes("/storage/")) {
       extractedFilename = imageSource.split("/storage/").pop() || null;
     } else if (!imageSource.startsWith("/") && !/^https?:\/\//i.test(imageSource)) {
@@ -302,7 +320,7 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
       const currentBackendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       // Try current backend storage
       if (currentBackendUrl) {
-        fallbacks.push(`${currentBackendUrl}/storage/${extractedFilename}`);
+        fallbacks.push(`${currentBackendUrl}/store/${extractedFilename}`);
       }
       // Try as public asset
       fallbacks.push(`/${extractedFilename}`);
@@ -333,7 +351,7 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
     // Also try as backend storage
     const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
     if (origin) {
-      fallbacks.push(`${origin}/storage/${imageSource.filename}`);
+      fallbacks.push(`${origin}/store/${imageSource.filename}`);
     }
   }
 

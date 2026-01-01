@@ -145,13 +145,20 @@ const ProviderHome = () => {
                     return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
                   }
                 } catch {
-                  const match = img.absoluteUrl.match(/\/(storage\/.+)$/);
+                  // Support both /store/ and /storage/ for backward compatibility
+                  const match = img.absoluteUrl.match(/\/(store\/.+)$/) || img.absoluteUrl.match(/\/(storage\/.+)$/);
                   if (match && backendOrigin) {
-                    return { ...img, absoluteUrl: `${backendOrigin}${match[1]}` };
+                    const path = match[1].replace(/^storage\//, 'store/');
+                    return { ...img, absoluteUrl: `${backendOrigin}/${path}` };
                   }
                 }
               }
-              else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+              else if (img.absoluteUrl.startsWith("/store/") && backendOrigin) {
+                return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
+              } else if (img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                // Legacy support: convert /storage/ to /store/
+                const storePath = img.absoluteUrl.replace("/storage/", "/store/");
+                return { ...img, absoluteUrl: `${backendOrigin}${storePath}` };
                 return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
               }
             }
@@ -555,10 +562,21 @@ const ProviderHome = () => {
                                     if (!Array.isArray(images)) return [];
                                     return images.map((img: any) => {
                                       if (!img) return img;
-                                      if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                                      if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/store/") && backendOrigin) {
                                         return { ...img, absoluteUrl: `${backendOrigin}${img.absoluteUrl}` };
                                       }
+                                      if (typeof img.absoluteUrl === "string" && img.absoluteUrl.startsWith("/storage/") && backendOrigin) {
+                                        // Legacy support: convert /storage/ to /store/
+                                        const storePath = img.absoluteUrl.replace("/storage/", "/store/");
+                                        return { ...img, absoluteUrl: `${backendOrigin}${storePath}` };
+                                      }
+                                      if (typeof img.url === "string" && img.url.startsWith("/store/") && backendOrigin) {
+                                        return { ...img, url: `${backendOrigin}${img.url}` };
+                                      }
                                       if (typeof img.url === "string" && img.url.startsWith("/storage/") && backendOrigin) {
+                                        // Legacy support: convert /storage/ to /store/
+                                        const storePath = img.url.replace("/storage/", "/store/");
+                                        return { ...img, url: `${backendOrigin}${storePath}` };
                                         return { ...img, url: `${backendOrigin}${img.url}`, absoluteUrl: img.absoluteUrl || `${backendOrigin}${img.url}` };
                                       }
                                       return img;

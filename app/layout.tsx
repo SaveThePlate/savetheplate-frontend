@@ -99,6 +99,14 @@ export default function RootLayout({
         <link rel="prefetch" href="/signIn" />
       </head>
       <body className="flex flex-col min-h-screen bg-white safe-area-inset">
+        {/* Fallback for when JavaScript fails to load */}
+        <noscript>
+          <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#fef2f2', color: '#991b1b', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+            <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>JavaScript Required</h1>
+            <p style={{ fontSize: '16px', marginBottom: '8px' }}>This application requires JavaScript to be enabled.</p>
+            <p style={{ fontSize: '14px', color: '#7f1d1d' }}>Please enable JavaScript in your browser settings and refresh the page.</p>
+          </div>
+        </noscript>
         <ErrorBoundary>
           <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
             <UserProvider>

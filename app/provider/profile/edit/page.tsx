@@ -247,9 +247,9 @@ export default function EditProviderProfile() {
       }
 
       if (filename && !filename.startsWith("/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        filename = `/storage/${filename}`;
-      } else if (filename && !filename.startsWith("/storage/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        filename = `/storage${filename}`;
+        filename = `/store/${filename}`;
+      } else if (filename && !filename.startsWith("/store/") && !filename.startsWith("/storage/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
+        filename = `/store${filename}`;
       }
 
       setProfileImage(filename);
@@ -347,10 +347,14 @@ export default function EditProviderProfile() {
       const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
       if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
         return profileImage;
-      } else if (profileImage.startsWith("/storage/") && backendUrl) {
+      } else if (profileImage.startsWith("/store/") && backendUrl) {
         return `${backendUrl}${profileImage}`;
+      } else if (profileImage.startsWith("/storage/") && backendUrl) {
+        // Legacy support: convert /storage/ to /store/
+        const storePath = profileImage.replace("/storage/", "/store/");
+        return `${backendUrl}${storePath}`;
       } else if (backendUrl) {
-        return `${backendUrl}/storage/${profileImage.replace(/^\/storage\//, '')}`;
+        return `${backendUrl}/store/${profileImage.replace(/^\/store\//, '').replace(/^\/storage\//, '')}`;
       }
     } else if (localFile) {
       // Show local preview - get or create blob URL
