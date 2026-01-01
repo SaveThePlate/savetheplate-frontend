@@ -45,6 +45,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Note: For production, .env files should be provided at runtime via volume mount
 RUN if [ -f .env.${APP_ENVIRONMENT} ]; then cp .env.${APP_ENVIRONMENT} .env; fi || true
 
+# Rendre post-build.sh exécutable
+RUN chmod +x post-build.sh
+
 # RUN npm install sharp
 # RUN npm install --platform=linux --arch=armv6 --verbose sharp
 
