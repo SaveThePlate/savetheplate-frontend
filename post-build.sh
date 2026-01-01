@@ -16,5 +16,13 @@ if [ -d "public" ] && [ -d ".next/standalone" ]; then
     echo "✓ Répertoire public copié dans standalone"
 fi
 
+# Installer sharp dans standalone (requis pour l'optimisation d'images)
+if [ -d ".next/standalone" ]; then
+    cd .next/standalone
+    npm install sharp --legacy-peer-deps --no-save 2>/dev/null
+    cd ../..
+    echo "✓ Sharp installé dans standalone"
+fi
+
 echo "✓ Post-build terminé"
 
