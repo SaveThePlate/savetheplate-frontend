@@ -28,6 +28,9 @@ RUN if [ -f package-lock.json ]; then npm ci --include=dev  --legacy-peer-deps; 
 FROM base AS builder
 WORKDIR /app
 
+# Install bash for post-build.sh script
+RUN apk add --no-cache bash
+
 ENV NODE_ENV=${APP_ENVIRONMENT}
 ENV TZ=UTC
 

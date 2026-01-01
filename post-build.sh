@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Script post-build pour copier les fichiers statiques dans standalone
 
 cd "$(dirname "$0")"
