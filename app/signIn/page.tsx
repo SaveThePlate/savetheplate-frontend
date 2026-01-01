@@ -156,8 +156,32 @@ export default function SignIn() {
               // Show verification code input instead of redirecting
               setSignUpEmail(email);
               setShowVerificationCode(true);
-              setShowAuthToast(true);
-              setShowErrorToast(false);
+              
+              // Automatically send verification email after sign up
+              try {
+                await axiosInstance.post(
+                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/send-verification-email`,
+                  { email },
+                  {
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                  }
+                );
+                setShowAuthToast(true);
+                setShowErrorToast(false);
+              } catch (emailError: any) {
+                // If sending email fails, still show the verification form
+                // but show an error message
+                console.error("Failed to send verification email:", emailError);
+                setShowAuthToast(false);
+                setShowErrorToast(true);
+                setErrorMessage(
+                  emailError?.response?.data?.error || 
+                  "Account created but failed to send verification email. Please click 'Resend Code' to try again."
+                );
+              }
+              
               setLoading(false);
               return;
             }

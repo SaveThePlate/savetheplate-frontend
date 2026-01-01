@@ -1,0 +1,71 @@
+name: 🚀 Auto Deploy Frontend (Git Pull)
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy Frontend to Server
+    steps:
+      - name: 🚀 Deploy to production server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PROD_SSH_PASSPHRASE }}
+          script: |
+            set -e
+            echo "📥 Pulling latest frontend changes from git..."
+            
+            # Navigate to frontend directory on server
+            cd /var/www/save-the-plate/frontend || exit 1
+            
+            # Pull latest changes
+            git fetch origin
+            git reset --hard origin/main || git reset --hard origin/master
+            git pull origin main || git pull origin master
+            
+            echo "✅ Git pull completed!"
+            
+            # Install dependencies if needed
+            if [ -f "package.json" ]; then
+              echo "📦 Installing dependencies..."
+              npm install --production || yarn install --production || true
+            fi
+            
+            # Build if needed (Next.js, React, etc.)
+            if [ -f "package.json" ] && grep -q '"build"' package.json; then
+              echo "🏗️ Building frontend..."
+              npm run build || yarn build || true
+            fi
+            
+            # If using Docker Compose, restart frontend service
+            if [ -f "/var/www/save-the-plate/docker-compose.yml" ] || [ -f "/var/www/save-the-plate/docker-compose.yaml" ]; then
+              echo "🐳 Restarting Docker containers..."
+              cd /var/www/save-the-plate
+              docker-compose restart frontend || docker-compose up -d frontend || true
+              cd frontend
+            fi
+            
+            # If using PM2, restart frontend service
+            if command -v pm2 &> /dev/null; then
+              echo "🔄 Restarting PM2 frontend service..."
+              pm2 restart frontend || pm2 restart savetheplate-frontend || pm2 restart all || true
+              echo "✅ PM2 service restarted!"
+            fi
+            
+            # If using Docker directly, restart container
+            if docker ps -a | grep -q "savetheplate-frontend\|leftover-frontend"; then
+              echo "🐳 Restarting Docker container..."
+              docker restart savetheplate-frontend 2>/dev/null || \
+              docker restart leftover-frontend 2>/dev/null || true
+            fi
+            
+            echo "✅ Frontend deployment complete!"
+
