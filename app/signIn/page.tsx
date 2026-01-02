@@ -30,8 +30,11 @@ export default function SignIn() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
-  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
-  const [authMode, setAuthMode] = useState<"magic-link" | "password">("password");
+  // COMMENTED OUT: Magic link disabled
+  // const [magicLinkLoading, setMagicLinkLoading] = useState(false);
+  // const [authMode, setAuthMode] = useState<"magic-link" | "password">("password");
+  const [magicLinkLoading] = useState(false); // Keep for compatibility but unused
+  const [authMode] = useState<"magic-link" | "password">("password"); // Keep for compatibility but unused
   const [isSignUp, setIsSignUp] = useState(false);
   const [showVerificationCode, setShowVerificationCode] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -113,7 +116,7 @@ export default function SignIn() {
 
     try {
       // Form submission only handles password authentication
-      // Magic link is handled by the alternative button
+      // COMMENTED OUT: Magic link is disabled
       if (isSignUp) {
           // Sign up with password
           if (!password || password.length < 8) {
@@ -1149,8 +1152,8 @@ export default function SignIn() {
               </div>
 
               <div className="space-y-3">
-                {/* Magic Link - Passwordless Option */}
-                <Button
+                {/* Magic Link - Passwordless Option - COMMENTED OUT */}
+                {/* <Button
                   onClick={async (e) => {
                     e.preventDefault();
                     if (!email || !email.includes('@')) {
@@ -1220,7 +1223,7 @@ export default function SignIn() {
                       <span>{t("signin.sign_in_email") || "Continue with Magic Link"}</span>
                     </>
                   )}
-                </Button>
+                </Button> */}
 
                 {/* Google Sign In - Temporarily commented out until logic is fixed */}
                 {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (

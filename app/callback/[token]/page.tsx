@@ -38,76 +38,93 @@ function AuthCallback() {
             router.push("/provider/orders");
             return;
           } catch {
-            // Not an order token or user doesn't have access, continue with auth verification
+            // Not an order token or user doesn't have access
+            // Magic link verification is disabled, so redirect to sign in
+            setError("Magic link authentication is disabled. Please sign in with your password.");
+            setTimeout(() => {
+              router.push("/signIn");
+            }, 3000);
+            return;
           }
         }
 
-        const resp = await clientApi.POST("/auth/verify-magic-mail", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: {
-            token: token,
-          },
-        });
-
-        // Check if response data exists
-        if (!resp.data || !resp.data.accessToken || !resp.data.refreshToken) {
-          throw new Error("Invalid response from server");
-        }
-
-        // Store tokens
-        LocalStorage.setItem("refresh-token", resp.data.refreshToken);
-        LocalStorage.setItem("accessToken", resp.data.accessToken);
-        LocalStorage.removeItem("remember");
-
-        // Determine redirect based on user's role
-        // Priority: Check role first to identify new users, then use backend redirectTo if available
-        const role = resp.data.role || resp.data.user?.role;
-        let redirectTo = '/onboarding'; // Default for new users
+        // COMMENTED OUT: Magic link verification disabled
+        // Magic link authentication is disabled, redirect to sign in
+        // const resp = await clientApi.POST("/auth/verify-magic-mail", {
+        //   headers: {
+        //     Authorization: `Bearer ${token}`,
+        //   },
+        //   body: {
+        //     token: token,
+        //   },
+        // });
+        // 
+        // // Check if response data exists
+        // if (!resp.data || !resp.data.accessToken || !resp.data.refreshToken) {
+        //   throw new Error("Invalid response from server");
+        // }
+        // 
+        // // Store tokens
+        // LocalStorage.setItem("refresh-token", resp.data.refreshToken);
+        // LocalStorage.setItem("accessToken", resp.data.accessToken);
+        // LocalStorage.removeItem("remember");
+        // 
+        // // Determine redirect based on user's role
+        // // Priority: Check role first to identify new users, then use backend redirectTo if available
+        // const role = resp.data.role || resp.data.user?.role;
+        // let redirectTo = '/onboarding'; // Default for new users
+        // 
+        // // If user has a valid role, determine redirect
+        // if (role === 'PROVIDER') {
+        //   // Check if provider has submitted location details
+        //   // If not, redirect to fillDetails page to complete their information
+        //   try {
+        //     const userDetails = await axiosInstance.get(
+        //       `/users/me`,
+        //       { headers: { Authorization: `Bearer ${resp.data.accessToken}` } }
+        //     );
+        //     const { phoneNumber, mapsLink } = userDetails.data || {};
+        //     // If location details are missing, redirect to fillDetails page to complete them
+        //     if (!phoneNumber || !mapsLink) {
+        //       redirectTo = '/onboarding/fillDetails';
+        //     } else {
+        //       redirectTo = '/provider/home';
+        //     }
+        //   } catch (error) {
+        //     // If we can't fetch user details, redirect to fillDetails to be safe
+        //     console.error("Error fetching user details:", error);
+        //     redirectTo = '/onboarding/fillDetails';
+        //   }
+        // } else if (role === 'PENDING_PROVIDER') {
+        //   redirectTo = '/onboarding/thank-you';
+        // } else if (role === 'CLIENT') {
+        //   redirectTo = '/client/home';
+        // } else {
+        //   // User has no role or role is 'NONE' - they are new and need onboarding
+        //   redirectTo = '/onboarding';
+        // }
+        // 
+        // // Only use backend's redirectTo if user already has a valid role
+        // // This prevents new users from being redirected to '/' or other incorrect paths
+        // if (role && role !== 'NONE' && typeof resp.data.redirectTo === 'string' && resp.data.redirectTo && resp.data.redirectTo !== '/') {
+        //   // Backend provided a redirectTo and user has a valid role, use it
+        //   redirectTo = resp.data.redirectTo;
+        // }
+        // 
+        // // Redirect to the determined path
+        // router.push(redirectTo);
         
-        // If user has a valid role, determine redirect
-        if (role === 'PROVIDER') {
-          // Check if provider has submitted location details
-          // If not, redirect to fillDetails page to complete their information
-          try {
-            const userDetails = await axiosInstance.get(
-              `/users/me`,
-              { headers: { Authorization: `Bearer ${resp.data.accessToken}` } }
-            );
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            // If location details are missing, redirect to fillDetails page to complete them
-            if (!phoneNumber || !mapsLink) {
-              redirectTo = '/onboarding/fillDetails';
-            } else {
-              redirectTo = '/provider/home';
-            }
-          } catch (error) {
-            // If we can't fetch user details, redirect to fillDetails to be safe
-            console.error("Error fetching user details:", error);
-            redirectTo = '/onboarding/fillDetails';
-          }
-        } else if (role === 'PENDING_PROVIDER') {
-          redirectTo = '/onboarding/thank-you';
-        } else if (role === 'CLIENT') {
-          redirectTo = '/client/home';
-        } else {
-          // User has no role or role is 'NONE' - they are new and need onboarding
-          redirectTo = '/onboarding';
-        }
-
-        // Only use backend's redirectTo if user already has a valid role
-        // This prevents new users from being redirected to '/' or other incorrect paths
-        if (role && role !== 'NONE' && typeof resp.data.redirectTo === 'string' && resp.data.redirectTo && resp.data.redirectTo !== '/') {
-          // Backend provided a redirectTo and user has a valid role, use it
-          redirectTo = resp.data.redirectTo;
-        }
-
-        // Redirect to the determined path
-        router.push(redirectTo);
+        // Magic link is disabled, redirect to sign in
+        setError("Magic link authentication is disabled. Please sign in with your password.");
+        setTimeout(() => {
+          router.push("/signIn");
+        }, 3000);
+        return;
       } catch (error: any) {
-        console.error("Error verifying magic link:", error);
-        setError(t("callback.verify_failed"));
+        // COMMENTED OUT: Magic link verification disabled
+        // console.error("Error verifying magic link:", error);
+        console.error("Magic link authentication is disabled:", error);
+        setError("Magic link authentication is disabled. Please sign in with your password.");
         // Redirect to sign in after a delay
         setTimeout(() => {
           router.push("/signIn");
