@@ -41,18 +41,7 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Security: Do NOT copy .env files into the image
-# Environment variables should be provided at runtime via:
-# - docker run --env-file .env
-# - docker-compose environment variables
-# - Kubernetes secrets/configmaps
-# Note: .dockerignore should prevent .env files from being copied, but we explicitly avoid copying them here
-
-# Rendre post-build.sh exécutable
-RUN chmod +x post-build.sh
-
-# RUN npm install sharp
-# RUN npm install --platform=linux --arch=armv6 --verbose sharp
+COPY .env.${APP_ENVIRONMENT} .env
 
 RUN npm run build
 
