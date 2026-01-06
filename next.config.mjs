@@ -119,13 +119,19 @@ const nextConfig = {
 
   async headers() {
     const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://savetheplate.tn').replace(/\/$/, '');
+    const isProd = process.env.NODE_ENV === 'production';
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
       "style-src 'self' 'unsafe-inline' https:",
-      "img-src 'self' data: blob: https: http://localhost:* http://127.0.0.1:* http:",
+      // In production, don't include localhost in CSP (keeps builds unambiguous and avoids accidental local calls).
+      isProd
+        ? "img-src 'self' data: blob: https:"
+        : "img-src 'self' data: blob: https: http://localhost:* http://127.0.0.1:* http:",
       "media-src 'self' data: blob: https:",
-      `connect-src 'self' ${backendUrl} http://localhost:*/ https: ws: wss:`,
+      isProd
+        ? `connect-src 'self' ${backendUrl} https: ws: wss:`
+        : `connect-src 'self' ${backendUrl} http://localhost:*/ https: ws: wss:`,
       "font-src 'self' data: https:",
       "frame-src 'self' https://accounts.google.com https://*.google.com https://*.facebook.com https://www.facebook.com",
       "frame-ancestors 'none'",
