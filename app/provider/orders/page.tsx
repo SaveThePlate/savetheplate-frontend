@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback, Suspense, useMemo } from "react";
 import dynamic from "next/dynamic";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
@@ -123,8 +123,8 @@ const ProviderOrdersContent = () => {
       }
 
       // Add cache-busting timestamp to ensure fresh data
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider?t=${Date.now()}`,
+      const res = await axiosInstance.get(
+        `/orders/provider?t=${Date.now()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

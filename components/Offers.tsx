@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { ClientOfferCard } from "./offerCard";
 import { useRouter } from "next/navigation";
 import { resolveImageSource } from "@/utils/imageUtils";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 // WEBSOCKET INTEGRATION TEMPORARILY DISABLED
 // import { useWebSocket } from "@/hooks/useWebSocket";
 import { useLanguage } from "@/context/LanguageContext";
@@ -75,6 +76,7 @@ const OffersPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const router = useRouter();
   const { t } = useLanguage();
+  const backendOrigin = getBackendOrigin();
 
   // Get user's location
   useEffect(() => {
@@ -122,7 +124,7 @@ const OffersPage = () => {
 
     const fetchUserRole = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`, {
+        const response = await axiosInstance.get(`/users/get-role`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserRole(response.data.role);
@@ -137,7 +139,7 @@ const OffersPage = () => {
         // Add cache-busting timestamp to ensure fresh data
         const timestamp = Date.now();
         // Use fetch instead of axios to avoid automatic cache-control headers
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, {
+        const response = await fetch(`${backendOrigin}/offers?t=${timestamp}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -158,7 +160,7 @@ const OffersPage = () => {
         const ratingPromises = providerIds.map(async (providerId: number) => {
           try {
             const ratingResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/ratings/provider/${providerId}/average`,
+              `${backendOrigin}/ratings/provider/${providerId}/average`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -189,7 +191,7 @@ const OffersPage = () => {
         });
 
         // normalize images array - preserve URLs from different backends, only normalize relative paths
-        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        const backendOriginForImages = backendOrigin.replace(/\/$/, "");
         const mappedOffers: Offer[] = data.map((o: any) => {
           const rating = o.ownerId ? ratingsMap.get(o.ownerId) : null;
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
@@ -205,12 +207,12 @@ const OffersPage = () => {
                   
                   // Extract current backend hostname
                   let currentBackendHost = "";
-                  if (backendOrigin) {
+                  if (backendOriginForImages) {
                     try {
-                      const backendUrlObj = new URL(backendOrigin);
+                      const backendUrlObj = new URL(backendOriginForImages);
                       currentBackendHost = backendUrlObj.hostname;
                     } catch {
-                      const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                      const match = backendOriginForImages.match(/https?:\/\/([^\/]+)/);
                       if (match) currentBackendHost = match[1];
                     }
                   }
@@ -327,7 +329,7 @@ const OffersPage = () => {
   //   
   //   // Normalize the offer data to match our format
   //   const normalizeOffer = (o: any): Offer => {
-  //     const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+  //     const backendOrigin = getBackendOrigin();
   //     
   //     // Parse images if they're stored as JSON string (old offers)
   //     let imagesArray: any[] = [];

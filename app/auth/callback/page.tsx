@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState, Suspense } from "react";
 import { LocalStorage } from "@/lib/utils";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -75,8 +75,8 @@ function FacebookAuthCallbackContent() {
         // 2. Fetching user info from Facebook
         // 3. Creating/updating user in database
         // 4. Returning JWT tokens
-        const backendResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/facebook/callback`,
+        const backendResponse = await axiosInstance.post(
+          `/auth/facebook/callback`,
           {
             code: code,
             state: state, // Optional: for CSRF protection
@@ -105,8 +105,8 @@ function FacebookAuthCallbackContent() {
         // If user has a valid role, determine redirect
         if (role === "PROVIDER") {
           try {
-            const userDetails = await axios.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            const userDetails = await axiosInstance.get(
+              `/users/me`,
               {
                 headers: {
                   Authorization: `Bearer ${backendResponse.data.accessToken}`,

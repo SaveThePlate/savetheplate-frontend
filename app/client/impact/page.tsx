@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { ArrowLeft, Leaf, Droplet, Cloud, TreePine, Calculator, Info, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
@@ -23,7 +23,7 @@ const ImpactPage = () => {
       }
 
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`, {
+        const response = await axiosInstance.get(`/users/get-role`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserRole(response.data.role);

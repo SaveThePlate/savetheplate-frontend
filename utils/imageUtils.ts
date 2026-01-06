@@ -3,6 +3,8 @@
  * Handles both local public assets and backend storage URLs
  */
 
+import { getBackendOrigin } from "@/lib/backendOrigin";
+
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
 /**
@@ -81,7 +83,7 @@ export const shouldUnoptimizeImage = (url: string | null | undefined): boolean =
             return true;
           }
           // Check if it's from the backend domain (more robust check)
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+          const backendUrl = getBackendOrigin();
           if (backendUrl) {
             try {
               const backendUrlObj = new URL(backendUrl);
@@ -160,7 +162,7 @@ export const resolveImageSource = (imageSource: ImageSource | string | null | un
 export const getImage = (filename?: string | null): string => {
   if (!filename) return DEFAULT_BAG_IMAGE;
 
-  const currentBackendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+  const currentBackendUrl = getBackendOrigin();
 
   // Full URL from API - check if it's from a different backend
   if (/^https?:\/\//i.test(filename)) {
@@ -317,7 +319,7 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
     
     // If we extracted a filename, try alternative URLs
     if (extractedFilename) {
-      const currentBackendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const currentBackendUrl = getBackendOrigin();
       // Try current backend storage
       if (currentBackendUrl) {
         fallbacks.push(`${currentBackendUrl}/store/${extractedFilename}`);
@@ -349,7 +351,7 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
   if (imageSource.filename) {
     fallbacks.push(getImage(imageSource.filename));
     // Also try as backend storage
-    const origin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+    const origin = getBackendOrigin();
     if (origin) {
       fallbacks.push(`${origin}/store/${imageSource.filename}`);
     }

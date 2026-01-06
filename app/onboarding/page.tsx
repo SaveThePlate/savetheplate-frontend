@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
@@ -27,8 +27,8 @@ const OnboardingPage = () => {
           return;
         }
 
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        const response = await axiosInstance.get(
+          `/users/get-role`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -64,8 +64,8 @@ const OnboardingPage = () => {
         return;
       }
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/set-role`,
+      const response = await axiosInstance.post(
+        `/users/set-role`,
         { role },
         { 
           headers: { 

@@ -1,8 +1,8 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { sanitizeErrorMessage } from '@/utils/errorUtils';
+import { axiosInstance } from '@/lib/axiosInstance';
 interface UserContextType {
   userRole: string | null;
   loading: boolean;
@@ -29,7 +29,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + '/users/get-role', {
+      const response = await axiosInstance.get('/users/get-role', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -65,8 +65,8 @@ const ProfilePage = () => {
 
         // Fetch profile and orders in parallel
         const [profileRes, ordersRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers }),
-          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${userId}`, { headers }),
+          axiosInstance.get(`/users/me`, { headers }),
+          axiosInstance.get(`/orders/user/${userId}`, { headers }),
         ]);
 
         const userData = profileRes.data || {};

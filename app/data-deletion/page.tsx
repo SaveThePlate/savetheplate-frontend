@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Trash2, AlertTriangle, CheckCircle, Mail, Send } from "lucide-react";
 import Link from "next/link";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-hot-toast";
 
 const DataDeletionPage = () => {
@@ -31,8 +31,8 @@ const DataDeletionPage = () => {
       }
 
       try {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/request-deletion`,
+        await axiosInstance.post(
+          `/users/request-deletion`,
           { email: email.trim() },
           { headers }
         );

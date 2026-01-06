@@ -28,4 +28,11 @@ export function getBackendOrigin(): string {
   return (envUrl || "http://localhost:3001").replace(/\/$/, "");
 }
 
+export function backendUrl(pathname: string): string {
+  const origin = getBackendOrigin();
+  if (!pathname) return origin;
+  if (pathname.startsWith("/")) return `${origin}${pathname}`;
+  return `${origin}/${pathname}`;
+}
+
 

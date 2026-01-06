@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,6 +26,7 @@ import {
   Star
 } from "lucide-react";
 import RatingDialog from "./RatingDialog";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import {
   Dialog,
   DialogContent,
@@ -102,8 +103,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
       if (!token) return;
 
       try {
-        const ratingRes = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/ratings/order/${order.id}`,
+        const ratingRes = await axiosInstance.get(
+          `/ratings/order/${order.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (ratingRes.data) {
@@ -126,12 +127,12 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
       if (!token) return router.push("/signIn");
 
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${order.offerId}`, {
+        const res = await axiosInstance.get(`/offers/${order.offerId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         
         // Normalize image URLs - preserve URLs from different backends
-        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        const backendOrigin = getBackendOrigin();
         if (res.data.images && Array.isArray(res.data.images)) {
           res.data.images = res.data.images.map((img: any) => {
             if (!img) return img;
@@ -259,8 +260,8 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
     if (localOrderStatus !== "pending") return toast.error(t("cart_order.only_pending_cancellable"));
     setCanceling(true);
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/${order.id}/cancel`,
+      await axiosInstance.post(
+        `/orders/${order.id}/cancel`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

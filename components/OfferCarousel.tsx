@@ -1,11 +1,12 @@
 import React, { useState, useEffect, memo, useMemo, useCallback } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import dynamic from "next/dynamic";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 
 // Lazy load react-slick to reduce initial bundle size
 const Slider = dynamic(() => import("react-slick"), { 
@@ -19,7 +20,7 @@ const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
 const getImage = (filename: string | null): string => {
   if (!filename) return DEFAULT_BAG_IMAGE;
-  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+  const backendUrl = getBackendOrigin();
   if (backendUrl) {
     return `${backendUrl}/store/${filename}`;
   }
@@ -72,8 +73,8 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
         return;
       }
       try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/offers",{
+        const response = await axiosInstance.get(
+          "/offers",{
             headers: { Authorization: `Bearer ${token}` },
         });
         setOffers(response.data);
@@ -99,8 +100,8 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
       }
 
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+        const response = await axiosInstance.get(
+          `/users/me`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUserId(response.data.id);

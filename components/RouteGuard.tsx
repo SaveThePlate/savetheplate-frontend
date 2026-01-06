@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@/context/UserContext";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -46,8 +46,8 @@ export default function RouteGuard({
       let currentRole = userRole;
       if (!currentRole) {
         try {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+          const response = await axiosInstance.get(
+            `/users/get-role`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -79,8 +79,8 @@ export default function RouteGuard({
       // For PROVIDER role, check if they have completed location details
       if (currentRole === "PROVIDER" && allowedRoles.includes("PROVIDER")) {
         try {
-          const userDetails = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+          const userDetails = await axiosInstance.get(
+            `/users/me`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const { phoneNumber, mapsLink } = userDetails.data || {};

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { useLanguage } from "@/context/LanguageContext";
 import Image from "next/image";
 
@@ -21,8 +21,8 @@ function VerifyEmailPage() {
         setLoading(true);
         setError(null);
 
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email`,
+        const response = await axiosInstance.post(
+          `/auth/verify-email`,
           {
             token: token,
           },

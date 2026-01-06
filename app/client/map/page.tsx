@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import MapComponent from "@/components/MapComponent";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -37,7 +37,7 @@ const Map = () => {
         if (token) {
           headers.Authorization = `Bearer ${token}`;
         }
-        const response = await axios.get(process.env.NEXT_PUBLIC_BACKEND_URL + "/offers", { headers });
+        const response = await axiosInstance.get("/offers", { headers });
         setOffers(response.data);
       } catch (fetchError: any) {
         console.error("Failed to fetch offers for map:", fetchError);

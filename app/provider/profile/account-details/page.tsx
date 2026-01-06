@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, User, Mail, Phone, CheckCircle2, XCircle, Send, MapPin, Link as LinkIcon, Check } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/context/LanguageContext";
-import axios from "axios";
 import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
 import { sanitizeImageUrl, shouldUnoptimizeImage, resolveImageSource } from "@/utils/imageUtils";
@@ -18,6 +17,7 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import {
   Dialog,
   DialogContent,
@@ -66,7 +66,7 @@ export default function AccountDetails() {
         }
 
         const headers = { Authorization: `Bearer ${token}` };
-        const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+        const profileRes = await axiosInstance.get(`/users/me`, { headers });
 
         const { username, email, phoneNumber, profileImage, emailVerified, location, mapsLink } = profileRes.data || {};
         setUsername(username || "");
@@ -136,8 +136,8 @@ export default function AccountDetails() {
 
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+      const response = await axiosInstance.post(
+        `/users/extract-location`,
         { mapsLink: cleanedUrl },
         { 
           headers: { Authorization: `Bearer ${token}` },
@@ -308,7 +308,7 @@ export default function AccountDetails() {
         }
       }
 
-      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, payload, {
+      await axiosInstance.post(`/users/me`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -340,8 +340,8 @@ export default function AccountDetails() {
 
       setSendingVerification(true);
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/send-verification-email`,
+      await axiosInstance.post(
+        `/auth/send-verification-email`,
         { email },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -373,8 +373,8 @@ export default function AccountDetails() {
         return;
       }
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email-code`,
+      const response = await axiosInstance.post(
+        `/auth/verify-email-code`,
         {
           email: email.trim(),
           code: verificationCode.trim(),
@@ -394,7 +394,7 @@ export default function AccountDetails() {
         toast.success("Email verified successfully!");
         
         // Refresh profile data
-        const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, {
+        const profileRes = await axiosInstance.get(`/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const { emailVerified: newEmailVerified } = profileRes.data || {};
@@ -415,7 +415,7 @@ export default function AccountDetails() {
 
   const getProfileImageSrc = () => {
     if (profileImage && localFile) {
-      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const backendUrl = getBackendOrigin();
       if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
         return profileImage;
       } else if (profileImage.startsWith("/store/") && backendUrl) {

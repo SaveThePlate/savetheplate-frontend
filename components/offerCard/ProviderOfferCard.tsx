@@ -14,6 +14,7 @@ import { ProviderOverlay } from "./shared/ProviderOverlay";
 import { formatDateTime, formatDateTimeRange, isOfferExpired, DEFAULT_LOGO, getImageFallbacksForOffer } from "./utils";
 import { shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { compressImages, shouldCompress } from "@/utils/imageCompression";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import {
   FileInput,
   FileUploader,
@@ -208,7 +209,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         throw new Error("Component unmounted");
       }
 
-      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const backendUrl = getBackendOrigin();
       const uploaded = Array.isArray(response.data) ? response.data : [response.data];
       
       console.log("Upload response data:", uploaded); // Debug log
@@ -990,14 +991,14 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                           if (isUploaded && uploadedImage) {
                             imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
                             if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                              const backendUrl = getBackendOrigin();
                               imageSrc = `${backendUrl}/store/${imageSrc}`;
                             } else if (imageSrc && imageSrc.startsWith("/store/")) {
-                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                              const backendUrl = getBackendOrigin();
                               imageSrc = `${backendUrl}${imageSrc}`;
                             } else if (imageSrc && imageSrc.startsWith("/storage/")) {
                               // Legacy support: convert /storage/ to /store/
-                              const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                              const backendUrl = getBackendOrigin();
                               const storePath = imageSrc.replace("/storage/", "/store/");
                               imageSrc = `${backendUrl}${storePath}`;
                             }

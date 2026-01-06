@@ -156,8 +156,8 @@ const CreateMagicBoxPage = () => {
 
       console.log("Sending payload:", payload); // Debug log
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers`,
+      await axiosInstance.post(
+        `/offers`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );

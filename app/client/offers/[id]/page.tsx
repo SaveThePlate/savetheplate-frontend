@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeImageUrl } from "@/utils/imageUtils";
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
@@ -55,12 +56,12 @@ const Offers = () => {
       const token = localStorage.getItem("accessToken");
       if (!token) return router.push("/signIn");
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
+        const res = await axiosInstance.get(`/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         
         // Normalize image URLs - preserve URLs from different backends
-        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        const backendOrigin = getBackendOrigin();
         if (res.data.images && Array.isArray(res.data.images)) {
           res.data.images = res.data.images.map((img: any) => {
             if (!img) return img;
@@ -132,8 +133,8 @@ const Offers = () => {
         router.push("/signIn");
         return;
       }
-    axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/get-user-by-token`, {
+    axiosInstance
+      .get(`/auth/get-user-by-token`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUserId(res.data.id))
@@ -151,8 +152,8 @@ const Offers = () => {
       return;
     }
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`,
+      await axiosInstance.post(
+        `/orders`,
         { userId, offerId: offer.id, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );

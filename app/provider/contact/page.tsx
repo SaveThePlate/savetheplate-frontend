@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { Mail, MapPin, Send, MessageSquare, User, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -29,8 +29,8 @@ const ContactPage = () => {
         return;
       }
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        const response = await axiosInstance.get(
+          `/users/get-role`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -39,8 +39,8 @@ const ContactPage = () => {
         
         // Pre-fill email if available
         try {
-          const userResponse = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+          const userResponse = await axiosInstance.get(
+            `/users/me`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -109,8 +109,8 @@ const ContactPage = () => {
 
       // Attempt to send via backend contact endpoint
       try {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/contact`,
+        await axiosInstance.post(
+          `/contact`,
           {
             name: formData.name.trim(),
             email: formData.email.trim(),

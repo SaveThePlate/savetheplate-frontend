@@ -3,7 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 interface Props {
   children: ReactNode;
@@ -45,8 +45,8 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       // Fetch role from API
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+      const response = await axiosInstance.get(
+        `/users/get-role`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

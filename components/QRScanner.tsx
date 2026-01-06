@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { X, Camera, CheckCircle, AlertCircle, Keyboard, QrCode } from "lucide-react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface QRScannerProps {
@@ -131,8 +131,8 @@ const QRScanner: React.FC<QRScannerProps> = ({
       }
 
       // Confirm the order directly (this endpoint confirms and returns the order)
-      const confirmResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/scan`,
+      const confirmResponse = await axiosInstance.post(
+        `/orders/scan`,
         { qrCodeToken },
         { 
           headers: { 

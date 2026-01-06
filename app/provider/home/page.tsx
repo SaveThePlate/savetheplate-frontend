@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Edit2, Trash2, Package, Clock, MapPin, X } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
@@ -87,6 +88,7 @@ const ProviderHome = () => {
         if (!token) return router.push("/signIn");
 
         const headers = { Authorization: `Bearer ${token}` };
+        const backendOrigin = getBackendOrigin();
         let id: string | number | undefined;
         try {
           const tokenPayload = JSON.parse(atob(token.split(".")[1]));
@@ -94,7 +96,7 @@ const ProviderHome = () => {
         } catch (error) {
           console.error("Error parsing token:", error);
           try {
-            const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+            const userResponse = await axiosInstance.get(`/users/me`, { headers });
             id = userResponse.data?.id;
           } catch (apiError) {
             console.error("Error fetching user info:", apiError);
@@ -107,14 +109,14 @@ const ProviderHome = () => {
           return;
         }
 
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${id}`,
+        const response = await axiosInstance.get(
+          `/offers/owner/${id}`,
           { headers }
         );
 
         if (!isMountedRef.current) return;
 
-        const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+        const backendOriginForImages = backendOrigin.replace(/\/$/, "");
         const mappedOffers: Offer[] = response.data.map((o: any) => {
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
             if (!img) return img;
@@ -126,12 +128,12 @@ const ProviderHome = () => {
                   const urlHost = urlObj.hostname;
                   
                   let currentBackendHost = "";
-                  if (backendOrigin) {
+                  if (backendOriginForImages) {
                     try {
-                      const backendUrlObj = new URL(backendOrigin);
+                      const backendUrlObj = new URL(backendOriginForImages);
                       currentBackendHost = backendUrlObj.hostname;
                     } catch {
-                      const match = backendOrigin.match(/https?:\/\/([^\/]+)/);
+                      const match = backendOriginForImages.match(/https?:\/\/([^\/]+)/);
                       if (match) currentBackendHost = match[1];
                     }
                   }
@@ -233,7 +235,7 @@ const ProviderHome = () => {
     setOffers(prev => prev.filter(o => o.id !== id));
 
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`, {
+      await axiosInstance.delete(`/offers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (err: any) {
@@ -256,7 +258,7 @@ const ProviderHome = () => {
           userId = tokenPayload?.id;
         } catch (parseError) {
           try {
-            const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+            const userResponse = await axiosInstance.get(`/users/me`, { headers });
             userId = userResponse.data?.id;
           } catch (apiError) {
             setLoading(false);
@@ -265,8 +267,8 @@ const ProviderHome = () => {
         }
         
         if (userId) {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${userId}`,
+          const response = await axiosInstance.get(
+            `/offers/owner/${userId}`,
             { headers }
           );
           setOffers(response.data);
@@ -557,7 +559,7 @@ const ProviderHome = () => {
                                 ownerId={offer.ownerId}
                                 onDelete={handleDeleteOffer}
                                 onUpdate={async (id, data) => {
-                                  const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                  const backendOrigin = getBackendOrigin();
                                   const normalizeImages = (images: any) => {
                                     if (!Array.isArray(images)) return [];
                                     return images.map((img: any) => {
@@ -607,8 +609,8 @@ const ProviderHome = () => {
                                     const token = localStorage.getItem("accessToken");
                                     if (!token) return;
                                     
-                                    const response = await axios.get(
-                                      `${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/${id}`,
+                                    const response = await axiosInstance.get(
+                                      `/offers/${id}`,
                                       { headers: { Authorization: `Bearer ${token}` } }
                                     );
                                     

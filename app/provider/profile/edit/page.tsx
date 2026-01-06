@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import axios from "axios";
 import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
 import {
@@ -17,6 +16,7 @@ import { sanitizeImageUrl, shouldUnoptimizeImage, resolveImageSource } from "@/u
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImage, shouldCompress } from "@/utils/imageCompression";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 
 const DEFAULT_PROFILE_IMAGE = "/logo.png";
 
@@ -56,7 +56,7 @@ export default function EditProviderProfile() {
         }
 
         const headers = { Authorization: `Bearer ${token}` };
-        const profileRes = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+        const profileRes = await axiosInstance.get(`/users/me`, { headers });
 
         const { username, location, phoneNumber, profileImage, mapsLink } = profileRes.data || {};
         setProfile({
@@ -130,8 +130,8 @@ export default function EditProviderProfile() {
 
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+      const response = await axiosInstance.post(
+        `/users/extract-location`,
         { mapsLink: cleanedUrl },
         { 
           headers: { Authorization: `Bearer ${token}` },
@@ -316,8 +316,8 @@ export default function EditProviderProfile() {
         }
       }
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+      await axiosInstance.post(
+        `/users/me`,
         payload,
         {
           headers: {
@@ -344,7 +344,7 @@ export default function EditProviderProfile() {
   const getProfileImageSrc = () => {
     if (profileImage && localFile) {
       // Show uploaded image
-      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const backendUrl = getBackendOrigin();
       if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
         return profileImage;
       } else if (profileImage.startsWith("/store/") && backendUrl) {

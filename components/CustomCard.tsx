@@ -19,6 +19,7 @@ import {
   FileUploaderItem,
 } from "@/components/dropFile";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import { Check } from "lucide-react";
 import {
   Credenza,
@@ -193,7 +194,7 @@ const CustomCard: FC<CustomCardProps> = ({
     filesToUpload.forEach((f) => fd.append("files", f));
 
     try {
-      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const backendUrl = getBackendOrigin();
       const res = await axiosInstance.post("/storage/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
         timeout: 30000, // 30 second timeout
@@ -1026,14 +1027,14 @@ const CustomCard: FC<CustomCardProps> = ({
                               
                               // If we have a relative URL, construct absolute URL
                               if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                                const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                const backendUrl = getBackendOrigin();
                                 imageSrc = `${backendUrl}/store/${imageSrc}`;
                               } else if (imageSrc && imageSrc.startsWith("/store/")) {
-                                const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                const backendUrl = getBackendOrigin();
                                 imageSrc = `${backendUrl}${imageSrc}`;
                               } else if (imageSrc && imageSrc.startsWith("/storage/")) {
                                 // Legacy support: convert /storage/ to /store/
-                                const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                                const backendUrl = getBackendOrigin();
                                 const storePath = imageSrc.replace("/storage/", "/store/");
                                 imageSrc = `${backendUrl}${storePath}`;
                               }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import AddOffer from "@/components/AddOffer";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -19,8 +19,8 @@ const AddOfferPage = () => {
 
     const verifyToken = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/get-user-by-token`,
+        const response = await axiosInstance.get(
+          `/auth/get-user-by-token`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.status !== 200) throw new Error("Invalid response");

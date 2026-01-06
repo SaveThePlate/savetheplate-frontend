@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Offers from "@/components/Offers";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Loader2, Search, MapPin, ChevronRight, X, Utensils, Croissant, ShoppingCart, Package, Clock, ArrowRight } from "lucide-react";
@@ -71,8 +72,8 @@ const Home = () => {
         headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/reverse-geocode?lat=${latitude}&lon=${longitude}`,
+      const response = await axiosInstance.get(
+        `/users/reverse-geocode?lat=${latitude}&lon=${longitude}`,
         { 
           headers,
           timeout: 10000, // 10 second timeout
@@ -328,6 +329,7 @@ const Home = () => {
       }
 
       const headers = { Authorization: `Bearer ${token}` };
+      const backendOrigin = getBackendOrigin();
       let currentUserId: string | undefined;
       try {
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
@@ -338,7 +340,7 @@ const Home = () => {
       } catch (error) {
         console.error("Error parsing token:", error);
         try {
-          const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+          const userResponse = await axiosInstance.get(`/users/me`, { headers });
           currentUserId = userResponse.data?.id;
           if (isMountedRef.current) {
             setUserId(Number(currentUserId));
@@ -351,7 +353,7 @@ const Home = () => {
       const timestamp = Date.now();
 
       const [offersResponse, ordersResponse] = await Promise.allSettled([
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers?t=${timestamp}`, {
+        fetch(`${backendOrigin}/offers?t=${timestamp}`, {
           method: 'GET',
           headers: {
             ...headers,
@@ -361,7 +363,7 @@ const Home = () => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
         }),
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${currentUserId}?t=${timestamp}`, { headers }),
+        axiosInstance.get(`/orders/user/${currentUserId}?t=${timestamp}`, { headers }),
       ]);
 
       if (!isMountedRef.current) return;

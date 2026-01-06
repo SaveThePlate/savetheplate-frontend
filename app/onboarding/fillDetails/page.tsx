@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
@@ -28,8 +28,8 @@ const FillDetails = () => {
           return;
         }
 
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-role`,
+        const response = await axiosInstance.get(
+          `/users/get-role`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -117,8 +117,8 @@ const FillDetails = () => {
 
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+      const response = await axiosInstance.post(
+        `/users/extract-location`,
         { mapsLink: cleanedUrl },
         { 
           headers: { Authorization: `Bearer ${token}` },
@@ -236,8 +236,8 @@ const FillDetails = () => {
         return;
       }
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/update-details`,
+      await axiosInstance.post(
+        `/users/update-details`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );

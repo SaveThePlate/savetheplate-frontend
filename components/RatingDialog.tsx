@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import { Star, Loader2 } from "lucide-react";
 import {
@@ -72,8 +72,8 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
         return;
       }
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/ratings`,
+      await axiosInstance.post(
+        `/ratings`,
         {
           orderId,
           providerId,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import { axiosInstance } from "@/lib/axiosInstance";
 import CartOrder from "@/components/cartOrder";
 import { useRouter } from "next/navigation";
 import { Package, Clock, CheckCircle, XCircle, ShoppingBag } from "lucide-react";
@@ -44,8 +44,8 @@ const Orders = () => {
       const currentUserId = tokenPayload.id;
       setUserId(currentUserId);
 
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/user/${currentUserId}`,
+      const response = await axiosInstance.get(
+        `/orders/user/${currentUserId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

@@ -17,6 +17,7 @@ import { compressImages, shouldCompress } from "@/utils/imageCompression";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 
 type UploadedImage = {
   filename: string;
@@ -181,7 +182,7 @@ const AddOffer: React.FC = () => {
     filesToUpload.forEach((f) => fd.append("files", f));
 
     try {
-      const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+      const backendUrl = getBackendOrigin();
       
       // Add timeout for upload (30 seconds)
       const res = await axiosInstance.post("/storage/upload", fd, {
@@ -552,14 +553,14 @@ const AddOffer: React.FC = () => {
                       imageSrc = uploadedImage.absoluteUrl || uploadedImage.url || "";
                       
                       if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                        const backendUrl = getBackendOrigin();
                         imageSrc = `${backendUrl}/store/${imageSrc}`;
                       } else if (imageSrc && imageSrc.startsWith("/store/")) {
-                        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                        const backendUrl = getBackendOrigin();
                         imageSrc = `${backendUrl}${imageSrc}`;
                       } else if (imageSrc && imageSrc.startsWith("/storage/")) {
                         // Legacy support: convert /storage/ to /store/
-                        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                        const backendUrl = getBackendOrigin();
                         const storePath = imageSrc.replace("/storage/", "/store/");
                         imageSrc = `${backendUrl}${storePath}`;
                       }

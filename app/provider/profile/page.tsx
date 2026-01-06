@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +26,7 @@ import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { compressImage, shouldCompress } from "@/utils/imageCompression";
 import { ShoppingBag, ChevronRight, LogOut, Heart, MessageCircle, Settings, User, HelpCircle } from "lucide-react";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 
 interface ProfileData {
   username: string;
@@ -87,7 +87,7 @@ const useProviderProfile = () => {
         console.error("Error parsing token:", error);
         // Try to get userId from API if token parsing fails
         try {
-          const userResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers });
+          const userResponse = await axiosInstance.get(`/users/me`, { headers });
           userId = userResponse.data?.id;
         } catch (apiError) {
           console.error("Error fetching user info:", apiError);
@@ -105,9 +105,9 @@ const useProviderProfile = () => {
 
       // Fetch profile, offers, and orders in parallel for faster loading
       const [profileRes, offersRes, ordersRes] = await Promise.all([
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/offers/owner/${userId}`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/orders/provider`, { headers }),
+        axiosInstance.get(`/users/me`, { headers }),
+        axiosInstance.get(`/offers/owner/${userId}`, { headers }),
+        axiosInstance.get(`/orders/provider`, { headers }),
       ]);
 
       // Process profile data first (show immediately)
@@ -118,8 +118,8 @@ const useProviderProfile = () => {
       let finalLocation = location;
       if (!finalLocation && mapsLink) {
         // Don't await this - set profile first, then update location if needed
-        axios.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+        axiosInstance.post(
+          `/users/extract-location`,
           { mapsLink },
           { 
             headers,
@@ -300,8 +300,8 @@ const EditProfileDialog: React.FC<{
 
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/extract-location`,
+      const response = await axiosInstance.post(
+        `/users/extract-location`,
         { mapsLink: cleanedUrl },
         { 
           headers: { Authorization: `Bearer ${token}` },
@@ -610,7 +610,7 @@ const EditProfileDialog: React.FC<{
                   let imageSrc: string;
                   if (profileImage && typeof profileImage === 'string') {
                     // Use uploaded image URL
-                    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "");
+                    const backendUrl = getBackendOrigin();
                     if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
                       imageSrc = profileImage;
                     } else if (profileImage.startsWith("/store/") && backendUrl) {
@@ -798,8 +798,8 @@ export default function ProviderProfile() {
       console.log("📤 Updating profile with payload:", JSON.stringify(payload, null, 2));
 
       // Use POST method to update profile
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+      await axiosInstance.post(
+        `/users/me`,
         payload,
         {
           headers: {
