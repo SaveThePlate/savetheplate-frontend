@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 
 interface UseWebSocketOptions {
   onOrderUpdate?: (data: { type: "created" | "updated" | "deleted"; order: any }) => void;
@@ -52,10 +53,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         
         if (!isMountedRef.current) return;
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://savetheplate.tn";
         // Socket.IO client automatically handles protocol conversion (http -> ws, https -> wss)
         // Use the full backend URL and explicitly set the path to match the server configuration
-        const wsUrl = backendUrl.replace(/\/$/, ""); // Remove trailing slash if present
+        const wsUrl = getBackendOrigin(); // already trimmed
 
         // Connect to WebSocket server
         // Use polling first for better compatibility with proxies/load balancers

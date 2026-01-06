@@ -133,7 +133,7 @@ export default function SignIn() {
           }
 
           const response = await axiosInstance.post(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
+            `/auth/signup`,
             {
               email,
               password,
@@ -163,7 +163,7 @@ export default function SignIn() {
               // Automatically send verification email after sign up
               try {
                 await axiosInstance.post(
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/send-verification-email`,
+                  `/auth/send-verification-email`,
                   { email },
                   {
                     headers: {
@@ -197,7 +197,7 @@ export default function SignIn() {
             if (role === 'PROVIDER') {
               try {
                 const userDetails = await axiosInstance.get(
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                  `/users/me`,
                   { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
                 );
                 const { phoneNumber, mapsLink } = userDetails.data || {};
@@ -230,7 +230,7 @@ export default function SignIn() {
           }
 
           const response = await axiosInstance.post(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`,
+            `/auth/signin`,
             {
               email,
               password,
@@ -253,7 +253,7 @@ export default function SignIn() {
             if (role === 'PROVIDER') {
               try {
                 const userDetails = await axiosInstance.get(
-                  `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                  `/users/me`,
                   { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
                 );
                 const { phoneNumber, mapsLink } = userDetails.data || {};
@@ -353,7 +353,7 @@ export default function SignIn() {
       });
       
       const response = await axiosInstance.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email-code`,
+        `/auth/verify-email-code`,
         {
           email: signUpEmail.trim(),
           code: codeToSend,
@@ -384,7 +384,7 @@ export default function SignIn() {
         // Fetch user details to get role
         try {
           const userDetails = await axiosInstance.get(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+            `/users/me`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
@@ -444,7 +444,7 @@ export default function SignIn() {
     try {
       setLoading(true);
       await axiosInstance.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/send-verification-email`,
+        `/auth/send-verification-email`,
         { email: signUpEmail },
         {
           headers: {
@@ -482,7 +482,7 @@ export default function SignIn() {
 
       // Send Google credential to backend
       const response = await axiosInstance.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`,
+        `/auth/google`,
         {
           credential: credentialResponse.credential,
         },
@@ -509,7 +509,7 @@ export default function SignIn() {
           // Check if provider has submitted location details
           try {
             const userDetails = await axiosInstance.get(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+              `/users/me`,
               { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
             );
             const { phoneNumber, mapsLink } = userDetails.data || {};
@@ -803,7 +803,7 @@ export default function SignIn() {
       // Use axios directly (not axiosInstance) since we're authenticating - no token needed
       try {
         const backendResponse = await axiosInstance.post(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/facebook`,
+          `/auth/facebook`,
           {
             accessToken: accessToken,
           },
@@ -831,7 +831,7 @@ export default function SignIn() {
           if (role === 'PROVIDER') {
             try {
               const userDetails = await axiosInstance.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+                `/users/me`,
                 { headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` } }
               );
               const { phoneNumber, mapsLink } = userDetails.data || {};

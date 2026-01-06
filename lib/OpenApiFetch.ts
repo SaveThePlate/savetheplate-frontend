@@ -2,6 +2,7 @@ import createClient from "openapi-fetch";
 import type { paths } from "@/generated/api/schema";
 import { LocalStorage, SessionStorage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { getBackendOrigin } from "@/lib/backendOrigin";
 
 const getaccessToken = () => {
   if (typeof window !== "undefined") {
@@ -10,16 +11,8 @@ const getaccessToken = () => {
   return null;
 };
 
-// Get the base URL for API requests
-// Use direct backend URL (CORS is configured on backend)
-const getBaseUrl = () => {
-  // Use direct backend URL for both browser and server
-  // Default to HTTPS in production to avoid browser security warnings
-  const defaultUrl = typeof window !== 'undefined' && window.location.protocol === 'https:'
-    ? "https://savetheplate.tn"
-    : process.env.NEXT_PUBLIC_BACKEND_URL || "https://savetheplate.tn";
-  return defaultUrl;
-};
+// Get the base URL for API requests (avoids accidental localhost in production)
+const getBaseUrl = () => getBackendOrigin();
 
 // eslint-disable-next-line import/no-anonymous-default-export
 const useOpenApiFetch = () => {
