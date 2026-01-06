@@ -24,7 +24,15 @@ export function getBackendOrigin(): string {
     return chosen.replace(/\/$/, "");
   }
 
-  // Server-side (during SSR/build). Prefer env, otherwise default to localhost backend.
+  // Server-side (during SSR/build).
+  // In production, never default to localhost (it will get baked into builds and break real users).
+  if (process.env.NODE_ENV === "production") {
+    const prodFallback =
+      (process.env.NEXT_PUBLIC_FRONTEND_URL || "https://savetheplate.tn").trim();
+    return (envUrl || prodFallback).replace(/\/$/, "");
+  }
+
+  // Dev fallback.
   return (envUrl || "http://localhost:3001").replace(/\/$/, "");
 }
 
