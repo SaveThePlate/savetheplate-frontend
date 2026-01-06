@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@/context/UserContext";
-import { axiosInstance } from "@/lib/axiosInstance";
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -22,7 +21,7 @@ export default function RouteGuard({
   allowedRoles,
   redirectTo = "/signIn",
 }: RouteGuardProps) {
-  const { userRole, loading } = useUser();
+  const { user, userRole, loading, fetchUserRole } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
@@ -42,25 +41,17 @@ export default function RouteGuard({
         return;
       }
 
-      // If userRole is still null after loading, try to fetch it directly
-      let currentRole = userRole;
-      if (!currentRole) {
+      // If userRole is still null after loading, refresh via context (calls `/users/me`)
+      if (!userRole) {
         try {
-          const response = await axiosInstance.get(
-            `/users/get-role`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          currentRole = response.data.role;
-        } catch (error) {
-          // Token is invalid, redirect to sign in
-          console.error("Error fetching user role:", error);
+          await fetchUserRole();
+        } catch {
           localStorage.removeItem("accessToken");
           router.push(redirectTo);
           return;
         }
       }
+      const currentRole = userRole;
 
       // Check if user role is in allowed roles
       if (currentRole && !allowedRoles.includes(currentRole)) {
@@ -78,20 +69,9 @@ export default function RouteGuard({
 
       // For PROVIDER role, check if they have completed location details
       if (currentRole === "PROVIDER" && allowedRoles.includes("PROVIDER")) {
-        try {
-          const userDetails = await axiosInstance.get(
-            `/users/me`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          const { phoneNumber, mapsLink } = userDetails.data || {};
-          // If location details are missing, redirect to fillDetails page
-          if (!phoneNumber || !mapsLink) {
-            router.push("/onboarding/fillDetails");
-            return;
-          }
-        } catch (error) {
-          // If we can't fetch user details, redirect to fillDetails to be safe
-          console.error("Error fetching user details in RouteGuard:", error);
+        const phoneNumber = (user as any)?.phoneNumber;
+        const mapsLink = (user as any)?.mapsLink;
+        if (!phoneNumber || !mapsLink) {
           router.push("/onboarding/fillDetails");
           return;
         }
@@ -102,7 +82,7 @@ export default function RouteGuard({
     };
 
     checkAccess();
-  }, [userRole, loading, allowedRoles, redirectTo, router, pathname]);
+  }, [user, userRole, loading, fetchUserRole, allowedRoles, redirectTo, router, pathname]);
 
   // Show loading state while checking
   if (loading || isChecking) {

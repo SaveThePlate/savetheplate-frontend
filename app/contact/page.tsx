@@ -8,10 +8,12 @@ import { Mail, Phone, MapPin, Send, MessageSquare, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { useUser } from "@/context/UserContext";
 
 const ContactPage = () => {
   const router = useRouter();
   const { t } = useLanguage();
+  const { userRole, user } = useUser();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,49 +21,17 @@ const ContactPage = () => {
     message: "",
   });
   const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setUserRole(null);
-        return;
-      }
-      try {
-        const response = await axiosInstance.get(
-          `/users/get-role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setUserRole(response.data.role);
-        
-        // Pre-fill email if available
-        try {
-          const userResponse = await axiosInstance.get(
-            `/users/me`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          if (userResponse.data?.email) {
-            setFormData((prev) => ({
-              ...prev,
-              email: userResponse.data.email,
-              name: userResponse.data.username || prev.name,
-            }));
-          }
-        } catch (err) {
-          console.error("Failed to fetch user data:", err);
-        }
-      } catch (error) {
-        console.error("Error fetching user role:", error);
-        setUserRole(null);
-      }
-    };
-    fetchUserRole();
-  }, []);
+    // Pre-fill from UserContext (single source of truth: `/users/me`)
+    if (user?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email,
+        name: user.username || prev.name,
+      }));
+    }
+  }, [user?.email, user?.username]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

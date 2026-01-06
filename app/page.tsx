@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 import CarbonFootprint from "@/components/CarbonFootprint";
 import { Button } from "@/components/ui/button";
 import { 
@@ -24,6 +24,7 @@ const WelcomePage = () => {
   const router = useRouter();
   const { t } = useLanguage();
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const { user, userRole, loading: userLoading, fetchUserRole } = useUser();
 
   // Check if user is already authenticated on page load
   useEffect(() => {
@@ -35,42 +36,28 @@ const WelcomePage = () => {
       }
 
       try {
-        const response = await axiosInstance.get(
-          `/users/get-role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const userRole = response?.data?.role;
-        if (userRole === 'PROVIDER') {
-          // Check if provider has submitted location details
-          // If they have details, redirect to provider home
-          // If not, allow them to stay on landing page (they can navigate to onboarding manually)
-          try {
-            const userDetails = await axiosInstance.get(
-              `/users/me`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            // Only redirect to provider home if they have completed details
-            if (phoneNumber && mapsLink) {
-              router.push("/provider/home");
-            } else {
-              // Allow them to stay on landing page - they can navigate to onboarding manually
-              setCheckingAuth(false);
-            }
-          } catch (error) {
-            // If we can't fetch user details, allow them to stay on landing page
-            console.error("Error fetching user details:", error);
-            setCheckingAuth(false);
-          }
-        } else if (userRole === 'CLIENT') {
-          router.push("/client/home");
-        } else {
-          // Role is NONE, PENDING_PROVIDER, or any other value - stay on landing page
-          setCheckingAuth(false);
+        // Ensure context is populated (single session bootstrap: `/users/me`)
+        if (!userLoading && !userRole) {
+          await fetchUserRole();
         }
+
+        // Landing page behavior:
+        // - CLIENT: go straight to client home
+        // - PROVIDER: only auto-redirect if they have completed required details
+        // - NONE / PENDING_PROVIDER: stay on landing page
+        if (userRole === "CLIENT") {
+          router.push("/client/home");
+          return;
+        }
+        if (userRole === "PROVIDER") {
+          const phoneNumber = (user as any)?.phoneNumber;
+          const mapsLink = (user as any)?.mapsLink;
+          if (phoneNumber && mapsLink) {
+            router.push("/provider/home");
+            return;
+          }
+        }
+        setCheckingAuth(false);
       } catch (error) {
         // Token is invalid or expired, stay on landing page
         console.debug("Token check failed, staying on landing page");
@@ -78,7 +65,7 @@ const WelcomePage = () => {
       }
     };
     checkAuth();
-  }, [router]);
+  }, [router, user, userRole, userLoading, fetchUserRole]);
 
   const handleGetStarted = () => {
     // Clear all tokens and localStorage to start fresh onboarding

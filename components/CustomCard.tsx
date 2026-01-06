@@ -21,6 +21,7 @@ import {
 import { useBlobUrl } from "@/hooks/useBlobUrl";
 import { getBackendOrigin } from "@/lib/backendOrigin";
 import { Check } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 import {
   Credenza,
   CredenzaTrigger,
@@ -92,6 +93,7 @@ const CustomCard: FC<CustomCardProps> = ({
 }) => {
   const { t } = useLanguage();
   const router = useRouter();
+  const { userRole } = useUser();
   const { createBlobUrl, revokeBlobUrl } = useBlobUrl();
   const blobUrlMapRef = React.useRef<Map<File, string>>(new Map());
   const [role, setRole] = useState<string | null>(null);
@@ -139,23 +141,13 @@ const CustomCard: FC<CustomCardProps> = ({
   const isClient = role === "CLIENT";
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
-      try {
-        const response = await axiosInstance.get(
-          `/users/get-role`
-        );
-        setRole(response?.data?.role);
-      } catch {
-        router.push("/onboarding");
-      }
-    };
-    fetchUserRole();
-  }, [router]);
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      router.push("/signIn");
+      return;
+    }
+    if (userRole) setRole(userRole);
+  }, [router, userRole]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

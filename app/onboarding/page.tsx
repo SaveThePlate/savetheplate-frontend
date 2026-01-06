@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -13,9 +14,10 @@ import { ArrowLeft } from "lucide-react";
 const OnboardingPage = () => {
   const router = useRouter();
   const { t } = useLanguage();
+  const { userRole, loading: userLoading, fetchUserRole } = useUser();
   const [role, setRole] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const didAttemptRoleFetchRef = useRef(false);
 
   // Check if user already has a role and pre-select it
   useEffect(() => {
@@ -23,18 +25,20 @@ const OnboardingPage = () => {
       try {
         const token = localStorage.getItem("accessToken");
         if (!token) {
-          setLoading(false);
           return;
         }
 
-        const response = await axiosInstance.get(
-          `/users/get-role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        // Prefer UserContext (already fetched on app load) to avoid duplicate calls.
+        // If context isn't ready yet, fetch once via context helper.
+        if (userLoading) return;
+        if (!userRole) {
+          // Trigger a single refresh; avoid infinite loops if the request keeps failing.
+          if (didAttemptRoleFetchRef.current) return;
+          didAttemptRoleFetchRef.current = true;
+          await fetchUserRole();
+          return;
+        }
 
-        const userRole = response?.data?.role;
         // Pre-select the role if user already has one (PROVIDER, CLIENT, or PENDING_PROVIDER)
         if (userRole && userRole !== 'NONE') {
           // Map PENDING_PROVIDER to PROVIDER for selection
@@ -42,13 +46,11 @@ const OnboardingPage = () => {
         }
       } catch (error) {
         console.error("Error checking current role:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     checkCurrentRole();
-  }, []);
+  }, [userRole, userLoading, fetchUserRole]);
 
   const handleRoleSelect = (selectedRole: string) => setRole(selectedRole);
 
@@ -122,7 +124,7 @@ const OnboardingPage = () => {
   };
 
   // Show loading state while checking current role
-  if (loading) {
+  if (userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 px-4">
         <div className="flex flex-col items-center gap-3">

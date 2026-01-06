@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isOfferExpired } from "./offerCard/utils";
 import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
+import { useUser } from "@/context/UserContext";
 
 interface Offer {
   id: number;
@@ -64,7 +65,7 @@ const OffersPage = () => {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { userRole } = useUser();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filter, setFilter] = useState<FilterType>("all");
   const [sort, setSort] = useState<SortType>("newest");
@@ -121,18 +122,6 @@ const OffersPage = () => {
       router.push("/signIn");
       return;
     }
-
-    const fetchUserRole = async () => {
-      try {
-        const response = await axiosInstance.get(`/users/get-role`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUserRole(response.data.role);
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-        // Don't set error for role fetch failure - it's non-critical
-      }
-    };
 
     const fetchOffers = async () => {
       try {
@@ -309,7 +298,7 @@ const OffersPage = () => {
       }
     };
 
-    Promise.all([fetchUserRole(), fetchOffers()]).catch((err) => {
+    fetchOffers().catch((err) => {
       console.error("Error during data fetching:", err);
       setError(t("offers.error_generic") || "Unable to load offers. Please refresh the page.");
       setLoading(false);

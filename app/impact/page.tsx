@@ -2,42 +2,18 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { axiosInstance } from "@/lib/axiosInstance";
 import { ArrowLeft, Leaf, Droplet, Cloud, TreePine, Calculator, Info, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import SharedLayout from "@/components/SharedLayout";
 import RouteGuard from "@/components/RouteGuard";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/context/UserContext";
 
 const ImpactPage = () => {
   const router = useRouter();
   const { t } = useLanguage();
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axiosInstance.get(`/users/get-role`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUserRole(response.data.role);
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserRole();
-  }, []);
+  const { userRole, loading } = useUser();
 
   return (
     <RouteGuard allowedRoles={["CLIENT", "PROVIDER"]} redirectTo="/signIn">

@@ -5,62 +5,20 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Home, ShoppingBag, User, LogOut, Menu, X, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { axiosInstance } from "@/lib/axiosInstance";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 
 export default function SharedLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { userRole, user } = useUser();
   const router = useRouter();
   const { t } = useLanguage();
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          return;
-        }
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          if (payload?.id) {
-            setUserId(String(payload.id));
-          }
-        } catch (parseError) {
-          console.warn("Error parsing token:", parseError);
-          // Try to get userId from API if token parsing fails
-          try {
-            const userResponse = await axiosInstance.get(
-              `/users/me`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            if (userResponse.data?.id) {
-              setUserId(String(userResponse.data.id));
-            }
-          } catch (apiError) {
-            console.error("Error fetching user info:", apiError);
-          }
-        }
-
-        try {
-          const response = await axiosInstance.get(
-            `/users/get-role`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          setUserRole(response.data.role);
-        } catch (err) {
-          console.error("Error fetching role:", err);
-        }
-      } catch (error) {
-        console.warn("Error in fetchUserInfo:", error);
-      }
-    };
-    fetchUserInfo();
-  }, []);
+    if (user?.id) setUserId(String(user.id));
+  }, [user?.id]);
 
   const isClient = userRole === "CLIENT";
   const isProvider = userRole === "PROVIDER";

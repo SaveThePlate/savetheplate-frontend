@@ -16,6 +16,8 @@ import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { GoogleLogin } from "@react-oauth/google";
 import { LocalStorage } from "@/lib/utils";
 import { Home } from "lucide-react";
+import { useUser } from "@/context/UserContext";
+import { getPostAuthRedirect } from "@/lib/authRedirect";
 
 export default function SignIn() {
   const { t, language } = useLanguage();
@@ -43,6 +45,7 @@ export default function SignIn() {
 
   const clientApi = useOpenApiFetch();
   const router = useRouter();
+  const { user, userRole, loading: userLoading, fetchUserRole } = useUser();
 
   // Check if user is already signed in
   useEffect(() => {
@@ -55,40 +58,17 @@ export default function SignIn() {
       }
 
       try {
-        const response = await axiosInstance.get(
-          `/users/get-role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const userRole = response?.data?.role;
-        if (userRole === 'PROVIDER') {
-          // Check if provider has submitted location details
-          // If not, redirect to fillDetails page to complete their information
-          try {
-            const userDetails = await axiosInstance.get(
-              `/users/me`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            // If location details are missing, redirect to fillDetails page to complete them
-            if (!phoneNumber || !mapsLink) {
-              router.push("/onboarding/fillDetails");
-            } else {
-              router.push("/provider/home");
-            }
-          } catch (error) {
-            // If we can't fetch user details, redirect to fillDetails to be safe
-            console.error("Error fetching user details:", error);
-            router.push("/onboarding/fillDetails");
-          }
-        } else if (userRole === 'CLIENT') {
-          // Redirect to client home
-          router.push("/client/home");
-        } else {
-          setCheckingAuth(false);
+        // Ensure UserContext has current user (single source of truth).
+        if (!userLoading && !userRole) {
+          await fetchUserRole();
         }
+
+        const redirectTo = getPostAuthRedirect(user);
+        if (redirectTo !== "/onboarding") {
+          router.push(redirectTo);
+          return;
+        }
+        setCheckingAuth(false);
       } catch (error) {
         // Token is invalid or expired, allow sign in
         console.debug("Token check failed, showing sign in form");
@@ -97,7 +77,7 @@ export default function SignIn() {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, user, userRole, userLoading, fetchUserRole]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -191,32 +171,19 @@ export default function SignIn() {
 
             // Email is verified, proceed with normal flow
 
-            const role = response.data.role || response.data.user?.role;
-            let redirectTo = '/onboarding';
-
-            if (role === 'PROVIDER') {
-              try {
-                const userDetails = await axiosInstance.get(
-                  `/users/me`,
-                  { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
-                );
-                const { phoneNumber, mapsLink } = userDetails.data || {};
-                if (!phoneNumber || !mapsLink) {
-                  redirectTo = '/onboarding/fillDetails';
-                } else {
-                  redirectTo = '/provider/home';
-                }
-              } catch (error) {
-                console.error("Error fetching user details:", error);
-                redirectTo = '/onboarding/fillDetails';
-              }
-            } else if (role === 'PENDING_PROVIDER') {
-              redirectTo = '/onboarding/thank-you';
-            } else if (role === 'CLIENT') {
-              redirectTo = '/client/home';
+            // Single source of truth: fetch `/users/me` and redirect from it.
+            try {
+              const meResp = await axiosInstance.get(`/users/me`, {
+                headers: { Authorization: `Bearer ${response.data.accessToken}` },
+              });
+              // Refresh global user context (best-effort; don't block redirect)
+              fetchUserRole().catch(() => {});
+              router.push(getPostAuthRedirect(meResp.data));
+            } catch (e) {
+              // If `/users/me` fails, fallback to onboarding (RouteGuard will handle later).
+              fetchUserRole().catch(() => {});
+              router.push("/onboarding");
             }
-
-            router.push(redirectTo);
           } else {
             throw new Error("Invalid response from server");
           }
@@ -247,32 +214,17 @@ export default function SignIn() {
             LocalStorage.setItem("accessToken", response.data.accessToken);
             LocalStorage.removeItem("remember");
 
-            const role = response.data.role || response.data.user?.role;
-            let redirectTo = '/onboarding';
-
-            if (role === 'PROVIDER') {
-              try {
-                const userDetails = await axiosInstance.get(
-                  `/users/me`,
-                  { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
-                );
-                const { phoneNumber, mapsLink } = userDetails.data || {};
-                if (!phoneNumber || !mapsLink) {
-                  redirectTo = '/onboarding/fillDetails';
-                } else {
-                  redirectTo = '/provider/home';
-                }
-              } catch (error) {
-                console.error("Error fetching user details:", error);
-                redirectTo = '/onboarding/fillDetails';
-              }
-            } else if (role === 'PENDING_PROVIDER') {
-              redirectTo = '/onboarding/thank-you';
-            } else if (role === 'CLIENT') {
-              redirectTo = '/client/home';
+            // Single source of truth: fetch `/users/me` and redirect from it.
+            try {
+              const meResp = await axiosInstance.get(`/users/me`, {
+                headers: { Authorization: `Bearer ${response.data.accessToken}` },
+              });
+              fetchUserRole().catch(() => {});
+              router.push(getPostAuthRedirect(meResp.data));
+            } catch (e) {
+              fetchUserRole().catch(() => {});
+              router.push("/onboarding");
             }
-
-            router.push(redirectTo);
           } else {
             throw new Error("Invalid response from server");
           }
@@ -500,36 +452,17 @@ export default function SignIn() {
         LocalStorage.setItem("accessToken", response.data.accessToken);
         LocalStorage.removeItem("remember");
 
-        // Determine redirect based on user's role
-        const role = response.data.role || response.data.user?.role;
-        let redirectTo = '/onboarding'; // Default for new users
-
-        // If user has a valid role, determine redirect
-        if (role === 'PROVIDER') {
-          // Check if provider has submitted location details
-          try {
-            const userDetails = await axiosInstance.get(
-              `/users/me`,
-              { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
-            );
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            if (!phoneNumber || !mapsLink) {
-              redirectTo = '/onboarding/fillDetails';
-            } else {
-              redirectTo = '/provider/home';
-            }
-          } catch (error) {
-            console.error("Error fetching user details:", error);
-            redirectTo = '/onboarding/fillDetails';
-          }
-        } else if (role === 'PENDING_PROVIDER') {
-          redirectTo = '/onboarding/thank-you';
-        } else if (role === 'CLIENT') {
-          redirectTo = '/client/home';
+        // Single source of truth: fetch `/users/me` and redirect from it.
+        try {
+          const meResp = await axiosInstance.get(`/users/me`, {
+            headers: { Authorization: `Bearer ${response.data.accessToken}` },
+          });
+          fetchUserRole().catch(() => {});
+          router.push(getPostAuthRedirect(meResp.data));
+        } catch (e) {
+          fetchUserRole().catch(() => {});
+          router.push("/onboarding");
         }
-
-        // Redirect user
-        router.push(redirectTo);
       } else {
         throw new Error("Invalid response from server");
       }

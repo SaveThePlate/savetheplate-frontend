@@ -2,38 +2,14 @@
 import Link from "next/link";
 import Image from 'next/image';
 import { Button } from "./ui/button";
-import { useEffect, useState } from 'react';
-import { axiosInstance } from '@/lib/axiosInstance';
+import { useState } from 'react';
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 
 const Nav = () => {
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { userRole } = useUser();
   const { t } = useLanguage();
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      const token = localStorage.getItem('accessToken');
-      try {
-        const response = await axiosInstance.get('/users/get-role', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.status === 200) {
-          setUserRole(response.data.role);
-        } else {
-          console.error('Failed to fetch user role:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching user role:');
-      }
-    };
-
-    fetchUserRole();
-  }, []);
 
   return (
     <header className='w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16'>

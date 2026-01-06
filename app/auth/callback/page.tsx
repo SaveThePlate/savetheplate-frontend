@@ -6,6 +6,7 @@ import { LocalStorage } from "@/lib/utils";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useLanguage } from "@/context/LanguageContext";
+import { getPostAuthRedirect } from "@/lib/authRedirect";
 
 /**
  * Facebook OAuth Callback Handler
@@ -98,50 +99,16 @@ function FacebookAuthCallbackContent() {
         LocalStorage.setItem("accessToken", backendResponse.data.accessToken);
         LocalStorage.removeItem("remember");
 
-        // Determine redirect based on user's role
-        const role = backendResponse.data.role || backendResponse.data.user?.role;
-        let redirectTo = "/onboarding"; // Default for new users
-
-        // If user has a valid role, determine redirect
-        if (role === "PROVIDER") {
-          try {
-            const userDetails = await axiosInstance.get(
-              `/users/me`,
-              {
-                headers: {
-                  Authorization: `Bearer ${backendResponse.data.accessToken}`,
-                },
-              }
-            );
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            if (!phoneNumber || !mapsLink) {
-              redirectTo = "/onboarding/fillDetails";
-            } else {
-              redirectTo = "/provider/home";
-            }
-          } catch (error) {
-            console.error("Error fetching user details:", error);
-            redirectTo = "/onboarding/fillDetails";
-          }
-        } else if (role === "PENDING_PROVIDER") {
-          redirectTo = "/onboarding/thank-you";
-        } else if (role === "CLIENT") {
-          redirectTo = "/client/home";
+        // Single source of truth: fetch `/users/me` then redirect from it.
+        // This keeps redirect behavior consistent across password / Google / Facebook flows.
+        try {
+          const meResp = await axiosInstance.get(`/users/me`, {
+            headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` },
+          });
+          router.push(getPostAuthRedirect(meResp.data));
+        } catch (e) {
+          router.push("/onboarding");
         }
-
-        // Use backend's redirectTo if provided and valid
-        if (
-          role &&
-          role !== "NONE" &&
-          typeof backendResponse.data.redirectTo === "string" &&
-          backendResponse.data.redirectTo &&
-          backendResponse.data.redirectTo !== "/"
-        ) {
-          redirectTo = backendResponse.data.redirectTo;
-        }
-
-        // Redirect user
-        router.push(redirectTo);
       } catch (err: any) {
         console.error("Error handling Facebook OAuth callback:", err);
         console.error("Error details:", {

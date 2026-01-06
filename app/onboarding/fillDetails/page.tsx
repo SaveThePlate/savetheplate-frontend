@@ -8,15 +8,18 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 import { ArrowLeft } from "lucide-react";
 
 const FillDetails = () => {
   const router = useRouter();
   const { t } = useLanguage();
+  const { userRole, loading: userLoading, fetchUserRole } = useUser();
   const [location, setLocation] = useState(""); // extracted restaurant name
   const [phoneNumber, setPhoneNumber] = useState("");
   const [mapsLink, setMapsLink] = useState("");
   const [checkingRole, setCheckingRole] = useState(true);
+  const didAttemptRoleFetchRef = useRef(false);
 
   // Check if user has PROVIDER role, if not redirect to onboarding
   useEffect(() => {
@@ -28,16 +31,21 @@ const FillDetails = () => {
           return;
         }
 
-        const response = await axiosInstance.get(
-          `/users/get-role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
+        // Prefer role from UserContext to avoid duplicate calls.
+        // If context isn't ready or doesn't have a role yet, fetch once.
+        if (userLoading) return;
+        if (!userRole) {
+          // Avoid infinite loops if role fetch keeps failing.
+          if (didAttemptRoleFetchRef.current) {
+            router.push("/signIn");
+            return;
           }
-        );
+          didAttemptRoleFetchRef.current = true;
+          await fetchUserRole();
+          return; // effect will re-run with updated userRole
+        }
 
-        const userRole = response?.data?.role;
-        // If user doesn't have PROVIDER role, redirect to onboarding (role setting page)
-        if (userRole !== 'PROVIDER') {
+        if (userRole !== "PROVIDER") {
           router.push("/onboarding");
           return;
         }
@@ -50,7 +58,7 @@ const FillDetails = () => {
     };
 
     checkRole();
-  }, [router]);
+  }, [router, userRole, userLoading, fetchUserRole]);
 
   // Clean and extract Google Maps URL from pasted text
   const cleanGoogleMapsUrl = (text: string): string => {
@@ -203,7 +211,9 @@ const FillDetails = () => {
     if (cleanedUrl && cleanedUrl !== pastedText) {
       e.preventDefault();
       setMapsLink(cleanedUrl);
-      fetchLocationName(cleanedUrl);
+      // Avoid firing an immediate API call here; on mobile, paste often triggers both
+      // onPaste and onChange which can double-hit the endpoint. Debounced onChange
+      // will handle extraction.
     }
   };
 

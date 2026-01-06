@@ -4,6 +4,7 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { axiosInstance } from "@/lib/axiosInstance";
+import { getPostAuthRedirect } from "@/lib/authRedirect";
 
 interface Props {
   children: ReactNode;
@@ -44,22 +45,17 @@ export class ErrorBoundary extends Component<Props, State> {
         // Token parsing failed, will try API
       }
 
-      // Fetch role from API
-      const response = await axiosInstance.get(
-        `/users/get-role`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      // Fetch session user from API (single source of truth)
+      const response = await axiosInstance.get(`/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const role = response?.data?.role;
-      if (role === "PROVIDER") {
-        return "/provider/home";
-      } else if (role === "CLIENT") {
-        return "/client/home";
-      } else {
-        return "/signIn";
+      const redirectTo = getPostAuthRedirect(response?.data);
+      // ErrorBoundary "Go Home" should not push users into onboarding flows
+      if (redirectTo === "/client/home" || redirectTo === "/provider/home") {
+        return redirectTo;
       }
+      return "/signIn";
     } catch (error) {
       // If we can't determine role, go to sign in
       console.error("Error determining user role for redirect:", error);

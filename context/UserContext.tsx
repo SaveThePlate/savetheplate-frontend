@@ -1,60 +1,92 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { sanitizeErrorMessage } from '@/utils/errorUtils';
-import { axiosInstance } from '@/lib/axiosInstance';
+
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useCallback,
+  useState,
+} from "react";
+import { sanitizeErrorMessage } from "@/utils/errorUtils";
+import { axiosInstance } from "@/lib/axiosInstance";
+
+export type AuthUser = {
+  id: number;
+  email: string;
+  username: string;
+  role: string;
+  phoneNumber?: number | null;
+  mapsLink?: string | null;
+  location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  profileImage?: string | null;
+  emailVerified?: boolean | null;
+};
+
 interface UserContextType {
+  /** Full authenticated user object (from `/users/me`) */
+  user: AuthUser | null;
+  /** Convenience: same as `user?.role` */
   userRole: string | null;
   loading: boolean;
   error: string | null;
+  /**
+   * Legacy name kept to minimize churn: refreshes user session information.
+   * Internally this calls `/users/me`.
+   */
   fetchUserRole: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  
+
   const fetchUserRole = useCallback(async () => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem("accessToken");
     if (!token) {
-      // No token - user is not authenticated, but don't redirect
-      // Let individual pages handle their own authentication checks
+      setUser(null);
       setUserRole(null);
       setLoading(false);
       return;
     }
 
     try {
-      const response = await axiosInstance.get('/users/get-role', {
+      const response = await axiosInstance.get("/users/me", {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
-      if (response.status === 200) {
-        setUserRole(response.data.role);
-      } else {
-        console.error('Failed to fetch user role:', response.data.message);
-        const errorMsg = sanitizeErrorMessage({ response: { data: { message: response.data.message } } }, {
-          action: "load user information",
-          defaultMessage: "Unable to load user information. Please try again later."
-        });
-        setError(errorMsg);
+      const me = response?.data as AuthUser;
+      setUser(me || null);
+      setUserRole(me?.role || null);
+      setError(null);
+    } catch (err: any) {
+      // If auth is invalid, clear local token and reset session.
+      const status = err?.response?.status;
+      if (status === 401 || status === 403) {
+        try {
+          localStorage.removeItem("accessToken");
+        } catch {}
+        setUser(null);
         setUserRole(null);
       }
-    } catch (error: any) {
-      console.error('Error fetching user role:', error);
-      const errorMsg = sanitizeErrorMessage(error, {
+
+      const errorMsg = sanitizeErrorMessage(err, {
         action: "load user information",
-        defaultMessage: "Unable to load user information. Please try again later."
+        defaultMessage:
+          "Unable to load user information. Please try again later.",
       });
       setError(errorMsg);
-      setUserRole(null);
     } finally {
       setLoading(false);
     }
@@ -64,23 +96,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchUserRole();
   }, [fetchUserRole]);
 
-  // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(
-    () => ({ userRole, loading, error, fetchUserRole }),
-    [userRole, loading, error, fetchUserRole]
+    () => ({ user, userRole, loading, error, fetchUserRole }),
+    [user, userRole, loading, error, fetchUserRole],
   );
 
   return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>
   );
 };
 
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
