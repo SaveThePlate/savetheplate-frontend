@@ -119,8 +119,8 @@ fi
 # Option 2 : Docker Compose (si fichier docker-compose présent)
 if [ $RESTARTED -eq 0 ] && [ -f "$REPO_DIR/../docker-compose.yml" ]; then
     if docker-compose -f "$REPO_DIR/../docker-compose.yml" ps | grep -q frontend; then
-        log "Redémarrage via Docker Compose..."
-        (cd "$REPO_DIR/.." && docker-compose restart frontend) 2>&1 | tee -a "$LOG_FILE" && RESTARTED=1
+        log "Redémarrage via Docker Compose (rebuild)..."
+        (cd "$REPO_DIR/.." && docker-compose up -d --no-deps --build frontend) 2>&1 | tee -a "$LOG_FILE" && RESTARTED=1
     fi
 fi
 
