@@ -45,7 +45,8 @@ const FillDetails = () => {
           return; // effect will re-run with updated userRole
         }
 
-        if (userRole !== "PROVIDER") {
+        // Allow both PROVIDER and PENDING_PROVIDER to access this page
+        if (userRole !== "PROVIDER" && userRole !== "PENDING_PROVIDER") {
           router.push("/onboarding");
           return;
         }

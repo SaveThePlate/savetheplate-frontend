@@ -43,19 +43,15 @@ const WelcomePage = () => {
 
         // Landing page behavior:
         // - CLIENT: go straight to client home
-        // - PROVIDER: only auto-redirect if they have completed required details
-        // - NONE / PENDING_PROVIDER: stay on landing page
+        // - PROVIDER / PENDING_PROVIDER: go to provider home
+        // - NONE: stay on landing page
         if (userRole === "CLIENT") {
           router.push("/client/home");
           return;
         }
-        if (userRole === "PROVIDER") {
-          const phoneNumber = (user as any)?.phoneNumber;
-          const mapsLink = (user as any)?.mapsLink;
-          if (phoneNumber && mapsLink) {
-            router.push("/provider/home");
-            return;
-          }
+        if (userRole === "PROVIDER" || userRole === "PENDING_PROVIDER") {
+          router.push("/provider/home");
+          return;
         }
         setCheckingAuth(false);
       } catch (error) {
@@ -147,13 +143,24 @@ const WelcomePage = () => {
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button
-                  onClick={handleSignIn}
+                  onClick={() => router.push("/business-signup")}
                   variant="outline"
                   size="lg"
-                  className="bg-white/90 backdrop-blur-sm hover:bg-white text-primary hover:text-primary border-2 border-primary shadow-md hover:shadow-lg transform hover:scale-105 font-bold"
+                  className="group bg-amber-50/90 backdrop-blur-sm hover:bg-amber-100 text-amber-700 hover:text-amber-800 border-2 border-amber-300 hover:border-amber-400 shadow-md hover:shadow-lg transform hover:scale-105 font-bold"
                 >
-                  {t("landing.sign_in")}
+                  <Store className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  {t("landing.register_business")}
                 </Button>
+              </div>
+              
+              {/* Sign In Link */}
+              <div className="mt-3 text-center lg:text-left">
+                <button
+                  onClick={handleSignIn}
+                  className="text-sm text-gray-600 hover:text-primary transition-colors underline underline-offset-4"
+                >
+                  {t("landing.already_member")} {t("landing.sign_in")}
+                </button>
               </div>
             </div>
 
@@ -342,12 +349,15 @@ const WelcomePage = () => {
                     <span>{t("landing.business_benefit3")}</span>
                   </li>
                 </ul>
-                <button
-                  onClick={handleGetStarted}
-                  className="px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-primary font-bold rounded-lg hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
+                <Button
+                  onClick={() => router.push("/business-signup")}
+                  size="lg"
+                  className="bg-white text-primary hover:bg-gray-100 font-bold shadow-lg group"
                 >
-                  {t("landing.start_listing")}
-                </button>
+                  <Store className="w-5 h-5 mr-2" />
+                  {t("landing.register_business")}
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
               </div>
               <div className="hidden lg:block">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-white/20">
@@ -375,15 +385,26 @@ const WelcomePage = () => {
           <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
             {t("landing.ready_desc")}
           </p>
-          <Button
-            onClick={handleGetStarted}
-            variant="emerald"
-            size="lg"
-            className="shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mx-auto"
-          >
-            {t("landing.get_started_now")}
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button
+              onClick={handleGetStarted}
+              variant="emerald"
+              size="lg"
+              className="shadow-lg hover:shadow-xl transition-all duration-300 group"
+            >
+              {t("landing.get_started_now")}
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button
+              onClick={() => router.push("/business-signup")}
+              variant="outline"
+              size="lg"
+              className="bg-white/90 hover:bg-white text-amber-700 border-2 border-amber-300 hover:border-amber-400 shadow-md hover:shadow-lg group"
+            >
+              <Store className="w-5 h-5 mr-2" />
+              {t("landing.for_business")}
+            </Button>
+          </div>
         </div>
       </section>
 

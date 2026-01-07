@@ -81,12 +81,6 @@ export default function Preferences() {
         </div>
       </div>
 
-      {/* Info Note */}
-      <div className="bg-white border border-border rounded-xl p-3 sm:p-4">
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          <strong className="text-foreground">{t("preferences.note") || "Note:"}</strong> {t("preferences.noteText") || "Changing the language will update the app interface immediately."}
-        </p>
-      </div>
     </div>
   );
 }

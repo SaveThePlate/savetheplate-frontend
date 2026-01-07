@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { UserProvider } from "@/context/UserContext";
 import { LanguageProvider } from "@/context/LanguageContext";
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import FacebookSDK from "@/components/FacebookSDK";
@@ -129,7 +129,7 @@ export default function RootLayout({
               <main className="flex-1">
                 {children}
               </main>
-              <Footer />
+              <ConditionalFooter />
 
               <Toaster 
                 position="top-center" 

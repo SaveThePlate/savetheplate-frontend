@@ -58,10 +58,8 @@ export default function RouteGuard({
         // Redirect based on role
         if (currentRole === "CLIENT") {
           router.push("/client/home");
-        } else if (currentRole === "PROVIDER") {
+        } else if (currentRole === "PROVIDER" || currentRole === "PENDING_PROVIDER") {
           router.push("/provider/home");
-        } else if (currentRole === "PENDING_PROVIDER") {
-          router.push("/onboarding/thank-you");
         } else if (currentRole === "NONE") {
           router.push("/onboarding");
         } else {
@@ -69,16 +67,6 @@ export default function RouteGuard({
           router.push(redirectTo);
         }
         return;
-      }
-
-      // For PROVIDER role, check if they have completed location details
-      if (currentRole === "PROVIDER" && allowedRoles.includes("PROVIDER")) {
-        const phoneNumber = (user as any)?.phoneNumber;
-        const mapsLink = (user as any)?.mapsLink;
-        if (!phoneNumber || !mapsLink) {
-          router.push("/onboarding/fillDetails");
-          return;
-        }
       }
 
       // Access granted

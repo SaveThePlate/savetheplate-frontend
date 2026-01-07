@@ -7,8 +7,8 @@ import type { AuthIntentRole } from "@/lib/authIntent";
  * Rules:
  * - role NONE (or missing): go to onboarding role selection
  * - role CLIENT: go to client home
- * - role PENDING_PROVIDER: go to onboarding thank-you
- * - role PROVIDER: if missing required provider details -> onboarding fillDetails, else provider home
+ * - role PENDING_PROVIDER: go to provider home (allows quick onboarding)
+ * - role PROVIDER: go to provider home (fully approved provider)
  */
 export function getPostAuthRedirect(
   user: AuthUser | null | undefined,
@@ -22,12 +22,11 @@ export function getPostAuthRedirect(
     return "/onboarding";
   }
   if (role === "CLIENT") return "/client/home";
-  if (role === "PENDING_PROVIDER") return "/onboarding/thank-you";
-
-  if (role === "PROVIDER") {
-    const hasPhone = !!user?.phoneNumber;
-    const hasMaps = !!(user?.mapsLink && String(user.mapsLink).trim());
-    return hasPhone && hasMaps ? "/provider/home" : "/onboarding/fillDetails";
+  
+  // Both PENDING_PROVIDER and PROVIDER go to provider home
+  // PENDING_PROVIDER can use the platform while awaiting approval
+  if (role === "PENDING_PROVIDER" || role === "PROVIDER") {
+    return "/provider/home";
   }
 
   // Unknown role: be safe and send to onboarding.

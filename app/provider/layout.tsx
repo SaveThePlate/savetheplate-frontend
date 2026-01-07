@@ -13,7 +13,7 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
   const { t } = useLanguage();
 
   return (
-    <RouteGuard allowedRoles={["PROVIDER"]} redirectTo="/signIn">
+    <RouteGuard allowedRoles={["PROVIDER", "PENDING_PROVIDER"]} redirectTo="/signIn">
       <section className="relative flex flex-col min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden" style={{ isolation: 'isolate' }}>
         {/* 🖥️ Desktop Sidebar Navigation */}
         <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-border shadow-lg z-40 flex-col">

@@ -285,11 +285,11 @@ const ProviderOrdersContent = () => {
   }, [safeOrders, searchQuery, activeTab]);
 
   return (
-    <main className="h-[100dvh] overflow-hidden pb-20 sm:pb-24 lg:pb-6 flex flex-col">
-      <div className="w-full mx-auto px-3 sm:px-4 max-w-2xl lg:max-w-6xl pt-6 sm:pt-8 md:pt-10 lg:pt-12 flex flex-col h-full">
+    <main className="min-h-screen overflow-y-auto pb-20 sm:pb-24 lg:pb-6">
+      <div className="w-full mx-auto px-3 sm:px-4 max-w-2xl lg:max-w-6xl pt-6 sm:pt-8 md:pt-10 lg:pt-12">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
           <div className="text-left flex-1">
             <h1 className="font-display font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl">
               {t("provider.orders_title")}
@@ -306,7 +306,7 @@ const ProviderOrdersContent = () => {
         </div>
 
         {/* Stats Cards - Clickable Filters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-3 flex-shrink-0">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-3">
             <button
               onClick={() => setActiveTab("all")}
               className={`bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
@@ -378,7 +378,7 @@ const ProviderOrdersContent = () => {
 
         {/* Search Bar */}
         {!loading && safeOrders.length > 0 && (
-          <div className="relative mb-2 sm:mb-3 flex-shrink-0">
+          <div className="relative mb-2 sm:mb-3">
             <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <Input
               type="text"
@@ -399,7 +399,7 @@ const ProviderOrdersContent = () => {
         )}
 
         {/* Tabs and Orders */}
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+        <div>
         {loading ? (
           <div className="space-y-3 sm:space-y-4">
             {[1, 2, 3].map((i) => (

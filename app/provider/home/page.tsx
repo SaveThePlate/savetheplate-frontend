@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { getBackendOrigin } from "@/lib/backendOrigin";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Edit2, Trash2, Package, Clock, MapPin, X } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Package, Clock, MapPin, X, AlertCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
 import { isOfferExpired } from "@/components/offerCard/utils";
@@ -22,6 +22,7 @@ import {
   CredenzaFooter,
 } from "@/components/ui/credenza";
 import { ProviderOfferCard } from "@/components/offerCard";
+import { useUser } from "@/context/UserContext";
 
 type FoodType = "snack" | "meal" | "beverage" | "other";
 type Taste = "sweet" | "salty" | "both" | "neutral";
@@ -65,6 +66,7 @@ type FilterType = "all" | "active" | "expired";
 const ProviderHome = () => {
   const router = useRouter();
   const { t } = useLanguage();
+  const { userRole } = useUser();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +75,7 @@ const ProviderHome = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [editingOfferId, setEditingOfferId] = useState<number | null>(null);
   const isMountedRef = useRef(true);
+  const isPendingProvider = userRole === "PENDING_PROVIDER";
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -335,6 +338,21 @@ const ProviderHome = () => {
   return (
     <main className="min-h-screen pb-24 px-4 pt-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Pending Provider Banner */}
+        {isPendingProvider && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-amber-900 mb-1">
+                {t("provider.home.pending_title") || "Account Under Review"}
+              </h3>
+              <p className="text-sm text-amber-800">
+                {t("provider.home.pending_message") || "Your provider account is currently under review. You can create and manage offers, but they will only be visible to customers once your account is approved by our team."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>

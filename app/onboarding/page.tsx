@@ -112,7 +112,7 @@ const OnboardingContent = () => {
         // Fallback to default redirects
         if (selectedRole === "PROVIDER") {
           writeAuthIntentRole(null);
-          router.push("/onboarding/fillDetails");
+          router.push("/provider/home");
         } else if (selectedRole === "CLIENT") {
           // Force full page reload for CLIENT to clear cached state
           writeAuthIntentRole(null);

@@ -85,7 +85,7 @@ export default function SignIn() {
     // Validate email format
     if (!email || !email.includes('@')) {
       setShowErrorToast(true);
-      setErrorMessage("Please enter a valid email address.");
+      setErrorMessage(t("signin.error_email_required"));
       setShowAuthToast(false);
       return;
     }
@@ -101,13 +101,13 @@ export default function SignIn() {
           // Sign up with password
           if (!password || password.length < 8) {
             setShowErrorToast(true);
-            setErrorMessage("Password must be at least 8 characters long.");
+            setErrorMessage(t("signin.error_password_short"));
             setLoading(false);
             return;
           }
           if (!username || username.trim().length === 0) {
             setShowErrorToast(true);
-            setErrorMessage("Username is required.");
+            setErrorMessage(t("signin.error_username_required"));
             setLoading(false);
             return;
           }
@@ -161,7 +161,7 @@ export default function SignIn() {
                 setShowErrorToast(true);
                 setErrorMessage(
                   emailError?.response?.data?.error || 
-                  "Account created but failed to send verification email. Please click 'Resend Code' to try again."
+                  t("signin.error_verification_email_failed")
                 );
               }
               
@@ -191,7 +191,7 @@ export default function SignIn() {
           // Sign in with password
           if (!password) {
             setShowErrorToast(true);
-            setErrorMessage("Password is required.");
+            setErrorMessage(t("signin.error_password_required"));
             setLoading(false);
             return;
           }
@@ -343,15 +343,8 @@ export default function SignIn() {
           const role = userDetails.data?.role;
           let redirectTo = '/onboarding';
 
-          if (role === 'PROVIDER') {
-            const { phoneNumber, mapsLink } = userDetails.data || {};
-            if (!phoneNumber || !mapsLink) {
-              redirectTo = '/onboarding/fillDetails';
-            } else {
-              redirectTo = '/provider/home';
-            }
-          } else if (role === 'PENDING_PROVIDER') {
-            redirectTo = '/onboarding/thank-you';
+          if (role === 'PROVIDER' || role === 'PENDING_PROVIDER') {
+            redirectTo = '/provider/home';
           } else if (role === 'CLIENT') {
             redirectTo = '/client/home';
           }
@@ -891,10 +884,10 @@ export default function SignIn() {
                     <span className="text-3xl">📧</span>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-                    Verify Your Email
+                    {t("signin.verify_email_title")}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    We&apos;ve sent a 6-digit verification code to <br />
+                    {t("signin.verify_email_desc")} <br />
                     <strong className="text-emerald-600">{signUpEmail}</strong>
                   </p>
                 </div>
@@ -902,11 +895,11 @@ export default function SignIn() {
                 <form onSubmit={handleVerifyCode} className="space-y-5">
                   <div>
                     <label htmlFor="verificationCode" className="block text-sm font-semibold text-foreground mb-3">
-                      Verification Code
+                      {t("signin.verification_code_label")}
                     </label>
                     <Input
                       id="verificationCode"
-                      placeholder="000000"
+                      placeholder={t("signin.verification_code_placeholder")}
                       className="w-full px-4 py-4 text-lg border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all text-center text-3xl tracking-[0.5em] font-mono"
                       type="text"
                       required
@@ -919,7 +912,7 @@ export default function SignIn() {
                       autoFocus
                     />
                     <p className="mt-2 text-xs text-muted-foreground text-center">
-                      Enter the 6-digit code from your email
+                      {t("signin.verification_code_hint")}
                     </p>
                   </div>
 
@@ -929,14 +922,14 @@ export default function SignIn() {
                       className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg"
                     >
                       <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
-                      Verifying...
+                      {t("signin.verifying")}
                     </Button>
                   ) : (
                     <Button
                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
                       type="submit"
                     >
-                      Verify Email
+                      {t("signin.verify_button")}
                     </Button>
                   )}
 
@@ -946,13 +939,13 @@ export default function SignIn() {
                     disabled={loading}
                     className="w-full text-sm text-emerald-600 hover:text-emerald-700 font-medium disabled:opacity-50 transition-colors"
                   >
-                    {loading ? "Sending..." : "Resend Code"}
+                    {loading ? t("signin.sending") : t("signin.resend_code")}
                   </button>
                 </form>
 
                 {showAuthToast && (
                   <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-800 transition-all duration-300">
-                    Verification code sent! Please check your email.
+                    {t("signin.verification_sent")}
                   </div>
                 )}
                 {showErrorToast && <ErrorToast message={errorMessage} />}
@@ -974,7 +967,7 @@ export default function SignIn() {
                     : "text-gray-700 hover:text-emerald-600 hover:bg-white"
                 }`}
               >
-                Sign In
+                {t("signin.sign_in")}
               </button>
               <button
                 type="button"
@@ -988,18 +981,18 @@ export default function SignIn() {
                     : "text-gray-700 hover:text-emerald-600 hover:bg-white"
                 }`}
               >
-                Sign Up
+                {t("signin.sign_up")}
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1.5">
                 <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
-                  Email Address
+                  {t("signin.email_label")}
                 </label>
                 <Input
                   id="email"
-                  placeholder="name@example.com"
+                  placeholder={t("signin.email_placeholder")}
                   className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                   type="email"
                   required
@@ -1013,11 +1006,11 @@ export default function SignIn() {
                 {isSignUp && (
                   <div className="space-y-1.5">
                     <label htmlFor="username" className="block text-sm font-semibold text-foreground mb-2">
-                      Username
+                      {t("signin.username_label")}
                     </label>
                     <Input
                       id="username"
-                      placeholder="john_doe"
+                      placeholder={t("signin.username_placeholder")}
                       className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                       type="text"
                       required
@@ -1029,11 +1022,11 @@ export default function SignIn() {
                 )}
                 <div className="space-y-1.5">
                   <label htmlFor="password" className="block text-sm font-semibold text-foreground mb-2">
-                    Password
+                    {t("signin.password_label")}
                   </label>
                   <Input
                     id="password"
-                    placeholder={isSignUp ? "At least 8 characters" : "Enter your password"}
+                    placeholder={isSignUp ? t("signin.password_placeholder_signup") : t("signin.password_placeholder_signin")}
                     className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                     type="password"
                     required
@@ -1045,7 +1038,7 @@ export default function SignIn() {
                   {isSignUp && (
                     <p className="mt-1.5 text-xs text-muted-foreground flex items-center gap-1">
                       <span>🔒</span>
-                      Password must be at least 8 characters long
+                      {t("signin.password_hint")}
                     </p>
                   )}
                 </div>
@@ -1057,7 +1050,7 @@ export default function SignIn() {
                   className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg mt-6"
                 >
                   <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
-                  {isSignUp ? "Signing up..." : "Signing in..."}
+                  {isSignUp ? t("signin.signing_up") : t("signin.signing_in")}
                 </Button>
               ) : (
                 <Button
@@ -1065,7 +1058,7 @@ export default function SignIn() {
                   type="submit"
                   id="sign-in-button"
                 >
-                  {isSignUp ? "Create Account" : "Sign In"}
+                  {isSignUp ? t("signin.sign_up") : t("signin.sign_in")}
                 </Button>
               )}
             </form>
