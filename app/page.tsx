@@ -150,7 +150,7 @@ const WelcomePage = () => {
                   onClick={handleSignIn}
                   variant="outline"
                   size="lg"
-                  className="bg-white/90 backdrop-blur-sm hover:bg-white text-primary border-2 border-primary shadow-md hover:shadow-lg transform hover:scale-105 font-bold"
+                  className="bg-white/90 backdrop-blur-sm hover:bg-white text-primary hover:text-primary border-2 border-primary shadow-md hover:shadow-lg transform hover:scale-105 font-bold"
                 >
                   {t("landing.sign_in")}
                 </Button>
@@ -158,26 +158,23 @@ const WelcomePage = () => {
             </div>
 
             {/* Right: Illustration - Takes 2 columns, more compact */}
-            <div className="lg:col-span-2 relative">
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-primary/20 p-6 sm:p-8 overflow-hidden">
-                <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-2xl opacity-40" />
-                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-accent/20 rounded-full blur-2xl opacity-40" />
-                
-                <div className="relative z-10 flex flex-col items-center">
-                  <Image
-                    src="/loveyou.png"
-                    width={200}
-                    height={200}
-                    alt={t("landing.illustration_alt")}
-                    className="mx-auto animate-float mb-4 w-auto h-auto"
-                    priority
-                  />
-                  <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl p-4 border-2 border-primary/20 w-full">
-                    <p className="text-center text-gray-800 font-semibold text-sm sm:text-base">
-                      &quot;{t("landing.quote")}&quot;
-                    </p>
-                  </div>
-                </div>
+            <div className="lg:col-span-2 relative flex items-center justify-center min-h-[400px]">
+              {/* Decorative background circles */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute w-64 h-64 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl opacity-60 animate-pulse" />
+                <div className="absolute w-48 h-48 bg-gradient-to-tr from-accent/30 to-primary/30 rounded-full blur-2xl opacity-40" style={{ animationDelay: '1s' }} />
+              </div>
+              
+              {/* Image container with shadow and styling */}
+              <div className="relative z-10 p-6 rounded-3xl bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-sm shadow-2xl">
+                <Image
+                  src="/newlander.png"
+                  width={350}
+                  height={350}
+                  alt={t("landing.illustration_alt")}
+                  className="animate-float w-auto h-auto max-w-full drop-shadow-2xl"
+                  priority
+                />
               </div>
             </div>
           </div>

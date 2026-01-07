@@ -35,7 +35,7 @@ const CarbonFootprint = () => {
                 {t("home.carbon_per_visit", { co2: "0.03" })}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {t("home.carbon_cleaner_than", { percentage: "34" })}
+                {t("home.carbon_cleaner_than", { percentage: "83" })}
               </p>
             </div>
           </div>

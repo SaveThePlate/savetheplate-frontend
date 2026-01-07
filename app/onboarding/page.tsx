@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -10,14 +10,34 @@ import { useUser } from "@/context/UserContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import {
+  normalizeAuthIntentRole,
+  readAuthIntentRole,
+  writeAuthIntentRole,
+  type AuthIntentRole,
+} from "@/lib/authIntent";
 
-const OnboardingPage = () => {
+const OnboardingContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useLanguage();
   const { userRole, loading: userLoading, fetchUserRole } = useUser();
   const [role, setRole] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const didAttemptRoleFetchRef = useRef(false);
+  const didAutoSubmitRef = useRef(false);
+  const [intentRole, setIntentRole] = useState<AuthIntentRole | null>(null);
+
+  // Capture auth intent from query/localStorage (e.g. /onboarding?intent=CLIENT)
+  useEffect(() => {
+    const fromQuery = normalizeAuthIntentRole(searchParams?.get("intent"));
+    if (fromQuery) {
+      writeAuthIntentRole(fromQuery);
+      setIntentRole(fromQuery);
+      return;
+    }
+    setIntentRole(readAuthIntentRole());
+  }, [searchParams]);
 
   // Check if user already has a role and pre-select it
   useEffect(() => {
@@ -54,10 +74,9 @@ const OnboardingPage = () => {
 
   const handleRoleSelect = (selectedRole: string) => setRole(selectedRole);
 
-  const handleSubmitRole = async () => {
-    if (!role) return;
-
+  const submitRole = async (selectedRole: "PROVIDER" | "CLIENT") => {
     setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -68,7 +87,7 @@ const OnboardingPage = () => {
 
       const response = await axiosInstance.post(
         `/users/set-role`,
-        { role },
+        { role: selectedRole },
         { 
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -82,17 +101,21 @@ const OnboardingPage = () => {
       if (redirectTo) {
         // For CLIENT role, use window.location.href to force a full page reload
         // This ensures UserContext and other cached state is refreshed
-        if (role === "CLIENT") {
+        if (selectedRole === "CLIENT") {
+          writeAuthIntentRole(null);
           window.location.href = redirectTo;
         } else {
+          writeAuthIntentRole(null);
           router.push(redirectTo);
         }
       } else {
         // Fallback to default redirects
-        if (role === "PROVIDER") {
+        if (selectedRole === "PROVIDER") {
+          writeAuthIntentRole(null);
           router.push("/onboarding/fillDetails");
-        } else if (role === "CLIENT") {
+        } else if (selectedRole === "CLIENT") {
           // Force full page reload for CLIENT to clear cached state
+          writeAuthIntentRole(null);
           window.location.href = "/client/home";
         }
       }
@@ -123,6 +146,28 @@ const OnboardingPage = () => {
     }
   };
 
+  const handleSubmitRole = async () => {
+    if (role !== "PROVIDER" && role !== "CLIENT") return;
+    await submitRole(role);
+  };
+
+  // If user has no role yet, and we know the intended role, auto-submit to make onboarding “one-click”.
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+    if (userLoading) return;
+    if (!userRole) return; // wait for context to populate
+
+    if (userRole === "NONE" && intentRole && !didAutoSubmitRef.current) {
+      didAutoSubmitRef.current = true;
+      setRole(intentRole);
+      submitRole(intentRole).catch(() => {
+        // If auto-submit fails, keep the UI available for manual retry.
+        didAutoSubmitRef.current = false;
+      });
+    }
+  }, [userRole, userLoading, intentRole]);
+
   // Show loading state while checking current role
   if (userLoading) {
     return (
@@ -130,6 +175,20 @@ const OnboardingPage = () => {
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-600 text-sm">{t("common.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Smooth path: if user came from a dedicated auth entry, auto-setting role should feel instant.
+  if (isSubmitting && intentRole && (userRole === "NONE" || !userRole)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 px-4">
+        <div className="flex flex-col items-center gap-3 text-center max-w-md">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-700 text-sm font-medium">
+            {t("onboarding.setting_up") || "Setting up your account..."}
+          </p>
         </div>
       </div>
     );
@@ -232,6 +291,21 @@ const OnboardingPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const OnboardingPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 text-sm">Loading...</p>
+        </div>
+      </div>
+    }>
+      <OnboardingContent />
+    </Suspense>
   );
 };
 

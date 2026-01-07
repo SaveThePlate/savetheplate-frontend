@@ -7,6 +7,7 @@ import { axiosInstance } from "@/lib/axiosInstance";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useLanguage } from "@/context/LanguageContext";
 import { getPostAuthRedirect } from "@/lib/authRedirect";
+import { readAuthIntentRole } from "@/lib/authIntent";
 
 /**
  * Facebook OAuth Callback Handler
@@ -105,9 +106,11 @@ function FacebookAuthCallbackContent() {
           const meResp = await axiosInstance.get(`/users/me`, {
             headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` },
           });
-          router.push(getPostAuthRedirect(meResp.data));
+          const intentRole = readAuthIntentRole();
+          router.push(getPostAuthRedirect(meResp.data, intentRole));
         } catch (e) {
-          router.push("/onboarding");
+          const intentRole = readAuthIntentRole();
+          router.push(intentRole ? `/onboarding?intent=${intentRole}` : "/onboarding");
         }
       } catch (err: any) {
         console.error("Error handling Facebook OAuth callback:", err);

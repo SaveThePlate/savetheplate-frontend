@@ -60,6 +60,10 @@ export default function RouteGuard({
           router.push("/client/home");
         } else if (currentRole === "PROVIDER") {
           router.push("/provider/home");
+        } else if (currentRole === "PENDING_PROVIDER") {
+          router.push("/onboarding/thank-you");
+        } else if (currentRole === "NONE") {
+          router.push("/onboarding");
         } else {
           // No valid role, redirect to sign in or onboarding
           router.push(redirectTo);
