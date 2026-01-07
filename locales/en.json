@@ -116,7 +116,7 @@
     "email_label": "Email Address",
     "email_placeholder": "name@example.com",
     "username_label": "Username",
-    "username_placeholder": "johndoe123",
+    "username_placeholder": "user123",
     "password_label": "Password",
     "password_placeholder_signin": "Enter your password",
     "password_placeholder_signup": "At least 8 characters",
