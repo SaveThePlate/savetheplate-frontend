@@ -395,7 +395,7 @@ const WelcomePage = () => {
               {t("landing.get_started_now")}
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button
+            {/* <Button
               onClick={() => router.push("/business-signup")}
               variant="outline"
               size="lg"
@@ -403,7 +403,7 @@ const WelcomePage = () => {
             >
               <Store className="w-5 h-5 mr-2" />
               {t("landing.for_business")}
-            </Button>
+            </Button> */}
           </div>
         </div>
       </section>

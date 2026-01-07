@@ -829,45 +829,45 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden flex items-center justify-center py-8 sm:py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden flex items-center justify-center py-4 sm:py-8 md:py-12 px-3 sm:px-4">
       {/* Language Switcher - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
         <LanguageSwitcher variant="button" />
       </div>
 
       {/* Back to Home Button - Fixed Position */}
       <button
         onClick={() => router.push("/")}
-        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 text-sm font-medium"
+        className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 flex items-center gap-2 px-3 py-2 sm:px-4 bg-white rounded-lg sm:rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 text-xs sm:text-sm font-medium"
         aria-label="Back to home"
       >
-        <Home size={18} />
+        <Home size={16} className="sm:w-[18px] sm:h-[18px]" />
         <span className="hidden sm:inline">{t("nav.home") || "Home"}</span>
       </button>
 
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-[95%] sm:max-w-md md:max-w-lg mx-auto">
         {/* Sign In Card */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
+        <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl sm:shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
           {/* Header Section with Logo */}
-          <div className="bg-gradient-to-br from-emerald-50 to-white px-4 sm:px-6 lg:px-8 py-8 sm:py-10 text-center border-b border-border/50">
+          <div className="bg-gradient-to-br from-emerald-50 to-white px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 text-center border-b border-border/50">
             <button
               onClick={() => router.push("/")}
-              className="inline-block mb-5 sm:mb-6 hover:opacity-90 transition-all duration-200 hover:scale-105"
+              className="inline-block mb-4 sm:mb-5 md:mb-6 hover:opacity-90 transition-all duration-200 hover:scale-105"
               aria-label="Go to home page"
             >
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={90}
-                height={90}
-                className="sm:w-[110px] sm:h-[110px] object-contain cursor-pointer mx-auto drop-shadow-sm"
+                width={70}
+                height={70}
+                className="w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] md:w-[110px] md:h-[110px] object-contain cursor-pointer mx-auto drop-shadow-sm"
                 priority
               />
             </button>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent px-2">
               {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base px-2 leading-relaxed">
+            <p className="text-muted-foreground text-xs sm:text-sm md:text-base px-3 sm:px-2 leading-relaxed">
               {!isNewUser
                 ? t("signin.description_new")
                 : t("signin.description_back")}
@@ -875,32 +875,32 @@ export default function SignIn() {
           </div>
 
           {/* Form Section */}
-          <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8">
             {/* Verification Code Input */}
             {showVerificationCode ? (
-              <div className="space-y-5 animate-fade-in">
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
-                    <span className="text-3xl">📧</span>
+              <div className="space-y-4 sm:space-y-5 animate-fade-in">
+                <div className="text-center mb-4 sm:mb-6">
+                  <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 mb-3 sm:mb-4">
+                    <span className="text-2xl sm:text-3xl">📧</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 px-2">
                     {t("signin.verify_email_title")}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground px-3 sm:px-2">
                     {t("signin.verify_email_desc")} <br />
                     <strong className="text-emerald-600">{signUpEmail}</strong>
                   </p>
                 </div>
 
-                <form onSubmit={handleVerifyCode} className="space-y-5">
+                <form onSubmit={handleVerifyCode} className="space-y-4 sm:space-y-5">
                   <div>
-                    <label htmlFor="verificationCode" className="block text-sm font-semibold text-foreground mb-3">
+                    <label htmlFor="verificationCode" className="block text-xs sm:text-sm font-semibold text-foreground mb-2 sm:mb-3">
                       {t("signin.verification_code_label")}
                     </label>
                     <Input
                       id="verificationCode"
                       placeholder={t("signin.verification_code_placeholder")}
-                      className="w-full px-4 py-4 text-lg border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all text-center text-3xl tracking-[0.5em] font-mono"
+                      className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all text-center text-2xl sm:text-3xl tracking-[0.4em] sm:tracking-[0.5em] font-mono"
                       type="text"
                       required
                       maxLength={6}
@@ -919,14 +919,14 @@ export default function SignIn() {
                   {verifyingCode ? (
                     <Button
                       disabled
-                      className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg"
+                      className="w-full bg-emerald-600 text-white font-semibold py-3 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center text-sm sm:text-base shadow-lg"
                     >
-                      <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                      <ReloadIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                       {t("signin.verifying")}
                     </Button>
                   ) : (
                     <Button
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 sm:py-3.5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                       type="submit"
                     >
                       {t("signin.verify_button")}
@@ -937,7 +937,7 @@ export default function SignIn() {
                     type="button"
                     onClick={handleResendCode}
                     disabled={loading}
-                    className="w-full text-sm text-emerald-600 hover:text-emerald-700 font-medium disabled:opacity-50 transition-colors"
+                    className="w-full text-xs sm:text-sm text-emerald-600 hover:text-emerald-700 font-medium disabled:opacity-50 transition-colors"
                   >
                     {loading ? t("signin.sending") : t("signin.resend_code")}
                   </button>
@@ -953,7 +953,7 @@ export default function SignIn() {
             ) : (
               <>
             {/* Sign Up / Sign In Toggle */}
-            <div className="flex gap-2 mb-6 p-1.5 bg-emerald-50/50 rounded-xl border border-emerald-100">
+            <div className="flex gap-1.5 sm:gap-2 mb-5 sm:mb-6 p-1 sm:p-1.5 bg-emerald-50/50 rounded-lg sm:rounded-xl border border-emerald-100">
               <button
                 type="button"
                 onClick={() => {
@@ -961,7 +961,7 @@ export default function SignIn() {
                   setPassword("");
                   setUsername("");
                 }}
-                className={`flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold rounded-md sm:rounded-lg transition-all duration-200 ${
                   !isSignUp
                     ? "bg-emerald-600 text-white shadow-md"
                     : "text-gray-700 hover:text-emerald-600 hover:bg-white"
@@ -975,7 +975,7 @@ export default function SignIn() {
                   setIsSignUp(true);
                   setPassword("");
                 }}
-                className={`flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold rounded-md sm:rounded-lg transition-all duration-200 ${
                   isSignUp
                     ? "bg-emerald-600 text-white shadow-md"
                     : "text-gray-700 hover:text-emerald-600 hover:bg-white"
@@ -985,15 +985,15 @@ export default function SignIn() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+              <div className="space-y-1 sm:space-y-1.5">
+                <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
                   {t("signin.email_label")}
                 </label>
                 <Input
                   id="email"
                   placeholder={t("signin.email_placeholder")}
-                  className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3.5 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                   type="email"
                   required
                   value={email}
@@ -1002,16 +1002,16 @@ export default function SignIn() {
                 />
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 {isSignUp && (
-                  <div className="space-y-1.5">
-                    <label htmlFor="username" className="block text-sm font-semibold text-foreground mb-2">
+                  <div className="space-y-1 sm:space-y-1.5">
+                    <label htmlFor="username" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
                       {t("signin.username_label")}
                     </label>
                     <Input
                       id="username"
                       placeholder={t("signin.username_placeholder")}
-                      className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                      className="w-full px-3 py-2.5 sm:px-4 sm:py-3.5 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                       type="text"
                       required
                       value={username}
@@ -1020,14 +1020,14 @@ export default function SignIn() {
                     />
                   </div>
                 )}
-                <div className="space-y-1.5">
-                  <label htmlFor="password" className="block text-sm font-semibold text-foreground mb-2">
+                <div className="space-y-1 sm:space-y-1.5">
+                  <label htmlFor="password" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
                     {t("signin.password_label")}
                   </label>
                   <Input
                     id="password"
                     placeholder={isSignUp ? t("signin.password_placeholder_signup") : t("signin.password_placeholder_signin")}
-                    className="w-full px-4 py-3.5 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3.5 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
                     type="password"
                     required
                     value={password}
@@ -1036,7 +1036,7 @@ export default function SignIn() {
                     autoComplete={isSignUp ? "new-password" : "current-password"}
                   />
                   {isSignUp && (
-                    <p className="mt-1.5 text-xs text-muted-foreground flex items-center gap-1">
+                    <p className="mt-1.5 text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
                       <span>🔒</span>
                       {t("signin.password_hint")}
                     </p>
@@ -1047,14 +1047,14 @@ export default function SignIn() {
               {loading ? (
                 <Button
                   disabled
-                  className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center text-base shadow-lg mt-6"
+                  className="w-full bg-emerald-600 text-white font-semibold py-3 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center text-sm sm:text-base shadow-lg mt-5 sm:mt-6"
                 >
-                  <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                  <ReloadIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                   {isSignUp ? t("signin.signing_up") : t("signin.signing_in")}
                 </Button>
               ) : (
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-base mt-6 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 sm:py-3.5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base mt-5 sm:mt-6 transform hover:scale-[1.02] active:scale-[0.98]"
                   type="submit"
                   id="sign-in-button"
                 >
@@ -1066,12 +1066,12 @@ export default function SignIn() {
             {/* Alternative Authentication Options */}
             <div>
               {/* Separator */}
-              <div className="relative my-6">
+              <div className="relative my-5 sm:my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border/50"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-muted-foreground font-medium">
+                <div className="relative flex justify-center text-xs sm:text-sm">
+                  <span className="px-3 sm:px-4 bg-white text-muted-foreground font-medium">
                     {t("common.or") || "or"}
                   </span>
                 </div>
