@@ -235,52 +235,40 @@ const ProviderHome = () => {
     if (!token) return router.push("/signIn");
 
     setDeleteConfirmId(null);
+    
+    // Store the offer to restore if delete fails
+    const offerToDelete = offers.find(o => o.id === id);
+    
+    // Optimistically remove from UI
     setOffers(prev => prev.filter(o => o.id !== id));
 
     try {
       await axiosInstance.delete(`/offers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // Success - offer already removed from state
     } catch (err: any) {
       const status = err?.response?.status;
+      // If it's actually a success response (200-299), don't restore
       if (status >= 200 && status < 300) {
         return;
       }
+      
+      // Delete failed - restore the offer if component is still mounted
+      if (!isMountedRef.current) return;
       
       const errorMsg = sanitizeErrorMessage(err, {
         action: "delete offer",
         defaultMessage: t("provider.home.delete_failed") || "Unable to delete offer. Please try again."
       });
       
-      setLoading(true);
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        let userId: string | number | undefined;
-        try {
-          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-          userId = tokenPayload?.id;
-        } catch (parseError) {
-          try {
-            const userResponse = await axiosInstance.get(`/users/me`, { headers });
-            userId = userResponse.data?.id;
-          } catch (apiError) {
-            setLoading(false);
-            return;
-          }
-        }
-        
-        if (userId) {
-          const response = await axiosInstance.get(
-            `/offers/owner/${userId}`,
-            { headers }
-          );
-          setOffers(response.data);
-        }
-      } catch (refetchError) {
-        console.error("Error refetching offers:", refetchError);
-      } finally {
-        setLoading(false);
+      // Restore the deleted offer back to the list
+      if (offerToDelete) {
+        setOffers(prev => [...prev, offerToDelete].sort((a, b) => b.id - a.id));
       }
+      
+      // Show error toast/alert (assuming you have a toast system)
+      console.error("Failed to delete offer:", errorMsg);
     }
   };
 

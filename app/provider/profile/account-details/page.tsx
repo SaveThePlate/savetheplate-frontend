@@ -692,14 +692,14 @@ export default function AccountDetails() {
                     <p className="font-medium">{email || "-"}</p>
                   </div>
                   {emailVerified ? (
-                    <div className="flex items-center gap-1 text-emerald-600">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span className="text-xs font-medium">Verified</span>
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 rounded-full text-emerald-600">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span className="text-[10px] font-semibold">Verified</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 text-amber-600">
-                      <XCircle className="w-4 h-4" />
-                      <span className="text-xs font-medium">Not Verified</span>
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-full text-amber-600">
+                      <XCircle className="w-3 h-3" />
+                      <span className="text-[10px] font-semibold whitespace-nowrap">Not Verified</span>
                     </div>
                   )}
                 </div>

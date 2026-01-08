@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -28,9 +29,7 @@ import {
   CredenzaDescription,
   CredenzaHeader,
   CredenzaTitle,
-  CredenzaBody,
   CredenzaFooter,
-  CredenzaClose,
 } from "@/components/ui/credenza";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +68,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [editStep, setEditStep] = useState(1); // Step 1: Basic Info, Step 2: Pricing, Step 3: Availability, Step 4: Categories & Images
   
   // Track mounted state to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -636,234 +636,290 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
         <CardFooter className="mt-auto pt-2 sm:pt-3 md:pt-4 flex w-full gap-1.5 sm:gap-2 border-t border-gray-100 px-0 pb-0">
           {/* Edit Modal */}
           <div className="flex-1 min-w-0">
-            <Credenza 
-              open={isEditing} 
-              onOpenChange={(open) => {
-                setIsEditing(open);
-                setEditingField(null);
-                if (!open) {
-                      // Reset all form data to original values
-                      setLocalData({
-                        title,
-                        description,
-                        price,
-                        originalPrice: originalPrice || "",
-                        quantity,
-                        expirationDate: expirationDate || "",
-                        pickupStartTime: pickupStartTime || "",
-                        pickupEndTime: pickupEndTime || "",
-                        // pickupLocation and mapsLink are managed from profile
-                        foodType: foodType || "other" as FoodType,
-                        taste: taste || "neutral" as Taste,
-                      });
-                  setLocalFiles(null);
-                  setUploadedImages([]);
-                  setUploadingImages(false);
-                }
-              }}
+            {/* Edit Button */}
+            <Button
+              disabled={loading}
+              variant="emerald"
+              size="sm"
+              className="w-full"
+              onClick={() => setIsEditing(true)}
             >
-              <CredenzaTrigger asChild>
-                <Button
-                  disabled={loading}
-                  variant="emerald"
-                  size="sm"
-                  className="w-full"
-                >
-                  {t("common.edit")}
-                </Button>
-              </CredenzaTrigger>
+              {t("common.edit")}
+            </Button>
 
-              <CredenzaContent className="bg-white rounded-xl shadow-2xl w-full md:max-w-2xl lg:max-w-3xl border border-border p-0 overflow-hidden max-h-[92vh] md:max-h-[90vh] flex flex-col [&>button]:!hidden">
-                {/* Header */}
-                <CredenzaHeader className="flex items-center justify-between p-4 sm:p-6 border-b border-border bg-gradient-to-r from-primary/5 to-accent/5">
-                  <div>
-                    <CredenzaTitle className="text-xl font-bold text-foreground">{t("common.edit") || "Edit Offer"}</CredenzaTitle>
-                    <CredenzaDescription className="text-sm text-muted-foreground mt-1">{t("offer_card.edit_description") || "Update your offer details below"}</CredenzaDescription>
+            {/* Full Page Edit Screen */}
+            {isEditing && typeof window !== 'undefined' && createPortal(
+              <div className="fixed inset-0 z-50 bg-white flex flex-col">
+                {/* Header with Step Indicator */}
+                <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-accent/5 flex-shrink-0 safe-top">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg sm:text-xl font-bold text-foreground">{t("common.edit") || "Edit Offer"}</h2>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                        {editStep === 1 && (t("offer_card.step_basic") || "Basic Information")}
+                        {editStep === 2 && (t("offer_card.step_pricing") || "Pricing Details")}
+                        {editStep === 3 && (t("offer_card.step_availability") || "Availability & Times")}
+                        {editStep === 4 && (t("offer_card.step_final") || "Categories & Images")}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditingField(null);
+                        setEditStep(1);
+                        setLocalData({
+                          title,
+                          description,
+                          price,
+                          originalPrice: originalPrice || "",
+                          quantity,
+                          expirationDate: expirationDate || "",
+                          pickupStartTime: pickupStartTime || "",
+                          pickupEndTime: pickupEndTime || "",
+                          foodType: foodType || "other" as FoodType,
+                          taste: taste || "neutral" as Taste,
+                        });
+                        setLocalFiles(null);
+                        setUploadedImages([]);
+                        setUploadingImages(false);
+                      }}
+                      className="rounded-full bg-white p-2 shadow-sm hover:bg-gray-50 transition-colors border border-border flex-shrink-0 ml-2"
+                      aria-label="Close"
+                      type="button"
+                    >
+                      <X className="h-5 w-5 text-foreground" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditingField(null);
-                      setLocalData({
-                        title,
-                        description,
-                        price,
-                        originalPrice: originalPrice || "",
-                        quantity,
-                        expirationDate: expirationDate || "",
-                        pickupStartTime: pickupStartTime || "",
-                        pickupEndTime: pickupEndTime || "",
-                        foodType: foodType || "other" as FoodType,
-                        taste: taste || "neutral" as Taste,
-                      });
-                      setLocalFiles(null);
-                      setUploadedImages([]);
-                      setUploadingImages(false);
-                    }}
-                    className="rounded-full bg-white p-2 shadow-sm hover:bg-gray-50 transition-colors border border-border"
-                    aria-label="Close"
-                    type="button"
-                  >
-                    <X className="h-5 w-5 text-foreground" />
-                  </button>
-                </CredenzaHeader>
+                  
+                  {/* Progress Steps */}
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4].map((step) => (
+                      <div key={step} className="flex items-center flex-1">
+                        <div className={`h-2 rounded-full flex-1 transition-all ${
+                          step <= editStep ? 'bg-primary' : 'bg-gray-200'
+                        }`} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-2">
+                    <span className="text-xs text-muted-foreground">{t("offer_card.step")} {editStep}/4</span>
+                  </div>
+                </div>
 
-                {/* Form Content */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6">
-                  {/* Basic Information Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
-                      {t("offer_card.basic_info") || "Basic Information"}
-                    </h3>
+                {/* Form Content - Step by Step - NO SCROLLING */}
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+                  
+                  {/* Step 1: Basic Information */}
+                  {editStep === 1 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Edit2 className="w-8 h-8 text-primary" />
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
+                        {t("offer_card.basic_info") || "Basic Information"}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {t("offer_card.basic_info_desc") || "Let's start with the name and description"}
+                      </p>
+                    </div>
                     
                     {/* Title */}
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">
-                        {t("offer_card.title_label") || "Title"} <span className="text-destructive">*</span>
+                      <label className="text-sm font-medium text-foreground block">
+                        {t("offer_card.title_label") || "Offer Title"} <span className="text-destructive">*</span>
                       </label>
                       <Input
                         type="text"
                         value={localData.title}
                         onChange={(e) => setLocalData(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder={t("offer_card.title_placeholder") || "Enter offer title"}
-                        className="w-full"
+                        placeholder={t("offer_card.title_placeholder") || "E.g., Fresh Croissants"}
+                        className="w-full h-11 text-base"
                         disabled={loading}
+                        autoFocus
                       />
+                      <p className="text-xs text-muted-foreground">
+                        {t("offer_card.title_hint") || "Give your offer a clear, appealing name"}
+                      </p>
                     </div>
 
                     {/* Description */}
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">
+                      <label className="text-sm font-medium text-foreground block">
                         {t("offer_card.description_label") || "Description"}
                       </label>
                       <textarea
                         value={localData.description}
                         onChange={(e) => setLocalData(prev => ({ ...prev, description: e.target.value }))}
-                        rows={4}
+                        rows={5}
                         maxLength={500}
-                        placeholder={t("offer_card.description_placeholder") || "Describe your offer..."}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                        placeholder={t("offer_card.description_placeholder") || "Describe what's included, freshness, ingredients..."}
+                        className="w-full rounded-lg border-2 border-input bg-transparent px-4 py-3 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary resize-none"
                         disabled={loading}
                       />
-                      <p className="text-xs text-muted-foreground text-right">
-                        {(localData.description?.length || 0)}/500
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs text-muted-foreground">
+                          {t("offer_card.description_hint") || "Help customers know what to expect"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(localData.description?.length || 0)}/500
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  )}
+
+                  {/* Step 2: Pricing */}
+                  {editStep === 2 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-3xl">💰</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
+                        {t("offer_card.pricing") || "Pricing"}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {t("offer_card.pricing_desc") || "Set your offer price"}
+                      </p>
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground block">
+                        {t("offer_card.price_label") || "Sell Price"} <span className="text-destructive">*</span>
+                      </label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={localData.price}
+                          onChange={(e) => setLocalData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                          placeholder="0.00"
+                          className="w-full h-12 pr-14 text-lg font-semibold"
+                          disabled={loading}
+                          autoFocus
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-semibold text-muted-foreground">dt</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("offer_card.price_hint") || "The price customers will pay"}
+                      </p>
+                    </div>
+
+                    {/* Original Price */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground block">
+                        {t("offer_card.original_price_label") || "Original Price"} <span className="text-xs text-muted-foreground">(optional)</span>
+                      </label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={localData.originalPrice}
+                          onChange={(e) => setLocalData(prev => ({ ...prev, originalPrice: e.target.value }))}
+                          placeholder="0.00"
+                          className="w-full h-12 pr-14 text-lg"
+                          disabled={loading}
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-muted-foreground">dt</span>
+                      </div>
+                      {localData.originalPrice && parseFloat(localData.originalPrice as any) > localData.price && (
+                        <div className="bg-success/10 border border-success/20 rounded-lg p-3 mt-2">
+                          <p className="text-sm font-semibold text-success flex items-center gap-2">
+                            <span className="text-lg">🎉</span>
+                            {Math.round(((parseFloat(localData.originalPrice as any) - localData.price) / parseFloat(localData.originalPrice as any)) * 100)}% {t("offers.save") || "DISCOUNT"}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {t("offer_card.discount_hint") || "Customers love seeing their savings!"}
+                          </p>
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {t("offer_card.original_price_hint") || "Show customers how much they're saving"}
                       </p>
                     </div>
                   </div>
+                  )}
 
-                  {/* Pricing Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
-                      {t("offer_card.pricing") || "Pricing"}
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Price */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("offer_card.price_label") || "Price"} <span className="text-destructive">*</span>
-                        </label>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={localData.price}
-                            onChange={(e) => setLocalData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                            placeholder="0.00"
-                            className="w-full pr-12"
-                            disabled={loading}
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">dt</span>
-                        </div>
+                  {/* Step 3: Availability & Times */}
+                  {editStep === 3 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Clock className="w-8 h-8 text-primary" />
                       </div>
-
-                      {/* Original Price */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("offer_card.original_price_label") || "Original Price"} <span className="text-xs text-muted-foreground">(optional)</span>
-                        </label>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={localData.originalPrice}
-                            onChange={(e) => setLocalData(prev => ({ ...prev, originalPrice: e.target.value }))}
-                            placeholder="0.00"
-                            className="w-full pr-12"
-                            disabled={loading}
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">dt</span>
-                        </div>
-                        {localData.originalPrice && parseFloat(localData.originalPrice as any) > localData.price && (
-                          <p className="text-xs text-success">
-                            {Math.round(((parseFloat(localData.originalPrice as any) - localData.price) / parseFloat(localData.originalPrice as any)) * 100)}% {t("offers.save") || "SAVED"}
-                          </p>
-                        )}
-                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
+                        {t("offer_card.availability") || "Availability & Times"}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {t("offer_card.availability_desc") || "When can customers pick up?"}
+                      </p>
                     </div>
-                  </div>
-
-                  {/* Availability Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
-                      {t("offer_card.availability") || "Availability"}
-                    </h3>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Quantity */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("offers.quantity_available") || "Quantity"} <span className="text-destructive">*</span>
-                        </label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={localData.quantity}
-                          onChange={(e) => setLocalData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
-                          placeholder="0"
-                          className="w-full"
-                          disabled={loading}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {localData.quantity === 1 ? t("common.item") || "item" : t("common.items") || "items"} {t("offer_card.available") || "available"}
-                        </p>
-                      </div>
+                    {/* Quantity */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground block">
+                        {t("offers.quantity_available") || "How many available?"} <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={localData.quantity}
+                        onChange={(e) => setLocalData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                        placeholder="0"
+                        className="w-full h-12 text-lg font-semibold"
+                        disabled={loading}
+                        autoFocus
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {localData.quantity > 0 && `${localData.quantity} ${localData.quantity === 1 ? t("common.item") || "item" : t("common.items") || "items"} ${t("offer_card.available") || "available"}`}
+                      </p>
+                    </div>
 
-                      {/* Expiration Date */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("add_offer.pickup_date") || "Expiration Date"} <span className="text-destructive">*</span>
-                        </label>
-                        <Input
-                          type="date"
-                          value={localData.expirationDate ? (() => {
-                            const date = new Date(localData.expirationDate);
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            return `${year}-${month}-${day}`;
-                          })() : ""}
-                          onChange={(e) => {
-                            const dateValue = e.target.value;
-                            if (dateValue) {
-                              const [year, month, day] = dateValue.split('-').map(Number);
-                              const date = new Date(year, month - 1, day, 23, 59, 59, 999);
-                              setLocalData(prev => ({ ...prev, expirationDate: date.toISOString() }));
-                            }
-                          }}
-                          className="w-full"
-                          disabled={loading}
-                        />
-                      </div>
+                    {/* Expiration Date */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground block">
+                        {t("add_offer.pickup_date") || "Pickup Date"} <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="date"
+                        value={localData.expirationDate ? (() => {
+                          const date = new Date(localData.expirationDate);
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          return `${year}-${month}-${day}`;
+                        })() : ""}
+                        onChange={(e) => {
+                          const dateValue = e.target.value;
+                          if (dateValue) {
+                            const [year, month, day] = dateValue.split('-').map(Number);
+                            const date = new Date(year, month - 1, day, 23, 59, 59, 999);
+                            setLocalData(prev => ({ ...prev, expirationDate: date.toISOString() }));
+                          }
+                        }}
+                        className="w-full h-12 text-base"
+                        disabled={loading}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t("offer_card.date_hint") || "Last day for pickup"}
+                      </p>
                     </div>
 
                     {/* Pickup Times */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-primary/5 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="w-5 h-5 text-primary" />
+                        <span className="text-sm font-semibold text-foreground">{t("offer_card.pickup_window") || "Pickup Time Window"}</span>
+                      </div>
+                      
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("add_offer.start_time") || "Pickup Start Time"}
+                        <label className="text-sm font-medium text-foreground block">
+                          {t("add_offer.start_time") || "From"}
                         </label>
                         <Input
                           type="time"
@@ -877,13 +933,14 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                               setLocalData(prev => ({ ...prev, pickupStartTime: date.toISOString() }));
                             }
                           }}
-                          className="w-full"
+                          className="w-full h-11 text-base"
                           disabled={loading}
                         />
                       </div>
+                      
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("add_offer.end_time") || "Pickup End Time"}
+                        <label className="text-sm font-medium text-foreground block">
+                          {t("add_offer.end_time") || "To"}
                         </label>
                         <Input
                           type="time"
@@ -897,60 +954,71 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                               setLocalData(prev => ({ ...prev, pickupEndTime: date.toISOString() }));
                             }
                           }}
-                          className="w-full"
+                          className="w-full h-11 text-base"
                           disabled={loading}
                         />
                       </div>
                     </div>
                   </div>
+                  )}
 
-                  {/* Categories Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
-                      {t("offer_card.categories") || "Categories"}
-                    </h3>
+                  {/* Step 4: Categories & Images */}
+                  {editStep === 4 && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Package className="w-8 h-8 text-primary" />
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
+                        {t("offer_card.categories") || "Final Details"}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {t("offer_card.categories_desc") || "Add categories and photos"}
+                      </p>
+                    </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Categories */}
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-foreground block">
                           {t("offer_card.food_type") || "Food Type"}
                         </label>
                         <select
                           value={localData.foodType}
                           onChange={(e) => setLocalData(prev => ({ ...prev, foodType: e.target.value as FoodType }))}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex h-11 w-full rounded-lg border-2 border-input bg-transparent px-4 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={loading}
                         >
-                          <option value="snack">{t("offer_card.food_type_snack")}</option>
-                          <option value="meal">{t("offer_card.food_type_meal")}</option>
-                          <option value="beverage">{t("offer_card.food_type_beverage")}</option>
-                          <option value="other">{t("offer_card.food_type_other")}</option>
+                          <option value="snack">🍪 {t("offer_card.food_type_snack")}</option>
+                          <option value="meal">🍽️ {t("offer_card.food_type_meal")}</option>
+                          <option value="beverage">🥤 {t("offer_card.food_type_beverage")}</option>
+                          <option value="other">📦 {t("offer_card.food_type_other")}</option>
                         </select>
                       </div>
+                      
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
-                          {t("offer_card.taste") || "Taste"}
+                        <label className="text-sm font-medium text-foreground block">
+                          {t("offer_card.taste") || "Taste Profile"}
                         </label>
                         <select
                           value={localData.taste}
                           onChange={(e) => setLocalData(prev => ({ ...prev, taste: e.target.value as Taste }))}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex h-11 w-full rounded-lg border-2 border-input bg-transparent px-4 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={loading}
                         >
-                          <option value="sweet">{t("offer_card.taste_sweet")}</option>
-                          <option value="salty">{t("offer_card.taste_salty")}</option>
-                          <option value="both">{t("offer_card.taste_both")}</option>
-                          <option value="neutral">{t("offer_card.taste_neutral")}</option>
+                          <option value="sweet">🍰 {t("offer_card.taste_sweet")}</option>
+                          <option value="salty">🧂 {t("offer_card.taste_salty")}</option>
+                          <option value="both">🍬 {t("offer_card.taste_both")}</option>
+                          <option value="neutral">⚪ {t("offer_card.taste_neutral")}</option>
                         </select>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Image Upload Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground border-b border-border pb-2">
-                      {t("offer_card.images_label") || "Image"}
-                    </h3>
+                    {/* Image Upload Section */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground block">
+                        {t("offer_card.images_label") || "Add Photo"} <span className="text-xs text-muted-foreground">(optional)</span>
+                      </label>
                     
                     <FileUploader
                       value={localFiles || []}
@@ -963,21 +1031,22 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                       }}
                     >
                       <FileInput>
-                        <div className="flex flex-col items-center justify-center h-32 w-full border-2 border-dashed border-border bg-muted/50 hover:bg-muted rounded-lg transition-colors cursor-pointer">
+                        <div className="flex flex-col items-center justify-center h-40 w-full border-2 border-dashed border-border bg-muted/50 hover:bg-muted rounded-xl transition-colors cursor-pointer">
                           {uploadingImages ? (
                             <>
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+                              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-3"></div>
                               <p className="text-sm text-muted-foreground">{t("offer_card.uploading")}</p>
                             </>
                           ) : localFiles && localFiles.length > 0 ? (
                             <>
-                              <Check className="w-8 h-8 text-success mb-2" />
-                              <p className="text-sm text-muted-foreground">{t("offer_card.images_ready", { count: localFiles.length })}</p>
+                              <Check className="w-10 h-10 text-success mb-3" />
+                              <p className="text-sm font-medium text-success">{t("offer_card.images_ready", { count: localFiles.length })}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{t("offer_card.tap_to_change") || "Tap to change"}</p>
                             </>
                           ) : (
                             <>
-                              <span className="text-4xl mb-2">📸</span>
-                              <p className="text-sm font-medium text-foreground">{t("offer_card.click_upload") || "Click to upload image"}</p>
+                              <span className="text-5xl mb-3">📸</span>
+                              <p className="text-sm font-medium text-foreground">{t("offer_card.click_upload") || "Tap to add a photo"}</p>
                               <p className="text-xs text-muted-foreground mt-1">JPG, PNG up to 5MB</p>
                             </>
                           )}
@@ -1045,77 +1114,129 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                     </FileUploader>
                   </div>
 
-                  {/* Pickup Location Info (Read-only) */}
-                  <div className="space-y-2 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <label className="text-sm font-medium text-foreground">
-                      {t("offers.pickup_location") || "Pickup Location"}
-                    </label>
-                    <p className="text-sm text-muted-foreground">
-                      {owner?.location || pickupLocation || t("offer_card.location_from_profile") || "Set in your profile"}
-                    </p>
+                    {/* Pickup Location Info (Read-only) */}
+                    <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <label className="text-sm font-medium text-foreground block mb-1">
+                            {t("offers.pickup_location") || "Pickup Location"}
+                          </label>
+                          <p className="text-sm text-muted-foreground">
+                            {owner?.location || pickupLocation || t("offer_card.location_from_profile") || "Set in your profile"}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {t("offer_card.location_note") || "Update in your profile settings"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  )}
                   </div>
                 </div>
 
-                {/* Fixed Bottom Action Bar */}
-                <div className="bg-white p-4 sm:p-6 flex-shrink-0 border-t border-border">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditingField(null);
-                        setLocalData({
-                          title,
-                          description,
-                          price,
-                          originalPrice: originalPrice || "",
-                          quantity,
-                          expirationDate: expirationDate || "",
-                          pickupStartTime: pickupStartTime || "",
-                          pickupEndTime: pickupEndTime || "",
-                          foodType: foodType || "other" as FoodType,
-                          taste: taste || "neutral" as Taste,
-                        });
-                        setLocalFiles(null);
-                        setUploadedImages([]);
-                        setUploadingImages(false);
-                      }}
-                      disabled={loading}
-                      className="flex-1"
-                    >
-                      {t("common.cancel") || "Cancel"}
-                    </Button>
-                    <Button
-                      onClick={handleEdit}
-                      disabled={loading || uploadingImages}
-                      className="flex-1 bg-primary hover:bg-primary/90"
-                    >
-                      {saveSuccess ? (
-                        <>
-                          <Check className="w-4 h-4 mr-2" />
-                          {t("common.saved") || "Saved"}
-                        </>
-                      ) : loading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          {t("common.saving") || "Saving..."}
-                        </>
-                      ) : uploadingImages ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          {t("offer_card.uploading") || "Uploading..."}
-                        </>
-                      ) : (
-                        <>
-                          <Check className="w-4 h-4 mr-2" />
-                          {t("offer_card.save_changes") || "Save Changes"}
-                        </>
-                      )}
-                    </Button>
+                {/* Fixed Bottom Navigation Bar */}
+                <div className="bg-white p-4 flex-shrink-0 border-t-2 border-border shadow-lg safe-bottom">
+                  <div className="flex gap-3">
+                    {editStep > 1 ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditStep(prev => prev - 1)}
+                        disabled={loading}
+                        className="flex-1 h-12 text-base font-semibold"
+                      >
+                        ← {t("common.previous") || "Previous"}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditingField(null);
+                          setEditStep(1);
+                          setLocalData({
+                            title,
+                            description,
+                            price,
+                            originalPrice: originalPrice || "",
+                            quantity,
+                            expirationDate: expirationDate || "",
+                            pickupStartTime: pickupStartTime || "",
+                            pickupEndTime: pickupEndTime || "",
+                            foodType: foodType || "other" as FoodType,
+                            taste: taste || "neutral" as Taste,
+                          });
+                          setLocalFiles(null);
+                          setUploadedImages([]);
+                          setUploadingImages(false);
+                        }}
+                        disabled={loading}
+                        className="flex-1 h-12 text-base font-semibold"
+                      >
+                        {t("common.cancel") || "Cancel"}
+                      </Button>
+                    )}
+                    
+                    {editStep < 4 ? (
+                      <Button
+                        onClick={() => {
+                          // Validate current step before proceeding
+                          if (editStep === 1 && !localData.title.trim()) {
+                            toast.error(t("offer_card.title_required") || "Title is required");
+                            return;
+                          }
+                          if (editStep === 2 && !localData.price) {
+                            toast.error(t("offer_card.price_required") || "Price is required");
+                            return;
+                          }
+                          if (editStep === 3) {
+                            if (!localData.quantity || !localData.expirationDate || !localData.pickupStartTime || !localData.pickupEndTime) {
+                              toast.error(t("offer_card.fill_fields") || "Please fill all required fields");
+                              return;
+                            }
+                          }
+                          setEditStep(prev => prev + 1);
+                        }}
+                        disabled={loading}
+                        className="flex-1 bg-primary hover:bg-primary/90 h-12 text-base font-semibold"
+                      >
+                        {t("common.next") || "Next"} →
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleEdit}
+                        disabled={loading || uploadingImages}
+                        className="flex-1 bg-primary hover:bg-primary/90 h-12 text-base font-semibold"
+                      >
+                        {saveSuccess ? (
+                          <>
+                            <Check className="w-5 h-5 mr-2" />
+                            {t("common.saved") || "Saved!"}
+                          </>
+                        ) : loading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            {t("common.saving") || "Saving..."}
+                          </>
+                        ) : uploadingImages ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            {t("offer_card.uploading") || "Uploading..."}
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-5 h-5 mr-2" />
+                            {t("offer_card.save_changes") || "Save Changes"}
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
-              </CredenzaContent>
-            </Credenza>
+              </div>,
+              document.body
+            )}
           </div>
 
           {/* Delete Modal */}
