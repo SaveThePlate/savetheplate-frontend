@@ -29,6 +29,7 @@ export interface BaseOfferCardProps {
   owner?: OfferOwner;
   averageRating?: number;
   totalRatings?: number;
+  distance?: number; // Distance from user in kilometers
 }
 
 export interface ClientOfferCardProps extends BaseOfferCardProps {

@@ -30,9 +30,11 @@ if (!exists(standaloneDir)) {
 
 const publicSrc = path.join(root, 'public');
 const staticSrc = path.join(nextDir, 'static');
+const localesSrc = path.join(root, 'locales');
 
 const publicDest = path.join(standaloneDir, 'public');
 const staticDest = path.join(standaloneDir, '.next', 'static');
+const localesDest = path.join(standaloneDir, 'locales');
 
 if (exists(publicSrc)) {
   rm(publicDest);
@@ -42,6 +44,12 @@ if (exists(publicSrc)) {
 if (exists(staticSrc)) {
   rm(staticDest);
   copyDir(staticSrc, staticDest);
+}
+
+if (exists(localesSrc)) {
+  rm(localesDest);
+  copyDir(localesSrc, localesDest);
+  console.log('[copy-standalone-assets] Copied locales/ into .next/standalone/');
 }
 
 console.log('[copy-standalone-assets] Copied public/ and .next/static into .next/standalone/');

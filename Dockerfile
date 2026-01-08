@@ -66,6 +66,10 @@ RUN chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
+# Note: The postbuild script (copy-standalone-assets.mjs) ensures that:
+# - public/ folder is copied to standalone output
+# - locales/ folder is copied to standalone output (for mobile compatibility)
+# - .next/static is properly included
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

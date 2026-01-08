@@ -204,15 +204,6 @@ const Offers = () => {
     }
   };
 
-  const isExpired = offer ? new Date(offer.expirationDate).getTime() <= new Date().getTime() : false;
-  const { date: formattedDate, time: formattedTime } = offer 
-    ? formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate)
-    : { date: "", time: "" };
-  const isToday = formattedDate === "Today";
-  // Prioritize offer's specific pickupLocation over owner's general location (matches backend logic)
-  const currentLocation = (offer?.pickupLocation && offer.pickupLocation.trim() !== '') ? offer.pickupLocation : (offer?.owner?.location || offer?.pickupLocation);
-  const currentMapsLink = (offer?.mapsLink && offer.mapsLink.trim() !== '') ? offer.mapsLink : (offer?.owner?.mapsLink || offer?.mapsLink);
-
   if (!offer) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -223,6 +214,13 @@ const Offers = () => {
       </div>
     );
   }
+
+  const isExpired = new Date(offer.expirationDate).getTime() <= new Date().getTime();
+  const { date: formattedDate, time: formattedTime } = formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate);
+  const isToday = formattedDate === "Today";
+  // Prioritize offer's specific pickupLocation over owner's general location (matches backend logic)
+  const currentLocation = (offer.pickupLocation && offer.pickupLocation.trim() !== '') ? offer.pickupLocation : (offer.owner?.location || offer.pickupLocation);
+  const currentMapsLink = (offer.mapsLink && offer.mapsLink.trim() !== '') ? offer.mapsLink : (offer.owner?.mapsLink || offer.mapsLink);
 
   return (
     <>
@@ -244,12 +242,12 @@ const Offers = () => {
         progressClassName="bg-emerald-500"
       />
       
-      <div className="w-full h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] flex items-center justify-center px-3 sm:px-4 lg:px-6 overflow-hidden">
-        <div className="w-full max-w-2xl lg:max-w-4xl flex items-center justify-center h-full">
-
-        <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border w-full h-auto max-h-[90%] flex flex-col">
-          {/* Hero Image - Compact */}
-          <div className="relative w-full h-48 sm:h-56 flex-shrink-0 bg-muted">
+      {/* Main Container - Clean and Direct */}
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 pb-24 pt-4 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-200">
+          {/* Hero Image */}
+          <div className="relative w-full h-64 sm:h-80 md:h-96 bg-gradient-to-br from-emerald-100 to-teal-100">
             <Image
               src={sanitizeImageUrl(imageSrc)}
               alt={offer.title}
@@ -269,26 +267,29 @@ const Offers = () => {
               }}
             />
             
-            {/* Badges Overlay - Top Left */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1.5">
-              {isExpired && (
-                <div className="bg-gray-800 text-white px-2 py-1 rounded-full text-[10px] font-semibold shadow-md">
-                  {t("common.expired")}
-                </div>
-              )}
-            </div>
+            {/* Status Badge - Top Left */}
+            {isExpired && (
+              <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                {t("common.expired")}
+              </div>
+            )}
+            {!isExpired && offer.quantity <= 3 && (
+              <div className="absolute top-4 left-4 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-pulse">
+                {offer.quantity} {t("common.left")}!
+              </div>
+            )}
 
             {/* Price Badge - Top Right */}
             {offer.price && (
-              <div className="absolute top-2 right-2 bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-xl text-xs shadow-lg z-10">
-                <div className="flex flex-col items-end leading-tight">
-                  <span className="font-bold text-base">{offer.price} dt</span>
+              <div className="absolute top-4 right-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold px-5 py-3 rounded-2xl shadow-2xl">
+                <div className="flex flex-col items-end">
+                  <span className="text-2xl font-extrabold">{offer.price} dt</span>
                   {offer.originalPrice && offer.originalPrice > offer.price && (
                     <>
-                      <span className="text-[10px] font-normal line-through opacity-75">
+                      <span className="text-sm line-through opacity-90 mt-1">
                         {offer.originalPrice.toFixed(2)} dt
                       </span>
-                      <span className="text-[10px] font-bold mt-0.5 bg-emerald-50/80 px-1.5 py-0.5 rounded">
+                      <span className="text-xs font-bold bg-yellow-400 text-gray-900 px-2 py-0.5 rounded-full mt-1">
                         -{((1 - offer.price / offer.originalPrice) * 100).toFixed(0)}%
                       </span>
                     </>
@@ -325,23 +326,23 @@ const Offers = () => {
             )}
           </div>
 
-          {/* Content - Compact, no scroll */}
-          <div className="p-2 sm:p-3 space-y-2 flex-1 min-h-0 overflow-hidden flex flex-col">
-            {/* Title */}
-            <div className="flex-shrink-0">
-              <h1 className="text-lg sm:text-xl font-bold text-foreground mb-0.5 line-clamp-1">{offer.title}</h1>
-              <p className="text-xs text-muted-foreground leading-tight line-clamp-1">{offer.description}</p>
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Title & Description */}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{offer.title}</h1>
+              <p className="text-base text-gray-600 leading-relaxed">{offer.description}</p>
             </div>
 
-            {/* Provider Information - Compact */}
+            {/* Provider Information */}
             {offer.owner && (
-              <div className="flex items-center gap-1.5 p-1.5 bg-gray-50 rounded-lg border border-border flex-shrink-0">
-                <div className="w-7 h-7 rounded-full border border-white overflow-hidden bg-white flex-shrink-0 shadow-sm">
+              <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
+                <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0 shadow-md">
                   <Image
                     src={sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png")}
                     alt={offer.owner.username}
-                    width={28}
-                    height={28}
+                    width={56}
+                    height={56}
                     className="object-cover w-full h-full"
                     unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png"))}
                     onError={(e) => {
@@ -350,11 +351,11 @@ const Offers = () => {
                     }}
                   />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-xs font-bold text-foreground truncate">{offer.owner.username}</h3>
+                <div className="flex-1">
+                  <h3 className="text-base font-bold text-gray-900">{offer.owner.username}</h3>
                   {offer.owner.phoneNumber && (
-                    <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                      <Phone className="w-2.5 h-2.5" />
+                    <div className="flex items-center gap-1.5 text-sm text-gray-600 mt-1">
+                      <Phone className="w-4 h-4" />
                       <span>{offer.owner.phoneNumber}</span>
                     </div>
                   )}
@@ -362,105 +363,103 @@ const Offers = () => {
               </div>
             )}
 
-            {/* Pickup Information - Compact Grid */}
-            <div className="grid grid-cols-2 gap-1.5 flex-shrink-0">
-              <div className="flex items-start gap-1.5 p-1.5 bg-gray-50 rounded-lg border border-border">
-                <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
-                  <MapPin className="w-3 h-3 text-emerald-600" />
+            {/* Pickup Information */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-emerald-300 transition-colors">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-emerald-600" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                     {t("client.offers.detail.pickup_location")}
                   </p>
-                  <p className="text-[10px] font-semibold text-foreground line-clamp-1">{currentLocation}</p>
+                  <p className="text-sm font-bold text-gray-900">{currentLocation}</p>
                   {currentMapsLink && (
                     <a
                       href={currentMapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-0.5 text-[9px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-0.5"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-2"
                     >
-                      <MapPin className="w-2.5 h-2.5" />
+                      <MapPin className="w-4 h-4" />
                       {t("common.open_in_maps")}
                     </a>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-start gap-1.5 p-1.5 bg-gray-50 rounded-lg border border-border">
-                <div className="flex-shrink-0 w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <Clock className="w-3 h-3 text-amber-700" />
+              <div className="flex items-start gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-amber-300 transition-colors">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-amber-700" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                     {t("client.offers.detail.pickup_deadline")}
                   </p>
-                  <p className="text-[10px] font-semibold text-foreground">
+                  <p className="text-sm font-bold text-gray-900">
                     {isToday ? t("common.today") : formattedDate}
                   </p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     {formattedTime ? (formattedTime.includes(" - ") ? `${t("common.between")} ${formattedTime}` : `${t("common.at")} ${formattedTime}`) : ""}
                   </p>
-                  {isExpired && (
-                    <span className="inline-block mt-0.5 px-1 py-0.5 bg-red-100 text-red-700 text-[9px] font-semibold rounded-full">
-                      {t("common.expired")}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
-            {/* Quantity Selector and Order Button - Compact */}
-            <div className="space-y-1.5 flex-shrink-0 mt-auto">
-              <div className="p-1.5 bg-gray-50 rounded-lg border border-border">
-                <p className="text-[10px] font-semibold text-foreground mb-1 text-center">{t("client.offers.detail.quantity")}</p>
-                <div className="flex items-center justify-center gap-2">
+            {/* Quantity Selector and Order Button */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                <div className="flex items-center gap-3">
+                  <ShoppingBag className="w-5 h-5 text-emerald-600" />
+                  <div>
+                    <span className="text-sm font-bold text-gray-900 block">{t("client.offers.detail.quantity")}</span>
+                    <span className="text-xs text-gray-500">{offer.quantity} {t("client.offers.detail.available")}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-2 border-2 border-gray-200 shadow-sm">
                   <button
                     onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
-                    className="w-7 h-7 flex items-center justify-center bg-white border-2 border-border rounded-lg hover:bg-gray-50 hover:border-primary font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={quantity <= 1}
+                    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-bold transition-all hover:scale-105 active:scale-95 flex items-center justify-center text-lg"
                   >
                     −
                   </button>
-                  <span className="text-base font-bold text-foreground min-w-[1.5rem] text-center">{quantity}</span>
+                  <span className="w-12 text-center text-lg font-bold text-gray-900">{quantity}</span>
                   <button
                     onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
-                    className="w-7 h-7 flex items-center justify-center bg-white border-2 border-border rounded-lg hover:bg-gray-50 hover:border-primary font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={quantity >= offer.quantity}
+                    className="w-8 h-8 rounded-lg bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold transition-all hover:scale-105 active:scale-95 flex items-center justify-center text-lg disabled:cursor-not-allowed"
                   >
                     +
                   </button>
                 </div>
-                <p className="text-[9px] text-muted-foreground text-center mt-0.5">
-                  {offer.quantity} {t("client.offers.detail.available")}
-                </p>
               </div>
 
               {/* Order Button */}
               <button
                 onClick={handleOrder}
-                disabled={offer.quantity === 0 || isExpired}
-                className={`w-full py-2 rounded-lg font-bold text-xs transition-all shadow-md ${
-                  offer.quantity === 0 || isExpired
-                    ? "bg-muted text-muted-foreground cursor-not-allowed"
-                    : inCart
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                    : "bg-emerald-600 text-white hover:bg-emerald-700"
+                disabled={inCart || isExpired || offer.quantity === 0}
+                className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${
+                  inCart
+                    ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                    : isExpired || offer.quantity === 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                 }`}
               >
-                {offer.quantity === 0
-                  ? t("common.out_of_stock")
+                {inCart
+                  ? `✓ ${t("common.added_to_cart")}`
                   : isExpired
                   ? t("common.expired")
-                  : inCart
-                  ? t("common.added_to_cart")
-                  : t("client.offers.detail.order_button", { price: offer.price ? `${(offer.price * quantity).toFixed(2)}` : t("common.free") })}
+                  : offer.quantity === 0
+                  ? t("common.out_of_stock")
+                  : `${t("common.order_now")} • ${offer.price ? `${(offer.price * quantity).toFixed(2)} dt` : t("common.free")}`}
               </button>
             </div>
           </div>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

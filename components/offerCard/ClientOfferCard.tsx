@@ -23,6 +23,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { X, Star, MapPin, Clock, Package } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { formatDistance } from "@/utils/distanceUtils";
 
 const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   offerId,
@@ -44,6 +45,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   owner,
   averageRating,
   totalRatings,
+  distance,
 }) => {
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -153,6 +155,16 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-1 line-clamp-2">
           {title}
         </h3>
+
+        {/* Distance Badge */}
+        {distance !== undefined && distance !== Infinity && (
+          <div className="flex items-center gap-1 mb-2">
+            <MapPin className="w-3 h-3 text-emerald-600" />
+            <span className="text-xs text-emerald-700 font-medium">
+              {formatDistance(distance)}
+            </span>
+          </div>
+        )}
 
         {/* Category Badges */}
         {(foodType || taste) && (

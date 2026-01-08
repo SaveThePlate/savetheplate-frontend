@@ -32,13 +32,39 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const loadTranslations = async () => {
       setIsLoading(true);
       try {
-        const translations = await import(`@/locales/${language}.json`);
-        setTranslations(translations.default);
+        // Try dynamic import first (works in development and some production builds)
+        try {
+          const translations = await import(`@/locales/${language}.json`);
+          setTranslations(translations.default);
+          setIsLoading(false);
+          return;
+        } catch (importError) {
+          console.debug(`Dynamic import failed for ${language}, trying fetch...`);
+        }
+
+        // Fallback to fetch from public folder (works reliably in all environments including mobile)
+        const response = await fetch(`/locales/${language}.json`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const translations = await response.json();
+        setTranslations(translations);
       } catch (error) {
         console.error(`Failed to load ${language} translations:`, error);
         // Fallback to English
-        const fallback = await import(`@/locales/en.json`);
-        setTranslations(fallback.default);
+        try {
+          const response = await fetch(`/locales/en.json`);
+          if (response.ok) {
+            const fallback = await response.json();
+            setTranslations(fallback);
+          } else {
+            console.error('Failed to load fallback English translations');
+            setTranslations({});
+          }
+        } catch (fallbackError) {
+          console.error('Failed to load fallback translations:', fallbackError);
+          setTranslations({});
+        }
       } finally {
         setIsLoading(false);
       }

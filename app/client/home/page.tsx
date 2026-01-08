@@ -12,6 +12,7 @@ import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { ClientOfferCard } from "@/components/offerCard/ClientOfferCard";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { isOfferExpired } from "@/components/offerCard/utils";
+import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
 import Link from "next/link";
 
 interface LocationData {
@@ -32,6 +33,8 @@ interface Offer {
   pickupStartTime?: string;
   pickupEndTime?: string;
   pickupLocation: string;
+  latitude?: number;
+  longitude?: number;
   mapsLink?: string;
   foodType?: "snack" | "meal" | "beverage" | "other";
   taste?: "sweet" | "salty" | "both" | "neutral";
@@ -43,9 +46,12 @@ interface Offer {
     phoneNumber?: number;
     mapsLink?: string;
     profileImage?: string;
+    latitude?: number;
+    longitude?: number;
   };
   averageRating?: number;
   totalRatings?: number;
+  distance?: number; // Distance from user in kilometers
 }
 
 const Home = () => {
@@ -59,6 +65,7 @@ const Home = () => {
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [distanceFilter, setDistanceFilter] = useState<number | null>(null); // null = show all, number = max distance in km
   const router = useRouter();
   const { t } = useLanguage();
   const isMountedRef = useRef(true);
@@ -268,9 +275,9 @@ const Home = () => {
         }
       },
       {
-        enableHighAccuracy: false, // Changed to false for faster response
-        timeout: 8000, // Reduced timeout to 8 seconds
-        maximumAge: 600000, // Accept cached location up to 10 minutes old
+        enableHighAccuracy: true, // Enable high accuracy for better location on mobile
+        timeout: 15000, // 15 second timeout for mobile devices
+        maximumAge: 300000, // Accept cached location up to 5 minutes old
       }
     );
   }, [reverseGeocode]);
@@ -370,7 +377,35 @@ const Home = () => {
       if (!isMountedRef.current) return;
 
       if (offersResponse.status === "fulfilled") {
-        const offersData = offersResponse.value;
+        let offersData = offersResponse.value;
+        
+        // Calculate distance for each offer if user location is available
+        if (locationData?.latitude && locationData?.longitude) {
+          offersData = offersData.map((offer: Offer) => {
+            // Use offer coordinates if available, fallback to owner coordinates
+            const offerLat = offer.latitude || offer.owner?.latitude;
+            const offerLng = offer.longitude || offer.owner?.longitude;
+            
+            if (offerLat && offerLng && locationData.latitude && locationData.longitude) {
+              const distance = calculateDistance(
+                locationData.latitude,
+                locationData.longitude,
+                offerLat,
+                offerLng
+              );
+              return { ...offer, distance };
+            }
+            return { ...offer, distance: Infinity };
+          });
+          
+          // Sort offers by distance (nearest first)
+          offersData.sort((a: Offer, b: Offer) => {
+            const distA = a.distance ?? Infinity;
+            const distB = b.distance ?? Infinity;
+            return distA - distB;
+          });
+        }
+        
         setOffers(offersData);
         setError(null);
       } else {
@@ -414,9 +449,51 @@ const Home = () => {
     fetchOffers();
   }, [fetchOffers]);
 
+  // Recalculate distances when location changes
+  useEffect(() => {
+    if (locationData?.latitude && locationData?.longitude && offers.length > 0) {
+      const offersWithDistance = offers.map((offer) => {
+        const offerLat = offer.latitude || offer.owner?.latitude;
+        const offerLng = offer.longitude || offer.owner?.longitude;
+        
+        if (offerLat && offerLng && locationData.latitude && locationData.longitude) {
+          const distance = calculateDistance(
+            locationData.latitude,
+            locationData.longitude,
+            offerLat,
+            offerLng
+          );
+          return { ...offer, distance };
+        }
+        return { ...offer, distance: Infinity };
+      });
+      
+      // Sort by distance
+      offersWithDistance.sort((a, b) => {
+        const distA = a.distance ?? Infinity;
+        const distB = b.distance ?? Infinity;
+        return distA - distB;
+      });
+      
+      setOffers(offersWithDistance);
+    }
+  }, [locationData]);
+
+  // Helper function to apply distance filter
+  const applyDistanceFilter = (offersList: Offer[]) => {
+    if (!distanceFilter || !locationData?.latitude || !locationData?.longitude) {
+      return offersList;
+    }
+    return offersList.filter(offer => {
+      const distance = offer.distance;
+      // Include offers without distance or within the selected range
+      return distance === undefined || distance === Infinity || distance <= distanceFilter;
+    });
+  };
+
   // Filter products by search query
   const searchFilteredProducts = searchQuery.trim()
-    ? offers.filter(p => {
+    ? applyDistanceFilter(offers.filter(p => {
         const query = searchQuery.toLowerCase();
         return (
           p.title.toLowerCase().includes(query) ||
@@ -424,10 +501,10 @@ const Home = () => {
           (p.owner?.location || p.pickupLocation || "").toLowerCase().includes(query) ||
           (p.foodType && p.foodType.toLowerCase().includes(query))
         );
-      })
+      }))
     : null;
 
-  const featuredProducts = offers.filter(p => !isOfferExpired(p.expirationDate) && p.quantity > 0).slice(0, 5);
+  const featuredProducts = applyDistanceFilter(offers.filter(p => !isOfferExpired(p.expirationDate) && p.quantity > 0)).slice(0, 5);
 
   // Category definitions with icons and foodType mapping - matching the rest of the app
   const categories = [
@@ -436,34 +513,34 @@ const Home = () => {
       foodType: 'meal',
       icon: Utensils,
       color: 'bg-orange-100 text-orange-600',
-      count: offers.filter(p => p.foodType === 'meal' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+      count: applyDistanceFilter(offers.filter(p => p.foodType === 'meal' && !isOfferExpired(p.expirationDate) && p.quantity > 0)).length,
     },
     {
       name: t('offers.food_type_snack') || "Snacks",
       foodType: 'snack',
       icon: Croissant,
       color: 'bg-yellow-100 text-yellow-600',
-      count: offers.filter(p => p.foodType === 'snack' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+      count: applyDistanceFilter(offers.filter(p => p.foodType === 'snack' && !isOfferExpired(p.expirationDate) && p.quantity > 0)).length,
     },
     {
       name: t('offers.food_type_beverage') || "Beverages",
       foodType: 'beverage',
       icon: ShoppingCart,
       color: 'bg-blue-100 text-blue-600',
-      count: offers.filter(p => p.foodType === 'beverage' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+      count: applyDistanceFilter(offers.filter(p => p.foodType === 'beverage' && !isOfferExpired(p.expirationDate) && p.quantity > 0)).length,
     },
     {
       name: t('offers.food_type_other') || "Other",
       foodType: 'other',
       icon: Package,
       color: 'bg-emerald-100 text-emerald-600',
-      count: offers.filter(p => p.foodType === 'other' && !isOfferExpired(p.expirationDate) && p.quantity > 0).length,
+      count: applyDistanceFilter(offers.filter(p => p.foodType === 'other' && !isOfferExpired(p.expirationDate) && p.quantity > 0)).length,
     },
   ];
 
   // Filter products by selected category
   const categoryFilteredProducts = selectedCategory
-    ? offers.filter(p => p.foodType === selectedCategory && !isOfferExpired(p.expirationDate) && p.quantity > 0)
+    ? applyDistanceFilter(offers.filter(p => p.foodType === selectedCategory && !isOfferExpired(p.expirationDate) && p.quantity > 0))
     : null;
 
   if (loading) {
@@ -559,6 +636,43 @@ const Home = () => {
             </button>
           )}
         </div>
+
+        {/* Distance Filter - Only show if location is available */}
+        {locationData?.latitude && locationData?.longitude && (
+          <div className="mt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4 text-emerald-600" />
+              <span className="text-sm font-medium text-foreground">
+                {t("home.distance_filter") || "Maximum Distance"}
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <button
+                onClick={() => setDistanceFilter(null)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                  distanceFilter === null
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "bg-white text-foreground hover:bg-emerald-50 border border-border"
+                }`}
+              >
+                {t("home.all_distances") || "All"}
+              </button>
+              {[3, 5, 10, 20].map((distance) => (
+                <button
+                  key={distance}
+                  onClick={() => setDistanceFilter(distance)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                    distanceFilter === distance
+                      ? "bg-emerald-600 text-white shadow-md"
+                      : "bg-white text-foreground hover:bg-emerald-50 border border-border"
+                  }`}
+                >
+                  {distance} km
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Pickup Reminder Banner */}
@@ -633,6 +747,7 @@ const Home = () => {
                       owner={offer.owner}
                       averageRating={offer.averageRating}
                       totalRatings={offer.totalRatings}
+                      distance={offer.distance}
                     />
                   );
                 })}
@@ -700,6 +815,7 @@ const Home = () => {
                       owner={offer.owner}
                       averageRating={offer.averageRating}
                       totalRatings={offer.totalRatings}
+                      distance={offer.distance}
                     />
                   </div>
                 );
@@ -793,6 +909,7 @@ const Home = () => {
                       owner={offer.owner}
                       averageRating={offer.averageRating}
                       totalRatings={offer.totalRatings}
+                      distance={offer.distance}
                     />
                   );
                 })}
