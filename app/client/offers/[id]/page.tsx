@@ -9,6 +9,8 @@ import { resolveImageSource, getImageFallbacks, shouldUnoptimizeImage, sanitizeI
 import { formatDateTimeRange } from "@/components/offerCard/utils";
 import { MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Offer {
   id: number;
@@ -151,6 +153,7 @@ const Offers = () => {
       return;
     }
     if (new Date(offer.expirationDate).getTime() <= new Date().getTime()) {
+      toast.error(t("client.offers.detail.offer_expired") || "This offer has expired");
       return;
     }
     try {
@@ -161,8 +164,43 @@ const Offers = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInCart(true);
+      
+      // Show success toast notification
+      toast.success(
+        t("client.offers.detail.order_success") || 
+        `🎉 Order placed successfully! ${quantity} ${quantity > 1 ? 'items' : 'item'} added to your orders.`,
+        {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+      
+      // Optional: Redirect to orders page after a short delay
+      setTimeout(() => {
+        router.push(userId ? `/client/orders/${userId}` : "/client/orders");
+      }, 2000);
+      
     } catch (err: any) {
       console.error("Error placing order:", err);
+      
+      // Show error toast notification
+      const errorMessage = err?.response?.data?.message || 
+                          err?.response?.data?.error || 
+                          t("client.offers.detail.order_error") || 
+                          "Failed to place order. Please try again.";
+      
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -187,8 +225,27 @@ const Offers = () => {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] flex items-center justify-center px-3 sm:px-4 lg:px-6 overflow-hidden">
-      <div className="w-full max-w-2xl lg:max-w-4xl flex items-center justify-center h-full">
+    <>
+      {/* Toast Container for notifications */}
+      <ToastContainer
+        position="top-center"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        limit={3}
+        toastClassName="bg-white rounded-xl shadow-lg border border-gray-200"
+        bodyClassName="text-sm font-medium text-gray-800"
+        progressClassName="bg-emerald-500"
+      />
+      
+      <div className="w-full h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] flex items-center justify-center px-3 sm:px-4 lg:px-6 overflow-hidden">
+        <div className="w-full max-w-2xl lg:max-w-4xl flex items-center justify-center h-full">
 
         <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-border w-full h-auto max-h-[90%] flex flex-col">
           {/* Hero Image - Compact */}
@@ -404,6 +461,7 @@ const Offers = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
