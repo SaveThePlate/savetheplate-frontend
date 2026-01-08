@@ -2,35 +2,30 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { axiosInstance } from "@/lib/axiosInstance";
 import AddOffer from "@/components/AddOffer";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 
 const AddOfferPage = () => {
   const router = useRouter();
   const { t } = useLanguage();
+  const { userRole, loading } = useUser();
 
   useEffect(() => {
+    // Use UserContext instead of making redundant API calls
+    if (loading) return;
+    
     const token = localStorage.getItem("accessToken");
-    if (!token) {
+    if (!token || !userRole || userRole === "NONE") {
       router.push("/signIn");
       return;
     }
 
-    const verifyToken = async () => {
-      try {
-        const response = await axiosInstance.get(
-          `/auth/get-user-by-token`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (response.status !== 200) throw new Error("Invalid response");
-      } catch {
-        router.push("/signIn");
-      }
-    };
-
-    verifyToken();
-  }, [router]);
+    // Only providers can add offers
+    if (userRole !== "PROVIDER" && userRole !== "PENDING_PROVIDER") {
+      router.push("/client/home");
+    }
+  }, [router, userRole, loading]);
 
   // Prevent overscroll bounce on mobile (but allow touch for inputs)
   useEffect(() => {

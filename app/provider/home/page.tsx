@@ -92,23 +92,21 @@ const ProviderHome = () => {
 
         const headers = { Authorization: `Bearer ${token}` };
         const backendOrigin = getBackendOrigin();
+        
+        // Parse userId from token - no need for API call
         let id: string | number | undefined;
         try {
           const tokenPayload = JSON.parse(atob(token.split(".")[1]));
           id = tokenPayload?.id;
         } catch (error) {
           console.error("Error parsing token:", error);
-          try {
-            const userResponse = await axiosInstance.get(`/users/me`, { headers });
-            id = userResponse.data?.id;
-          } catch (apiError) {
-            console.error("Error fetching user info:", apiError);
-            return;
-          }
+          router.push("/signIn");
+          return;
         }
 
         if (!id) {
           console.error("Could not determine user ID");
+          router.push("/signIn");
           return;
         }
 

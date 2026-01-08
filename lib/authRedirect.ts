@@ -5,7 +5,9 @@ import type { AuthIntentRole } from "@/lib/authIntent";
  * Centralized post-auth redirect decision.
  *
  * Rules:
- * - role NONE (or missing): go to onboarding role selection
+ * - role NONE (or missing) with CLIENT intent: go directly to client home (auto-set role)
+ * - role NONE (or missing) with PROVIDER intent: go to onboarding for provider setup
+ * - role NONE (or missing) without intent: go to onboarding for role selection
  * - role CLIENT: go to client home
  * - role PENDING_PROVIDER: go to provider home (allows quick onboarding)
  * - role PROVIDER: go to provider home (fully approved provider)
@@ -17,7 +19,9 @@ export function getPostAuthRedirect(
   const role = user?.role;
 
   if (!role || role === "NONE") {
-    if (intentRole === "CLIENT") return "/onboarding?intent=CLIENT";
+    // For client intent, bypass onboarding and go directly to client home
+    // The signup flow will handle setting the CLIENT role
+    if (intentRole === "CLIENT") return "/client/home";
     if (intentRole === "PROVIDER") return "/onboarding?intent=PROVIDER";
     return "/onboarding";
   }

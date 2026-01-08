@@ -22,32 +22,6 @@ function AuthCallback() {
         setLoading(true);
         setError(null);
 
-        // Check if this is an order QR token (not an auth token)
-        // Order tokens are typically longer and don't match auth token format
-        // If the token looks like an order token, redirect providers to orders page
-        const accessToken = LocalStorage.getItem("accessToken");
-        if (accessToken && token.length > 50) {
-          // This might be an order QR token, check if user is a provider
-          try {
-            const testResponse = await axiosInstance.get(
-              `/orders/qr/${token}`,
-              { headers: { Authorization: `Bearer ${accessToken}` } }
-            );
-            // If this succeeds, it's an order token and user is logged in as provider
-            // Redirect to orders page
-            router.push("/provider/orders");
-            return;
-          } catch {
-            // Not an order token or user doesn't have access
-            // Magic link verification is disabled, so redirect to sign in
-            setError("Magic link authentication is disabled. Please sign in with your password.");
-            setTimeout(() => {
-              router.push("/signIn");
-            }, 3000);
-            return;
-          }
-        }
-
         // COMMENTED OUT: Magic link verification disabled
         // Magic link authentication is disabled, redirect to sign in
         // const resp = await clientApi.POST("/auth/verify-magic-mail", {

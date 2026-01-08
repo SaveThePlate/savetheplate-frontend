@@ -79,22 +79,18 @@ const useProviderProfile = () => {
       }
 
       const headers = { Authorization: `Bearer ${token}` };
+      
+      // Parse userId from token (fast, no API call needed for this)
       let userId: string | number | undefined;
       try {
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
         userId = tokenPayload?.id;
       } catch (error) {
         console.error("Error parsing token:", error);
-        // Try to get userId from API if token parsing fails
-        try {
-          const userResponse = await axiosInstance.get(`/users/me`, { headers });
-          userId = userResponse.data?.id;
-        } catch (apiError) {
-          console.error("Error fetching user info:", apiError);
-          setError("Could not fetch user information");
-          setLoading(false);
-          return;
-        }
+        setError("Invalid authentication token");
+        setLoading(false);
+        router.push("/signIn");
+        return;
       }
 
       if (!userId) {
@@ -103,7 +99,7 @@ const useProviderProfile = () => {
         return;
       }
 
-      // Fetch profile, offers, and orders in parallel for faster loading
+      // Fetch profile, offers, and orders in parallel - ONLY ONE /users/me call
       const [profileRes, offersRes, ordersRes] = await Promise.all([
         axiosInstance.get(`/users/me`, { headers }),
         axiosInstance.get(`/offers/owner/${userId}`, { headers }),

@@ -330,6 +330,8 @@ const Home = () => {
 
       const headers = { Authorization: `Bearer ${token}` };
       const backendOrigin = getBackendOrigin();
+      
+      // Parse userId from token - no need for fallback API call
       let currentUserId: string | undefined;
       try {
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
@@ -339,15 +341,14 @@ const Home = () => {
         }
       } catch (error) {
         console.error("Error parsing token:", error);
-        try {
-          const userResponse = await axiosInstance.get(`/users/me`, { headers });
-          currentUserId = userResponse.data?.id;
-          if (isMountedRef.current) {
-            setUserId(Number(currentUserId));
-          }
-        } catch (apiError) {
-          console.error("Error fetching user info:", apiError);
-        }
+        router.push("/signIn");
+        return;
+      }
+
+      if (!currentUserId) {
+        console.error("Could not determine user ID from token");
+        router.push("/signIn");
+        return;
       }
 
       const timestamp = Date.now();

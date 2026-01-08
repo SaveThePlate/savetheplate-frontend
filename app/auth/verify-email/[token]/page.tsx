@@ -35,10 +35,56 @@ function VerifyEmailPage() {
 
         if (response.data?.verified) {
           setVerified(true);
-          // Redirect to sign in after 3 seconds
-          setTimeout(() => {
-            router.push("/signIn");
-          }, 3000);
+          
+          // Check if user is already logged in (has tokens from signup)
+          const accessToken = localStorage.getItem("accessToken");
+          
+          if (accessToken) {
+            // User is logged in - set CLIENT role and redirect to client home
+            try {
+              // First check if user already has a role
+              const userDetails = await axiosInstance.get(
+                `/users/me`,
+                { headers: { Authorization: `Bearer ${accessToken}` } }
+              );
+              
+              const currentRole = userDetails.data?.role;
+              
+              if (currentRole === 'NONE' || !currentRole) {
+                // Set role to CLIENT
+                await axiosInstance.post(
+                  `/users/set-role`,
+                  { role: "CLIENT" },
+                  { 
+                    headers: { 
+                      Authorization: `Bearer ${accessToken}`,
+                      "Content-Type": "application/json"
+                    } 
+                  }
+                );
+              }
+              
+              // Redirect to appropriate page based on role
+              setTimeout(() => {
+                if (currentRole === 'PROVIDER' || currentRole === 'PENDING_PROVIDER') {
+                  router.push("/provider/home");
+                } else {
+                  router.push("/client/home");
+                }
+              }, 2000);
+            } catch (roleError) {
+              console.error("Error setting role after verification:", roleError);
+              // Fallback: redirect to sign in
+              setTimeout(() => {
+                router.push("/signIn");
+              }, 2000);
+            }
+          } else {
+            // User is not logged in - redirect to sign in
+            setTimeout(() => {
+              router.push("/signIn");
+            }, 2000);
+          }
         } else {
           setError("Email verification failed. Please try again.");
         }
@@ -96,7 +142,7 @@ function VerifyEmailPage() {
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            Redirecting to sign in...
+            Redirecting to your home page...
           </p>
         </div>
       </div>

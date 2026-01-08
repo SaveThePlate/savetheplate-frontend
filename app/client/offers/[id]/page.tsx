@@ -133,12 +133,14 @@ const Offers = () => {
         router.push("/signIn");
         return;
       }
-    axiosInstance
-      .get(`/auth/get-user-by-token`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setUserId(res.data.id))
-      .catch(() => router.push("/signIn"));
+    // Parse userId from token instead of making API call
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      setUserId(tokenPayload?.id);
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      router.push("/signIn");
+    }
   }, [router]);
 
   const handleOrder = async () => {
@@ -152,9 +154,10 @@ const Offers = () => {
       return;
     }
     try {
+      // Don't send userId in body - backend gets it from auth token
       await axiosInstance.post(
         `/orders`,
-        { userId, offerId: offer.id, quantity },
+        { offerId: offer.id, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInCart(true);

@@ -91,28 +91,25 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
   }, [ownerId, router, t]);
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      const token = localStorage.getItem("accessToken");
+    // Parse userId from token instead of making API call
+    // UserContext already handles fetching user details globally
+    const token = localStorage.getItem("accessToken");
 
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
+    if (!token) {
+      router.push("/signIn");
+      return;
+    }
 
-      try {
-        const response = await axiosInstance.get(
-          `/users/me`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setUserId(response.data.id);
-        setUserRole(response.data.role);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-        setError(t("offer_carousel.fetch_user_failed"));
-      }
-    };
-
-    fetchUserDetails();
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      setUserId(tokenPayload?.id);
+      // Note: For userRole, ideally use UserContext instead of local state
+      // But keeping this minimal change for now
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      setError(t("offer_carousel.fetch_user_failed"));
+      router.push("/signIn");
+    }
   }, [router, t]); 
   
 

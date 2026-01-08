@@ -170,17 +170,30 @@ export default function SignIn() {
             }
 
             // Email is verified, proceed with normal flow
-
-            // Single source of truth: fetch `/users/me` and redirect from it.
+            // For client signup, automatically set role to CLIENT and redirect to client home
             try {
-              const meResp = await axiosInstance.get(`/users/me`, {
-                headers: { Authorization: `Bearer ${response.data.accessToken}` },
-              });
-              // Refresh global user context (best-effort; don't block redirect)
-              fetchUserRole().catch(() => {});
-              router.push(getPostAuthRedirect(meResp.data));
+              const token = response.data.accessToken;
+              
+              // Set role to CLIENT
+              await axiosInstance.post(
+                `/users/set-role`,
+                { role: "CLIENT" },
+                { 
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                  } 
+                }
+              );
+              
+              // Refresh global user context
+              await fetchUserRole().catch(() => {});
+              
+              // Redirect directly to client home
+              router.push("/client/home");
             } catch (e) {
-              // If `/users/me` fails, fallback to onboarding (RouteGuard will handle later).
+              console.error("Error setting client role:", e);
+              // If setting role fails, fallback to onboarding
               fetchUserRole().catch(() => {});
               router.push("/onboarding");
             }
@@ -341,15 +354,37 @@ export default function SignIn() {
           );
 
           const role = userDetails.data?.role;
-          let redirectTo = '/onboarding';
-
-          if (role === 'PROVIDER' || role === 'PENDING_PROVIDER') {
-            redirectTo = '/provider/home';
+          
+          // If user has no role (NONE), automatically set to CLIENT and redirect
+          if (role === 'NONE' || !role) {
+            try {
+              await axiosInstance.post(
+                `/users/set-role`,
+                { role: "CLIENT" },
+                { 
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                  } 
+                }
+              );
+              
+              // Refresh user context and redirect to client home
+              await fetchUserRole().catch(() => {});
+              router.push('/client/home');
+            } catch (roleError) {
+              console.error("Error setting client role after verification:", roleError);
+              // If setting role fails, fallback to onboarding
+              router.push('/onboarding');
+            }
+          } else if (role === 'PROVIDER' || role === 'PENDING_PROVIDER') {
+            router.push('/provider/home');
           } else if (role === 'CLIENT') {
-            redirectTo = '/client/home';
+            router.push('/client/home');
+          } else {
+            // Unknown role, go to onboarding
+            router.push('/onboarding');
           }
-
-          router.push(redirectTo);
         } catch (userDetailsError: any) {
           console.error("Error fetching user details after verification:", userDetailsError);
           // If token is invalid, redirect to sign in
@@ -360,8 +395,24 @@ export default function SignIn() {
               router.push("/signIn");
             }, 2000);
           } else {
-            // Other error, still try to redirect to onboarding
-            router.push('/onboarding');
+            // Other error, try to set role and redirect to client home (most common case)
+            try {
+              await axiosInstance.post(
+                `/users/set-role`,
+                { role: "CLIENT" },
+                { 
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                  } 
+                }
+              );
+              await fetchUserRole().catch(() => {});
+              router.push('/client/home');
+            } catch {
+              // Last resort: go to onboarding
+              router.push('/onboarding');
+            }
           }
         }
       } else {
