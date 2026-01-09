@@ -146,21 +146,52 @@ const Offers = () => {
   }, [router]);
 
   const handleOrder = async () => {
-    if (!offer) return;
+    if (!offer) {
+      toast.error(t("client.offers.detail.offer_not_loaded") || "Offer not loaded. Please try again.");
+      return;
+    }
+    
+    // Validate offer ID and quantity before making the request
+    if (!offer.id || typeof offer.id !== 'number') {
+      console.error("Invalid offer ID:", offer.id);
+      toast.error(t("client.offers.detail.invalid_offer") || "Invalid offer. Please refresh the page.");
+      return;
+    }
+    
+    if (!quantity || quantity <= 0) {
+      toast.error(t("client.offers.detail.invalid_quantity") || "Please select a valid quantity.");
+      return;
+    }
+    
+    if (quantity > offer.quantity) {
+      toast.error(t("client.offers.detail.insufficient_stock") || `Only ${offer.quantity} items available.`);
+      return;
+    }
+    
     const token = localStorage.getItem("accessToken");
     if (!token) {
       router.push("/signIn");
       return;
     }
+    
     if (new Date(offer.expirationDate).getTime() <= new Date().getTime()) {
       toast.error(t("client.offers.detail.offer_expired") || "This offer has expired");
       return;
     }
+    
     try {
       // Don't send userId in body - backend gets it from auth token
+      // Ensure both offerId and quantity are numbers
+      const orderData = {
+        offerId: Number(offer.id),
+        quantity: Number(quantity)
+      };
+      
+      console.log("Placing order with data:", orderData); // Debug log
+      
       await axiosInstance.post(
         `/orders`,
-        { offerId: offer.id, quantity },
+        orderData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setInCart(true);
@@ -186,6 +217,7 @@ const Offers = () => {
       
     } catch (err: any) {
       console.error("Error placing order:", err);
+      console.error("Order data that failed:", { offerId: offer.id, quantity }); // Debug log
       
       // Show error toast notification
       const errorMessage = err?.response?.data?.message || 
