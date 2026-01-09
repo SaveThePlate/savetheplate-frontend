@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { useUser } from "@/context/UserContext";
-import CarbonFootprint from "@/components/CarbonFootprint";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
@@ -19,6 +19,12 @@ import {
   TrendingUp,
   CheckCircle2
 } from "lucide-react";
+
+// Lazy load CarbonFootprint component as it's below the fold
+const CarbonFootprint = dynamic(() => import("@/components/CarbonFootprint"), {
+  loading: () => <div className="h-32 animate-pulse bg-gray-200 rounded-lg" />,
+  ssr: false, // This component doesn't need SSR
+});
 
 const WelcomePage = () => {
   const router = useRouter();

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import Offers from "@/components/Offers";
+import dynamic from "next/dynamic";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { getBackendOrigin } from "@/lib/backendOrigin";
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,20 @@ import { useRouter } from "next/navigation";
 import { Loader2, Search, MapPin, ChevronRight, X, Utensils, Croissant, ShoppingCart, Package, Clock, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
-import { ClientOfferCard } from "@/components/offerCard/ClientOfferCard";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { isOfferExpired } from "@/components/offerCard/utils";
 import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
 import Link from "next/link";
+
+// Lazy load heavy components
+const ClientOfferCard = dynamic(() => import("@/components/offerCard/ClientOfferCard").then(mod => ({ default: mod.ClientOfferCard })), {
+  loading: () => <div className="h-64 animate-pulse bg-gray-200 rounded-lg" />,
+});
+
+const Offers = dynamic(() => import("@/components/Offers"), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-200 rounded-lg" />,
+  ssr: false,
+});
 
 interface LocationData {
   city: string;

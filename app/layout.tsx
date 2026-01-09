@@ -8,6 +8,8 @@ import ConditionalFooter from "@/components/ConditionalFooter";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import FacebookSDK from "@/components/FacebookSDK";
+import { Providers } from "./providers";
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_FRONTEND_URL || "https://savetheplate.tn"),
@@ -108,36 +110,41 @@ export default function RootLayout({
           </div>
         </noscript>
         <ErrorBoundary>
-          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-            <UserProvider>
-              <LanguageProvider>
-              {/* Google Analytics - gtag.js */}
-              <Script
-                src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
-                strategy="afterInteractive"
-              />
-              <Script id="gtag-init" strategy="afterInteractive">
-                {`window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);} 
-                gtag('js', new Date());
+          <Providers>
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+              <UserProvider>
+                <LanguageProvider>
+                {/* Performance Monitoring */}
+                <PerformanceMonitor />
+                
+                {/* Google Analytics - gtag.js */}
+                <Script
+                  src="https://www.googletagmanager.com/gtag/js?id=G-CVCP72DH21"
+                  strategy="afterInteractive"
+                />
+                <Script id="gtag-init" strategy="afterInteractive">
+                  {`window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);} 
+                  gtag('js', new Date());
 
-                gtag('config', 'G-CVCP72DH21');`}
-              </Script>
-              {/* Facebook SDK */}
-              <FacebookSDK />
+                  gtag('config', 'G-CVCP72DH21');`}
+                </Script>
+                {/* Facebook SDK */}
+                <FacebookSDK />
 
-              <main className="flex-1">
-                {children}
-              </main>
-              <ConditionalFooter />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <ConditionalFooter />
 
-              <Toaster 
-                position="top-center" 
-                reverseOrder={false}
-              />
-            </LanguageProvider>
-          </UserProvider>
-          </GoogleOAuthProvider>
+                <Toaster 
+                  position="top-center" 
+                  reverseOrder={false}
+                />
+              </LanguageProvider>
+            </UserProvider>
+            </GoogleOAuthProvider>
+          </Providers>
         </ErrorBoundary>
       </body>
     </html>
