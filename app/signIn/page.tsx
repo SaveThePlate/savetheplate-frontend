@@ -634,17 +634,13 @@ export default function SignIn() {
           }, 2000);
           
         } else if (isAndroid) {
-          // Android: Use intent:// URL to open Facebook app
-          // This will open the app if installed, otherwise fall back to web OAuth
-          const intentUrl = `intent://authorize?` +
-            `client_id=${appId}&` +
-            `redirect_uri=${redirectUri}&` +
-            `scope=${scope}&` +
-            `state=${state}&` +
-            `response_type=code` +
-            `#Intent;scheme=fb${appId};package=com.facebook.katana;S.browser_fallback_url=${encodeURIComponent(webOAuthUrl)};end`;
-          
-          window.location.href = intentUrl;
+          // Android: Use mobile web OAuth directly instead of intent:// deep links
+          // Many Android browsers will show an error if the fb{appId} intent scheme
+          // has no handler (Facebook app not installed) and won't reliably fall back.
+          // Using the mobile web OAuth URL is more robust and still lets Facebook
+          // redirect back to our /auth/callback endpoint.
+          console.log("Android device detected, using mobile web OAuth for Facebook login");
+          window.location.href = webOAuthUrl;
         } else {
           // Other mobile devices, use mobile web OAuth
           window.location.href = webOAuthUrl;
