@@ -134,18 +134,17 @@ const OffersPage = () => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          // Don't use credentials: 'include' - we use Bearer tokens, not cookies
-          // Using credentials with CORS requires specific origin, not wildcard
         });
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
 
-        const data = await response.json();
+        const raw = await response.json();
+        const data = Array.isArray(raw) ? raw : raw.data; // Support both array and {data: array}
 
         // Fetch ratings for all providers in parallel
-        const providerIds = Array.from(new Set(data.map((o: any) => o.ownerId).filter(Boolean))) as number[];
+        const providerIds = Array.from(new Set((data || []).map((o: any) => o.ownerId).filter(Boolean))) as number[];
         const ratingPromises = providerIds.map(async (providerId: number) => {
           try {
             const ratingResponse = await fetch(
@@ -181,7 +180,7 @@ const OffersPage = () => {
 
         // normalize images array - preserve URLs from different backends, only normalize relative paths
         const backendOriginForImages = backendOrigin.replace(/\/$/, "");
-        const mappedOffers: Offer[] = data.map((o: any) => {
+        const mappedOffers: Offer[] = (data || []).map((o: any) => {
           const rating = o.ownerId ? ratingsMap.get(o.ownerId) : null;
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
             if (!img) return img;
