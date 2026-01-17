@@ -103,95 +103,86 @@ const WelcomePage = () => {
         <LanguageSwitcher variant="button" />
       </div>
 
-      {/* Compact Logo Header */}
-      <div className="w-full flex justify-center items-center pt-2 pb-0 px-4 sm:px-6">
-        <div className="group cursor-pointer transition-transform duration-300 hover:scale-105">
+      {/* Logo centered above hero section, layered above image and overlay */}
+      <div className="absolute top-8 left-0 w-full flex justify-center z-30 pointer-events-none">
+        <Image
+          src="/logo.png"
+          alt="Save The Plate"
+          width={120}
+          height={120}
+          className="object-contain drop-shadow-xl w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 mb-10 sm:mb-14 lg:mb-16"
+          priority
+        />
+      </div>
+
+      {/* Hero Section - Enhanced Design */}
+      <section className="relative pt-12 pb-12 sm:pt-10 sm:pb-16 lg:pt-14 lg:pb-20 px-0 sm:px-0 lg:px-0 overflow-hidden min-h-[500px] flex items-center justify-center">
+        {/* Full-section background image */}
+        <div className="absolute inset-0 w-full h-full z-0">
           <Image
-            src="/logo.png"
-            alt="Save The Plate"
-            width={150}
-            height={150}
-            className="object-contain drop-shadow-xl sm:w-48 sm:h-48 md:w-56 md:h-56"
+            src="/newlander.png"
+            alt={t("landing.illustration_alt")}
+            fill
+            sizes="100vw"
+            className="object-cover w-full h-full opacity-40"
             priority
           />
         </div>
-      </div>
-
-      {/* Hero Section - Compact Design */}
-      <section className="relative pt-2 pb-8 sm:pt-4 sm:pb-12 lg:pt-6 lg:pb-16 px-4 sm:px-6 lg:px-8">
-        {/* Subtle Decorative Background Elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl opacity-30 -z-10" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-accent/20 rounded-full blur-3xl opacity-25 -z-10" />
-
-        <div className="w-full mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-center">
-            {/* Left: Content - Takes 3 columns */}
-            <div className="lg:col-span-3 text-center lg:text-left space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-foreground leading-tight">
-                {t("landing.welcome_title")}{" "}
-                <span className="text-primary bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-white/60 to-white/40 z-10" />
+        <div className="relative z-20 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[500px] sm:min-h-[600px] lg:min-h-[700px]">
+          <div className="flex flex-col items-center justify-center text-center space-y-6 w-full py-8 sm:py-12 lg:py-16">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-foreground drop-shadow-xl">
+              <span className="block">
+                {t("landing.welcome_title")}
+                <span className="inline-block ml-2 text-primary bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-gradient-x">
                   {t("landing.welcome_subtitle")}
                 </span>
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                {t("landing.welcome_description")}
-              </p>
-
-              {/* CTA Buttons - Inline */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">
-                <Button
-                  onClick={handleGetStarted}
-                  variant="emerald"
-                  size="lg"
-                  className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg hover:shadow-xl transform hover:scale-105 font-bold"
-                >
-                  {t("landing.get_started")}
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button
-                  onClick={() => router.push("/business-signup")}
-                  variant="outline"
-                  size="lg"
-                  className="group bg-amber-50/90 backdrop-blur-sm hover:bg-amber-100 text-amber-700 hover:text-amber-800 border-2 border-amber-300 hover:border-amber-400 shadow-md hover:shadow-lg transform hover:scale-105 font-bold"
-                >
-                  <Store className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  {t("landing.register_business")}
-                </Button>
-              </div>
-              
-              {/* Sign In Link */}
-              <div className="mt-3 text-center lg:text-left">
-                <button
-                  onClick={handleSignIn}
-                  className="text-sm text-gray-600 hover:text-primary transition-colors underline underline-offset-4"
-                >
-                  {t("landing.already_member")} {t("landing.sign_in")}
-                </button>
-              </div>
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
+              {t("landing.welcome_description")}
+            </p>
+            {/* Tagline/Value Prop */}
+            <div className="flex justify-center mt-8 sm:mt-10 lg:mt-12">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-base shadow-sm border border-emerald-100 animate-fade-in">
+                <Leaf className="w-5 h-5 text-emerald-500" />
+                {t("landing.hero_tagline", { defaultValue: "Save food. Save money. Save the planet." })}
+              </span>
             </div>
-
-            {/* Right: Illustration - Takes 2 columns, more compact */}
-            <div className="lg:col-span-2 relative flex items-center justify-center min-h-[400px]">
-              {/* Decorative background circles */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="absolute w-64 h-64 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl opacity-60 animate-pulse" />
-                <div className="absolute w-48 h-48 bg-gradient-to-tr from-accent/30 to-primary/30 rounded-full blur-2xl opacity-40" style={{ animationDelay: '1s' }} />
-              </div>
-              
-              {/* Image container with shadow and styling */}
-              <div className="relative z-10 p-6 rounded-3xl bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-sm shadow-2xl">
-                <Image
-                  src="/newlander.png"
-                  width={350}
-                  height={350}
-                  alt={t("landing.illustration_alt")}
-                  className="animate-float w-auto h-auto max-w-full drop-shadow-2xl"
-                  priority
-                />
-              </div>
+            {/* CTA Buttons - Enhanced */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2">
+              <Button
+                onClick={handleGetStarted}
+                variant="emerald"
+                size="lg"
+                className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-xl hover:shadow-2xl transform hover:scale-105 font-bold px-8 py-3 text-lg transition-all duration-200"
+              >
+                <ArrowRight className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform" />
+                {t("landing.get_started")}
+              </Button>
+              <Button
+                onClick={() => router.push("/business-signup")}
+                variant="outline"
+                size="lg"
+                className="group bg-amber-50/90 backdrop-blur-sm hover:bg-amber-100 text-amber-700 hover:text-amber-800 border-2 border-amber-300 hover:border-amber-400 shadow-md hover:shadow-lg transform hover:scale-105 font-bold px-8 py-3 text-lg transition-all duration-200"
+              >
+                <Store className="w-5 h-5 mr-2" />
+                {t("landing.register_business")}
+              </Button>
+            </div>
+            {/* Sign In Link */}
+            <div className="mt-3 text-center">
+              <button
+                onClick={handleSignIn}
+                className="text-sm text-gray-600 hover:text-primary transition-colors underline underline-offset-4"
+              >
+                {t("landing.already_member")} {t("landing.sign_in")}
+              </button>
             </div>
           </div>
         </div>
+        {/* Custom Animations merged below */}
       </section>
 
       {/* Features Section - More Compact */}
@@ -415,6 +406,35 @@ const WelcomePage = () => {
       </section>
 
       <style jsx>{`
+        @keyframes gradient-x {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 4s ease-in-out infinite;
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.7; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 4s cubic-bezier(0.4,0,0.6,1) infinite;
+        }
+        @keyframes pulse-slower {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.5; }
+        }
+        .animate-pulse-slower {
+          animation: pulse-slower 7s cubic-bezier(0.4,0,0.6,1) infinite;
+        }
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: none; }
+        }
+        .animate-fade-in {
+          animation: fade-in 1.2s cubic-bezier(0.4,0,0.6,1) 0.2s both;
+        }
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-12px); }
