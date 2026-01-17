@@ -117,8 +117,11 @@ const ProviderHome = () => {
 
         if (!isMountedRef.current) return;
 
+        // Ensure response.data is an array
+        const offersArray = Array.isArray(response.data) ? response.data : [];
+        
         const backendOriginForImages = backendOrigin.replace(/\/$/, "");
-        const mappedOffers: Offer[] = response.data.map((o: any) => {
+        const mappedOffers: Offer[] = offersArray.map((o: any) => {
           const images = Array.isArray(o.images) ? o.images.map((img: any) => {
             if (!img) return img;
             

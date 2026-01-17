@@ -386,7 +386,14 @@ const Home = () => {
       if (!isMountedRef.current) return;
 
       if (offersResponse.status === "fulfilled") {
-        let offersData = offersResponse.value;
+        let offersData = Array.isArray(offersResponse.value) 
+          ? offersResponse.value 
+          : (offersResponse.value?.data || []);
+        
+        // Ensure offersData is always an array
+        if (!Array.isArray(offersData)) {
+          offersData = [];
+        }
         
         // Calculate distance for each offer if user location is available
         if (locationData?.latitude && locationData?.longitude) {
