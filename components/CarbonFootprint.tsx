@@ -62,7 +62,7 @@ const CarbonFootprint = () => {
       {/* Link to websitecarbon */}
       <div className="mt-6 pt-4 border-t border-primary/20">
         <a
-          href="https://www.websitecarbon.com/website/leftover-ccdev-space/"
+          href="https://www.websitecarbon.com/website/savetheplate-tn/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs sm:text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-2 transition-colors"
