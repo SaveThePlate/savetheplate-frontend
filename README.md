@@ -13,8 +13,6 @@ This is the frontend for SaveThePlate, a platform to reduce food waste by connec
 
 The app will be available at http://localhost:3000
 
-For more info, ask your team or check the Confluence space.
-
 **State Management & Data Fetching:**
 - React Query (TanStack Query)
 - Context API (User & Language)
@@ -347,4 +345,3 @@ Welcome to SaveThePlate! Here's your learning path:
 ---
 
 **Last Updated:** January 2026
-**Questions?** Contact the team lead or check the Confluence space!
