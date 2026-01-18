@@ -65,11 +65,25 @@ export default function BusinessSignUp() {
           await fetchUserRole();
         }
 
-        const redirectTo = getPostAuthRedirect(user);
-        if (redirectTo !== "/onboarding") {
-          router.push(redirectTo);
+        // Allow users with no role (unverified email) to stay on business signup page
+        // They may have signed up as CLIENT but want to switch to PROVIDER signup
+        if (!userRole || userRole === "NONE") {
+          setCheckingAuth(false);
           return;
         }
+
+        // If user already has CLIENT role, redirect to client home
+        if (userRole === "CLIENT") {
+          router.push("/client/home");
+          return;
+        }
+
+        // If user already has PROVIDER/PENDING_PROVIDER role, redirect to provider home
+        if (userRole === "PROVIDER" || userRole === "PENDING_PROVIDER") {
+          router.push("/provider/home");
+          return;
+        }
+
         setCheckingAuth(false);
       } catch (error) {
         console.debug("Token check failed, showing sign up form");

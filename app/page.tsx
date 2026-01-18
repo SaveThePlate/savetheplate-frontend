@@ -50,7 +50,7 @@ const WelcomePage = () => {
         // Landing page behavior:
         // - CLIENT: go straight to client home
         // - PROVIDER / PENDING_PROVIDER: go to provider home
-        // - NONE: stay on landing page
+        // - NONE or undefined: stay on landing page (unverified user can navigate freely)
         if (userRole === "CLIENT") {
           router.push("/client/home");
           return;
@@ -59,6 +59,7 @@ const WelcomePage = () => {
           router.push("/provider/home");
           return;
         }
+        // User has token but no role (unverified email) - allow them to stay
         setCheckingAuth(false);
       } catch (error) {
         // Token is invalid or expired, stay on landing page

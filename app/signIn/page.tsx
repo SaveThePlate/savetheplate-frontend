@@ -63,11 +63,23 @@ export default function SignIn() {
           await fetchUserRole();
         }
 
-        const redirectTo = getPostAuthRedirect(user);
-        if (redirectTo !== "/onboarding") {
-          router.push(redirectTo);
+        // If user has no role (unverified email), allow them to stay on sign in page
+        // This is important for users on verification screen who want to navigate
+        if (!userRole || userRole === "NONE") {
+          setCheckingAuth(false);
           return;
         }
+
+        // Redirect users with valid roles to their appropriate home pages
+        if (userRole === "CLIENT") {
+          router.push("/client/home");
+          return;
+        }
+        if (userRole === "PROVIDER" || userRole === "PENDING_PROVIDER") {
+          router.push("/provider/home");
+          return;
+        }
+
         setCheckingAuth(false);
       } catch (error) {
         // Token is invalid or expired, allow sign in
@@ -988,6 +1000,20 @@ export default function SignIn() {
                   >
                     {loading ? t("signin.sending") : t("signin.resend_code")}
                   </button>
+
+                  {/* Explore without verification option */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs text-center text-gray-600 mb-2">
+                      {t("signin.verify_later") || "Want to verify your email later?"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/")}
+                      className="w-full text-xs sm:text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors underline"
+                    >
+                      {t("signin.explore_platform") || "Explore the platform"}
+                    </button>
+                  </div>
                 </form>
 
                 {showAuthToast && (
