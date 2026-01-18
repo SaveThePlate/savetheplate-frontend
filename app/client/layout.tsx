@@ -14,20 +14,20 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const { t } = useLanguage();
 
   useEffect(() => {
+    // Extract userId from token for navigation purposes only
+    // RouteGuard already handles authentication, no need to redirect here
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) {
-        router.push("/signIn");
-        return;
-      }
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        if (payload?.id) {
-          setUserId(String(payload.id));
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          if (payload?.id) {
+            setUserId(String(payload.id));
+          }
+        } catch (parseError) {
+          console.warn("Error parsing token:", parseError);
+          // Token parsing failed, RouteGuard will handle authentication
         }
-      } catch (parseError) {
-        console.warn("Error parsing token:", parseError);
-        // Token parsing failed, but don't redirect - let RouteGuard handle it
       }
     } catch (error) {
       console.warn("Error accessing token:", error);

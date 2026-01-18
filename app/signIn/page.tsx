@@ -18,6 +18,7 @@ import { LocalStorage } from "@/lib/utils";
 import { Home } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { getPostAuthRedirect } from "@/lib/authRedirect";
+import { readAuthIntentRole } from "@/lib/authIntent";
 
 export default function SignIn() {
   const { t, language } = useLanguage();
@@ -513,11 +514,34 @@ export default function SignIn() {
           const meResp = await axiosInstance.get(`/users/me`, {
             headers: { Authorization: `Bearer ${response.data.accessToken}` },
           });
-          fetchUserRole().catch(() => {});
-          router.push(getPostAuthRedirect(meResp.data));
+          const userData = meResp.data;
+          const intentRole = readAuthIntentRole();
+          
+          // Handle unverified users or users with no role from Google OAuth
+          // Google OAuth users are typically auto-verified, but default to CLIENT if no role
+          if (!userData.role || userData.role === "NONE") {
+            try {
+              await axiosInstance.post(
+                `/users/set-role`,
+                { role: "CLIENT" },
+                { headers: { Authorization: `Bearer ${response.data.accessToken}` } }
+              );
+              await fetchUserRole().catch(() => {});
+              router.push("/client/home");
+            } catch (roleError) {
+              console.error("Error setting role:", roleError);
+              await fetchUserRole().catch(() => {});
+              router.push(getPostAuthRedirect(userData, intentRole));
+            }
+          } else {
+            await fetchUserRole().catch(() => {});
+            router.push(getPostAuthRedirect(userData, intentRole));
+          }
         } catch (e) {
-          fetchUserRole().catch(() => {});
-          router.push("/onboarding");
+          console.error("Error fetching user data:", e);
+          await fetchUserRole().catch(() => {});
+          const intentRole = readAuthIntentRole();
+          router.push(getPostAuthRedirect(null, intentRole));
         }
       } else {
         throw new Error("Invalid response from server");
