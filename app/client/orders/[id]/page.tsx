@@ -40,9 +40,17 @@ const Orders = () => {
     }
 
     try {
-      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-      const currentUserId = tokenPayload.id;
-      setUserId(currentUserId);
+      let currentUserId;
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        currentUserId = tokenPayload.id;
+        setUserId(currentUserId);
+      } catch (parseError) {
+        console.error("Error parsing token:", parseError);
+        setError("Invalid authentication. Please sign in again.");
+        router.push("/signIn");
+        return;
+      }
 
       const response = await axiosInstance.get(
         `/orders/user/${currentUserId}`,

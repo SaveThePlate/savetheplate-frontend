@@ -213,9 +213,12 @@ export default function BusinessSignUp() {
         setShowSuccess(true);
         
         // Redirect to provider home page after 2 seconds
-        setTimeout(() => {
+        const redirectTimeout = setTimeout(() => {
           router.push("/provider/home");
         }, 2000);
+
+        // Store timeout ID for cleanup if component unmounts
+        return () => clearTimeout(redirectTimeout);
       } else {
         throw new Error("Invalid response from server");
       }

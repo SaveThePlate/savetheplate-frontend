@@ -61,7 +61,19 @@ const ProfilePage = () => {
         }
 
         const headers = { Authorization: `Bearer ${token}` };
-        const userId = JSON.parse(atob(token.split(".")[1])).id;
+        let userId;
+        
+        // Parse userId from token with error handling
+        try {
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+          userId = tokenPayload.id;
+        } catch (parseError) {
+          console.error("Error parsing token:", parseError);
+          setIsAuthenticated(false);
+          setLoading(false);
+          router.push("/signIn");
+          return;
+        }
 
         // Fetch profile and orders in parallel
         const [profileRes, ordersRes] = await Promise.all([

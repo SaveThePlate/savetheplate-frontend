@@ -56,7 +56,21 @@ const Offers = () => {
   useEffect(() => {
     const fetchOffer = async () => {
       const token = localStorage.getItem("accessToken");
-      if (!token) return router.push("/signIn");
+      if (!token) {
+        router.push("/signIn");
+        return;
+      }
+
+      // Parse userId from token
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        setUserId(tokenPayload?.id);
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        router.push("/signIn");
+        return;
+      }
+
       try {
         const res = await axiosInstance.get(`/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -128,22 +142,6 @@ const Offers = () => {
     };
     fetchOffer();
   }, [id, router, t]);
-
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-        router.push("/signIn");
-        return;
-      }
-    // Parse userId from token instead of making API call
-    try {
-      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-      setUserId(tokenPayload?.id);
-    } catch (error) {
-      console.error("Error parsing token:", error);
-      router.push("/signIn");
-    }
-  }, [router]);
 
   const handleOrder = async () => {
     if (!offer) {

@@ -187,16 +187,21 @@ const Home = () => {
     if (cachedLocation) {
       try {
         const location = JSON.parse(cachedLocation);
-        // Use cached location if it's less than 24 hours old
-        const cacheAge = Date.now() - (location.timestamp || 0);
-        if (cacheAge < 24 * 60 * 60 * 1000) {
-          setLocationData(location);
-          setLocationPermission('granted');
-          setIsLoadingLocation(false);
-          return;
+        // Validate the parsed location has required properties
+        if (location && typeof location === 'object' && 'timestamp' in location) {
+          // Use cached location if it's less than 24 hours old
+          const cacheAge = Date.now() - (location.timestamp || 0);
+          if (cacheAge < 24 * 60 * 60 * 1000) {
+            setLocationData(location);
+            setLocationPermission('granted');
+            setIsLoadingLocation(false);
+            return;
+          }
         }
       } catch (e) {
-        // Invalid cache, continue with new request
+        // Invalid cache, clear it and continue with new request
+        console.warn('Invalid cached location, clearing:', e);
+        localStorage.removeItem('userLocation');
       }
     }
     setIsLoadingLocation(true);
