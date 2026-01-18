@@ -13,9 +13,9 @@ import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_FRONTEND_URL || "https://savetheplate.tn"),
-  title: "Save The Plate",
-  description: "Connect restaurants with consumers to reduce food waste. Discover the best foods at the most affordable prices!",
-  keywords: ["food waste", "sustainable food", "restaurant deals", "eco-friendly", "save food", "reduce waste"],
+  title: "Save The Plate - Réduire le gaspillage alimentaire en Tunisie",
+  description: "SaveThePlate permet aux commerces de vendre leurs invendus en fin de journée à prix réduit, tout en aidant les clients à économiser et en réduisant le gaspillage alimentaire.",
+  keywords: ["gaspillage alimentaire", "invendus", "prix réduit", "économiser", "food waste", "sustainable food", "restaurant deals", "eco-friendly", "save food", "reduce waste", "Tunisie", "Tunisia", "anti-gaspi"],
   authors: [{ name: "Save The Plate" }],
   creator: "Save The Plate",
   publisher: "Save The Plate",
@@ -24,8 +24,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Save The Plate",
-    title: "Save The Plate - Reduce Food Waste",
-    description: "Connect restaurants with consumers to reduce food waste. Discover the best foods at the most affordable prices!",
+    title: "Save The Plate - Réduire le gaspillage alimentaire en Tunisie",
+    description: "SaveThePlate permet aux commerces de vendre leurs invendus en fin de journée à prix réduit, tout en aidant les clients à économiser et en réduisant le gaspillage alimentaire.",
+    locale: "fr_TN",
     images: [
       {
         url: "/logo.png",
@@ -38,8 +39,8 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: "summary_large_image",
-    title: "Save The Plate",
-    description: "Connect restaurants with consumers to reduce food waste.",
+    title: "Save The Plate - Réduire le gaspillage alimentaire",
+    description: "SaveThePlate permet aux commerces de vendre leurs invendus à prix réduit. Économisez et réduisez le gaspillage alimentaire.",
     images: ["/logo.png"],
   },
   // App Icons

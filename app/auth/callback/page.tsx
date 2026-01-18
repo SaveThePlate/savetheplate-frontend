@@ -110,7 +110,7 @@ function FacebookAuthCallbackContent() {
           router.push(getPostAuthRedirect(meResp.data, intentRole));
         } catch (e) {
           const intentRole = readAuthIntentRole();
-          router.push(intentRole ? `/onboarding?intent=${intentRole}` : "/onboarding");
+          router.push(getPostAuthRedirect(null, intentRole));
         }
       } catch (err: any) {
         console.error("Error handling Facebook OAuth callback:", err);

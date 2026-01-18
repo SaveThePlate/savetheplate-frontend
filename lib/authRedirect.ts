@@ -2,15 +2,14 @@ import type { AuthUser } from "@/context/UserContext";
 import type { AuthIntentRole } from "@/lib/authIntent";
 
 /**
- * Centralized post-auth redirect decision.
+ * Centralized post-auth redirect decision (no onboarding flow).
  *
  * Rules:
- * - role NONE (or missing) with CLIENT intent: go directly to client home (auto-set role)
- * - role NONE (or missing) with PROVIDER intent: go to onboarding for provider setup
- * - role NONE (or missing) without intent: go to onboarding for role selection
+ * - role NONE/missing with PROVIDER intent: send to business signup
+ * - role NONE/missing otherwise: send to sign-in
  * - role CLIENT: go to client home
- * - role PENDING_PROVIDER: go to provider home (allows quick onboarding)
- * - role PROVIDER: go to provider home (fully approved provider)
+ * - role PENDING_PROVIDER or PROVIDER: go to provider home
+ * - unknown: fall back to sign-in
  */
 export function getPostAuthRedirect(
   user: AuthUser | null | undefined,
@@ -19,11 +18,8 @@ export function getPostAuthRedirect(
   const role = user?.role;
 
   if (!role || role === "NONE") {
-    // For client intent, bypass onboarding and go directly to client home
-    // The signup flow will handle setting the CLIENT role
-    if (intentRole === "CLIENT") return "/client/home";
-    if (intentRole === "PROVIDER") return "/onboarding?intent=PROVIDER";
-    return "/onboarding";
+    if (intentRole === "PROVIDER") return "/business-signup";
+    return "/signIn";
   }
   if (role === "CLIENT") return "/client/home";
   
@@ -33,8 +29,8 @@ export function getPostAuthRedirect(
     return "/provider/home";
   }
 
-  // Unknown role: be safe and send to onboarding.
-  return "/onboarding";
+  // Unknown role: be safe and send to sign-in.
+  return "/signIn";
 }
 
 

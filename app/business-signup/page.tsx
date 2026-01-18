@@ -29,6 +29,8 @@ export default function BusinessSignUp() {
   const router = useRouter();
   const { user, userRole, loading: userLoading, fetchUserRole } = useUser();
 
+  const normalizePhoneNumber = (value: string) => value.replace(/\D/g, "");
+
   // Form state
   const [formData, setFormData] = useState({
     businessName: "",
@@ -89,6 +91,8 @@ export default function BusinessSignUp() {
   };
 
   const validateForm = () => {
+    const normalizedPhone = normalizePhoneNumber(formData.phone);
+
     if (!formData.businessName.trim()) {
       setErrorMessage(t("business_signup.error_generic") || "Business name is required");
       return false;
@@ -97,8 +101,12 @@ export default function BusinessSignUp() {
       setErrorMessage("Please enter a valid email address");
       return false;
     }
-    if (!formData.phone.trim()) {
-      setErrorMessage(t("business_signup.error_phone_invalid") || "Phone number is required");
+    if (!normalizedPhone) {
+      setErrorMessage(t("business_signup.error_phone_invalid") || "Invalid phone number");
+      return false;
+    }
+    if (normalizedPhone.length < 8 || normalizedPhone.length > 15) {
+      setErrorMessage(t("business_signup.error_phone_invalid") || "Invalid phone number");
       return false;
     }
     if (formData.password.length < 8) {
@@ -168,12 +176,14 @@ export default function BusinessSignUp() {
 
         // Update provider details using the correct endpoint
         // Note: The endpoint will automatically extract latitude/longitude from mapsLink
+        const normalizedPhone = normalizePhoneNumber(formData.phone);
+
         await axiosInstance.post(
           `/users/update-details`,
           {
-            phoneNumber: parseInt(formData.phone, 10),
-            mapsLink: formData.mapsLink,
-            location: formData.address || "Business Address",
+            phoneNumber: normalizedPhone,
+            mapsLink: formData.mapsLink.trim(),
+            location: formData.address.trim() || "Business Address",
             latitude: 0, // Will be extracted from mapsLink by backend
             longitude: 0, // Will be extracted from mapsLink by backend
           },
