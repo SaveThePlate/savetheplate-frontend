@@ -106,31 +106,11 @@ function FacebookAuthCallbackContent() {
           const meResp = await axiosInstance.get(`/users/me`, {
             headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` },
           });
-          const userData = meResp.data;
           const intentRole = readAuthIntentRole();
-          
-          // Handle unverified users - redirect to client home if they signed up via social
-          // Social auth users are typically auto-verified, but if not, treat as CLIENT
-          if (!userData.role || userData.role === "NONE") {
-            // For Facebook login with no role, default to CLIENT
-            try {
-              await axiosInstance.post(
-                `/users/set-role`,
-                { role: "CLIENT" },
-                { headers: { Authorization: `Bearer ${backendResponse.data.accessToken}` } }
-              );
-              router.push("/client/home");
-            } catch (roleError) {
-              console.error("Error setting role:", roleError);
-              router.push(getPostAuthRedirect(userData, intentRole));
-            }
-          } else {
-            router.push(getPostAuthRedirect(userData, intentRole));
-          }
+          router.push(getPostAuthRedirect(meResp.data, intentRole));
         } catch (e) {
-          console.error("Error fetching user data:", e);
           const intentRole = readAuthIntentRole();
-          router.push(getPostAuthRedirect(null, intentRole));
+          router.push(intentRole ? `/onboarding?intent=${intentRole}` : "/onboarding");
         }
       } catch (err: any) {
         console.error("Error handling Facebook OAuth callback:", err);
