@@ -41,8 +41,8 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy example env if it exists, otherwise build without it
-COPY .env.local.example .env 2>/dev/null || true
+# Copy env template (build doesn't need real secrets, just structure)
+COPY .env.local.example .env
 
 RUN npm run build
 
