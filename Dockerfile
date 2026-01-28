@@ -56,6 +56,9 @@ ENV TZ=UTC
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NEXT_SHARP_PATH=/app/node_modules/sharp
 
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
