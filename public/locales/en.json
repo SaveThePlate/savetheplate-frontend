@@ -210,7 +210,7 @@
       "sort_price_high": "Price: High to Low",
       "sort_quantity_low": "Quantity: Low to High",
       "no_results": "No offers match your search criteria. Try adjusting your filters.",
-      "empty_state_title": "You have no published offers yet. Start by creating one!",
+      "empty_state_title": "You have no published offers yet.",
       "empty_state_description": "Start by creating your first offer to reach more customers!",
       "status_label": "Status",
       "category": "Category",

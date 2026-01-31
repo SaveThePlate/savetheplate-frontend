@@ -154,6 +154,7 @@
     "error_verification_email_failed": "Compte créé mais échec de l'envoi de l'email de vérification. Veuillez cliquer sur 'Renvoyer le Code' pour réessayer."
   },
   "home": {
+      "rapid_offer": "Offre Rapide",
     "pending_orders_single": "Vous avez {count} commande en attente.",
     "pending_orders_plural": "Vous avez {count} commandes en attente.",
     "pending_reminder": "N'oubliez pas de les récupérer et de les confirmer à temps !",
@@ -182,17 +183,30 @@
     "searchPlaceholder": "Rechercher de la nourriture, des magasins..."
   },
   "provider": {
+        "rapid_offer": {
+          "title": "Publication Rapide d'Offre",
+          "success": "Offre créée avec succès !",
+          "error": "Échec de la création de l'offre.",
+          "form": {
+            "title": "Titre",
+            "price": "Prix (dt)",
+            "quantity": "Quantité",
+            "pickup_time": "Heure de retrait",
+            "submit": "Publier l'offre",
+            "submitting": "Publication..."
+          }
+        },
     "home": {
       "title": "Vos Offres Publiées",
       "subtitle": "Gérez vos offres et atteignez plus de clients 🌍",
       "publish_offer": "Publier une Offre",
       "loading_offers": "Chargement de vos offres...",
-      "no_offers": "Vous n'avez pas encore d'offres publiées. Commencez par en créer une !",
+      "no_offers": "Vous n'avez pas encore d'offres publiées.",
       "offer_deleted": "Offre supprimée avec succès",
       "delete_failed": "Échec de la suppression de l'offre",
       "fetch_offers_failed": "Échec du chargement des offres : {error}",
       "pending_title": "Compte en cours de vérification",
-      "pending_message": "Votre compte fournisseur est actuellement en cours de vérification. Vous pouvez créer et gérer des offres, mais elles ne seront visibles aux clients qu'une fois votre compte approuvé par notre équipe.",
+      "pending_message": "Votre compte fournisseur est actuellement en cours de vérification.",
       "stats": {
         "total": "Total",
         "active": "Actives",
@@ -210,7 +224,7 @@
       "sort_price_high": "Prix: Décroissant",
       "sort_quantity_low": "Quantité: Croissante",
       "no_results": "Aucune offre ne correspond à vos critères de recherche. Essayez d'ajuster vos filtres.",
-      "empty_state_title": "Vous n'avez pas encore d'offres publiées. Commencez par en créer une !",
+      "empty_state_title": "Vous n'avez pas encore d'offres publiées.",
       "empty_state_description": "Commencez par créer votre première offre pour atteindre plus de clients !",
       "status_label": "Statut",
       "category": "Catégorie",
@@ -810,7 +824,9 @@
     "error_passwords_match": "Les mots de passe ne correspondent pas",
     "error_phone_invalid": "Numéro de téléphone invalide",
     "error_terms": "Vous devez accepter les conditions d'utilisation",
-    "error_generic": "Une erreur s'est produite. Veuillez réessayer."
+    "error_generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "quick_signup_subtitle": "Inscription rapide - Complétez les détails de votre profil plus tard",
+    "quick_start_hint": "Vous pouvez ajouter votre adresse, localisation et détails commerciaux après l'inscription dans les paramètres de votre profil."
   },
   "onboarding": {
     "step_1_of_2": "Étape 1 sur 2",

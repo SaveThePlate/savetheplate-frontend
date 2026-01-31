@@ -31,17 +31,13 @@ export default function BusinessSignUp() {
 
   const normalizePhoneNumber = (value: string) => value.replace(/\D/g, "");
 
-  // Form state
+  // Form state - only essential fields for quick onboarding
   const [formData, setFormData] = useState({
     businessName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
-    address: "",
-    mapsLink: "",
-    businessType: "",
-    description: "",
   });
   
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -105,8 +101,8 @@ export default function BusinessSignUp() {
   };
 
   const validateForm = () => {
-    const normalizedPhone = normalizePhoneNumber(formData.phone);
-
+    const normalizedPhone = normalizePhoneNumber(formData.phoneNumber);
+    
     if (!formData.businessName.trim()) {
       setErrorMessage(t("business_signup.error_generic") || "Business name is required");
       return false;
@@ -116,7 +112,7 @@ export default function BusinessSignUp() {
       return false;
     }
     if (!normalizedPhone) {
-      setErrorMessage(t("business_signup.error_phone_invalid") || "Invalid phone number");
+      setErrorMessage(t("business_signup.error_phone_invalid") || "Phone number is required");
       return false;
     }
     if (normalizedPhone.length < 8 || normalizedPhone.length > 15) {
@@ -129,10 +125,6 @@ export default function BusinessSignUp() {
     }
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage(t("business_signup.error_passwords_match") || "Passwords do not match");
-      return false;
-    }
-    if (!formData.mapsLink.trim()) {
-      setErrorMessage("Google Maps link is required");
       return false;
     }
     if (!termsAccepted) {
@@ -153,11 +145,14 @@ export default function BusinessSignUp() {
     setErrorMessage("");
 
     try {
+      const normalizedPhone = normalizePhoneNumber(formData.phoneNumber);
+      
       // First, sign up the user with PROVIDER role intent
       const signupResponse = await axiosInstance.post(
         `/auth/signup`,
         {
           email: formData.email,
+          phoneNumber: normalizedPhone,
           password: formData.password,
           username: formData.businessName, // Use business name as username
         },
@@ -188,26 +183,7 @@ export default function BusinessSignUp() {
           }
         );
 
-        // Update provider details using the correct endpoint
-        // Note: The endpoint will automatically extract latitude/longitude from mapsLink
-        const normalizedPhone = normalizePhoneNumber(formData.phone);
-
-        await axiosInstance.post(
-          `/users/update-details`,
-          {
-            phoneNumber: normalizedPhone,
-            mapsLink: formData.mapsLink.trim(),
-            location: formData.address.trim() || "Business Address",
-            latitude: 0, // Will be extracted from mapsLink by backend
-            longitude: 0, // Will be extracted from mapsLink by backend
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        // User can complete their profile with phone, address, maps link, etc. later
 
         // Show success message
         setShowSuccess(true);
@@ -316,6 +292,9 @@ export default function BusinessSignUp() {
           <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
             {t("business_signup.subtitle")}
           </p>
+          <p className="text-sm text-emerald-600 font-medium mt-2">
+            {t("business_signup.quick_signup_subtitle")}
+          </p>
         </div>
 
         {/* Benefits Section */}
@@ -400,19 +379,19 @@ export default function BusinessSignUp() {
               />
             </div>
 
-            {/* Phone */}
+            {/* Phone Number */}
             <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-semibold text-foreground">
+              <label htmlFor="phoneNumber" className="block text-sm font-semibold text-foreground">
                 {t("business_signup.phone")} <span className="text-red-500">*</span>
               </label>
               <Input
-                id="phone"
-                name="phone"
+                id="phoneNumber"
+                name="phoneNumber"
                 placeholder={t("business_signup.phone_placeholder")}
                 className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
                 type="tel"
                 required
-                value={formData.phone}
+                value={formData.phoneNumber}
                 onChange={handleInputChange}
               />
             </div>
@@ -453,74 +432,11 @@ export default function BusinessSignUp() {
               </div>
             </div>
 
-            {/* Address */}
-            <div className="space-y-2">
-              <label htmlFor="address" className="block text-sm font-semibold text-foreground">
-                {t("business_signup.address")}
-              </label>
-              <Input
-                id="address"
-                name="address"
-                placeholder={t("business_signup.address_placeholder")}
-                className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
-                type="text"
-                value={formData.address}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            {/* Google Maps Link */}
-            <div className="space-y-2">
-              <label htmlFor="mapsLink" className="block text-sm font-semibold text-foreground">
-                {t("business_signup.maps_link")} <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="mapsLink"
-                name="mapsLink"
-                placeholder={t("business_signup.maps_link_placeholder")}
-                className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
-                type="url"
-                required
-                value={formData.mapsLink}
-                onChange={handleInputChange}
-              />
-              <p className="text-xs text-muted-foreground">
-                {t("business_signup.maps_hint")}
+            {/* Info box about completing profile later */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+              <p className="text-sm text-emerald-800">
+                <strong>✨ Quick Start:</strong> {t("business_signup.quick_start_hint")}
               </p>
-            </div>
-
-            {/* Business Type */}
-            <div className="space-y-2">
-              <label htmlFor="businessType" className="block text-sm font-semibold text-foreground">
-                {t("business_signup.business_type")}
-              </label>
-              <Select value={formData.businessType} onValueChange={handleSelectChange}>
-                <SelectTrigger className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white">
-                  <SelectValue placeholder={t("business_signup.business_type_placeholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bakery">{t("business_signup.type_bakery")}</SelectItem>
-                  <SelectItem value="restaurant">{t("business_signup.type_restaurant")}</SelectItem>
-                  <SelectItem value="cafe">{t("business_signup.type_cafe")}</SelectItem>
-                  <SelectItem value="grocery">{t("business_signup.type_grocery")}</SelectItem>
-                  <SelectItem value="other">{t("business_signup.type_other")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <label htmlFor="description" className="block text-sm font-semibold text-foreground">
-                {t("business_signup.description")}
-              </label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder={t("business_signup.description_placeholder")}
-                className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all min-h-[100px]"
-                value={formData.description}
-                onChange={handleInputChange}
-              />
             </div>
 
             {/* Terms and Conditions */}
