@@ -26,6 +26,8 @@ const withPWA = nextPWA({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  // Turbopack configuration for Next.js 16+
+  turbopack: {},
   // Enable compression
   compress: true,
   // Optimize production builds
