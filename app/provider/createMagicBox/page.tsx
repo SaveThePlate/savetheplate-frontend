@@ -184,7 +184,7 @@ const CreateMagicBoxPage = () => {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => router.push("/provider/publish")}
+          onClick={() => router.push("/provider/home")}
           className="absolute top-5 left-5 flex items-center text-muted-foreground hover:text-emerald-600 gap-2 text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />

@@ -27,6 +27,9 @@ import { compressImage, shouldCompress } from "@/utils/imageCompression";
 import { ShoppingBag, ChevronRight, LogOut, Heart, MessageCircle, Settings, User, HelpCircle } from "lucide-react";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
 import { getBackendOrigin } from "@/lib/backendOrigin";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { ImprovedEditProfileModal } from "@/components/ImprovedEditProfileModal";
+import { ProfileSkeleton } from "@/components/SkeletonLoaders";
 
 interface ProfileData {
   username: string;
@@ -727,21 +730,33 @@ export default function ProviderProfile() {
   const router = useRouter();
   const { t } = useLanguage();
   const { profile, stats, loading, refetch } = useProviderProfile();
-
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const getProfileImageSrc = () => {
     if (!profile?.profileImage) return DEFAULT_PROFILE_IMAGE;
     if (typeof profile.profileImage === "string") {
-      return resolveImageSource(profile.profileImage);
+      // If it's already a full URL, use it as-is
+      if (profile.profileImage.startsWith('http')) {
+        return profile.profileImage;
+      }
+      // If it's a storage path, prepend backend URL
+      if (profile.profileImage.startsWith('/store/') || profile.profileImage.startsWith('/storage/')) {
+        const backendUrl = getBackendOrigin();
+        return `${backendUrl}${profile.profileImage}`;
+      }
+      // If it's a bare filename, prepend backend storage path
+      const backendUrl = getBackendOrigin();
+      return `${backendUrl}/store/${profile.profileImage}`;
     }
-    if (typeof profile.profileImage === "object" && "url" in profile.profileImage) {
-      return resolveImageSource({ url: String(profile.profileImage.url) });
+    if (typeof profile.profileImage === "object" && profile.profileImage?.url) {
+      return profile.profileImage.url;
     }
     return DEFAULT_PROFILE_IMAGE;
   };
 
   const profileImageSrc = getProfileImageSrc();
 
+// ... (rest of the code remains the same)
   const handleSaveProfile = async (data: {
     username: string;
     phoneNumber: string;
@@ -820,84 +835,97 @@ export default function ProviderProfile() {
 
   return (
     <div className="min-h-screen pb-24 px-4 pt-10">
-      <h1 className="font-display font-bold text-3xl mb-8">{t("profile.title") || "Profile"}</h1>
+      {loading ? (
+        <ProfileSkeleton />
+      ) : (
+        <>
+          <h1 className="font-display font-bold text-3xl mb-8">{t("profile.title") || "Profile"}</h1>
 
-      {/* User Info */}
-      <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden">
-          <Image
-            src={sanitizeImageUrl(profileImageSrc)}
-            alt={profile?.username || "Store"}
-            width={64}
-            height={64}
-            className="w-full h-full object-cover"
-            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(profileImageSrc))}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = DEFAULT_PROFILE_IMAGE;
-            }}
+          {/* Profile Completion Banner */}
+          <ProfileCompletionBanner
+            profile={profile}
+            onEditProfile={() => setShowEditDialog(true)}
           />
-        </div>
-        <div className="flex-1">
-          <h2 className="font-bold text-lg sm:text-xl">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
-          <p className="text-muted-foreground text-xs sm:text-sm">{profile?.location || t("provider.profile.location")}</p>
-        </div>
-      </div>
 
-      {/* Impact Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <ShoppingBag className="w-6 h-6 mb-2" />
-          <div className="text-2xl font-bold">{loading ? "..." : stats.totalOffers}</div>
-          <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.active_offers") || "Active Offers"}</div>
-        </div>
+          {/* User Info */}
+          <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6 flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden">
+              <Image
+                src={profileImageSrc}
+                alt={profile?.username || "Store"}
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+                unoptimized={profileImageSrc.includes(getBackendOrigin()) || profileImageSrc.startsWith('/store/') || profileImageSrc.startsWith('/storage/')}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = DEFAULT_PROFILE_IMAGE;
+                }}
+              />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-bold text-lg sm:text-xl">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
+              <p className="text-muted-foreground text-xs sm:text-sm">{profile?.location || t("provider.profile.location")}</p>
+            </div>
+          </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-          <Heart className="w-6 h-6 mb-2" />
-          <div className="text-2xl font-bold">{loading ? "..." : stats.totalMealsSaved}</div>
-          <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
-        </div>
+          {/* Impact Stats */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <ShoppingBag className="w-6 h-6 mb-2" />
+              <div className="text-2xl font-bold">{loading ? "..." : stats.totalOffers}</div>
+              <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.active_offers") || "Active Offers"}</div>
+            </div>
 
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-          <svg className="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div className="text-2xl font-bold">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
-          <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.total_revenue") || "Revenue (dt)"}</div>
-        </div>
-      </div>
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+              <Heart className="w-6 h-6 mb-2" />
+              <div className="text-2xl font-bold">{loading ? "..." : stats.totalMealsSaved}</div>
+              <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
+            </div>
 
-      {/* Menu */}
-      <div className="space-y-2 mb-6">
-        <Link href="/provider/profile/account-details" className="block">
-          <MenuItem icon={User} label={t("profile.accountDetails") || "Account Details"} />
-        </Link>
-        <Link href="/provider/profile/preferences" className="block">
-          <MenuItem icon={Settings} label={t("common.preferences") || "Preferences"} />
-        </Link>
-        <Link href="/provider/impact" className="block">
-          <MenuItem icon={Heart} label={t("nav.impact") || "Impact"} />
-        </Link>
-        <Link href="/provider/contact" className="block">
-          <MenuItem icon={MessageCircle} label={t("nav.contact") || "Contact"} />
-        </Link>
-        <Link href="/provider/profile/help-support" className="block">
-          <MenuItem icon={HelpCircle} label={t("profile.helpSupport") || "Help & Support"} />
-        </Link>
-      </div>
+            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+              <svg className="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="text-2xl font-bold">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
+              <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.total_revenue") || "Revenue (dt)"}</div>
+            </div>
+          </div>
 
-      {/* Sign Out */}
-      <button
-        onClick={() => {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          router.push("/");
-        }}
-        className="w-full flex items-center justify-center gap-3 p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 hover:bg-destructive/20 transition-all active:scale-[0.99] font-medium"
-      >
-        <LogOut className="w-5 h-5" />
-        {t("common.signOut") || "Sign Out"}
-      </button>
+          {/* Menu */}
+          <div className="space-y-2 mb-6">
+            <Link href="/provider/profile/account-details" className="block">
+              <MenuItem icon={User} label={t("profile.accountDetails") || "Account Details"} />
+            </Link>
+            <Link href="/provider/profile/preferences" className="block">
+              <MenuItem icon={Settings} label={t("profile.preferences") || "Preferences"} />
+            </Link>
+            <Link href="/provider/profile/help-support" className="block">
+              <MenuItem icon={HelpCircle} label={t("profile.helpSupport") || "Help & Support"} />
+            </Link>
+          </div>
+
+          {/* Sign Out */}
+          <button
+            onClick={() => {
+              localStorage.removeItem("accessToken");
+              router.push("/signIn");
+            }}
+            className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+          >
+            <LogOut className="w-5 h-5" />
+            {t("common.signOut") || "Sign Out"}
+          </button>
+
+          {/* Edit Profile Dialog */}
+          <ImprovedEditProfileModal
+            isOpen={showEditDialog}
+            onClose={() => setShowEditDialog(false)}
+            profile={profile}
+            onSave={handleSaveProfile}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -225,7 +225,7 @@ export default function AccountDetails() {
                 width={64}
                 height={64}
                 className="w-full h-full object-cover"
-                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(profileImage))}
+                unoptimized={shouldUnoptimizeImage(profileImage)}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = DEFAULT_PROFILE_IMAGE;

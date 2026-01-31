@@ -152,7 +152,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
                 alt={offer.title}
                 className="h-16 rounded-md"
                 loading="lazy"
-                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE))}
+                unoptimized={shouldUnoptimizeImage(offer.images.length > 0 ? getImage(offer.images[0].path) : DEFAULT_BAG_IMAGE)}
                 />
             </div>
 

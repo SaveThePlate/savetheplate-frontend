@@ -40,5 +40,6 @@ export interface ProviderOfferCardProps extends BaseOfferCardProps {
   onDelete?: (id: number) => void;
   onUpdate?: (id: number, data: any) => void;
   ownerId: number;
+  isDeleting?: boolean;
 }
 

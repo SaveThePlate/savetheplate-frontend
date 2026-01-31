@@ -6,10 +6,12 @@ import { useState } from 'react';
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { useUser } from "@/context/UserContext";
+import { OfferTypeModal } from "./OfferTypeModal";
 
 const Nav = () => {
   const { userRole } = useUser();
   const { t } = useLanguage();
+  const [showOfferTypeModal, setShowOfferTypeModal] = useState(false);
 
   return (
     <header className='w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16'>
@@ -40,11 +42,12 @@ const Nav = () => {
         <div className="flex items-center gap-3 h-full">
           <LanguageSwitcher variant="button" />
           {userRole === 'PROVIDER' ? (
-            <Link href="/provider/addOffer">
-              <Button className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl">
-                {t("nav.publish_offer")}
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => setShowOfferTypeModal(true)}
+              className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl"
+            >
+              {t("nav.publish_offer")}
+            </Button>
           ) : userRole === 'CLIENT' ? (
             <Link href="/client/offers">
               <Button className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition-all duration-300 ease-in-out transform hover:scale-110 hover:from-emerald-500 hover:to-emerald-700 hover:shadow-xl">
@@ -54,6 +57,12 @@ const Nav = () => {
           ) : null}
         </div>
       </nav>
+      
+      {/* Offer Type Modal */}
+      <OfferTypeModal 
+        isOpen={showOfferTypeModal}
+        onClose={() => setShowOfferTypeModal(false)}
+      />
     </header>
   );
 };

@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { Home, ShoppingBag, User, Plus, LogOut } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import RouteGuard from "@/components/RouteGuard";
+import { OfferTypeModal } from "@/components/OfferTypeModal";
 
 export default function ProviderLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useLanguage();
+  const [showOfferTypeModal, setShowOfferTypeModal] = useState(false);
 
   return (
     <RouteGuard allowedRoles={["PROVIDER", "PENDING_PROVIDER"]} redirectTo="/signIn">
@@ -44,17 +46,17 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
                 <ShoppingBag size={20} />
                 <span>{t("nav.orders")}</span>
               </Link>
-              <Link
-                href="/provider/publish"
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium ${
-                  pathname?.startsWith("/provider/publish") 
+              <button
+                onClick={() => setShowOfferTypeModal(true)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-left w-full ${
+                  false 
                     ? "bg-emerald-50 text-emerald-600" 
                     : "text-foreground hover:bg-emerald-50 hover:text-emerald-600"
                 }`}
               >
                 <Plus size={20} />
                 <span>{t("nav.publish_offer")}</span>
-              </Link>
+              </button>
               <Link
                 href="/provider/profile"
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium ${
@@ -97,13 +99,13 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             <Home size={22} />
             <span className="text-xs mt-1">{t("nav.home")}</span>
           </Link>
-          <Link
-            href="/provider/publish"
+          <button
+            onClick={() => setShowOfferTypeModal(true)}
             className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors"
           >
             <Plus size={22} />
             <span className="text-xs mt-1">{t("nav.publish")}</span>
-          </Link>
+          </button>
           <Link
             href="/provider/orders"
             className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors"
@@ -119,6 +121,12 @@ export default function ProviderLayout({ children }: { children: React.ReactNode
             <span className="text-xs mt-1">{t("nav.profile")}</span>
           </Link>
         </nav>
+        
+        {/* Offer Type Modal */}
+        <OfferTypeModal 
+          isOpen={showOfferTypeModal}
+          onClose={() => setShowOfferTypeModal(false)}
+        />
       </section>
     </RouteGuard>
   );

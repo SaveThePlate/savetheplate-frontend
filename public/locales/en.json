@@ -154,6 +154,7 @@
     "error_verification_email_failed": "Account created but failed to send verification email. Please click 'Resend Code' to try again."
   },
   "home": {
+      "rapid_offer": "Rapid Offer",
     "pending_orders_single": "You have {count} pending order.",
     "pending_orders_plural": "You have {count} pending orders.",
     "pending_reminder": "Don't forget to collect and confirm them on time!",
@@ -182,6 +183,19 @@
     "searchPlaceholder": "Search for food, stores..."
   },
   "provider": {
+        "rapid_offer": {
+          "title": "Rapid Offer Posting",
+          "success": "Offer created successfully!",
+          "error": "Failed to create offer.",
+          "form": {
+            "title": "Title",
+            "price": "Price (dt)",
+            "quantity": "Quantity",
+            "pickup_time": "Pickup Time",
+            "submit": "Post Offer",
+            "submitting": "Posting..."
+          }
+        },
     "home": {
       "title": "Your Published Offers",
       "subtitle": "Manage your offers and reach more customers 🌍",
@@ -192,7 +206,7 @@
       "delete_failed": "Failed to delete offer",
       "fetch_offers_failed": "Failed to fetch offers: {error}",
       "pending_title": "Account Under Review",
-      "pending_message": "Your provider account is currently under review. You can create and manage offers, but they will only be visible to customers once your account is approved by our team.",
+      "pending_message": "Your provider account is currently under review.",
       "stats": {
         "total": "Total",
         "active": "Active",
@@ -644,7 +658,42 @@
     "preset_tomorrow_morning": "Tomorrow 10 AM-2 PM",
     "preset_tomorrow_afternoon": "Tomorrow 2-6 PM",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "step1_subtitle": "Tell us about your offer",
+    "step1_description": "Start with the basic details to attract customers",
+    "step2_subtitle": "Set your pricing",
+    "step2_description": "Competitive pricing helps attract more customers",
+    "step3_subtitle": "Set pickup availability",
+    "step3_description": "When can customers pick up their order?",
+    "step4_subtitle": "Categorize your offer",
+    "step4_description": "Help customers find what they're looking for",
+    "creating_offer": "Creating Offer...",
+    "upload_photos_text": "Click to upload photos",
+    "upload_drag_text": "or drag and drop",
+    "upload_hint_text": "PNG, JPG up to 5MB each",
+    "sale_price": "Sale Price",
+    "original_price_label": "Original Price",
+    "quantity_available": "Quantity Available",
+    "pickup_date_label": "Pickup Date",
+    "start_time_label": "Start Time",
+    "end_time_label": "End Time",
+    "select_food_type_label": "Select food type",
+    "select_taste_profile": "Select taste profile",
+    "validation_title_required": "Title is required",
+    "validation_title_min_length": "Title must be at least 3 characters",
+    "validation_price_required": "Please enter a valid price",
+    "validation_quantity_required": "Please enter a valid quantity",
+    "validation_all_fields_required": "All pickup fields are required",
+    "validation_time_order": "End time must be after start time",
+    "validation_future_time": "Pickup time must be in the future",
+    "validation_food_type_required": "Please select a food type",
+    "validation_taste_required": "Please select a taste profile",
+    "validation_complete_fields": "Please complete all required fields",
+    "upload_success": "Images uploaded successfully!",
+    "upload_failed": "Failed to upload images",
+    "create_success": "Offer created successfully! 🎉",
+    "create_failed": "Failed to create offer. Please try again.",
+    "login_required": "Please log in to continue"
   },
   "publish": {
     "title": "Create New Offer",
@@ -758,7 +807,9 @@
     "error_passwords_match": "Passwords do not match",
     "error_phone_invalid": "Invalid phone number",
     "error_terms": "You must accept the terms of use",
-    "error_generic": "An error occurred. Please try again."
+    "error_generic": "An error occurred. Please try again.",
+    "quick_signup_subtitle": "Quick signup - Complete your profile details later",
+    "quick_start_hint": "You can add your address, location, and business details after signing up in your profile settings."
   },
   "onboarding": {
     "step_1_of_2": "Step 1 of 2",
@@ -1233,6 +1284,52 @@
     "faq2Answer": "Check the pickup deadline on your order. Make sure to collect your order before the expiration date.",
     "faq3Question": "What payment methods are accepted?",
     "faq3Answer": "Currently, we accept cash payments at pickup. More payment options are coming soon."
+  },
+  "offer_type_modal": {
+    "title": "Create New Offer",
+    "description": "Choose how you want to create your offer",
+    "rapid_title": "⚡ Rapid Offer",
+    "rapid_description": "Quick setup in 30 seconds. Perfect for simple items.",
+    "normal_title": "📝 Detailed Offer",
+    "normal_description": "Full details with images, descriptions, and categories.",
+    "fast": "Fast",
+    "simple": "Simple",
+    "detailed": "Detailed",
+    "images": "Images"
+  },
+  "quick_edit": {
+    "title": "Quick Edit",
+    "quick_actions": "Quick Actions",
+    "detailed": "Detailed Edit",
+    "price": "Price",
+    "quantity": "Quantity",
+    "title": "Title",
+    "description": "Description",
+    "food_type": "Food Type",
+    "taste": "Taste",
+    "snack": "Snack",
+    "meal": "Meal",
+    "beverage": "Beverage",
+    "other": "Other",
+    "sweet": "Sweet",
+    "salty": "Salty",
+    "both": "Both",
+    "neutral": "Neutral",
+    "quick": "Quick",
+    "save_all": "Save All",
+    "updated": "Offer updated successfully",
+    "error": "Failed to update offer",
+    "title_placeholder": "Quick title update...",
+    "update_title": "Update Title",
+    "description_placeholder": "Describe your offer..."
+  },
+  "profile_completion": {
+    "title": "Complete Your Profile",
+    "missing_location": "Add your location to help customers find you",
+    "missing_maps": "Add a Google Maps link for easy navigation",
+    "missing_image": "Add a profile picture to build trust",
+    "complete_now": "Complete Now",
+    "profile_complete": "Your profile is complete! 🎉"
   },
   "toasts": {
     "check_email": "Check your email",

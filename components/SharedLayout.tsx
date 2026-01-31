@@ -2,15 +2,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { Home, ShoppingBag, User, LogOut, Menu, X, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { useUser } from "@/context/UserContext";
+import { OfferTypeModal } from "./OfferTypeModal";
+import { LoadingSkeleton } from "./ui/LoadingSkeleton";
+
+// Lazy load OfferTypeModal for better performance
+const LazyOfferTypeModal = lazy(() => import("./OfferTypeModal").then(mod => ({ 
+  default: mod.OfferTypeModal 
+})));
 
 export default function SharedLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showOfferTypeModal, setShowOfferTypeModal] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const { userRole, user } = useUser();
   const router = useRouter();
@@ -74,9 +82,12 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
             )}
             {isProvider && (
               <>
-                <Link href="/provider/publish" className="hover:text-green-600 transition-colors">
+                <button 
+                  onClick={() => setShowOfferTypeModal(true)}
+                  className="hover:text-green-600 transition-colors"
+                >
                   {t("nav.publish_offer")}
-                </Link>
+                </button>
                 <Link href="/provider/orders" className="hover:text-green-600 transition-colors">
                   {t("nav.orders")}
                 </Link>
@@ -151,13 +162,15 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
             )}
             {isProvider && (
               <>
-                <Link
-                  href="/provider/publish"
-                  onClick={() => setMenuOpen(false)}
+                <button
+                  onClick={() => {
+                    setShowOfferTypeModal(true);
+                    setMenuOpen(false);
+                  }}
                   className="hover:text-green-600"
                 >
                   {t("nav.publish_offer")}
-                </Link>
+                </button>
                 <Link
                   href="/provider/orders"
                   onClick={() => setMenuOpen(false)}
@@ -250,13 +263,13 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
                 <Home size={22} />
                 <span className="text-xs mt-1">{t("nav.home")}</span>
               </Link>
-              <Link
-                href="/provider/publish"
+              <button
+                onClick={() => setShowOfferTypeModal(true)}
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
               >
                 <Plus size={22} />
                 <span className="text-xs mt-1">{t("nav.publish")}</span>
-              </Link>
+              </button>
               <Link
                 href="/provider/orders"
                 className="flex flex-col items-center text-gray-700 hover:text-green-600"
@@ -275,6 +288,24 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
           )}
         </nav>
       )}
+      
+      {/* Offer Type Modal */}
+      <Suspense fallback={<div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded mb-4"></div>
+            <div className="space-y-3">
+              <div className="h-20 bg-gray-200 rounded"></div>
+              <div className="h-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>}>
+        <LazyOfferTypeModal 
+          isOpen={showOfferTypeModal}
+          onClose={() => setShowOfferTypeModal(false)}
+        />
+      </Suspense>
     </section>
   );
 }

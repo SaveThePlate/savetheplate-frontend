@@ -37,6 +37,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { sanitizeErrorMessage } from "@/utils/errorUtils";
 import { Clock, MapPin, Package, Edit2, X, Check, Calendar } from "lucide-react";
 import { useBlobUrl } from "@/hooks/useBlobUrl";
+import { QuickEditModal } from "@/components/QuickEditModal";
 
 export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   offerId,
@@ -55,8 +56,13 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   foodType,
   taste,
   owner,
+  averageRating,
+  totalRatings,
+  distance,
   onDelete,
   onUpdate,
+  ownerId,
+  isDeleting = false,
 }) => {
   const router = useRouter();
   const { t } = useLanguage();
@@ -65,10 +71,11 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [internalDeleting, setInternalDeleting] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [editStep, setEditStep] = useState(1); // Step 1: Basic Info, Step 2: Pricing, Step 3: Availability, Step 4: Categories & Images
+  const [showQuickEdit, setShowQuickEdit] = useState(false);
   
   // Track mounted state to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -499,7 +506,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
     if (!isMountedRef.current) return;
     
     setShowDeleteConfirm(false);
-    setIsDeleting(true);
+    setInternalDeleting(true);
     
     // Clear any existing timeout
     if (deleteTimeoutRef.current) {
@@ -527,7 +534,9 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
   return (
     <Card className={`flex flex-col bg-white rounded-xl sm:rounded-2xl overflow-hidden border transition-all hover:shadow-lg ${
       expired ? "border-gray-200 opacity-75" : isLowStock ? "border-amber-200" : "border-gray-100"
-    } ${isDeleting ? "opacity-0 scale-95" : ""}`}>
+    } ${isDeleting || internalDeleting ? "opacity-50 scale-95 pointer-events-none" : ""}`}>
+      {/* Fixed height container to prevent layout shifts */}
+      <div className={`${isDeleting || internalDeleting ? 'invisible' : ''}`}>
       {/* Image */}
       <div className="relative w-full h-32 sm:h-40 md:h-44">
         {currentImage ? (
@@ -541,7 +550,7 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -634,20 +643,32 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
 
         {/* Footer Buttons */}
         <CardFooter className="mt-auto pt-2 sm:pt-3 md:pt-4 flex w-full gap-1.5 sm:gap-2 border-t border-gray-100 px-0 pb-0">
-          {/* Edit Modal */}
-          <div className="flex-1 min-w-0">
-            {/* Edit Button */}
-            <Button
-              disabled={loading}
-              variant="emerald"
-              size="sm"
-              className="w-full"
-              onClick={() => setIsEditing(true)}
-            >
-              {t("common.edit")}
-            </Button>
+          {/* Quick Edit Button */}
+          <Button
+            disabled={loading}
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => setShowQuickEdit(true)}
+          >
+            <Edit2 className="w-3 h-3 mr-1" />
+            {t("quick_edit.quick") || "Quick"}
+          </Button>
 
-            {/* Full Page Edit Screen */}
+          {/* Detailed Edit Button */}
+          <Button
+            disabled={loading}
+            variant="emerald"
+            size="sm"
+            className="flex-1"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit2 className="w-3 h-3 mr-1" />
+            {t("quick_edit.detailed") || "Detailed"}
+          </Button>
+
+          {/* Detailed Edit Modal */}
+          <div className="flex-1 min-w-0">
             {isEditing && typeof window !== 'undefined' && createPortal(
               <div className="fixed inset-0 z-50 bg-white flex flex-col">
                 {/* Header with Step Indicator */}
@@ -1247,8 +1268,16 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
                   variant="destructive" 
                   size="sm"
                   className="w-full"
+                  disabled={isDeleting || internalDeleting}
                 >
-                  {t("common.delete")}
+                  {(isDeleting || internalDeleting) ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {t("common.deleting") || "Deleting..."}
+                    </>
+                  ) : (
+                    t("common.delete")
+                  )}
                 </Button>
               </CredenzaTrigger>
 
@@ -1281,6 +1310,25 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
             </Credenza>
           </div>
         </CardFooter>
+      </div>
+
+      {/* Quick Edit Modal */}
+      <QuickEditModal
+        isOpen={showQuickEdit}
+        onClose={() => setShowQuickEdit(false)}
+        offer={{
+          id: offerId,
+          title,
+          description,
+          price,
+          quantity,
+          foodType,
+          taste,
+        }}
+        onUpdate={(updatedOffer) => {
+          onUpdate?.(offerId, updatedOffer);
+        }}
+      />
       </div>
     </Card>
   );

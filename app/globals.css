@@ -238,6 +238,30 @@
         min-height: 44px;
         min-width: 44px;
       }
+      
+      /* Improve mobile form inputs */
+      input, textarea, select {
+        font-size: 16px; /* Prevent zoom on iOS */
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      
+      /* Better mobile spacing */
+      .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      
+      /* Mobile-optimized shadows */
+      .shadow-mobile {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Mobile card optimizations */
+      .card-mobile {
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
     }
 
     /* Smooth scrolling for mobile */

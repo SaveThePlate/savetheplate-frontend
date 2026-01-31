@@ -127,7 +127,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -277,7 +277,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                 fill
                 sizes="(max-width: 640px) calc(100vw - 1rem), 512px"
                 className="object-cover"
-                unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+                unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
                 onError={handleImageError}
               />
             ) : (
@@ -310,7 +310,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                       width={40}
                       height={40}
                       className="object-cover w-full h-full"
-                      unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
+                      unoptimized={shouldUnoptimizeImage(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = "/logo.png";

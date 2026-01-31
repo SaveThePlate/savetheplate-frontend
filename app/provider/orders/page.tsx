@@ -664,7 +664,7 @@ const OrderCard: React.FC<{
             fill
             sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 33vw"
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImageSrc))}
+            unoptimized={shouldUnoptimizeImage(currentImageSrc)}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               let imageSource: any = null;
