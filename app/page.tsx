@@ -121,7 +121,7 @@ const WelcomePage = () => {
         {/* Full-section background image */}
         <div className="absolute inset-0 w-full h-full z-0">
           <Image
-            src="/newlander.png"
+            src="/cover2.png"
             alt={t("landing.illustration_alt")}
             fill
             sizes="100vw"
@@ -129,8 +129,8 @@ const WelcomePage = () => {
             priority
           />
         </div>
-        {/* Overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-white/60 to-white/40 z-10" />
+        {/* Overlay for smooth transition - fades to white at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/100 z-10" />
         <div className="relative z-20 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[500px] sm:min-h-[600px] lg:min-h-[700px]">
           <div className="flex flex-col items-center justify-center text-center space-y-6 w-full py-8 sm:py-12 lg:py-16">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-foreground drop-shadow-xl">
@@ -146,10 +146,10 @@ const WelcomePage = () => {
             </p>
             {/* Tagline/Value Prop */}
             <div className="flex justify-center mt-8 sm:mt-10 lg:mt-12">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-base shadow-sm border border-emerald-100 animate-fade-in">
+              {/* <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-base shadow-sm border border-emerald-100 animate-fade-in">
                 <Leaf className="w-5 h-5 text-emerald-500" />
                 {t("landing.hero_tagline", { defaultValue: "Save food. Save money. Save the planet." })}
-              </span>
+              </span> */}
             </div>
             {/* CTA Buttons - Enhanced */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2">
@@ -186,8 +186,8 @@ const WelcomePage = () => {
         {/* Custom Animations merged below */}
       </section>
 
-      {/* Features Section - More Compact */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
+      {/* Features Section - Smooth gradient from hero */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white/100 to-emerald-50/50">
         <div className="w-full mx-auto max-w-7xl">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
@@ -233,9 +233,9 @@ const WelcomePage = () => {
             </div>
 
             {/* Feature 4 */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
-                <Clock className="w-6 h-6 text-blue-700" />
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
+                <Clock className="w-6 h-6 text-amber-700" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.quick_easy_title")}</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
@@ -268,8 +268,8 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* How It Works Section - More Compact */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
+      {/* How It Works Section - Gradient transition */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-emerald-50/50 via-teal-50 to-white">
         <div className="w-full mx-auto max-w-7xl">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
@@ -367,15 +367,15 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Carbon Footprint Section - More Compact */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
+      {/* Carbon Footprint Section - Gradient transition */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-[#F9FAF5]">
         <div className="w-full mx-auto max-w-2xl">
           <CarbonFootprint />
         </div>
       </section>
 
-      {/* Final CTA - More Compact */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
+      {/* Final CTA - Smooth gradient */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
         <div className="w-full mx-auto max-w-4xl text-center">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
             {t("landing.ready_title")}

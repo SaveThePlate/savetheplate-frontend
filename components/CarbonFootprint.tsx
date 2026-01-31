@@ -32,17 +32,17 @@ const CarbonFootprint = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">
-                {t("home.carbon_per_visit", { co2: "0.03" })}
+                {t("home.carbon_per_visit", { co2: "0.10" })}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {t("home.carbon_cleaner_than", { percentage: "83" })}
+                {t("home.carbon_cleaner_than", { percentage: "82" })}
               </p>
             </div>
           </div>
         </div>
 
         {/* Sustainable energy */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10">
+        {/* <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
               <Zap className="w-5 h-5 text-warning" />
@@ -56,7 +56,7 @@ const CarbonFootprint = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Link to websitecarbon */}
