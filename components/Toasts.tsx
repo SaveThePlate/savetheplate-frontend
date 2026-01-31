@@ -25,6 +25,9 @@ export const AuthToast = () => {
 export const ErrorToast = ({ message }: { message?: string }) => {
   const { t } = useLanguage();
   
+  // Ensure message is always a string
+  const safeMessage = typeof message === 'string' ? message : (message ? String(message) : undefined);
+  
   return (
     <div className="flex flex-col gap-2 mx-4 my-2 p-4 bg-red-50 border border-red-200 rounded-lg shadow-lg max-w-md">
       <div className="flex gap-3 items-center">
@@ -36,7 +39,7 @@ export const ErrorToast = ({ message }: { message?: string }) => {
         </h2>
       </div>
       <p className="font-normal text-red-800 text-sm">
-        {message || t("toasts.error_generic") || "There was an error, please try again."}
+        {safeMessage || t("toasts.error_generic") || "There was an error, please try again."}
       </p>
     </div>
   );

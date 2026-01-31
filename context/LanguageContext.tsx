@@ -93,14 +93,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       value = value?.[k];
     }
     
-    // If value is undefined, null, or empty string, return empty string
-    // This allows the || fallback pattern to work in components
-    let result = (value !== undefined && value !== null && value !== "") ? value : "";
+    // Ensure value is always a string, not an object
+    let stringValue = "";
+    if (value !== undefined && value !== null && value !== "") {
+      // If value is not a string, convert it to string (but don't convert objects)
+      if (typeof value === 'string') {
+        stringValue = value;
+      } else if (typeof value === 'object') {
+        // If it's an object, something went wrong - return empty string
+        console.warn(`Translation for "${key}" is an object, expected a string`, value);
+        stringValue = "";
+      } else {
+        stringValue = String(value);
+      }
+    }
+    
+    let result = stringValue;
     
     // Replace parameters like {orderId} with actual values
     if (params && result) {
       Object.keys(params).forEach((param) => {
-        result = result.replace(new RegExp(`\\{${param}\\}`, "g"), params[param]);
+        result = result.replace(new RegExp(`\\{${param}\\}`, "g"), String(params[param]));
       });
     }
     

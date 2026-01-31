@@ -48,6 +48,19 @@ export default function SignIn() {
   const router = useRouter();
   const { user, userRole, loading: userLoading, fetchUserRole } = useUser();
 
+  // Helper function to safely set error messages (always convert to string)
+  const safeSetErrorMessage = (message: any) => {
+    if (message === null || message === undefined) {
+      setErrorMessage("");
+    } else if (typeof message === 'string') {
+      setErrorMessage(message);
+    } else if (typeof message === 'object' && message.message) {
+      setErrorMessage(String(message.message));
+    } else {
+      setErrorMessage(String(message));
+    }
+  };
+
   // Check if user is already signed in
   useEffect(() => {
     const checkAuth = async () => {
@@ -172,10 +185,9 @@ export default function SignIn() {
                 console.error("Failed to send verification email:", emailError);
                 setShowAuthToast(false);
                 setShowErrorToast(true);
-                setErrorMessage(
-                  emailError?.response?.data?.error || 
-                  t("signin.error_verification_email_failed")
-                );
+                const errorMsg = emailError?.response?.data?.error || 
+                  t("signin.error_verification_email_failed");
+                safeSetErrorMessage(errorMsg);
               }
               
               setLoading(false);
