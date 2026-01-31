@@ -29,7 +29,7 @@ const nextConfig = {
   // Enable compression
   compress: true,
   // Optimize production builds
-  swcMinify: true,
+  // swcMinify is now enabled by default in Next.js 13+
   // Enable React strict mode for better performance
   reactStrictMode: true,
   // Optimize images
@@ -84,40 +84,6 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Optimize webpack configuration
-  webpack: (config, { isServer }) => {
-    // Optimize bundle splitting
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk for large libraries
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Separate chunk for common libraries
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-    return config;
-  },
-
   async headers() {
     const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://savetheplate.tn').replace(/\/$/, '');
     const isProd = process.env.NODE_ENV === 'production';
