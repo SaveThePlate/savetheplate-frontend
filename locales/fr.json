@@ -810,7 +810,9 @@
     "error_passwords_match": "Les mots de passe ne correspondent pas",
     "error_phone_invalid": "Numéro de téléphone invalide",
     "error_terms": "Vous devez accepter les conditions d'utilisation",
-    "error_generic": "Une erreur s'est produite. Veuillez réessayer."
+    "error_generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "quick_signup_subtitle": "Inscription rapide - Complétez les détails de votre profil plus tard",
+    "quick_start_hint": "Vous pouvez ajouter votre adresse, localisation et détails commerciaux après l'inscription dans les paramètres de votre profil."
   },
   "onboarding": {
     "step_1_of_2": "Étape 1 sur 2",

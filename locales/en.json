@@ -758,7 +758,9 @@
     "error_passwords_match": "Passwords do not match",
     "error_phone_invalid": "Invalid phone number",
     "error_terms": "You must accept the terms of use",
-    "error_generic": "An error occurred. Please try again."
+    "error_generic": "An error occurred. Please try again.",
+    "quick_signup_subtitle": "Quick signup - Complete your profile details later",
+    "quick_start_hint": "You can add your address, location, and business details after signing up in your profile settings."
   },
   "onboarding": {
     "step_1_of_2": "Step 1 of 2",
