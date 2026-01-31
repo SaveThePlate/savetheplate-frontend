@@ -335,9 +335,9 @@ const ProviderHome = () => {
               <h3 className="font-semibold text-amber-900 mb-1">
                 {t("provider.home.pending_title") || "Account Under Review"}
               </h3>
-              <p className="text-sm text-amber-800">
+              {/* <p className="text-sm text-amber-800">
                 {t("provider.home.pending_message") || "Your provider account is currently under review. You can create and manage offers, but they will only be visible to customers once your account is approved by our team."}
-              </p>
+              </p> */}
             </div>
           </div>
         )}
@@ -352,14 +352,25 @@ const ProviderHome = () => {
               {stats.active} {t("provider.home.stats.active") || "active"} {stats.total > 0 && `• ${stats.total} ${t("provider.home.stats.total") || "total"}`}
             </p>
           </div>
-          <Button
-            onClick={() => router.push("./publish")}
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {t("provider.home.publish_offer") || "Create Offer"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button
+              onClick={() => router.push("./publish")}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t("provider.home.publish_offer") || "Create Offer"}
+            </Button>
+            <Button
+              onClick={() => router.push("./rapid-offer")}
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t("provider.home.rapid_offer") || "Rapid Offer"}
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters */}
