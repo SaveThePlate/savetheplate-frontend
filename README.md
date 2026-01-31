@@ -726,7 +726,7 @@ Welcome to SaveThePlate! Here's your learning path:
 
 ### Project Links
 - **Repository**: [github.com/SaveThePlate/savetheplate-frontend](https://github.com/SaveThePlate/savetheplate-frontend)
-- **Backend API**: [github.com/SaveThePlate/savetheplate-backend](https://github.com/SaveThePlate/leftover-backend)
+- **Backend API**: [github.com/SaveThePlate/leftover-backend](https://github.com/SaveThePlate/leftover-backend)
 - **Issues**: [Report bugs or request features](https://github.com/SaveThePlate/savetheplate-frontend/issues)
 
 ---
