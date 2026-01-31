@@ -64,6 +64,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.1.6",
+    "framer-motion": "^11.0.0",
     "gsap": "^3.12.5",
     "html5-qrcode": "^2.3.8",
     "input-otp": "^1.2.4",
@@ -71,7 +72,11 @@
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.408.0",
+<<<<<<< HEAD
     "next": "^16.1.6",
+=======
+    "next": "15.5.10",
+>>>>>>> 146e154 (Critical Vulnerabilities Fixed)
     "next-pwa": "^5.6.0",
     "next-themes": "^0.3.0",
     "openapi-fetch": "0.9.2",
