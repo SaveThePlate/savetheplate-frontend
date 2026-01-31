@@ -82,8 +82,13 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          args: |
+          build-args: |
             ENVIRONMENT=production
+            NEXT_PUBLIC_FACEBOOK_APP_ID=${{ secrets.NEXT_PUBLIC_FACEBOOK_APP_ID }}
+            NEXT_PUBLIC_BACKEND_URL=https://savetheplate.tn
+            NEXT_PUBLIC_FRONTEND_URL=https://savetheplate.tn
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_MAPS_API_KEY }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

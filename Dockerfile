@@ -34,15 +34,26 @@ RUN apk add --no-cache bash
 ENV NODE_ENV=${APP_ENVIRONMENT}
 ENV TZ=UTC
 
+# Accept build arguments for NEXT_PUBLIC_ env vars
+ARG NEXT_PUBLIC_FACEBOOK_APP_ID
+ARG NEXT_PUBLIC_BACKEND_URL
+ARG NEXT_PUBLIC_FRONTEND_URL
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_MAPS_API_KEY
+
+# Make them available to Next.js build
+ENV NEXT_PUBLIC_FACEBOOK_APP_ID=${NEXT_PUBLIC_FACEBOOK_APP_ID}
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+ENV NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL}
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+ENV NEXT_PUBLIC_MAPS_API_KEY=${NEXT_PUBLIC_MAPS_API_KEY}
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Copy env template (build doesn't need real secrets, just structure)
-COPY .env.local.example .env
 
 RUN npm run build
 
