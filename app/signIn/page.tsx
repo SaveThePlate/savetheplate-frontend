@@ -19,6 +19,7 @@ import { Home } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { getPostAuthRedirect } from "@/lib/authRedirect";
 import { readAuthIntentRole } from "@/lib/authIntent";
+import { getReCaptchaToken } from "@/lib/recaptcha";
 
 export default function SignIn() {
   const { t, language } = useLanguage();
@@ -108,6 +109,11 @@ export default function SignIn() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    if (loading) {
+      return;
+    }
+    
     // Validate email format
     if (!email || !email.includes('@')) {
       setShowErrorToast(true);
@@ -138,12 +144,16 @@ export default function SignIn() {
             return;
           }
 
+          // Get reCAPTCHA token (will be null if not configured)
+          const recaptchaToken = await getReCaptchaToken('signup');
+
           const response = await axiosInstance.post(
             `/auth/signup`,
             {
               email,
               password,
               username,
+              recaptchaToken,
             },
             {
               headers: {
@@ -1318,6 +1328,23 @@ export default function SignIn() {
               {showAuthToast && <AuthToast />}
               {showErrorToast && <ErrorToast message={errorMessage} />}
             </div>
+
+            {/* reCAPTCHA Badge Notice */}
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+              <div className="mt-4 text-center text-xs text-gray-500">
+                <p>
+                  This site is protected by reCAPTCHA and the Google{' '}
+                  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
+                    Privacy Policy
+                  </a>
+                  {' '}and{' '}
+                  <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
+                    Terms of Service
+                  </a>
+                  {' '}apply.
+                </p>
+              </div>
+            )}
               </>
             )}
           </div>
