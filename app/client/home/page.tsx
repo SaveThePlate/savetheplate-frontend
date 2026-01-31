@@ -381,11 +381,15 @@ const Home = () => {
             ...headers,
             'Content-Type': 'application/json',
           },
+          signal: AbortSignal.timeout(8000), // 8 second timeout
         }).then(res => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
         }),
-        axiosInstance.get(`/orders/user/${currentUserId}?t=${timestamp}`, { headers }),
+        axiosInstance.get(`/orders/user/${currentUserId}?t=${timestamp}`, { 
+          headers,
+          timeout: 8000, // 8 second timeout
+        }),
       ]);
 
       if (!isMountedRef.current) return;
@@ -696,29 +700,29 @@ const Home = () => {
         )}
       </header>
 
-      {/* Pickup Reminder Banner */}
+      {/* Pickup Reminder Banner - Mobile Optimized */}
       {pendingCount > 0 && (
-        <div className="px-4 pt-4">
+        <div className="px-3 sm:px-4 pt-3 sm:pt-4">
           <Link
             href={userId ? `/client/orders/${userId}` : "/client/orders"}
-            className="block bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+            className="block bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-3 sm:p-4 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
           >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6 text-amber-700" />
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-lg text-amber-900 mb-1">
+                <h3 className="font-bold text-base sm:text-lg text-amber-900 mb-1">
                   {t("client.home.pickup_reminder_title") || "Don't forget to pick up your order!"}
                 </h3>
-                <p className="text-sm text-amber-800 mb-3">
+                <p className="text-xs sm:text-sm text-amber-800 mb-2 sm:mb-3">
                   {pendingCount === 1
                     ? t("client.home.pickup_reminder_message_singular") || "You have 1 pending order waiting for pickup."
                     : t("client.home.pickup_reminder_message", { count: pendingCount, plural: "s" }) || `You have ${pendingCount} pending orders waiting for pickup.`}
                 </p>
-                <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
+                <div className="flex items-center gap-2 text-amber-700 font-semibold text-xs sm:text-sm">
                   <span>{t("client.home.view_orders") || "View Orders"}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
               </div>
             </div>
@@ -726,23 +730,23 @@ const Home = () => {
         </div>
       )}
 
-      <main className="space-y-8 pt-6">
-        {/* Search Results */}
+      <main className="space-y-6 sm:space-y-8 pt-4 sm:pt-6">
+        {/* Search Results - Mobile Optimized */}
         {searchQuery.trim() && (
-          <section className="px-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display font-bold text-xl">
+          <section className="px-3 sm:px-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="font-display font-bold text-lg sm:text-xl">
                 Search Results {searchFilteredProducts && `(${searchFilteredProducts.length})`}
               </h3>
               <button
                 onClick={() => setSearchQuery("")}
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="text-xs sm:text-sm text-muted-foreground hover:text-foreground"
               >
                 {t("common.clear")}
               </button>
             </div>
             {searchFilteredProducts && searchFilteredProducts.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {searchFilteredProducts.map((offer) => {
                   const firstImage = offer.images?.[0];
                   const imageSrc = resolveImageSource(firstImage);
@@ -774,27 +778,27 @@ const Home = () => {
                 })}
               </div>
             ) : (
-              <div className="bg-white rounded-xl p-8 text-center border border-border border-dashed">
-                <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">{t("common.search")}: &quot;{searchQuery}&quot;</p>
+              <div className="bg-white rounded-xl p-6 sm:p-8 text-center border border-border border-dashed">
+                <Search className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm sm:text-base text-muted-foreground">{t("common.search")}: &quot;{searchQuery}&quot;</p>
               </div>
             )}
           </section>
         )}
 
-        {/* Hero Section - Hide when searching */}
+        {/* Hero Section - Mobile Optimized - Hide when searching */}
         {!searchQuery.trim() && (
-          <section className="px-4">
+          <section className="px-3 sm:px-4">
             <div 
-              className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-3xl p-6 text-white shadow-lg shadow-emerald-600/20 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
+              className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-lg shadow-emerald-600/20 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl -ml-10 -mb-10 pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-emerald-600/10 rounded-full blur-2xl -mr-8 -mt-8 sm:-mr-10 sm:-mt-10 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-black/10 rounded-full blur-xl -ml-8 -mb-8 sm:-ml-10 sm:-mb-10 pointer-events-none"></div>
               
               <div className="relative z-10">
-                <h2 className="text-2xl font-display font-bold mb-2">{t("home.title") || "Save food, Save money"}</h2>
-                <p className="text-white/90 text-sm mb-6 max-w-[80%]">{t("home.subtitle") || "Help the planet by rescuing delicious unsold food from local shops."}</p>
-                <Link href="/client/home" className="inline-block bg-white text-emerald-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95">
+                <h2 className="text-xl sm:text-2xl font-display font-bold mb-2">{t("home.title") || "Save food, Save money"}</h2>
+                <p className="text-white/90 text-xs sm:text-sm mb-4 sm:mb-6 max-w-[90%] sm:max-w-[80%]">{t("home.subtitle") || "Help the planet by rescuing delicious unsold food from local shops."}</p>
+                <Link href="/client/home" className="inline-block bg-white text-emerald-600 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95">
                   {t("home.browseBags") || "Discover Exclusive Offers"}
                 </Link>
               </div>

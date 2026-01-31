@@ -26,7 +26,7 @@ export const ProviderOverlay: FC<ProviderOverlayProps> = ({
             width={24}
             height={24}
             className="object-cover w-full h-full"
-            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
+            unoptimized={shouldUnoptimizeImage(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = "/logo.png";

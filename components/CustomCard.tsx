@@ -452,7 +452,7 @@ const CustomCard: FC<CustomCardProps> = ({
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
               className="object-cover"
-              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+              unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
             />
           ) : (
             <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -494,7 +494,7 @@ const CustomCard: FC<CustomCardProps> = ({
                   width={32}
                   height={32}
                   className="object-cover w-full h-full"
-                  unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png"))}
+                  unoptimized={shouldUnoptimizeImage(owner.profileImage ? resolveImageSource(owner.profileImage) : "/logo.png")}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "/logo.png";
@@ -548,7 +548,7 @@ const CustomCard: FC<CustomCardProps> = ({
               fill
               sizes="(max-width: 640px) calc(100vw - 2rem), 512px"
               className="object-cover"
-              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+              unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
               onError={handleImageError}
             />
               ) : (
@@ -662,7 +662,7 @@ const CustomCard: FC<CustomCardProps> = ({
             placeholder="blur"
             blurDataURL={getBlurDataURL()}
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(currentImage) || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">

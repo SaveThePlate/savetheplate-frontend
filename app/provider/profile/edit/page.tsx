@@ -247,9 +247,9 @@ export default function EditProviderProfile() {
       }
 
       if (filename && !filename.startsWith("/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        filename = `/store/${filename}`;
-      } else if (filename && !filename.startsWith("/store/") && !filename.startsWith("/storage/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        filename = `/store${filename}`;
+        filename = `/storage/${filename}`;
+      } else if (filename && !filename.startsWith("/storage/") && !filename.startsWith("/store/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
+        filename = `/storage${filename}`;
       }
 
       setProfileImage(filename);
@@ -347,14 +347,15 @@ export default function EditProviderProfile() {
       const backendUrl = getBackendOrigin();
       if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
         return profileImage;
-      } else if (profileImage.startsWith("/store/") && backendUrl) {
-        return `${backendUrl}${profileImage}`;
       } else if (profileImage.startsWith("/storage/") && backendUrl) {
-        // Legacy support: convert /storage/ to /store/
-        const storePath = profileImage.replace("/storage/", "/store/");
-        return `${backendUrl}${storePath}`;
+        // Use /storage/ directly as it's the current standard
+        return `${backendUrl}${profileImage}`;
+      } else if (profileImage.startsWith("/store/") && backendUrl) {
+        // Legacy support: convert /store/ to /storage/
+        const storagePath = profileImage.replace("/store/", "/storage/");
+        return `${backendUrl}${storagePath}`;
       } else if (backendUrl) {
-        return `${backendUrl}/store/${profileImage.replace(/^\/store\//, '').replace(/^\/storage\//, '')}`;
+        return `${backendUrl}/storage/${profileImage.replace(/^\/store\//, '').replace(/^\/storage\//, '')}`;
       }
     } else if (localFile) {
       // Show local preview - get or create blob URL
@@ -411,7 +412,7 @@ export default function EditProviderProfile() {
                   width={96}
                   height={96}
                   className="w-full h-full object-cover"
-                  unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(getProfileImageSrc()))}
+                  unoptimized={shouldUnoptimizeImage(getProfileImageSrc())}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = DEFAULT_PROFILE_IMAGE;

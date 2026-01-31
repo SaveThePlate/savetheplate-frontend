@@ -61,12 +61,12 @@ export const shouldUnoptimizeImage = (url: string | null | undefined): boolean =
   
   // All backend storage images should be unoptimized to avoid upstream fetch issues
   // Check this FIRST before other checks to ensure we catch all storage URLs
-  if (url.includes('/store/')) {
+  if (url.includes('/store/') || url.includes('/storage/')) {
     return true;
   }
   
-  // Public assets (starting with / and not /store/) can be optimized
-  if (url.startsWith('/') && !url.startsWith('/store/')) {
+  // Public assets (starting with / and not /store/ or /storage/) can be optimized
+  if (url.startsWith('/') && !url.startsWith('/store/') && !url.startsWith('/storage/')) {
     return false;
   }
   
@@ -261,24 +261,22 @@ export const getImage = (filename?: string | null): string => {
   }
 
   // Backend storage path - prepend current backend origin
-  // Support both /store/ (new) and /storage/ (legacy) for backward compatibility
+  // Support both /store/ (legacy) and /storage/ (current) for backward compatibility
+  if (filename.startsWith("/storage/")) {
+    return currentBackendUrl ? `${currentBackendUrl}${filename}` : filename;
+  }
   if (filename.startsWith("/store/")) {
     return currentBackendUrl ? `${currentBackendUrl}${filename}` : filename;
   }
-  if (filename.startsWith("/storage/")) {
-    // Convert legacy /storage/ to /store/
-    const storePath = filename.replace("/storage/", "/store/");
-    return currentBackendUrl ? `${currentBackendUrl}${storePath}` : storePath;
-  }
 
   // Frontend public asset (leading slash, not /store/ or /storage/) - return as-is
-  if (filename.startsWith("/")) {
+  if (filename.startsWith("/") && !filename.startsWith("/store/") && !filename.startsWith("/storage/")) {
     return filename;
   }
 
-  // Bare filename - use current backend storage
+  // Bare filename - use current backend storage (prefer /storage/ as it's the current standard)
   if (currentBackendUrl) {
-    return `${currentBackendUrl}/store/${filename}`;
+    return `${currentBackendUrl}/storage/${filename}`;
   }
   
   // Fallback to public folder if no backend URL
@@ -305,14 +303,14 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
     
     // Try to extract filename from various URL formats
     // Support both /store/ and /storage/ for backward compatibility
-    if (resolved.includes("/store/")) {
-      extractedFilename = resolved.split("/store/").pop() || null;
-    } else if (resolved.includes("/storage/")) {
+    if (resolved.includes("/storage/")) {
       extractedFilename = resolved.split("/storage/").pop() || null;
-    } else if (imageSource.includes("/store/")) {
-      extractedFilename = imageSource.split("/store/").pop() || null;
+    } else if (resolved.includes("/store/")) {
+      extractedFilename = resolved.split("/store/").pop() || null;
     } else if (imageSource.includes("/storage/")) {
       extractedFilename = imageSource.split("/storage/").pop() || null;
+    } else if (imageSource.includes("/store/")) {
+      extractedFilename = imageSource.split("/store/").pop() || null;
     } else if (!imageSource.startsWith("/") && !/^https?:\/\//i.test(imageSource)) {
       extractedFilename = imageSource;
     }
@@ -320,8 +318,9 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
     // If we extracted a filename, try alternative URLs
     if (extractedFilename) {
       const currentBackendUrl = getBackendOrigin();
-      // Try current backend storage
+      // Try current backend storage (both /storage/ and /store/)
       if (currentBackendUrl) {
+        fallbacks.push(`${currentBackendUrl}/storage/${extractedFilename}`);
         fallbacks.push(`${currentBackendUrl}/store/${extractedFilename}`);
       }
       // Try as public asset
@@ -350,9 +349,10 @@ export const getImageFallbacks = (imageSource: ImageSource | string | null | und
   // Try filename as public asset
   if (imageSource.filename) {
     fallbacks.push(getImage(imageSource.filename));
-    // Also try as backend storage
+    // Also try as backend storage (both /storage/ and /store/)
     const origin = getBackendOrigin();
     if (origin) {
+      fallbacks.push(`${origin}/storage/${imageSource.filename}`);
       fallbacks.push(`${origin}/store/${imageSource.filename}`);
     }
   }

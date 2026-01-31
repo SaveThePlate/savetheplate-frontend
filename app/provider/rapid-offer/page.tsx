@@ -61,7 +61,10 @@ const RapidOffer = () => {
           quantity: parseInt(quantity, 10),
           pickupStartTime: `${pickupDate}T${pickupStartTime || "14:00"}:00`,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000, // 10 second timeout
+        }
       );
 
       setSuccess(true);
@@ -71,6 +74,11 @@ const RapidOffer = () => {
       setPickupDate(formatDate(today));
       setPickupStartTime("");
       setPickupEndTime("");
+      
+      // Faster redirect to home
+      setTimeout(() => {
+        router.push("/provider/home");
+      }, 1000); // Reduced from default delay
     } catch (err: any) {
       setError(err?.response?.data?.message || t("provider.rapid_offer.error") || "Failed to create offer.");
     } finally {

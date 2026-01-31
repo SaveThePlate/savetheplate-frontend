@@ -244,7 +244,7 @@ const ImpactPage = () => {
                 )}
                 {userRole === "PROVIDER" && (
                   <Button
-                    onClick={() => router.push("/provider/publish")}
+                    onClick={() => router.push("/provider/home")}
                     variant="teal"
                     size="lg"
                   >
@@ -261,7 +261,7 @@ const ImpactPage = () => {
                       {t("impact.browse_offers")}
                     </Button>
                     <Button
-                      onClick={() => router.push("/provider/publish")}
+                      onClick={() => router.push("/provider/home")}
                       variant="teal"
                       size="lg"
                     >

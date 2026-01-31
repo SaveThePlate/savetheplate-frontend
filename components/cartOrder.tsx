@@ -346,7 +346,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
               sizes="(max-width: 640px) 64px, 80px"
               className="object-cover"
               priority
-              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(imageSrc))}
+              unoptimized={shouldUnoptimizeImage(imageSrc)}
               onError={() => {
                 const nextIndex = fallbackIndex + 1;
                 if (nextIndex < fallbacks.length) {

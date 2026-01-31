@@ -230,8 +230,8 @@ export default function AccountDetails() {
       }
 
       if (filename && !filename.startsWith("/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
-        filename = `/store/${filename}`;
-      } else if (filename && !filename.startsWith("/store/") && !filename.startsWith("/storage/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
+        filename = `/storage/${filename}`;
+      } else if (filename && !filename.startsWith("/storage/") && !filename.startsWith("/store/") && !filename.startsWith("http://") && !filename.startsWith("https://")) {
         filename = `/storage${filename}`;
       }
 
@@ -418,14 +418,15 @@ export default function AccountDetails() {
       const backendUrl = getBackendOrigin();
       if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
         return profileImage;
-      } else if (profileImage.startsWith("/store/") && backendUrl) {
-        return `${backendUrl}${profileImage}`;
       } else if (profileImage.startsWith("/storage/") && backendUrl) {
-        // Legacy support: convert /storage/ to /store/
-        const storePath = profileImage.replace("/storage/", "/store/");
-        return `${backendUrl}${storePath}`;
+        // Use /storage/ directly as it's the current standard
+        return `${backendUrl}${profileImage}`;
+      } else if (profileImage.startsWith("/store/") && backendUrl) {
+        // Legacy support: convert /store/ to /storage/
+        const storagePath = profileImage.replace("/store/", "/storage/");
+        return `${backendUrl}${storagePath}`;
       } else if (backendUrl) {
-        return `${backendUrl}/store/${profileImage.replace(/^\/store\//, '').replace(/^\/storage\//, '')}`;
+        return `${backendUrl}/storage/${profileImage.replace(/^\/store\//, '').replace(/^\/storage\//, '')}`;
       }
     } else if (localFile) {
       // Get or create blob URL for local file
@@ -480,7 +481,7 @@ export default function AccountDetails() {
               width={64}
               height={64}
               className="w-full h-full object-cover"
-              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(getProfileImageSrc()))}
+              unoptimized={shouldUnoptimizeImage(getProfileImageSrc())}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = DEFAULT_PROFILE_IMAGE;
@@ -508,7 +509,7 @@ export default function AccountDetails() {
                     width={64}
                     height={64}
                     className="w-full h-full object-cover"
-                    unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(getProfileImageSrc()))}
+                    unoptimized={shouldUnoptimizeImage(getProfileImageSrc())}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = DEFAULT_PROFILE_IMAGE;

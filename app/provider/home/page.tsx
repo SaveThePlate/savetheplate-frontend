@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { getBackendOrigin } from "@/lib/backendOrigin";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { Plus, Search, Edit2, Trash2, Package, Clock, MapPin, X, AlertCircle } from "lucide-react";
 import { resolveImageSource } from "@/utils/imageUtils";
 import { useLanguage } from "@/context/LanguageContext";
@@ -22,6 +23,7 @@ import {
   CredenzaFooter,
 } from "@/components/ui/credenza";
 import { ProviderOfferCard } from "@/components/offerCard";
+import { OfferTypeModal } from "@/components/OfferTypeModal";
 import { useUser } from "@/context/UserContext";
 
 type FoodType = "snack" | "meal" | "beverage" | "other";
@@ -72,8 +74,10 @@ const ProviderHome = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filter, setFilter] = useState<FilterType>("all");
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [editingOfferId, setEditingOfferId] = useState<number | null>(null);
+  const [showOfferTypeModal, setShowOfferTypeModal] = useState(false);
   const isMountedRef = useRef(true);
   const isPendingProvider = userRole === "PENDING_PROVIDER";
 
@@ -112,7 +116,10 @@ const ProviderHome = () => {
 
         const response = await axiosInstance.get(
           `/offers/owner/${id}`,
-          { headers }
+          { 
+            headers,
+            timeout: 8000, // 8 second timeout
+          }
         );
 
         if (!isMountedRef.current) return;
@@ -237,39 +244,79 @@ const ProviderHome = () => {
 
     setDeleteConfirmId(null);
     
+    // Add to deleting set for loading state
+    setDeletingIds(prev => new Set(prev).add(id));
+    
     // Store the offer to restore if delete fails
     const offerToDelete = offers.find(o => o.id === id);
     
-    // Optimistically remove from UI
-    setOffers(prev => prev.filter(o => o.id !== id));
+    // Store current scroll position
+    const scrollY = window.scrollY;
 
     try {
-      await axiosInstance.delete(`/offers/${id}`, {
+      const response = await axiosInstance.delete(`/offers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000, // 10 second timeout
       });
-      // Success - offer already removed from state
+      
+      // Success - remove from UI and restore scroll position
+      if (isMountedRef.current) {
+        // Use setTimeout to ensure smooth transition
+        setTimeout(() => {
+          setOffers(prev => prev.filter(o => o.id !== id));
+          
+          // Restore scroll position after DOM update
+          requestAnimationFrame(() => {
+            window.scrollTo(0, scrollY);
+          });
+        }, 300); // Wait for the card animation to complete
+        
+        toast.success(t("provider.home.offer_deleted") || "Offer deleted successfully");
+      }
+      
     } catch (err: any) {
+      // Only restore if component is still mounted and it's a genuine error
+      if (!isMountedRef.current) return;
+      
       const status = err?.response?.status;
+      const statusText = err?.response?.statusText;
+      
       // If it's actually a success response (200-299), don't restore
       if (status >= 200 && status < 300) {
+        setTimeout(() => {
+          setOffers(prev => prev.filter(o => o.id !== id));
+          
+          // Restore scroll position after DOM update
+          requestAnimationFrame(() => {
+            window.scrollTo(0, scrollY);
+          });
+        }, 300);
+        
+        toast.success(t("provider.home.offer_deleted") || "Offer deleted successfully");
         return;
       }
       
-      // Delete failed - restore the offer if component is still mounted
-      if (!isMountedRef.current) return;
-      
+      // Delete failed - show error but don't restore since we didn't remove it
       const errorMsg = sanitizeErrorMessage(err, {
         action: "delete offer",
         defaultMessage: t("provider.home.delete_failed") || "Unable to delete offer. Please try again."
       });
       
-      // Restore the deleted offer back to the list
-      if (offerToDelete) {
-        setOffers(prev => [...prev, offerToDelete].sort((a, b) => b.id - a.id));
-      }
+      // Show user-friendly error message
+      toast.error(errorMsg);
+      console.error("Failed to delete offer:", { error: err, status, statusText });
       
-      // Show error toast/alert (assuming you have a toast system)
-      console.error("Failed to delete offer:", errorMsg);
+    } finally {
+      // Remove from deleting set
+      if (isMountedRef.current) {
+        setTimeout(() => {
+          setDeletingIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(id);
+            return newSet;
+          });
+        }, 300);
+      }
     }
   };
 
@@ -352,25 +399,14 @@ const ProviderHome = () => {
               {stats.active} {t("provider.home.stats.active") || "active"} {stats.total > 0 && `• ${stats.total} ${t("provider.home.stats.total") || "total"}`}
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button
-              onClick={() => router.push("./publish")}
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t("provider.home.publish_offer") || "Create Offer"}
-            </Button>
-            <Button
-              onClick={() => router.push("./rapid-offer")}
-              size="lg"
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t("provider.home.rapid_offer") || "Rapid Offer"}
-            </Button>
-          </div>
+          <Button
+            onClick={() => setShowOfferTypeModal(true)}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {t("provider.home.create_offer") || "Create Offer"}
+          </Button>
         </div>
 
         {/* Search and Filters */}
@@ -443,11 +479,11 @@ const ProviderHome = () => {
                 {t("provider.home.empty_state_description") || "Create your first offer to start selling surplus food"}
               </p>
               <Button
-                onClick={() => router.push("./publish")}
+                onClick={() => setShowOfferTypeModal(true)}
                 size="lg"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                {t("provider.home.publish_offer") || "Create Offer"}
+                {t("provider.home.create_offer") || "Create Offer"}
               </Button>
             </div>
           </div>
@@ -495,7 +531,7 @@ const ProviderHome = () => {
                           alt={offer.title}
                           fill
                           className="object-cover"
-                          unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(imageSrc))}
+                          unoptimized={shouldUnoptimizeImage(imageSrc)}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -575,6 +611,7 @@ const ProviderHome = () => {
                                 foodType={offer.foodType}
                                 taste={offer.taste}
                                 ownerId={offer.ownerId}
+                                isDeleting={deletingIds.has(offer.id)}
                                 onDelete={handleDeleteOffer}
                                 onUpdate={async (id, data) => {
                                   const backendOrigin = getBackendOrigin();
@@ -722,6 +759,12 @@ const ProviderHome = () => {
           </div>
         )}
       </div>
+      
+      {/* Offer Type Modal */}
+      <OfferTypeModal 
+        isOpen={showOfferTypeModal}
+        onClose={() => setShowOfferTypeModal(false)}
+      />
     </main>
   );
 };

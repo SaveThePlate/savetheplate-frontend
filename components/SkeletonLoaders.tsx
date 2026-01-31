@@ -58,39 +58,61 @@ export const OrderCardSkeleton = () => {
 
 export const ProfileSkeleton = () => {
   return (
-    <div className="space-y-6">
-      {/* Profile header */}
-      <div className="bg-white rounded-xl shadow-md border border-border p-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-20 w-20 rounded-full" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-64" />
+    <div className="min-h-screen pb-24 px-4 pt-10">
+      {/* Title Skeleton */}
+      <Skeleton className="h-10 w-48 mb-8" />
+
+      {/* Profile Completion Banner Skeleton */}
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <Skeleton className="w-10 h-10 rounded-full" />
+          <div className="flex-1">
+            <Skeleton className="h-5 w-32 mb-2" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-64" />
+              <Skeleton className="h-4 w-48" />
+            </div>
           </div>
         </div>
       </div>
-      
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl shadow-md border border-border p-4 space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-16" />
-        </div>
-        <div className="bg-white rounded-xl shadow-md border border-border p-4 space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-16" />
+
+      {/* User Info Skeleton */}
+      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm mb-6 flex items-center gap-4">
+        <Skeleton className="w-16 h-16 rounded-full" />
+        <div className="flex-1">
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-4 w-32" />
         </div>
       </div>
-      
-      {/* Content */}
-      <div className="bg-white rounded-xl shadow-md border border-border p-6 space-y-4">
-        <Skeleton className="h-6 w-32" />
-        <div className="space-y-3">
-          <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-        </div>
+
+      {/* Impact Stats Skeleton */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-gray-100 rounded-xl p-4">
+            <Skeleton className="w-6 h-6 rounded mb-2" />
+            <Skeleton className="h-8 w-12 mb-1" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ))}
       </div>
+
+      {/* Menu Items Skeleton */}
+      <div className="space-y-2 mb-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-white rounded-xl p-4 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-10 h-10 rounded-lg" />
+                <Skeleton className="h-5 w-32" />
+              </div>
+              <Skeleton className="w-5 h-5" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Sign Out Button Skeleton */}
+      <Skeleton className="w-full h-12 rounded-xl" />
     </div>
   );
 };

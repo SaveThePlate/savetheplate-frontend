@@ -11,6 +11,7 @@ import { MapPin, Clock, Phone, Calendar, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 
 interface Offer {
   id: number;
@@ -40,12 +41,12 @@ interface Offer {
 
 const DEFAULT_BAG_IMAGE = "/defaultBag.png";
 
-
 const Offers = () => {
   const router = useRouter();
   const { t } = useLanguage();
   const { id } = useParams();
   const [offer, setOffer] = useState<Offer | null>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [inCart, setInCart] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -74,6 +75,7 @@ const Offers = () => {
       try {
         const res = await axiosInstance.get(`/offers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
+          timeout: 8000, // 8 second timeout for faster feedback
         });
         
         // Normalize image URLs - preserve URLs from different backends
@@ -138,6 +140,8 @@ const Offers = () => {
         setOffer(res.data);
       } catch (err) {
         console.error("Failed to fetch offer:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchOffer();
@@ -148,89 +152,32 @@ const Offers = () => {
       toast.error(t("client.offers.detail.offer_not_loaded") || "Offer not loaded. Please try again.");
       return;
     }
-    
-    // Validate offer ID and quantity before making the request
-    if (!offer.id || typeof offer.id !== 'number') {
-      console.error("Invalid offer ID:", offer.id);
-      toast.error(t("client.offers.detail.invalid_offer") || "Invalid offer. Please refresh the page.");
-      return;
-    }
-    
-    if (!quantity || quantity <= 0) {
-      toast.error(t("client.offers.detail.invalid_quantity") || "Please select a valid quantity.");
-      return;
-    }
-    
-    if (quantity > offer.quantity) {
-      toast.error(t("client.offers.detail.insufficient_stock") || `Only ${offer.quantity} items available.`);
-      return;
-    }
-    
+
     const token = localStorage.getItem("accessToken");
     if (!token) {
+      toast.error(t("client.offers.detail.login_required") || "Please login to order.");
       router.push("/signIn");
       return;
     }
-    
-    if (new Date(offer.expirationDate).getTime() <= new Date().getTime()) {
-      toast.error(t("client.offers.detail.offer_expired") || "This offer has expired");
-      return;
-    }
-    
+
     try {
-      // Don't send userId in body - backend gets it from auth token
-      // Ensure both offerId and quantity are numbers
-      const orderData = {
-        offerId: Number(offer.id),
-        quantity: Number(quantity)
-      };
-      
-      console.log("Placing order with data:", orderData); // Debug log
-      
-      await axiosInstance.post(
-        `/orders`,
-        orderData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setInCart(true);
-      
-      // Show success toast notification
-      toast.success(
-        t("client.offers.detail.order_success") || 
-        `🎉 Order placed successfully! ${quantity} ${quantity > 1 ? 'items' : 'item'} added to your orders.`,
+      const response = await axiosInstance.post(
+        "/orders",
         {
-          position: "top-center",
-          autoClose: 4000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
+          offerId: offer.id,
+          quantity,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 8000,
         }
       );
-      
-      // Optional: Redirect to orders page after a short delay
-      setTimeout(() => {
-        router.push(userId ? `/client/orders/${userId}` : "/client/orders");
-      }, 2000);
-      
+
+      setInCart(true);
+      toast.success(t("client.offers.detail.order_success") || "Order placed successfully!");
     } catch (err: any) {
-      console.error("Error placing order:", err);
-      console.error("Order data that failed:", { offerId: offer.id, quantity }); // Debug log
-      
-      // Show error toast notification
-      const errorMessage = err?.response?.data?.message || 
-                          err?.response?.data?.error || 
-                          t("client.offers.detail.order_error") || 
-                          "Failed to place order. Please try again.";
-      
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      console.error("Order error:", err);
+      toast.error(err?.response?.data?.message || t("client.offers.detail.order_error") || "Failed to place order.");
     }
   };
 
@@ -254,72 +201,68 @@ const Offers = () => {
 
   return (
     <>
-      {/* Toast Container for notifications */}
-      <ToastContainer
-        position="top-center"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        limit={3}
-        toastClassName="bg-white rounded-xl shadow-lg border border-gray-200"
-        bodyClassName="text-sm font-medium text-gray-800"
-        progressClassName="bg-emerald-500"
-      />
-      
-      {/* Main Container - Clean and Direct */}
-      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 pb-24 pt-4 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-200">
-          {/* Hero Image */}
-          <div className="relative w-full h-64 sm:h-80 md:h-96 bg-gradient-to-br from-emerald-100 to-teal-100">
-            <Image
-              src={sanitizeImageUrl(imageSrc)}
-              alt={offer.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 896px, 1152px"
-              priority
-              className="object-cover"
-              unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(imageSrc))}
-              onError={() => {
-                const nextIndex = fallbackIndex + 1;
-                if (nextIndex < fallbacks.length) {
-                  setFallbackIndex(nextIndex);
-                  setImageSrc(fallbacks[nextIndex]);
-                } else {
-                  setImageSrc(DEFAULT_BAG_IMAGE);
-                }
-              }}
-            />
+      {loading ? (
+        <LoadingSkeleton type="detail" />
+      ) : (
+        <>
+          {/* Toast Container for notifications */}
+          <ToastContainer
+            position="top-center"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            limit={3}
+            toastClassName="bg-white rounded-xl shadow-lg border border-gray-200"
+            bodyClassName="text-sm font-medium text-gray-800"
+            progressClassName="bg-emerald-500"
+          />
+          
+          {/* Hero Section with Offer Image */}
+          <div className="relative h-64 sm:h-80 bg-gradient-to-br from-emerald-100 to-teal-100">
+            {offer?.images?.[0] ? (
+              <Image
+                src={imageSrc}
+                alt={offer.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                priority
+                onError={() => {
+                  if (fallbackIndex < fallbacks.length - 1) {
+                    setFallbackIndex(fallbackIndex + 1);
+                    setImageSrc(fallbacks[fallbackIndex + 1]);
+                  } else {
+                    setImageSrc(DEFAULT_BAG_IMAGE);
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                    <ShoppingBag className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500">No image available</p>
+                </div>
+              </div>
+            )}
             
-            {/* Status Badge - Top Left */}
-            {isExpired && (
-              <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                {t("common.expired")}
-              </div>
-            )}
-            {!isExpired && offer.quantity <= 3 && (
-              <div className="absolute top-4 left-4 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-pulse">
-                {offer.quantity} {t("common.left")}!
-              </div>
-            )}
-
-            {/* Price Badge - Top Right */}
             {offer.price && (
-              <div className="absolute top-4 right-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold px-5 py-3 rounded-2xl shadow-2xl">
+              <div className="absolute top-3 right-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold px-3 py-2 sm:px-4 sm:py-3 rounded-2xl shadow-2xl z-10">
                 <div className="flex flex-col items-end">
-                  <span className="text-2xl font-extrabold">{offer.price} dt</span>
+                  <span className="text-lg sm:text-2xl font-extrabold">{offer.price} dt</span>
                   {offer.originalPrice && offer.originalPrice > offer.price && (
                     <>
-                      <span className="text-sm line-through opacity-90 mt-1">
+                      <span className="text-xs sm:text-sm line-through opacity-90 mt-0.5">
                         {offer.originalPrice.toFixed(2)} dt
                       </span>
-                      <span className="text-xs font-bold bg-yellow-400 text-gray-900 px-2 py-0.5 rounded-full mt-1">
+                      <span className="text-xs font-bold bg-yellow-400 text-gray-900 px-1.5 py-0.5 rounded-full mt-0.5">
                         -{((1 - offer.price / offer.originalPrice) * 100).toFixed(0)}%
                       </span>
                     </>
@@ -344,8 +287,8 @@ const Offers = () => {
                 
                 {/* Taste Badge */}
                 {offer.taste && (
-                  <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-purple-100 text-purple-800 shadow-md">
-                    {offer.taste === "sweet" && "🍰"}
+                  <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-pink-100 text-pink-800 shadow-md">
+                    {offer.taste === "sweet" && "🍯"}
                     {offer.taste === "salty" && "🧂"}
                     {offer.taste === "both" && "🍬"}
                     {offer.taste === "neutral" && "⚪"}
@@ -356,140 +299,133 @@ const Offers = () => {
             )}
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Title & Description */}
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{offer.title}</h1>
-              <p className="text-base text-gray-600 leading-relaxed">{offer.description}</p>
-            </div>
+          {/* Main Content */}
+          <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+              {/* Offer Title and Description */}
+              <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{offer.title}</h1>
+                <p className="text-gray-600 leading-relaxed">{offer.description}</p>
+              </div>
 
-            {/* Provider Information */}
-            {offer.owner && (
-              <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
-                <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden bg-white flex-shrink-0 shadow-md">
-                  <Image
-                    src={sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png")}
-                    alt={offer.owner.username}
-                    width={56}
-                    height={56}
-                    className="object-cover w-full h-full"
-                    unoptimized={shouldUnoptimizeImage(sanitizeImageUrl(offer.owner.profileImage ? resolveImageSource(offer.owner.profileImage) : "/logo.png"))}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/logo.png";
-                    }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-bold text-gray-900">{offer.owner.username}</h3>
-                  {offer.owner.phoneNumber && (
-                    <div className="flex items-center gap-1.5 text-sm text-gray-600 mt-1">
-                      <Phone className="w-4 h-4" />
-                      <span>{offer.owner.phoneNumber}</span>
+              {/* Provider Info */}
+              {offer.owner && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-xl">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    {t("client.offers.detail.provider_info")}
+                  </h3>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-500 text-lg font-bold">
+                        {offer.owner.username.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Pickup Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-emerald-300 transition-colors">
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-emerald-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    {t("client.offers.detail.pickup_location")}
-                  </p>
-                  <p className="text-sm font-bold text-gray-900">{currentLocation}</p>
-                  {currentMapsLink && (
-                    <a
-                      href={currentMapsLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-2"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      {t("common.open_in_maps")}
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-amber-300 transition-colors">
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-amber-700" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    {t("client.offers.detail.pickup_deadline")}
-                  </p>
-                  <p className="text-sm font-bold text-gray-900">
-                    {isToday ? t("common.today") : formattedDate}
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {formattedTime ? (formattedTime.includes(" - ") ? `${t("common.between")} ${formattedTime}` : `${t("common.at")} ${formattedTime}`) : ""}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quantity Selector and Order Button */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
-                <div className="flex items-center gap-3">
-                  <ShoppingBag className="w-5 h-5 text-emerald-600" />
-                  <div>
-                    <span className="text-sm font-bold text-gray-900 block">{t("client.offers.detail.quantity")}</span>
-                    <span className="text-xs text-gray-500">{offer.quantity} {t("client.offers.detail.available")}</span>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{offer.owner.username}</h3>
+                      {offer.owner.phoneNumber && (
+                        <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 mt-1">
+                          <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span>{offer.owner.phoneNumber}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-2 border-2 border-gray-200 shadow-sm">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
-                    disabled={quantity <= 1}
-                    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-bold transition-all hover:scale-105 active:scale-95 flex items-center justify-center text-lg"
-                  >
-                    −
-                  </button>
-                  <span className="w-12 text-center text-lg font-bold text-gray-900">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
-                    disabled={quantity >= offer.quantity}
-                    className="w-8 h-8 rounded-lg bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold transition-all hover:scale-105 active:scale-95 flex items-center justify-center text-lg disabled:cursor-not-allowed"
-                  >
-                    +
-                  </button>
+              )}
+
+              {/* Pickup Information */}
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                <div className="flex items-start gap-3 p-3 sm:p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-emerald-300 transition-colors">
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                      {t("client.offers.detail.pickup_location")}
+                    </p>
+                    <p className="text-sm font-bold text-gray-900 truncate">{currentLocation}</p>
+                    {currentMapsLink && (
+                      <a
+                        href={currentMapsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-2"
+                      >
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                        {t("client.offers.detail.view_maps")}
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 sm:p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-emerald-300 transition-colors">
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                      {t("client.offers.detail.pickup_time")}
+                    </p>
+                    <p className="text-sm font-bold text-gray-900">
+                      {isToday ? t("client.offers.detail.today") : formattedDate}
+                    </p>
+                    <p className="text-sm text-gray-600">{formattedTime}</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Order Button */}
-              <button
-                onClick={handleOrder}
-                disabled={inCart || isExpired || offer.quantity === 0}
-                className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${
-                  inCart
-                    ? "bg-gray-200 text-gray-600 cursor-not-allowed"
-                    : isExpired || offer.quantity === 0
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
-                }`}
-              >
-                {inCart
-                  ? `✓ ${t("common.added_to_cart")}`
-                  : isExpired
-                  ? t("common.expired")
-                  : offer.quantity === 0
-                  ? t("common.out_of_stock")
-                  : `${t("common.order_now")} • ${offer.price ? `${(offer.price * quantity).toFixed(2)} dt` : t("common.free")}`}
-              </button>
+              {/* Quantity and Order Section */}
+              <div className="mt-6 border-t pt-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-semibold text-gray-700">
+                      {t("client.offers.detail.quantity")}:
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        disabled={quantity <= 1}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 font-bold transition-all hover:scale-105 active:scale-95 flex items-center justify-center text-base sm:text-lg disabled:cursor-not-allowed"
+                      >
+                        −
+                      </button>
+                      <span className="w-10 sm:w-12 text-center text-base sm:text-lg font-bold text-gray-900">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity((q) => Math.min(q + 1, offer.quantity))}
+                        disabled={quantity >= offer.quantity}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold transition-all hover:scale-105 active:scale-95 flex items-center justify-center text-base sm:text-lg disabled:cursor-not-allowed"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Order Button */}
+                  <button
+                    onClick={handleOrder}
+                    disabled={inCart || isExpired || offer.quantity === 0}
+                    className={`w-full sm:w-auto px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all ${
+                      inCart
+                        ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                        : isExpired || offer.quantity === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+                    }`}
+                  >
+                    {inCart
+                      ? `✓ ${t("common.added_to_cart")}`
+                      : isExpired
+                      ? t("common.expired")
+                      : offer.quantity === 0
+                      ? t("common.out_of_stock")
+                      : `${t("common.order_now")} • ${offer.price ? `${(offer.price * quantity).toFixed(2)} dt` : t("common.free")}`}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </>
   );
 };
