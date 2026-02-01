@@ -646,8 +646,9 @@ export default function SignIn() {
         const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
         const isAndroid = /Android/i.test(navigator.userAgent);
         
-        // Web OAuth fallback URL (used if native app is not installed)
-        const webOAuthUrl = `https://m.facebook.com/v24.0/dialog/oauth?` +
+        // Web OAuth URL - use www.facebook.com, not m.facebook.com
+        // Facebook decides whether to open Facebook App or Browser based on User-Agent, not domain
+        const webOAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
           `client_id=${appId}&` +
           `redirect_uri=${redirectUri}&` +
           `scope=${scope}&` +
