@@ -135,7 +135,7 @@ const RapidOffer = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <label className="block mb-1 font-medium">{t("provider.rapid_offer.form.price") || "Price (dt)"}</label>
+              <label className="block mb-1 font-medium">{t("provider.rapid_offer.form.price") || "Price (DT)"}</label>
               <input
                 type="number"
                 min="0"
@@ -145,6 +145,11 @@ const RapidOffer = () => {
                 onChange={e => setPrice(e.target.value)}
                 required
               />
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5">
+                <p className="text-xs text-amber-800">
+                  <span className="font-semibold">ℹ️ Note:</span> A 1 DT commission will be automatically added.
+                </p>
+              </div>
             </motion.div>
 
             <motion.div

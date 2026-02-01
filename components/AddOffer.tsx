@@ -650,6 +650,11 @@ const AddOffer: React.FC = () => {
                 />
                 <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs sm:text-sm">dt</span>
               </div>
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                <p className="text-xs sm:text-sm text-amber-800">
+                  <span className="font-semibold">ℹ️ Note:</span> A 1 DT commission will be automatically added to your price. If you enter 5 DT, customers will pay 6 DT.
+                </p>
+              </div>
             </div>
 
             {/* Original Price (Optional) */}
