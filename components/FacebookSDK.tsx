@@ -62,6 +62,9 @@ export default function FacebookSDK() {
 
     // Set up the Facebook SDK initialization function
     // This follows the official Facebook SDK pattern
+    // Note: We deliberately do NOT call FB.getLoginStatus() here to avoid
+    // the "overriding current access token" warning that occurs when
+    // FB.login() is called after getLoginStatus() has set an internal token.
     window.fbAsyncInit = function () {
       if (window.FB) {
         try {
@@ -69,24 +72,17 @@ export default function FacebookSDK() {
             appId: appId,
             cookie: true,                     // Enable cookies to allow the server to access the session.
             xfbml: true,                     // Parse social plugins on this webpage.
-            version: apiVersion              // Use this Graph API version for this call.
+            version: apiVersion,             // Use this Graph API version for this call.
+            // Do NOT set frictionlessRequests here as it can cause token conflicts
           });
 
           console.log('Facebook SDK initialized successfully with App ID:', appId);
 
-          // Called after the JS SDK has been initialized.
-          // Returns the login status.
-          // Note: FB.getLoginStatus only works on HTTPS (Facebook requirement as of 2018)
-          if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-            window.FB.getLoginStatus(function (response: any) {
-              if (window.statusChangeCallback) {
-                window.statusChangeCallback(response);
-              }
-            }, true); // Force a roundtrip to Facebook to get fresh status
-          } else {
-            console.warn('Facebook login requires HTTPS. Skipping getLoginStatus. Current protocol:', 
-              typeof window !== 'undefined' ? window.location.protocol : 'unknown');
-          }
+          // Note: We intentionally skip FB.getLoginStatus() during initialization
+          // to avoid the "overriding current access token" warning.
+          // The login status will be checked when the user actually clicks the login button.
+          // This prevents conflicts between the SDK's internal token state and
+          // the token returned by FB.login().
         } catch (error: any) {
           console.error('Facebook SDK initialization error:', error);
           // Store error for sign-in page to display
