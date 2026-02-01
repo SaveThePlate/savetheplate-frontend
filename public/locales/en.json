@@ -204,7 +204,7 @@
           "error": "Failed to create offer.",
           "form": {
             "title": "Title",
-            "price": "Price (dt)",
+            "price": "Price (DT)",
             "quantity": "Quantity",
             "pickup_time": "Pickup Time",
             "submit": "Post Offer",

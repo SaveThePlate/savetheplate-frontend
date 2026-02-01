@@ -202,7 +202,7 @@
           "error": "Échec de la création de l'offre.",
           "form": {
             "title": "Titre",
-            "price": "Prix (dt)",
+            "price": "Prix (DT)",
             "quantity": "Quantité",
             "pickup_time": "Heure de retrait",
             "submit": "Publier l'offre",

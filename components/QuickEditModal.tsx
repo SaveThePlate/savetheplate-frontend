@@ -344,7 +344,7 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
                 {/* Price */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("quick_edit.price") || "Price (dt)"}
+                    {t("quick_edit.price") || "Price (DT)"}
                   </label>
                   <Input
                     type="number"
