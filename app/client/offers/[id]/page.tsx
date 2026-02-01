@@ -315,12 +315,33 @@ const Offers = () => {
                     {t("client.offers.detail.provider_info")}
                   </h3>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500 text-lg font-bold">
-                        {offer.owner.username.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
+                    {offer.owner.profileImage ? (
+                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                        <Image
+                          src={sanitizeImageUrl(offer.owner.profileImage)}
+                          alt={offer.owner.username}
+                          width={48}
+                          height={48}
+                          className="object-cover w-full h-full"
+                          unoptimized={shouldUnoptimizeImage(offer.owner.profileImage)}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = document.createElement('div');
+                            fallback.className = 'w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center';
+                            fallback.innerHTML = `<span class="text-gray-500 text-lg font-bold">${offer.owner?.username.charAt(0).toUpperCase()}</span>`;
+                            target.parentNode?.appendChild(fallback);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-gray-500 text-lg font-bold">
+                          {offer.owner.username.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{offer.owner.username}</h3>
                       {offer.owner.phoneNumber && (
                         <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 mt-1">
@@ -328,6 +349,17 @@ const Offers = () => {
                           <span>{offer.owner.phoneNumber}</span>
                         </div>
                       )}
+                    </div>
+                  </div>
+                  {/* Quantity Available */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gray-600">
+                        {t("client.offers.detail.quantity_available") || "Available"}:
+                      </span>
+                      <span className="text-base font-bold text-emerald-600">
+                        {offer.quantity} {t("client.offers.detail.items") || "items"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -343,17 +375,18 @@ const Offers = () => {
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                       {t("client.offers.detail.pickup_location")}
                     </p>
-                    <p className="text-sm font-bold text-gray-900 truncate">{currentLocation}</p>
-                    {currentMapsLink && (
+                    {currentMapsLink ? (
                       <a
                         href={currentMapsLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mt-2"
+                        className="flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors group"
                       >
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-                        {t("client.offers.detail.view_maps")}
+                        <span className="truncate">{currentLocation}</span>
+                        <MapPin className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
                       </a>
+                    ) : (
+                      <p className="text-sm font-bold text-gray-900 truncate">{currentLocation}</p>
                     )}
                   </div>
                 </div>

@@ -37,18 +37,29 @@ const nextConfig = {
   // Optimize images
   images: {
     remotePatterns: [
-      // Localhost with any port (for development)
+      // Localhost with any port (for development) - /store/ paths
       { 
         protocol: 'http', 
         hostname: 'localhost',
         pathname: '/store/**',
+      },
+      // Localhost with any port (for development) - /storage/ paths (legacy support)
+      { 
+        protocol: 'http', 
+        hostname: 'localhost',
+        pathname: '/storage/**',
       },
       { 
         protocol: 'http', 
         hostname: '127.0.0.1',
         pathname: '/store/**',
       },
-      // Production backend
+      { 
+        protocol: 'http', 
+        hostname: '127.0.0.1',
+        pathname: '/storage/**',
+      },
+      // Production backend - /store/ paths
       { 
         protocol: 'http', 
         hostname: 'savetheplate.tn', 
@@ -58,6 +69,17 @@ const nextConfig = {
         protocol: 'https', 
         hostname: 'savetheplate.tn', 
         pathname: '/store/**' 
+      },
+      // Production backend - /storage/ paths (legacy support)
+      { 
+        protocol: 'http', 
+        hostname: 'savetheplate.tn', 
+        pathname: '/storage/**' 
+      },
+      { 
+        protocol: 'https', 
+        hostname: 'savetheplate.tn', 
+        pathname: '/storage/**' 
       },
       // Facebook CDN for profile images
       {
@@ -68,7 +90,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'scontent.*.fbcdn.net',
       },
-      // Allow images from any domain (for flexibility)
+      // Allow images from any domain (for flexibility) - /store/ paths
       { 
         protocol: 'http', 
         hostname: '**', 
@@ -78,6 +100,17 @@ const nextConfig = {
         protocol: 'https', 
         hostname: '**', 
         pathname: '/store/**' 
+      },
+      // Allow images from any domain (for flexibility) - /storage/ paths
+      { 
+        protocol: 'http', 
+        hostname: '**', 
+        pathname: '/storage/**' 
+      },
+      { 
+        protocol: 'https', 
+        hostname: '**', 
+        pathname: '/storage/**' 
       },
     ],
     unoptimized: false, // Enable Next.js image optimization for better performance
