@@ -696,7 +696,7 @@ const WelcomePage = () => {
               </div>
 
               {/* OSTX Logo */}
-              <div className="flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gray-50 rounded-2xl hover:shadow-lg transition-shadow duration-300 hover:bg-gray-100">
+              <div className="flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-slate-800 rounded-2xl hover:shadow-lg transition-shadow duration-300 hover:bg-slate-900">
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 flex items-center justify-center">
                   <Image
                     src="/logo ostx.avif"
@@ -706,7 +706,7 @@ const WelcomePage = () => {
                     className="object-contain"
                   />
                 </div>
-                <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 font-medium text-center">
+                <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-200 font-medium text-center">
                   {t("landing.ostx") || "OSTX"}
                 </p>
               </div>
