@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -10,21 +10,63 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
   Leaf, 
-  DollarSign, 
   MapPin, 
   Clock, 
   Heart,
   ShoppingBag,
   Store,
+  CheckCircle2,
+  Users,
+  Globe,
   TrendingUp,
-  CheckCircle2
+  Star,
+  Zap,
+  Shield,
+  Target
 } from "lucide-react";
 
 // Lazy load CarbonFootprint component as it's below the fold
 const CarbonFootprint = dynamic(() => import("@/components/CarbonFootprint"), {
-  loading: () => <div className="h-32 animate-pulse bg-gray-200 rounded-lg" />,
-  ssr: false, // This component doesn't need SSR
+  loading: () => <div className="h-32 animate-pulse bg-gray-200 rounded-xl" />,
+  ssr: false,
 });
+
+// Animated Section Component
+const AnimatedSection = ({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1, rootMargin: "-50px" }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div 
+      ref={ref} 
+      className={`transition-all duration-1000 transform ${
+        isVisible 
+          ? "opacity-100 translate-y-0" 
+          : "opacity-0 translate-y-12"
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const WelcomePage = () => {
   const router = useRouter();
@@ -42,15 +84,9 @@ const WelcomePage = () => {
       }
 
       try {
-        // Ensure context is populated (single session bootstrap: `/users/me`)
         if (!userLoading && !userRole) {
           await fetchUserRole();
         }
-
-        // Landing page behavior:
-        // - CLIENT: go straight to client home
-        // - PROVIDER / PENDING_PROVIDER: go to provider home
-        // - NONE or undefined: stay on landing page (unverified user can navigate freely)
         if (userRole === "CLIENT") {
           router.push("/client/home");
           return;
@@ -59,10 +95,8 @@ const WelcomePage = () => {
           router.push("/provider/home");
           return;
         }
-        // User has token but no role (unverified email) - allow them to stay
         setCheckingAuth(false);
       } catch (error) {
-        // Token is invalid or expired, stay on landing page
         console.debug("Token check failed, staying on landing page");
         setCheckingAuth(false);
       }
@@ -71,17 +105,13 @@ const WelcomePage = () => {
   }, [router, user, userRole, userLoading, fetchUserRole]);
 
   const handleGetStarted = () => {
-    // Clear all tokens and localStorage to start fresh onboarding
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refresh-token");
     localStorage.removeItem("remember");
-    // Redirect to signIn page to start the onboarding process from the beginning
     router.push("/signIn");
   };
 
   const handleSignIn = () => {
-    // Keep existing session and redirect to signIn
-    // The signIn page will handle redirecting users based on their current state
     router.push("/signIn");
   };
 
@@ -90,7 +120,7 @@ const WelcomePage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/5">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
         </div>
       </div>
@@ -98,344 +128,678 @@ const WelcomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE] overflow-x-hidden">
-      {/* Language Switcher - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageSwitcher variant="button" />
-      </div>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Navigation Header */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side - Logo */}
+            <div className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="Save The Plate"
+                width={36}
+                height={36}
+                className="object-contain"
+              />
+              <span className="text-lg font-bold text-[#1B4332] hidden sm:block">SaveThePlate</span>
+            </div>
+            
+            {/* Center - Navigation Links (Desktop) */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.fun_header_badge")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.how_it_works")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="#business" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.for_business")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </div>
+            
+            {/* Right side - Language Switcher and Sign In */}
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="button" />
+              <Button
+                onClick={handleSignIn}
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+              >
+                {t("landing.sign_in")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-      {/* Logo centered above hero section, layered above image and overlay */}
-      <div className="absolute top-8 left-0 w-full flex justify-center z-30 pointer-events-none">
-        <Image
-          src="/logo.png"
-          alt="Save The Plate"
-          width={120}
-          height={120}
-          className="object-contain drop-shadow-xl w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 mb-10 sm:mb-14 lg:mb-16"
-          priority
-        />
-      </div>
-
-      {/* Hero Section - Enhanced Design */}
-      <section className="relative pt-12 pb-12 sm:pt-10 sm:pb-16 lg:pt-14 lg:pb-20 px-0 sm:px-0 lg:px-0 overflow-hidden min-h-[500px] flex items-center justify-center">
-        {/* Full-section background image */}
-        <div className="absolute inset-0 w-full h-full z-0">
+      {/* Hero Section with Background Image */}
+      <section className="relative pt-0 pb-0 overflow-hidden h-screen flex items-center">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
           <Image
             src="/cover2.png"
-            alt={t("landing.illustration_alt")}
+            alt="Hero background"
             fill
             sizes="100vw"
-            className="object-cover w-full h-full opacity-40"
+            className="object-cover"
             priority
           />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1B4332]/95 via-[#1B4332]/85 to-[#2D5A47]/90" />
+          {/* Animated gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" />
+          {/* Decorative elements */}
+          {/* <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-teal-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} /> */}
         </div>
-        {/* Overlay for smooth transition - fades to white at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white/100 z-10" />
-        <div className="relative z-20 w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[500px] sm:min-h-[600px] lg:min-h-[700px]">
-          <div className="flex flex-col items-center justify-center text-center space-y-6 w-full py-8 sm:py-12 lg:py-16">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-foreground drop-shadow-xl">
-              <span className="block">
-                {t("landing.welcome_title")}
-                <span className="inline-block ml-2 text-primary bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-gradient-x">
-                  {t("landing.welcome_subtitle")}
-                </span>
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
-              {t("landing.welcome_description")}
-            </p>
-            {/* Tagline/Value Prop */}
-            <div className="flex justify-center mt-8 sm:mt-10 lg:mt-12">
-              {/* <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-base shadow-sm border border-emerald-100 animate-fade-in">
-                <Leaf className="w-5 h-5 text-emerald-500" />
-                {t("landing.hero_tagline", { defaultValue: "Save food. Save money. Save the planet." })}
-              </span> */}
-            </div>
-            {/* CTA Buttons - Enhanced */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2">
-              <Button
-                onClick={handleGetStarted}
-                variant="emerald"
-                size="lg"
-                className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-xl hover:shadow-2xl transform hover:scale-105 font-bold px-8 py-3 text-lg transition-all duration-200"
-              >
-                <ArrowRight className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform" />
-                {t("landing.get_started")}
-              </Button>
-              <Button
-                onClick={() => router.push("/business-signup")}
-                variant="outline"
-                size="lg"
-                className="group bg-amber-50/90 backdrop-blur-sm hover:bg-amber-100 text-amber-700 hover:text-amber-800 border-2 border-amber-300 hover:border-amber-400 shadow-md hover:shadow-lg transform hover:scale-105 font-bold px-8 py-3 text-lg transition-all duration-200"
-              >
-                <Store className="w-5 h-5 mr-2" />
-                {t("landing.register_business")}
-              </Button>
-            </div>
-            {/* Sign In Link */}
-            <div className="mt-3 text-center">
-              <button
-                onClick={handleSignIn}
-                className="text-sm text-gray-600 hover:text-primary transition-colors underline underline-offset-4"
-              >
-                {t("landing.already_member")} {t("landing.sign_in")}
-              </button>
-            </div>
-          </div>
-        </div>
-        {/* Custom Animations merged below */}
-      </section>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+            {/* Left Content */}
+            <div className="text-white space-y-4 sm:space-y-6 lg:space-y-8">
+              <AnimatedSection delay={0}>
+                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-white/20 shadow-lg">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-300 text-yellow-300" />
+                  <span>{t("landing.badge_text")}</span>
+                </div>
+              </AnimatedSection>
+              
+              <AnimatedSection delay={100}>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                  {t("landing.welcome_title")}
+                  <span className="block text-emerald-300 mt-2 sm:mt-3 bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 bg-clip-text text-transparent drop-shadow-lg">
+                    {t("landing.welcome_subtitle")}
+                  </span>
+                </h1>
+              </AnimatedSection>
+              
+              <AnimatedSection delay={200}>
+                <p className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed max-w-xl">
+                  {t("landing.welcome_description")}
+                </p>
+              </AnimatedSection>
+              
+              <AnimatedSection delay={300}>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
+                  <Button
+                    onClick={handleGetStarted}
+                    size="lg"
+                    className="w-full sm:w-auto bg-white text-[#1B4332] hover:bg-gray-100 font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 py-5 sm:py-6 px-5 sm:px-7 rounded-xl"
+                  >
+                    {t("landing.get_started")}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                  <Button
+                    onClick={() => router.push("/business-signup")}
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto bg-white/10 text-white border-2 border-white/30 hover:bg-white/20 hover:border-white/50 font-bold shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:-translate-y-1 py-5 sm:py-6 px-5 sm:px-7 rounded-xl"
+                  >
+                    <Store className="w-5 h-5 mr-2" />
+                    {t("landing.register_business")}
+                  </Button>
+                </div>
+              </AnimatedSection>
 
-      {/* Features Section - Smooth gradient from hero */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white/100 to-emerald-50/50">
-        <div className="w-full mx-auto max-w-7xl">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
-              {t("landing.why_choose")}
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              {t("landing.why_subtitle")}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {/* Feature 1 */}
-            <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-5 border-2 border-primary/20 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-                <DollarSign className="w-6 h-6 text-primary" />
+              {/* Mobile Floating Stats Cards - Visible only on mobile */}
+              <div className="flex lg:hidden gap-3 pt-4">
+                <AnimatedSection delay={400} className="flex-1">
+                  <div className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/20 shadow-lg">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                        <Leaf className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm font-bold text-white">-70% CO₂</p>
+                        <p className="text-[10px] sm:text-xs text-white/70">par repas sauvé</p>
+                      </div>
+                    </div>
+                  </div>
+                </AnimatedSection>
+                
+                <AnimatedSection delay={500} className="flex-1">
+                  <div className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/20 shadow-lg">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                        <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm font-bold text-white">-50% Prix</p>
+                        <p className="text-[10px] sm:text-xs text-white/70">sur les invendus</p>
+                      </div>
+                    </div>
+                  </div>
+                </AnimatedSection>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.save_money_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.save_money_desc")}
-              </p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-xl p-5 border-2 border-accent/20 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
-                <Leaf className="w-6 h-6 text-accent" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.save_planet_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.save_planet_desc")}
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
-                <MapPin className="w-6 h-6 text-amber-700" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.support_local_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.support_local_desc")}
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
-                <Clock className="w-6 h-6 text-amber-700" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.quick_easy_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.quick_easy_desc")}
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-5 border-2 border-pink-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-pink-100 flex items-center justify-center mb-3">
-                <Heart className="w-6 h-6 text-pink-700" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.make_difference_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.make_difference_desc")}
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border-2 border-purple-200 shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-3">
-                <ShoppingBag className="w-6 h-6 text-purple-700" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.surprise_packs_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.surprise_packs_desc")}
-              </p>
+            {/* Right Image - App Preview - Desktop Only */}
+            <div className="relative hidden lg:block">
+              <AnimatedSection delay={400}>
+                <div className="relative w-full max-w-lg xl:max-w-xl mx-auto aspect-[9/19]">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 rounded-full blur-3xl animate-pulse" />
+                  <Image
+                    src="/phone1.png"
+                    alt="App preview"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-contain drop-shadow-[0_50px_100px_rgba(0,0,0,0.4)] hover:scale-105 transition-transform duration-700"
+                    priority
+                  />
+                </div>
+              </AnimatedSection>
+              
+              {/* Floating Cards - Desktop */}
+              <AnimatedSection delay={500}>
+                <div className="absolute -bottom-8 -left-12 xl:-left-16 bg-white rounded-2xl shadow-2xl p-5 flex items-center gap-4 animate-float hover:scale-110 transition-transform cursor-pointer border border-emerald-100">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center">
+                    <Leaf className="w-7 h-7 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-[#1B4332]">-70% CO₂</p>
+                    <p className="text-sm text-gray-500">par repas sauvé</p>
+                  </div>
+                </div>
+              </AnimatedSection>
+              
+              <AnimatedSection delay={600}>
+                <div className="absolute -top-8 -right-12 xl:-right-16 bg-white rounded-2xl shadow-2xl p-5 flex items-center gap-4 animate-float hover:scale-110 transition-transform cursor-pointer border border-amber-100" style={{ animationDelay: '0.5s' }}>
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center">
+                    <ShoppingBag className="w-7 h-7 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-[#1B4332]">-50% Prix</p>
+                    <p className="text-sm text-gray-500">sur les invendus</p>
+                  </div>
+                </div>
+              </AnimatedSection>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section - Gradient transition */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-emerald-50/50 via-teal-50 to-white">
-        <div className="w-full mx-auto max-w-7xl">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
-              {t("landing.how_it_works")}
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              {t("landing.how_subtitle")}
-            </p>
-          </div>
+      {/* App Preview Section */}
+      <section id="features" className="relative py-20 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-white">
+        <div className="max-w-[1600px] mx-auto">
+          {/* Large Desktop Image Container */}
+          <div className="relative now aw-full h-[600px] md:h-[700px] lg:h-[800px]">
+            {/* Background Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse" />
+            
+            {/* Desktop Image - Much Bigger */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              <div className="relative w-[90%] md:w-[85%] lg:w-[80%] xl:w-[75%] h-full">
+                <Image
+                  src="/desktop.png"
+                  alt="App home screen"
+                  fill
+                  sizes="(max-width: 768px) 90vw, (max-width: 1200px) 85vw, 75vw"
+                  className="object-contain drop-shadow-[0_50px_100px_rgba(0,0,0,0.25)] hover:scale-[1.02] transition-transform duration-700"
+                  priority
+                />
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+            {/* Floating Content Overlay - Top Right */}
+            <AnimatedSection className="absolute top-8 right-4 md:top-12 md:right-12 lg:top-20 lg:right-24 max-w-md z-10">
+              <div className="backdrop-blur-xl bg-white/90 rounded-3xl p-6 shadow-2xl border border-white/50">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1B4332] leading-tight mb-3">
+                  Une application simple et <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">intuitive</span>
+                </h2>
+                <p className="text-sm lg:text-base text-gray-600">
+                  Découvre les meilleures offres près de chez toi en quelques clics. 
+                  Parcourt, réserve et récupère tes repas en toute simplicité.
+                </p>
+              </div>
+            </AnimatedSection>
+
+            {/* Floating Feature Cards - Bottom Left */}
+            <div className="absolute bottom-8 left-4 md:bottom-12 md:left-12 lg:bottom-20 lg:left-24 space-y-4 z-10 max-w-sm">
+              <AnimatedSection delay={200}>
+                <div className="flex items-center gap-3 p-4 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 border border-white/50">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#1B4332] text-base">Géolocalisation</p>
+                    <p className="text-sm text-gray-600">
+                      Trouve les offres près de chez toi
+                    </p>
+                  </div>
+                </div>
+              </AnimatedSection>
+
+              <AnimatedSection delay={300}>
+                <div className="flex items-center gap-3 p-4 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 border border-white/50">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                    <ShoppingBag className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#1B4332] text-base">Réservation facile</p>
+                    <p className="text-sm text-gray-600">
+                      Commande en 2 clics
+                    </p>
+                  </div>
+                </div>
+              </AnimatedSection>
+
+              <AnimatedSection delay={400}>
+                <div className="flex items-center gap-3 p-4 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 border border-white/50">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center flex-shrink-0">
+                    <Leaf className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#1B4332] text-base">Impact environnemental</p>
+                    <p className="text-sm text-gray-600">
+                      Suis tes économies
+                    </p>
+                  </div>
+                </div>
+              </AnimatedSection>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="relative py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30 overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-200/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <AnimatedSection>
+            <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+              <div className="inline-block px-4 py-2 bg-emerald-100 rounded-full mb-4">
+                <p className="text-emerald-700 font-semibold text-sm">{t("landing.how_it_works")}</p>
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-4 leading-tight">
+                {t("landing.how_subtitle")}
+              </h2>
+              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto rounded-full" />
+            </div>
+          </AnimatedSection>
+
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 relative">
+            {/* Connecting line for desktop */}
+            <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-200 via-amber-200 to-green-200" style={{ width: 'calc(100% - 12rem)', left: '6rem' }} />
+            
             {/* Step 1 */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-primary/20 text-center">
-              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                1
+            <AnimatedSection delay={100}>
+              <div className="relative group">
+                <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-500 h-full border border-emerald-100/50 hover:border-emerald-300 hover:-translate-y-3 overflow-hidden">
+                  {/* Gradient background on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Number badge */}
+                  <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl z-20 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+                    1
+                  </div>
+                  
+                  {/* Image container */}
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6 mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl animate-pulse" />
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 p-4 group-hover:scale-110 transition-transform duration-500">
+                      <Image
+                        src="/step1.png"
+                        alt="Browse offers"
+                        fill
+                        sizes="160px"
+                        className="object-contain p-3"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#1B4332] mb-2 text-center">{t("landing.step1_title")}</h3>
+                    <p className="text-gray-600 text-center leading-relaxed text-sm">{t("landing.step1_desc")}</p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step1_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.step1_desc")}
-              </p>
-            </div>
+            </AnimatedSection>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-primary/20 text-center">
-              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                2
+            <AnimatedSection delay={200}>
+              <div className="relative group">
+                <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-500 h-full border border-amber-100/50 hover:border-amber-300 hover:-translate-y-3 overflow-hidden">
+                  {/* Gradient background on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Number badge */}
+                  <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl z-20 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+                    2
+                  </div>
+                  
+                  {/* Image container */}
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6 mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-orange-400/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-amber-100 to-orange-100 p-4 group-hover:scale-110 transition-transform duration-500">
+                      <Image
+                        src="/step2.avif"
+                        alt="Place order"
+                        fill
+                        sizes="160px"
+                        className="object-cover rounded-xl"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#1B4332] mb-2 text-center">{t("landing.step2_title")}</h3>
+                    <p className="text-gray-600 text-center leading-relaxed text-sm">{t("landing.step2_desc")}</p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step2_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.step2_desc")}
-              </p>
-            </div>
+            </AnimatedSection>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-primary/20 text-center">
-              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                3
+            <AnimatedSection delay={300}>
+              <div className="relative group">
+                <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-500 h-full border border-green-100/50 hover:border-green-300 hover:-translate-y-3 overflow-hidden">
+                  {/* Gradient background on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Number badge */}
+                  <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl z-20 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+                    3
+                  </div>
+                  
+                  {/* Image container */}
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6 mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/30 to-emerald-400/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-green-100 to-emerald-100 p-4 group-hover:scale-110 transition-transform duration-500">
+                      <Image
+                        src="/step3.avif"
+                        alt="Pick up"
+                        fill
+                        sizes="160px"
+                        className="object-cover rounded-xl"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#1B4332] mb-2 text-center">{t("landing.step3_title")}</h3>
+                    <p className="text-gray-600 text-center leading-relaxed text-sm">{t("landing.step3_desc")}</p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t("landing.step3_title")}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {t("landing.step3_desc")}
-              </p>
-            </div>
+            </AnimatedSection>
           </div>
+        </div>
+      </section>      
+
+      {/* Newlander Image Section */}
+      <section className="py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <AnimatedSection>
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1B4332]/95 via-[#1B4332]/70 to-transparent z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1B4332]/50 to-transparent z-10" />
+              <Image
+                src="/newlander.png"
+                alt="Save The Plate mission"
+                fill
+                sizes="100vw"
+                className="object-cover hover:scale-105 transition-transform duration-700"
+              />
+              <div className="relative z-20 p-8 md:p-12 lg:p-16 max-w-2xl">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3">
+                  Sauvez la nourriture, réduisez le gaspillage alimentaire !
+                </h2>
+                <p className="text-base text-white/90 mb-6">
+                  Avec Save the Plate,лизне de délicieux repas à prix réduits tout en aidant à réduire le gaspillage alimentaire.
+                </p>
+                <Button
+                  onClick={handleGetStarted}
+                  size="lg"
+                  className="bg-white text-[#1B4332] hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {t("landing.get_started")}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
-      {/* For Providers Section - More Compact */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="w-full mx-auto max-w-7xl">
-          <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-6 sm:p-8 lg:p-10 text-white shadow-xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
+      {/* Carbon Footprint Section */}
+      <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+        <div className="max-w-4xl mx-auto">
+          <AnimatedSection>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1.5 mb-4">
-                  <Store className="w-4 h-4" />
-                  <span className="text-xs sm:text-sm font-semibold">{t("landing.for_business")}</span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#1B4332] mb-4">
+                  Chaque geste compte pour la planète
+                </h2>
+                <p className="text-base text-gray-600 mb-8 leading-relaxed">
+                  En sauvant des repas, vous contribuez directement à la réduction du gaspillage alimentaire et à la protection de l'environnement. Chaque repas sauvé, c'est moins de CO₂ émis et moins de ressources gaspillées.
+                </p>
+                <div className="flex flex-col gap-4 mb-8">
+                  <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Réduction de 70% des émissions de CO₂</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Économie de 1000L d'eau par repas sauvé</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Moins de déchets pour les décharges</span>
+                  </div>
                 </div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl" />
+                <CarbonFootprint />
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* For Business Section */}
+      <section id="business" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#1B4332] via-[#1B4332] to-[#2D5A47]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="text-white">
+              <AnimatedSection>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 mb-6">
+                  <Store className="w-5 h-5" />
+                  <span className="text-sm font-semibold">{t("landing.for_business")}</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-6">
                   {t("landing.list_surplus")}
                 </h2>
-                <p className="text-base sm:text-lg mb-5 opacity-90">
+                <p className="text-base text-white/80 mb-8 leading-relaxed">
                   {t("landing.business_desc")}
                 </p>
-                <ul className="space-y-2 mb-5">
-                  <li className="flex items-center gap-2 text-sm sm:text-base">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span>{t("landing.business_benefit1")}</span>
+              </AnimatedSection>
+              <AnimatedSection delay={100}>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400/30 to-green-400/30 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <span className="text-white/90">{t("landing.business_benefit1")}</span>
                   </li>
-                  <li className="flex items-center gap-2 text-sm sm:text-base">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span>{t("landing.business_benefit2")}</span>
+                  <li className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400/30 to-green-400/30 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <span className="text-white/90">{t("landing.business_benefit2")}</span>
                   </li>
-                  <li className="flex items-center gap-2 text-sm sm:text-base">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span>{t("landing.business_benefit3")}</span>
+                  <li className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400/30 to-green-400/30 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <span className="text-white/90">{t("landing.business_benefit3")}</span>
                   </li>
                 </ul>
+              </AnimatedSection>
+              <AnimatedSection delay={200}>
                 <Button
                   onClick={() => router.push("/business-signup")}
                   size="lg"
-                  className="bg-white text-primary hover:bg-gray-100 font-bold shadow-lg group"
+                  className="bg-white text-[#1B4332] hover:bg-gray-100 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <Store className="w-5 h-5 mr-2" />
                   {t("landing.register_business")}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
-              </div>
-              <div className="hidden lg:block">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-white/20">
-                  <TrendingUp className="w-16 h-16 sm:w-20 sm:h-20 mx-auto opacity-80" />
+              </AnimatedSection>
+            </div>
+            
+            <div className="relative">
+              <AnimatedSection delay={300}>
+                <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/30 to-green-500/30 flex items-center justify-center mx-auto mb-4">
+                        <TrendingUp className="w-8 h-8 text-emerald-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">+30%</p>
+                      <p className="text-white/60 text-sm">Revenus supplémentaires</p>
+                    </div>
+                    <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/30 to-indigo-500/30 flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-8 h-8 text-blue-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">500+</p>
+                      <p className="text-white/60 text-sm">Nouveaux clients/mois</p>
+                    </div>
+                    <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/30 to-orange-500/30 flex items-center justify-center mx-auto mb-4">
+                        <Globe className="w-8 h-8 text-amber-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">-50%</p>
+                      <p className="text-white/60 text-sm">Déchets alimentaires</p>
+                    </div>
+                    <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/30 to-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+                        <Leaf className="w-8 h-8 text-green-400" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">100%</p>
+                      <p className="text-white/60 text-sm">Engagement éco</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </AnimatedSection>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Carbon Footprint Section - Gradient transition */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-[#F9FAF5]">
-        <div className="w-full mx-auto max-w-2xl">
-          <CarbonFootprint />
+      {/* Final CTA */}
+      <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30">
+        <div className="max-w-4xl mx-auto text-center">
+          <AnimatedSection>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1B4332] mb-4">
+              {t("landing.ready_title")}
+            </h2>
+            <p className="text-base text-gray-600 mb-10 max-w-2xl mx-auto">
+              {t("landing.ready_desc")}
+            </p>
+          </AnimatedSection>
+          <AnimatedSection delay={100}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={handleGetStarted}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-200 group text-lg px-8"
+              >
+                {t("landing.get_started_now")}
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
-      {/* Final CTA - Smooth gradient */}
-      <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F9FAF5] via-[#F0F7F4] to-[#E8F4EE]">
-        <div className="w-full mx-auto max-w-4xl text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3">
-            {t("landing.ready_title")}
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-            {t("landing.ready_desc")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Button
-              onClick={handleGetStarted}
-              variant="emerald"
-              size="lg"
-              className="shadow-lg hover:shadow-xl transition-all duration-300 group"
+      {/* Footer */}
+      <footer className="bg-[#1B4332] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <Image
+                  src="/logo.png"
+                  alt="Save The Plate"
+                  width={40}
+                  height={40}
+                  className="object-contain bg-white rounded-lg p-1"
+                />
+                <span className="text-xl font-bold text-white">SaveThePlate</span>
+              </div>
+              <p className="text-white/60 max-w-md">
+                Sauvez la nourriture, économisez de l'argent et sauvez la planète. 
+                Rejoignez notre communauté de héros du quotidien !
+              </p>
+            </div>
+            <div>
+             
+            </div>
+            <div>
+          <div className="flex items-center justify-center gap-4 mt-8 pt-8">
+            <a 
+              href="https://www.facebook.com/people/Save-The-Plate/61584973505504/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
             >
-              {t("landing.get_started_now")}
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            {/* <Button
-              onClick={() => router.push("/business-signup")}
-              variant="outline"
-              size="lg"
-              className="bg-white/90 hover:bg-white text-amber-700 border-2 border-amber-300 hover:border-amber-400 shadow-md hover:shadow-lg group"
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+              </svg>
+            </a>
+            <a 
+              href="https://www.instagram.com/savetheplate_tn/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
             >
-              <Store className="w-5 h-5 mr-2" />
-              {t("landing.for_business")}
-            </Button> */}
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.468 2.37c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
+              </svg>
+            </a>
+            <a 
+              href="https://www.tiktok.com/@savetheplatetn" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+              </svg>
+            </a>
+            <a 
+              href="https://www.linkedin.com/company/savetheplate/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
+              </svg>
+            </a>
           </div>
+            </div>
+          </div>
+          
         </div>
-      </section>
+      </footer>
 
       <style jsx>{`
-        @keyframes gradient-x {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-gradient-x {
-          background-size: 200% 200%;
-          animation: gradient-x 4s ease-in-out infinite;
-        }
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.7; }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 4s cubic-bezier(0.4,0,0.6,1) infinite;
-        }
-        @keyframes pulse-slower {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.5; }
-        }
-        .animate-pulse-slower {
-          animation: pulse-slower 7s cubic-bezier(0.4,0,0.6,1) infinite;
-        }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: none; }
-        }
-        .animate-fade-in {
-          animation: fade-in 1.2s cubic-bezier(0.4,0,0.6,1) 0.2s both;
-        }
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-12px); }
