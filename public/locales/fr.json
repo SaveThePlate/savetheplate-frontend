@@ -107,7 +107,7 @@
     "step2_desc": "Sélectionnez votre pack préféré, passez une commande et recevez un code QR unique pour la collecte.",
     "step3_title": "Récupérer et Déguster",
     "step3_desc": "Visitez le magasin, montrez votre code QR et dégustez de délicieux plats tout en sauvant la planète !",
-    "for_business": "Pour les Propriétaires d'Entreprises",
+    "for_business": "Pour les Propriétaires de Commerces",
     "list_surplus": "Listez Vos Surplus Alimentaires",
     "business_desc": "Transformez vos surplus alimentaires en revenus tout en réduisant les déchets. Rejoignez les fournisseurs de nourriture qui ont un impact positif.",
     "business_benefit1": "Réduire le gaspillage alimentaire et les coûts d'élimination",
@@ -192,7 +192,7 @@
     "noProductsInCategory": "Aucun produit disponible dans cette catégorie",
     "distance_filter": "Distance Maximale",
     "all_distances": "Toutes",
-    "getLocation": "Obtenir la Position",
+    "getLocation": "Obtenir la Localisation",
     "searchPlaceholder": "Rechercher de la nourriture, des magasins..."
   },
   "provider": {

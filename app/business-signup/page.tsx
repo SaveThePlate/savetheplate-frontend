@@ -253,96 +253,123 @@ export default function BusinessSignUp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden py-8 px-4">
-      {/* Language Switcher - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageSwitcher variant="button" />
-      </div>
-
-      {/* Back to Home Button - Fixed Position */}
-      <button
-        onClick={() => router.push("/")}
-        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 text-sm font-medium"
-        aria-label="Back to home"
-      >
-        <Home size={18} />
-        <span className="hidden sm:inline">{t("nav.home")}</span>
-      </button>
-
-      <div className="w-full max-w-4xl mx-auto mt-16 sm:mt-8">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <button
-            onClick={() => router.push("/")}
-            className="inline-block mb-6 hover:opacity-90 transition-all duration-200 hover:scale-105"
-            aria-label="Go to home page"
-          >
-            <Image
-              src="/logo.png"
-              alt="Save The Plate"
-              width={100}
-              height={100}
-              className="object-contain cursor-pointer mx-auto drop-shadow-lg"
-              priority
-            />
-          </button>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
-            {t("business_signup.title")}
-          </h1>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
-            {t("business_signup.subtitle")}
-          </p>
-          <p className="text-sm text-emerald-600 font-medium mt-2">
-            {t("business_signup.quick_signup_subtitle")}
-          </p>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Navigation Header - Match Landing Page */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side - Logo */}
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <Image
+                src="/logo.png"
+                alt="Save The Plate"
+                width={36}
+                height={36}
+                className="object-contain"
+              />
+              <span className="text-lg font-bold text-[#1B4332] hidden sm:block">SaveThePlate</span>
+            </button>
+            
+            {/* Center - Navigation Links (Desktop) */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="/#features" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.fun_header_badge")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="/#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.how_it_works")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="/#business" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.for_business")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </div>
+            
+            {/* Right side - Language Switcher */}
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="button" />
+            </div>
+          </div>
         </div>
+      </nav>
+
+      <div className="w-full bg-gradient-to-br from-white via-emerald-50/30 to-white min-h-screen pt-28 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-4 leading-tight">
+              {t("business_signup.title")}
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-2 leading-relaxed max-w-xl mx-auto">
+              {t("business_signup.subtitle")}
+            </p>
+            <p className="text-xs sm:text-sm text-emerald-600 font-medium">
+              {t("business_signup.quick_signup_subtitle")}
+            </p>
+          </div>
 
         {/* Benefits Section */}
-        {/* <div className="bg-white rounded-2xl shadow-lg border border-border/50 p-6 mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-4">
+        <div className="mb-12">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#1B4332] mb-8 text-center">
             {t("business_signup.benefits_title")}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <Leaf className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">{t("business_signup.benefit1")}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <DollarSign className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">{t("business_signup.benefit2")}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl border border-emerald-100/50 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-emerald-200/80">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <Leaf className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-[#1B4332] text-base mb-2">{t("business_signup.benefit1")}</p>
+                  <p className="text-gray-600 text-xs leading-relaxed">{t("business_signup.benefit1_desc") || ""}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">{t("business_signup.benefit3")}</p>
+            <div className="bg-white rounded-2xl border border-emerald-100/50 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-emerald-200/80">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <DollarSign className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-[#1B4332] text-base mb-2">{t("business_signup.benefit2")}</p>
+                  <p className="text-gray-600 text-xs leading-relaxed">{t("business_signup.benefit2_desc") || ""}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            <div className="bg-white rounded-2xl border border-emerald-100/50 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-emerald-200/80">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <Users className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-[#1B4332] text-base mb-2">{t("business_signup.benefit3")}</p>
+                  <p className="text-gray-600 text-xs leading-relaxed">{t("business_signup.benefit3_desc") || ""}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-foreground">{t("business_signup.benefit4")}</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-emerald-100/50 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-emerald-200/80">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-1">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-[#1B4332] text-base mb-2">{t("business_signup.benefit4")}</p>
+                  <p className="text-gray-600 text-xs leading-relaxed">{t("business_signup.benefit4_desc") || ""}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Form Section */}
         <div className="bg-white rounded-2xl shadow-2xl border border-border/50 p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-foreground mb-6">
+          {/* <h2 className="text-2xl font-bold text-foreground mb-6">
             {t("business_signup.form_title")}
-          </h2>
+          </h2> */}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Business Name */}
@@ -493,6 +520,7 @@ export default function BusinessSignUp() {
           </form>
         </div>
       </div>
+    </div>
     </div>
   );
 }

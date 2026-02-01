@@ -935,53 +935,69 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 overflow-x-hidden flex items-center justify-center py-4 sm:py-8 md:py-12 px-3 sm:px-4">
-      {/* Language Switcher - Fixed Position */}
-      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
-        <LanguageSwitcher variant="button" />
-      </div>
-
-      {/* Back to Home Button - Fixed Position */}
-      <button
-        onClick={() => router.push("/")}
-        className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 flex items-center gap-2 px-3 py-2 sm:px-4 bg-white rounded-lg sm:rounded-xl border border-border shadow-sm hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 text-xs sm:text-sm font-medium"
-        aria-label="Back to home"
-      >
-        <Home size={16} className="sm:w-[18px] sm:h-[18px]" />
-        <span className="hidden sm:inline">{t("nav.home") || "Home"}</span>
-      </button>
-
-      <div className="w-full max-w-[95%] sm:max-w-md md:max-w-lg mx-auto">
-        {/* Sign In Card */}
-        <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl sm:shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
-          {/* Header Section with Logo */}
-          <div className="bg-gradient-to-br from-emerald-50 to-white px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 text-center border-b border-border/50">
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Navigation Header - Match Landing Page */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side - Logo */}
             <button
               onClick={() => router.push("/")}
-              className="inline-block mb-4 sm:mb-5 md:mb-6 hover:opacity-90 transition-all duration-200 hover:scale-105"
-              aria-label="Go to home page"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={70}
-                height={70}
-                className="w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] md:w-[110px] md:h-[110px] object-contain cursor-pointer mx-auto drop-shadow-sm"
-                priority
+                width={36}
+                height={36}
+                className="object-contain"
               />
+              <span className="text-lg font-bold text-[#1B4332] hidden sm:block">SaveThePlate</span>
             </button>
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent px-2">
-              {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
-            </h1>
-            <p className="text-muted-foreground text-xs sm:text-sm md:text-base px-3 sm:px-2 leading-relaxed">
-              {!isNewUser
-                ? t("signin.description_new")
-                : t("signin.description_back")}
-            </p>
+            
+            {/* Center - Navigation Links (Desktop) */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="/#features" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.fun_header_badge")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="/#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.how_it_works")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="/#business" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+                {t("landing.for_business")}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </div>
+            
+            {/* Right side - Language Switcher */}
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="button" />
+            </div>
           </div>
+        </div>
+      </nav>
 
-          {/* Form Section */}
-          <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8">
+      {/* Main Content */}
+      <div className="flex items-center justify-center min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-emerald-50/30 to-white">
+        <div className="w-full max-w-md">
+          {/* Sign In Card */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border border-emerald-100/50 overflow-hidden backdrop-blur-sm">
+            {/* Header Section with Logo */}
+            <div className="bg-gradient-to-br from-white to-emerald-50 px-6 sm:px-8 py-8 sm:py-10 text-center border-b border-emerald-100/50">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-2 sm:mb-3 leading-tight">
+                {!isNewUser ? t("signin.welcome_new") : t("signin.welcome_back")}
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                {!isNewUser
+                  ? t("signin.description_new")
+                  : t("signin.description_back")}
+              </p>
+            </div>
+
+            {/* Form Section */}
+            <div className="px-6 sm:px-8 py-8 sm:py-10">
             {/* Verification Code Input */}
             {showVerificationCode ? (
               <div className="space-y-4 sm:space-y-5 animate-fade-in">
@@ -1105,15 +1121,15 @@ export default function SignIn() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-              <div className="space-y-1 sm:space-y-1.5">
-                <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2.5">
+                <label htmlFor="email" className="block text-sm font-semibold text-[#1B4332]">
                   {t("signin.email_label")}
                 </label>
                 <Input
                   id="email"
                   placeholder={t("signin.email_placeholder")}
-                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3.5 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                  className="w-full px-4 py-3 text-base border-2 border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-200"
                   type="email"
                   required
                   value={email}
@@ -1124,14 +1140,14 @@ export default function SignIn() {
 
               <div className="space-y-4 sm:space-y-5">
                 {isSignUp && (
-                  <div className="space-y-1 sm:space-y-1.5">
-                    <label htmlFor="username" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
+                  <div className="space-y-2.5">
+                    <label htmlFor="username" className="block text-sm font-semibold text-[#1B4332]">
                       {t("signin.username_label")}
                     </label>
                     <Input
                       id="username"
                       placeholder={t("signin.username_placeholder")}
-                      className="w-full px-3 py-2.5 sm:px-4 sm:py-3.5 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                      className="w-full px-4 py-3 text-base border-2 border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-200"
                       type="text"
                       required
                       value={username}
@@ -1140,14 +1156,14 @@ export default function SignIn() {
                     />
                   </div>
                 )}
-                <div className="space-y-1 sm:space-y-1.5">
-                  <label htmlFor="password" className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 sm:mb-2">
+                <div className="space-y-2.5">
+                  <label htmlFor="password" className="block text-sm font-semibold text-[#1B4332]">
                     {t("signin.password_label")}
                   </label>
                   <Input
                     id="password"
                     placeholder={isSignUp ? t("signin.password_placeholder_signup") : t("signin.password_placeholder_signin")}
-                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3.5 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-300"
+                    className="w-full px-4 py-3 text-base border-2 border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-200"
                     type="password"
                     required
                     value={password}
@@ -1156,7 +1172,7 @@ export default function SignIn() {
                     autoComplete={isSignUp ? "new-password" : "current-password"}
                   />
                   {isSignUp && (
-                    <p className="mt-1.5 text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
+                    <p className="mt-1.5 text-xs text-gray-600 flex items-center gap-1.5">
                       <span>🔒</span>
                       {t("signin.password_hint")}
                     </p>
@@ -1167,14 +1183,14 @@ export default function SignIn() {
               {loading ? (
                 <Button
                   disabled
-                  className="w-full bg-emerald-600 text-white font-semibold py-3 sm:py-3.5 rounded-lg sm:rounded-xl flex justify-center items-center text-sm sm:text-base shadow-lg mt-5 sm:mt-6"
+                  className="w-full bg-emerald-600 text-white font-semibold py-3.5 rounded-lg flex justify-center items-center text-base shadow-lg mt-8"
                 >
-                  <ReloadIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
                   {isSignUp ? t("signin.signing_up") : t("signin.signing_in")}
                 </Button>
               ) : (
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 sm:py-3.5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base mt-5 sm:mt-6 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-base mt-8 transform hover:scale-[1.01] active:scale-[0.99]"
                   type="submit"
                   id="sign-in-button"
                 >
@@ -1183,171 +1199,31 @@ export default function SignIn() {
               )}
             </form>
 
-            {/* Alternative Authentication Options */}
-            <div>
-              {/* Separator */}
-              <div className="relative my-5 sm:my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border/50"></div>
+              {/* Toast Messages */}
+              <div className="mt-6 space-y-3">
+                {showAuthToast && <AuthToast />}
+                {showErrorToast && <ErrorToast message={errorMessage} />}
+              </div>
+
+              {/* reCAPTCHA Badge Notice */}
+              {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+                <div className="mt-4 text-center text-xs text-gray-500">
+                  <p>
+                    This site is protected by reCAPTCHA and the Google{' '}
+                    <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
+                      Privacy Policy
+                    </a>
+                    {' '}and{' '}
+                    <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
+                      Terms of Service
+                    </a>
+                    {' '}apply.
+                  </p>
                 </div>
-                <div className="relative flex justify-center text-xs sm:text-sm">
-                  <span className="px-3 sm:px-4 bg-white text-muted-foreground font-medium">
-                    {t("common.or") || "or"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {/* Magic Link - Passwordless Option - COMMENTED OUT */}
-                {/* <Button
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (!email || !email.includes('@')) {
-                      setShowErrorToast(true);
-                      setErrorMessage("Please enter a valid email address.");
-                      setShowAuthToast(false);
-                      return;
-                    }
-                    setAuthMode("magic-link");
-                    setMagicLinkLoading(true);
-                    setShowErrorToast(false);
-                    setShowAuthToast(false);
-                    try {
-                      const resp = await clientApi.POST("/auth/send-magic-mail", {
-                        body: { email },
-                      });
-                      
-                      // Check if response is successful
-                      // OpenApiFetch returns { data, response, error }
-                      // If there's no error, the request was successful
-                      if (resp.response && (resp.response.status === 200 || resp.response.status === 201)) {
-                        setShowAuthToast(true);
-                        setShowErrorToast(false);
-                        setMagicLinkLoading(false);
-                        return;
-                      }
-                      
-                      // If response exists but status is not 200/201, treat as error
-                      throw new Error("Unexpected response status");
-                    } catch (err: any) {
-                      console.error("Magic link error:", err);
-                      
-                      // Check if it's actually a successful response that was thrown
-                      // Sometimes OpenApiFetch might throw even on success
-                      if (err?.response?.status === 200 || err?.response?.status === 201) {
-                        setShowAuthToast(true);
-                        setShowErrorToast(false);
-                        setMagicLinkLoading(false);
-                        return;
-                      }
-                      
-                      // Use sanitizeErrorMessage for user-friendly messages
-                      const userMessage = sanitizeErrorMessage(err, {
-                        action: "send magic link",
-                        defaultMessage: "Unable to send magic link. Please check your email and try again.",
-                        t: t
-                      });
-                      
-                      setErrorMessage(userMessage);
-                      setShowErrorToast(true);
-                      setShowAuthToast(false);
-                    } finally {
-                      setMagicLinkLoading(false);
-                    }
-                  }}
-                  disabled={magicLinkLoading || loading || !email || !email.includes('@')}
-                  className="w-full bg-white border-2 border-emerald-200 hover:border-emerald-300 text-emerald-600 hover:text-emerald-700 font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {magicLinkLoading ? (
-                    <>
-                      <ReloadIcon className="h-5 w-5 animate-spin" />
-                      <span>{t("signin.sending") || "Sending..."}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xl">✨</span>
-                      <span>{t("signin.sign_in_email") || "Continue with Magic Link"}</span>
-                    </>
-                  )}
-                </Button> */}
-
-                {/* Google Sign In - Temporarily commented out until logic is fixed */}
-                {/* {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
-                  <div className="w-full flex justify-center">
-                    {googleLoading ? (
-                      <Button
-                        disabled
-                        className="w-full bg-white border-2 border-border text-foreground font-semibold py-3 rounded-xl flex justify-center items-center hover:bg-emerald-50"
-                      >
-                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                        {t("signin.google_signing_in") || "Signing in..."}
-                      </Button>
-                    ) : (
-                      <div className="w-full flex justify-center">
-                        <GoogleLogin
-                          onSuccess={handleGoogleSuccess}
-                          onError={handleGoogleError}
-                          useOneTap={false}
-                          theme="outline"
-                          size="large"
-                          text="signin_with"
-                          shape="rectangular"
-                          locale={language}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )} */}
-
-                {/* Facebook Sign In */}
-                {process.env.NEXT_PUBLIC_FACEBOOK_APP_ID && (
-                  <Button
-                    onClick={handleFacebookLogin}
-                    disabled={facebookLoading}
-                    className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base transform hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    {facebookLoading ? (
-                      <>
-                        <ReloadIcon className="h-5 w-5 animate-spin" />
-                        <span>{t("signin.facebook_signing_in") || "Signing in with Facebook..."}</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                        <span>{t("signin.facebook_sign_in") || "Continue with Facebook"}</span>
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Toast Messages */}
-            <div className="mt-6 space-y-3">
-              {showAuthToast && <AuthToast />}
-              {showErrorToast && <ErrorToast message={errorMessage} />}
-            </div>
-
-            {/* reCAPTCHA Badge Notice */}
-            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-              <div className="mt-4 text-center text-xs text-gray-500">
-                <p>
-                  This site is protected by reCAPTCHA and the Google{' '}
-                  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
-                    Privacy Policy
-                  </a>
-                  {' '}and{' '}
-                  <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
-                    Terms of Service
-                  </a>
-                  {' '}apply.
-                </p>
-              </div>
+              )}
+            </>
             )}
-              </>
-            )}
+            </div>
           </div>
         </div>
       </div>

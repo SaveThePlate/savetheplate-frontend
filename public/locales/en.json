@@ -193,6 +193,8 @@
     "distance_filter": "Maximum Distance",
     "all_distances": "All",
     "getLocation": "Get Location",
+    "searchPlaceholder": "Search for food, stores...",
+    "getLocation": "Get Location",
     "searchPlaceholder": "Search for food, stores..."
   },
   "provider": {
@@ -1316,6 +1318,7 @@
     "detailed": "Detailed Edit",
     "price": "Price",
     "quantity": "Quantity",
+    "title": "Title",
     "description": "Description",
     "food_type": "Food Type",
     "taste": "Taste",
