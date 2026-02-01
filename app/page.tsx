@@ -663,6 +663,74 @@ const WelcomePage = () => {
         </div>
       </section>
 
+      {/* Partners & Supporters Section */}
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <AnimatedSection>
+            <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1B4332] mb-2 sm:mb-3">
+                {t("landing.partners_title") || "Nos Partenaires & Supporters"}
+              </h2>
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600 max-w-2xl mx-auto">
+                {t("landing.partners_desc") || "Soutenus par les meilleures organisations pour sauver la planète"}
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <AnimatedSection delay={100}>
+            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-12 items-center justify-center">
+              {/* Startup Act Logo */}
+              <div className="flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gray-50 rounded-2xl hover:shadow-lg transition-shadow duration-300 hover:bg-gray-100">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 flex items-center justify-center">
+                  <Image
+                    src="/startup act logo.avif"
+                    alt="Startup Act Logo"
+                    width={128}
+                    height={128}
+                    className="object-contain"
+                  />
+                </div>
+                <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 font-medium text-center">
+                  {t("landing.startup_act") || "Startup Act"}
+                </p>
+              </div>
+
+              {/* OSTX Logo */}
+              <div className="flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gray-50 rounded-2xl hover:shadow-lg transition-shadow duration-300 hover:bg-gray-100">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 flex items-center justify-center">
+                  <Image
+                    src="/logo ostx.avif"
+                    alt="OSTX Logo"
+                    width={128}
+                    height={128}
+                    className="object-contain"
+                  />
+                </div>
+                <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 font-medium text-center">
+                  {t("landing.ostx") || "OSTX"}
+                </p>
+              </div>
+
+              {/* The Dot Logo */}
+              <div className="flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gray-50 rounded-2xl hover:shadow-lg transition-shadow duration-300 hover:bg-gray-100">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 flex items-center justify-center">
+                  <Image
+                    src="/logo_the_dot.svg"
+                    alt="The Dot Logo"
+                    width={128}
+                    height={128}
+                    className="object-contain"
+                  />
+                </div>
+                <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 font-medium text-center">
+                  {t("landing.the_dot") || "The Dot"}
+                </p>
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30">
         <div className="max-w-4xl mx-auto text-center">
