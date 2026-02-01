@@ -38,13 +38,15 @@ export default function FacebookSDK() {
 
     // Check login state - Called when a person is finished with the Login Button
     window.checkLoginState = function () {
-      if (window.FB) {
+      if (window.FB && typeof window !== 'undefined' && window.location.protocol === 'https:') {
         window.FB.getLoginStatus(function (response: any) {
           // See the onlogin handler
           if (window.statusChangeCallback) {
             window.statusChangeCallback(response);
           }
         });
+      } else if (typeof window !== 'undefined' && window.location.protocol !== 'https:') {
+        console.warn('Facebook login requires HTTPS. Current protocol:', window.location.protocol);
       }
     };
 
@@ -74,11 +76,17 @@ export default function FacebookSDK() {
 
           // Called after the JS SDK has been initialized.
           // Returns the login status.
-          window.FB.getLoginStatus(function (response: any) {
-            if (window.statusChangeCallback) {
-              window.statusChangeCallback(response);
-            }
-          }, true); // Force a roundtrip to Facebook to get fresh status
+          // Note: FB.getLoginStatus only works on HTTPS (Facebook requirement as of 2018)
+          if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+            window.FB.getLoginStatus(function (response: any) {
+              if (window.statusChangeCallback) {
+                window.statusChangeCallback(response);
+              }
+            }, true); // Force a roundtrip to Facebook to get fresh status
+          } else {
+            console.warn('Facebook login requires HTTPS. Skipping getLoginStatus. Current protocol:', 
+              typeof window !== 'undefined' ? window.location.protocol : 'unknown');
+          }
         } catch (error: any) {
           console.error('Facebook SDK initialization error:', error);
           // Store error for sign-in page to display
