@@ -177,7 +177,7 @@ const WelcomePage = () => {
       </nav>
 
       {/* Hero Section with Background Image */}
-      <section className="relative pt-0 pb-0 overflow-hidden h-screen flex items-center">
+      <section className="relative pt-0 pb-0 overflow-hidden min-h-screen flex items-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -191,143 +191,107 @@ const WelcomePage = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-[#1B4332]/95 via-[#1B4332]/85 to-[#2D5A47]/90" />
           {/* Animated gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" />
-          {/* Decorative elements */}
-          {/* <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-teal-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} /> */}
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 sm:py-0">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
             {/* Left Content */}
-            <div className="text-white space-y-4 sm:space-y-6 lg:space-y-8">
-              <AnimatedSection delay={0}>
-                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-white/20 shadow-lg">
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-300 text-yellow-300" />
+            <div className="text-white space-y-3 sm:space-y-4 lg:space-y-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs font-medium mb-3 sm:mb-4 border border-white/20">
+                  <Star className="w-3 h-3 fill-yellow-300 text-yellow-300" />
                   <span>{t("landing.badge_text")}</span>
                 </div>
-              </AnimatedSection>
+              </div>
               
-              <AnimatedSection delay={100}>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight">
                   {t("landing.welcome_title")}
-                  <span className="block text-emerald-300 mt-2 sm:mt-3 bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 bg-clip-text text-transparent drop-shadow-lg">
+                  <span className="block text-emerald-300 mt-1.5 sm:mt-2 bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 bg-clip-text text-transparent">
                     {t("landing.welcome_subtitle")}
                   </span>
                 </h1>
-              </AnimatedSection>
+              </div>
               
-              <AnimatedSection delay={200}>
+              <div>
                 <p className="text-sm sm:text-base lg:text-lg text-white/90 leading-relaxed max-w-xl">
                   {t("landing.welcome_description")}
                 </p>
-              </AnimatedSection>
+              </div>
               
-              <AnimatedSection delay={300}>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
+              <div>
+                <div className="flex gap-2.5 pt-2">
                   <Button
                     onClick={handleGetStarted}
-                    size="lg"
-                    className="w-full sm:w-auto bg-white text-[#1B4332] hover:bg-gray-100 font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 py-5 sm:py-6 px-5 sm:px-7 rounded-xl"
+                    className="flex-1 sm:flex-none bg-white text-[#1B4332] hover:bg-gray-100 font-bold shadow-lg transition-all duration-200 py-3 px-6 rounded-lg text-sm"
                   >
                     {t("landing.get_started")}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-3.5 h-3.5 ml-2" />
                   </Button>
                   <Button
                     onClick={() => router.push("/business-signup")}
                     variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto bg-white/10 text-white border-2 border-white/30 hover:bg-white/20 hover:border-white/50 font-bold shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:-translate-y-1 py-5 sm:py-6 px-5 sm:px-7 rounded-xl"
+                    className="flex-1 sm:flex-none bg-white/10 text-white border-2 border-white/30 hover:bg-white/20 hover:border-white/50 font-bold backdrop-blur-sm transition-all duration-200 py-3 px-6 rounded-lg text-sm"
                   >
-                    <Store className="w-5 h-5 mr-2" />
+                    <Store className="w-3.5 h-3.5 mr-2" />
                     {t("landing.register_business")}
                   </Button>
                 </div>
-              </AnimatedSection>
+              </div>
 
-              {/* Mobile Floating Stats Cards - Visible only on mobile */}
-              <div className="flex lg:hidden gap-3 pt-4">
-                <AnimatedSection delay={400} className="flex-1">
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/20 shadow-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
-                        <Leaf className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm font-bold text-white">-70% CO₂</p>
-                        <p className="text-[10px] sm:text-xs text-white/70">par repas sauvé</p>
-                      </div>
+            </div>
+
+            {/* Right Image - App Preview - Mobile & Desktop */}
+            <div className="relative mt-8 lg:mt-0 flex justify-center">
+              <div className="relative w-[280px] sm:w-[320px] md:w-[380px] lg:w-full max-w-md lg:max-w-lg xl:max-w-2xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-[3rem] blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
+                <Image
+                  src="/phone1.png"
+                  alt="App preview"
+                  width={600}
+                  height={1200}
+                  sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 380px, 600px"
+                  className="relative z-10 object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.4)] hover:scale-105 transition-transform duration-700"
+                  priority
+                />
+                
+                {/* Floating Cards - Overlay on image */}
+                <AnimatedSection delay={500} className="absolute top-1/4 -left-12 sm:-left-16 md:-left-20 z-20">
+                  <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 animate-float border border-emerald-100 w-max">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                      <Leaf className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-bold text-[#1B4332]">-70% CO₂</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500">par repas sauvé</p>
                     </div>
                   </div>
                 </AnimatedSection>
                 
-                <AnimatedSection delay={500} className="flex-1">
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/20 shadow-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
-                        <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm font-bold text-white">-50% Prix</p>
-                        <p className="text-[10px] sm:text-xs text-white/70">sur les invendus</p>
-                      </div>
+                <AnimatedSection delay={600} className="absolute top-1/2 -right-12 sm:-right-16 md:-right-20 z-20">
+                  <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 animate-float border border-amber-100 w-max" style={{ animationDelay: '0.5s' }}>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                      <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-bold text-[#1B4332]">-50% Prix</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500">sur les invendus</p>
                     </div>
                   </div>
                 </AnimatedSection>
               </div>
-            </div>
-
-            {/* Right Image - App Preview - Desktop Only */}
-            <div className="relative hidden lg:block">
-              <AnimatedSection delay={400}>
-                <div className="relative w-full max-w-lg xl:max-w-xl mx-auto aspect-[9/19]">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 rounded-full blur-3xl animate-pulse" />
-                  <Image
-                    src="/phone1.png"
-                    alt="App preview"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain drop-shadow-[0_50px_100px_rgba(0,0,0,0.4)] hover:scale-105 transition-transform duration-700"
-                    priority
-                  />
-                </div>
-              </AnimatedSection>
-              
-              {/* Floating Cards - Desktop */}
-              <AnimatedSection delay={500}>
-                <div className="absolute -bottom-8 -left-12 xl:-left-16 bg-white rounded-2xl shadow-2xl p-5 flex items-center gap-4 animate-float hover:scale-110 transition-transform cursor-pointer border border-emerald-100">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center">
-                    <Leaf className="w-7 h-7 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1B4332]">-70% CO₂</p>
-                    <p className="text-sm text-gray-500">par repas sauvé</p>
-                  </div>
-                </div>
-              </AnimatedSection>
-              
-              <AnimatedSection delay={600}>
-                <div className="absolute -top-8 -right-12 xl:-right-16 bg-white rounded-2xl shadow-2xl p-5 flex items-center gap-4 animate-float hover:scale-110 transition-transform cursor-pointer border border-amber-100" style={{ animationDelay: '0.5s' }}>
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center">
-                    <ShoppingBag className="w-7 h-7 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1B4332]">-50% Prix</p>
-                    <p className="text-sm text-gray-500">sur les invendus</p>
-                  </div>
-                </div>
-              </AnimatedSection>
             </div>
           </div>
         </div>
       </section>
 
       {/* App Preview Section */}
-      <section id="features" className="relative py-20 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-white">
+      <section id="features" className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-white">
         <div className="max-w-[1600px] mx-auto">
           {/* Large Desktop Image Container */}
-          <div className="relative now aw-full h-[600px] md:h-[700px] lg:h-[800px]">
+          <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px]">
             {/* Background Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl" />
             
             {/* Desktop Image - Much Bigger */}
             <div className="relative w-full h-full flex items-center justify-center">
@@ -344,12 +308,12 @@ const WelcomePage = () => {
             </div>
 
             {/* Floating Content Overlay - Top Right */}
-            <AnimatedSection className="absolute top-8 right-4 md:top-12 md:right-12 lg:top-20 lg:right-24 max-w-md z-10">
-              <div className="backdrop-blur-xl bg-white/90 rounded-3xl p-6 shadow-2xl border border-white/50">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1B4332] leading-tight mb-3">
+            <AnimatedSection className="absolute top-4 right-2 sm:top-6 sm:right-4 md:top-12 md:right-12 lg:top-20 lg:right-24 max-w-[180px] sm:max-w-xs md:max-w-md z-10">
+              <div className="backdrop-blur-xl bg-white/90 rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 md:p-6 shadow-xl border border-white/50">
+                <h2 className="text-xs sm:text-sm md:text-lg lg:text-2xl xl:text-3xl font-bold text-[#1B4332] leading-tight mb-1.5 sm:mb-2 md:mb-3">
                   Une application simple et <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">intuitive</span>
                 </h2>
-                <p className="text-sm lg:text-base text-gray-600">
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-600 leading-snug">
                   Découvre les meilleures offres près de chez toi en quelques clics. 
                   Parcourt, réserve et récupère tes repas en toute simplicité.
                 </p>
@@ -357,43 +321,43 @@ const WelcomePage = () => {
             </AnimatedSection>
 
             {/* Floating Feature Cards - Bottom Left */}
-            <div className="absolute bottom-8 left-4 md:bottom-12 md:left-12 lg:bottom-20 lg:left-24 space-y-4 z-10 max-w-sm">
+            <div className="absolute bottom-4 left-2 sm:bottom-6 sm:left-4 md:bottom-12 md:left-12 lg:bottom-20 lg:left-24 space-y-2 sm:space-y-3 md:space-y-4 z-10 max-w-[180px] sm:max-w-xs md:max-w-sm">
               <AnimatedSection delay={200}>
-                <div className="flex items-center gap-3 p-4 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 border border-white/50">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-primary" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 md:p-4 backdrop-blur-xl bg-white/90 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-white/50">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <div>
-                    <p className="font-bold text-[#1B4332] text-base">Géolocalisation</p>
-                    <p className="text-sm text-gray-600">
-                      Trouve les offres près de chez toi
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#1B4332] text-[10px] sm:text-xs md:text-sm lg:text-base truncate">Géolocalisation</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-gray-600 truncate">
+                      Près de chez toi
                     </p>
                   </div>
                 </div>
               </AnimatedSection>
 
               <AnimatedSection delay={300}>
-                <div className="flex items-center gap-3 p-4 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 border border-white/50">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
-                    <ShoppingBag className="w-6 h-6 text-amber-600" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 md:p-4 backdrop-blur-xl bg-white/90 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-white/50">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                    <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-amber-600" />
                   </div>
-                  <div>
-                    <p className="font-bold text-[#1B4332] text-base">Réservation facile</p>
-                    <p className="text-sm text-gray-600">
-                      Commande en 2 clics
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#1B4332] text-[10px] sm:text-xs md:text-sm lg:text-base truncate">Réservation</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-gray-600 truncate">
+                      En 2 clics
                     </p>
                   </div>
                 </div>
               </AnimatedSection>
 
               <AnimatedSection delay={400}>
-                <div className="flex items-center gap-3 p-4 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 border border-white/50">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center flex-shrink-0">
-                    <Leaf className="w-6 h-6 text-green-600" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 md:p-4 backdrop-blur-xl bg-white/90 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-white/50">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center flex-shrink-0">
+                    <Leaf className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-600" />
                   </div>
-                  <div>
-                    <p className="font-bold text-[#1B4332] text-base">Impact environnemental</p>
-                    <p className="text-sm text-gray-600">
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#1B4332] text-[10px] sm:text-xs md:text-sm lg:text-base truncate">Impact</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-gray-600 truncate">
                       Suis tes économies
                     </p>
                   </div>
@@ -405,57 +369,57 @@ const WelcomePage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="relative py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30 overflow-hidden">
+      <section id="how-it-works" className="relative py-12 sm:py-16 lg:py-24 xl:py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-emerald-50/30 overflow-hidden">
         {/* Decorative background elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-200/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+        <div className="absolute top-0 left-0 w-64 h-64 md:w-96 md:h-96 bg-emerald-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-teal-200/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
         
         <div className="max-w-7xl mx-auto relative z-10">
           <AnimatedSection>
-            <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-              <div className="inline-block px-4 py-2 bg-emerald-100 rounded-full mb-4">
-                <p className="text-emerald-700 font-semibold text-sm">{t("landing.how_it_works")}</p>
+            <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+              <div className="inline-block px-3 py-1.5 bg-emerald-100 rounded-full mb-3">
+                <p className="text-emerald-700 font-semibold text-xs sm:text-sm">{t("landing.how_it_works")}</p>
               </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-4 leading-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3 leading-tight px-4">
                 {t("landing.how_subtitle")}
               </h2>
-              <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto rounded-full" />
+              <div className="w-16 sm:w-20 md:w-24 h-1 sm:h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 mx-auto rounded-full" />
             </div>
           </AnimatedSection>
 
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 relative">
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 relative">
             {/* Connecting line for desktop */}
             <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-200 via-amber-200 to-green-200" style={{ width: 'calc(100% - 12rem)', left: '6rem' }} />
             
             {/* Step 1 */}
             <AnimatedSection delay={100}>
               <div className="relative group">
-                <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-500 h-full border border-emerald-100/50 hover:border-emerald-300 hover:-translate-y-3 overflow-hidden">
+                <div className="relative bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-full border border-emerald-100/50 hover:border-emerald-300 hover:-translate-y-2 overflow-hidden">
                   {/* Gradient background on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   {/* Number badge */}
-                  <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl z-20 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute -top-3 -left-3 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-lg sm:text-xl md:text-2xl shadow-lg z-20 ring-2 sm:ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
                     1
                   </div>
                   
                   {/* Image container */}
-                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6 mt-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-teal-400/30 rounded-full blur-2xl animate-pulse" />
-                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 p-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mx-auto mb-4 sm:mb-6 mt-2 sm:mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-teal-400/30 rounded-full blur-xl" />
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 p-3 sm:p-4 group-hover:scale-110 transition-transform duration-500">
                       <Image
                         src="/step1.png"
                         alt="Browse offers"
                         fill
                         sizes="160px"
-                        className="object-contain p-3"
+                        className="object-contain p-2 sm:p-3"
                       />
                     </div>
                   </div>
                   
                   <div className="relative z-10">
-                    <h3 className="text-lg sm:text-xl font-bold text-[#1B4332] mb-2 text-center">{t("landing.step1_title")}</h3>
-                    <p className="text-gray-600 text-center leading-relaxed text-sm">{t("landing.step1_desc")}</p>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#1B4332] mb-1.5 sm:mb-2 text-center">{t("landing.step1_title")}</h3>
+                    <p className="text-gray-600 text-center leading-relaxed text-xs sm:text-sm">{t("landing.step1_desc")}</p>
                   </div>
                 </div>
               </div>
@@ -464,19 +428,19 @@ const WelcomePage = () => {
             {/* Step 2 */}
             <AnimatedSection delay={200}>
               <div className="relative group">
-                <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-500 h-full border border-amber-100/50 hover:border-amber-300 hover:-translate-y-3 overflow-hidden">
+                <div className="relative bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-full border border-amber-100/50 hover:border-amber-300 hover:-translate-y-2 overflow-hidden">
                   {/* Gradient background on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   {/* Number badge */}
-                  <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl z-20 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute -top-3 -left-3 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-lg sm:text-xl md:text-2xl shadow-lg z-20 ring-2 sm:ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
                     2
                   </div>
                   
                   {/* Image container */}
-                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6 mt-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-orange-400/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-amber-100 to-orange-100 p-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mx-auto mb-4 sm:mb-6 mt-2 sm:mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-orange-400/30 rounded-full blur-xl" />
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-amber-100 to-orange-100 p-3 sm:p-4 group-hover:scale-110 transition-transform duration-500">
                       <Image
                         src="/step2.avif"
                         alt="Place order"
@@ -488,8 +452,8 @@ const WelcomePage = () => {
                   </div>
                   
                   <div className="relative z-10">
-                    <h3 className="text-lg sm:text-xl font-bold text-[#1B4332] mb-2 text-center">{t("landing.step2_title")}</h3>
-                    <p className="text-gray-600 text-center leading-relaxed text-sm">{t("landing.step2_desc")}</p>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#1B4332] mb-1.5 sm:mb-2 text-center">{t("landing.step2_title")}</h3>
+                    <p className="text-gray-600 text-center leading-relaxed text-xs sm:text-sm">{t("landing.step2_desc")}</p>
                   </div>
                 </div>
               </div>
@@ -498,19 +462,19 @@ const WelcomePage = () => {
             {/* Step 3 */}
             <AnimatedSection delay={300}>
               <div className="relative group">
-                <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-500 h-full border border-green-100/50 hover:border-green-300 hover:-translate-y-3 overflow-hidden">
+                <div className="relative bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-full border border-green-100/50 hover:border-green-300 hover:-translate-y-2 overflow-hidden">
                   {/* Gradient background on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   {/* Number badge */}
-                  <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center font-bold text-2xl shadow-xl z-20 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute -top-3 -left-3 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center font-bold text-lg sm:text-xl md:text-2xl shadow-lg z-20 ring-2 sm:ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
                     3
                   </div>
                   
                   {/* Image container */}
-                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6 mt-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/30 to-emerald-400/30 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
-                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-green-100 to-emerald-100 p-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mx-auto mb-4 sm:mb-6 mt-2 sm:mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/30 to-emerald-400/30 rounded-full blur-xl" />
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-green-100 to-emerald-100 p-3 sm:p-4 group-hover:scale-110 transition-transform duration-500">
                       <Image
                         src="/step3.avif"
                         alt="Pick up"
@@ -522,8 +486,8 @@ const WelcomePage = () => {
                   </div>
                   
                   <div className="relative z-10">
-                    <h3 className="text-lg sm:text-xl font-bold text-[#1B4332] mb-2 text-center">{t("landing.step3_title")}</h3>
-                    <p className="text-gray-600 text-center leading-relaxed text-sm">{t("landing.step3_desc")}</p>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#1B4332] mb-1.5 sm:mb-2 text-center">{t("landing.step3_title")}</h3>
+                    <p className="text-gray-600 text-center leading-relaxed text-xs sm:text-sm">{t("landing.step3_desc")}</p>
                   </div>
                 </div>
               </div>
@@ -676,7 +640,7 @@ const WelcomePage = () => {
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/30 to-indigo-500/30 flex items-center justify-center mx-auto mb-4">
                         <Users className="w-8 h-8 text-blue-400" />
                       </div>
-                      <p className="text-3xl font-bold text-white">500+</p>
+                      <p className="text-3xl font-bold text-white">50+</p>
                       <p className="text-white/60 text-sm">Nouveaux clients/mois</p>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
