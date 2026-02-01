@@ -115,8 +115,8 @@ export default function RootLayout({
             <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
               <UserProvider>
                 <LanguageProvider>
-                {/* Performance Monitoring */}
-                <PerformanceMonitor />
+                  {/* Performance Monitoring */}
+                  <PerformanceMonitor />
                 
                 {/* Google Analytics - gtag.js */}
                 <Script
