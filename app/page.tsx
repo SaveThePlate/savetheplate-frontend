@@ -193,7 +193,7 @@ const WelcomePage = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" />
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 sm:py-0 overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 sm:py-0">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
             {/* Left Content */}
             <div className="text-white space-y-3 sm:space-y-4 lg:space-y-6">
@@ -256,7 +256,7 @@ const WelcomePage = () => {
                 />
                 
                 {/* Floating Cards - Overlay on image */}
-                <AnimatedSection delay={500} className="absolute top-1/4 -left-6 sm:-left-14 md:-left-20 z-20">
+                <AnimatedSection delay={500} className="absolute top-1/4 -left-6 sm:-left-12 md:-left-8 lg:-left-12 z-20">
                   <div className="bg-white rounded-lg sm:rounded-2xl shadow-lg sm:shadow-xl p-2 sm:p-4 flex items-center gap-1.5 sm:gap-3 animate-float border border-emerald-100 w-max">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
                       <Leaf className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
@@ -268,7 +268,7 @@ const WelcomePage = () => {
                   </div>
                 </AnimatedSection>
                 
-                <AnimatedSection delay={600} className="absolute top-1/2 -right-6 sm:-right-14 md:-right-20 z-20">
+                <AnimatedSection delay={600} className="absolute top-1/2 -right-6 sm:-right-12 md:-right-8 lg:-right-12 z-20">
                   <div className="bg-white rounded-lg sm:rounded-2xl shadow-lg sm:shadow-xl p-2 sm:p-4 flex items-center gap-1.5 sm:gap-3 animate-float border border-amber-100 w-max" style={{ animationDelay: '0.5s' }}>
                     <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
                       <ShoppingBag className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600" />
