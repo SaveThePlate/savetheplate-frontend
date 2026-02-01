@@ -671,9 +671,9 @@ const WelcomePage = () => {
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1B4332] mb-2 sm:mb-3">
                 {t("landing.partners_title") || "Nos Partenaires & Supporters"}
               </h2>
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600 max-w-2xl mx-auto">
+              {/* <p className="text-xs sm:text-sm lg:text-base text-gray-600 max-w-2xl mx-auto">
                 {t("landing.partners_desc") || "Soutenus par les meilleures organisations pour sauver la planète"}
-              </p>
+              </p> */}
             </div>
           </AnimatedSection>
 
