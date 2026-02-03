@@ -581,40 +581,7 @@ const Home = () => {
     [selectedCategory, offers, applyDistanceFilter]
   );
 
-  // Show skeleton only on initial load, otherwise show cached data while loading (stale-while-revalidate)
-  if (loading && isInitialLoad) {
-    return (
-      <div className="min-h-screen pb-24">
-        <div className="p-4 space-y-6 animate-pulse">
-          <div className="h-8 bg-muted rounded-lg w-1/3"></div>
-          <div className="h-40 bg-muted rounded-2xl w-full"></div>
-          <div className="space-y-4">
-            <div className="h-6 bg-muted rounded w-1/4"></div>
-            <div className="flex gap-4 overflow-hidden">
-              <div className="h-64 bg-muted rounded-2xl w-64 flex-shrink-0"></div>
-              <div className="h-64 bg-muted rounded-2xl w-64 flex-shrink-0"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  // If loading (but not initial load), show cached data with visual refresh indicator
-  if (loading && !isInitialLoad && offers.length > 0) {
-    // Show cached offers with slight opacity to indicate refresh in progress
-    return (
-      <div className="min-h-screen pb-24 opacity-90">
-        <div className="fixed top-2 right-4 text-sm text-gray-500 animate-pulse">
-          <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
-          {t.refreshing || "Refreshing..."}
-        </div>
-        {renderHomeContent()}
-      </div>
-    );
-  }
-
-  // Show skeleton only on initial load, otherwise show cached data while loading (stale-while-revalidate)
+  // Render function for home content (declared here to be accessible in all render paths)
   const renderHomeContent = () => {
     return (
       <>
@@ -1017,7 +984,7 @@ const Home = () => {
       <div className="min-h-screen pb-24 opacity-90">
         <div className="fixed top-2 right-4 text-sm text-gray-500 animate-pulse z-50">
           <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
-          {t.refreshing || "Refreshing..."}
+          {t("common.loading") || "Refreshing..."}
         </div>
         <div className="min-h-screen pb-24">
           {renderHomeContent()}
