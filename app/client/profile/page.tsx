@@ -137,7 +137,7 @@ const ProfilePage = () => {
               width={64}
               height={64}
               className="w-full h-full object-cover"
-                unoptimized={shouldUnoptimizeImage(profileImage)}
+                unoptimized={shouldUnoptimizeImage(contextUser.profileImage)}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = DEFAULT_PROFILE_IMAGE;
@@ -149,7 +149,7 @@ const ProfilePage = () => {
                 </div>
         <div className="flex-1">
           <h2 className="font-bold text-lg sm:text-xl">{displayName}</h2>
-          <p className="text-muted-foreground text-xs sm:text-sm">{user.email}</p>
+          <p className="text-muted-foreground text-xs sm:text-sm">{contextUser.email}</p>
         </div>
       </div>
 
@@ -175,7 +175,7 @@ const ProfilePage = () => {
             </div>
 
       {/* Pending Provider Status */}
-      {user.role === "PENDING_PROVIDER" && (
+      {contextUser.role === "PENDING_PROVIDER" && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
             <Clock className="w-5 h-5 text-yellow-700" />
@@ -208,7 +208,7 @@ const ProfilePage = () => {
           <MenuItem icon={HelpCircle} label={t("profile.helpSupport") || "Help & Support"} />
         </Link>
         
-        {user.role === "PROVIDER" && (
+        {contextUser.role === "PROVIDER" && (
           <Link href="/provider/home" className="block">
             <MenuItem icon={Store} label={t("profile.providerDashboard") || "Provider Dashboard"} />
           </Link>

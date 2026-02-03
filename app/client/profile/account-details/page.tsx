@@ -64,8 +64,6 @@ export default function AccountDetails() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setUsername(formData.username);
-      setPhoneNumber(formData.phoneNumber);
       setIsEditing(false);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
@@ -89,7 +87,7 @@ export default function AccountDetails() {
 
       await axiosInstance.post(
         `/auth/send-verification-email`,
-        { email },
+        { email: user?.email },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -123,7 +121,7 @@ export default function AccountDetails() {
       const response = await axiosInstance.post(
         `/auth/verify-email-code`,
         {
-          email: email.trim(),
+          email: user?.email?.trim() || "",
           code: verificationCode.trim(),
         },
         {
@@ -186,14 +184,14 @@ export default function AccountDetails() {
       <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden">
-            {profileImage && profileImage !== DEFAULT_PROFILE_IMAGE ? (
+            {user?.profileImage && user.profileImage !== DEFAULT_PROFILE_IMAGE ? (
               <Image
-                src={sanitizeImageUrl(profileImage)}
+                src={sanitizeImageUrl(user.profileImage)}
                 alt={displayName}
                 width={64}
                 height={64}
                 className="w-full h-full object-cover"
-                unoptimized={shouldUnoptimizeImage(profileImage)}
+                unoptimized={shouldUnoptimizeImage(user.profileImage)}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = DEFAULT_PROFILE_IMAGE;
@@ -205,7 +203,7 @@ export default function AccountDetails() {
           </div>
           <div className="flex-1">
             <h2 className="font-bold text-xl">{displayName}</h2>
-            <p className="text-muted-foreground text-sm">{email}</p>
+            <p className="text-muted-foreground text-sm">{user?.email}</p>
           </div>
         </div>
 
@@ -256,7 +254,7 @@ export default function AccountDetails() {
               <button
                 onClick={() => {
                   setIsEditing(false);
-                  setFormData({ username, phoneNumber });
+                  setFormData({ username: user?.username || "", phoneNumber: user?.phoneNumber ?? null });
                 }}
                 className="flex-1 py-3 rounded-xl bg-secondary text-foreground font-medium hover:bg-secondary/80 transition-colors"
               >
@@ -336,7 +334,7 @@ export default function AccountDetails() {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Verify Your Email</DialogTitle>
             <DialogDescription>
-              Enter the 6-digit verification code sent to <strong>{email}</strong>
+              Enter the 6-digit verification code sent to <strong>{user?.email}</strong>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
