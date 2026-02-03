@@ -76,6 +76,14 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   };
 
+  handleClearTokensAndReconnect = () => {
+    // Clear all authentication tokens
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    // Force hard refresh to clear any cached state
+    window.location.href = "/signIn";
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -101,6 +109,13 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="w-full"
               >
                 Go to Home
+              </Button>
+              <Button
+                onClick={this.handleClearTokensAndReconnect}
+                variant="default"
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                Clear Tokens & Reconnect
               </Button>
             </div>
             {process.env.NODE_ENV === "development" && this.state.error && (
