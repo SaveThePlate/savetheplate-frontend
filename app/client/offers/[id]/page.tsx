@@ -49,6 +49,7 @@ const Offers = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [inCart, setInCart] = useState(false);
+  const [ordering, setOrdering] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_BAG_IMAGE);
   const [fallbackIndex, setFallbackIndex] = useState(0);
@@ -153,12 +154,19 @@ const Offers = () => {
       return;
     }
 
+    // Prevent multiple submissions
+    if (ordering) {
+      return;
+    }
+
     const token = localStorage.getItem("accessToken");
     if (!token) {
       toast.error(t("client.offers.detail.login_required") || "Please login to order.");
       router.push("/signIn");
       return;
     }
+
+    setOrdering(true);
 
     try {
       const response = await axiosInstance.post(
@@ -178,6 +186,8 @@ const Offers = () => {
     } catch (err: any) {
       console.error("Order error:", err);
       toast.error(err?.response?.data?.message || t("client.offers.detail.order_error") || "Failed to place order.");
+    } finally {
+      setOrdering(false);
     }
   };
 
@@ -436,16 +446,20 @@ const Offers = () => {
                   {/* Order Button */}
                   <button
                     onClick={handleOrder}
-                    disabled={inCart || isExpired || offer.quantity === 0}
+                    disabled={ordering || inCart || isExpired || offer.quantity === 0}
                     className={`w-full sm:w-auto px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all ${
-                      inCart
+                      ordering
+                        ? "bg-emerald-400 text-white cursor-wait"
+                        : inCart
                         ? "bg-gray-200 text-gray-600 cursor-not-allowed"
                         : isExpired || offer.quantity === 0
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                     }`}
                   >
-                    {inCart
+                    {ordering
+                      ? t("client.offers.detail.order_processing") || "Order Processing..."
+                      : inCart
                       ? `✓ ${t("common.added_to_cart")}`
                       : isExpired
                       ? t("common.expired")
