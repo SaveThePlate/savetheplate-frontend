@@ -15,6 +15,14 @@ export const sanitizeImageUrl = (url: string | null | undefined): string => {
     return DEFAULT_BAG_IMAGE;
   }
   
+  // Trim whitespace
+  url = url.trim();
+  
+  // Empty string after trim
+  if (url === '') {
+    return DEFAULT_BAG_IMAGE;
+  }
+  
   // Blob URLs and data URLs are valid
   if (url.startsWith('blob:') || url.startsWith('data:')) {
     return url;
@@ -33,6 +41,13 @@ export const sanitizeImageUrl = (url: string | null | undefined): string => {
     } catch {
       return DEFAULT_BAG_IMAGE;
     }
+  }
+  
+  // If it looks like a bare filename (no path, no protocol), it's probably invalid
+  // This catches cases like "38d0c4a7-2707-4565-8329-dde5acf1fdda.jpeg"
+  if (/^[a-f0-9-]+\.(jpg|jpeg|png|gif|webp|avif)$/i.test(url)) {
+    console.warn(`Invalid image path detected: ${url}. Expected format: /store/${url}`);
+    return DEFAULT_BAG_IMAGE;
   }
   
   // If it's not a valid format, return default

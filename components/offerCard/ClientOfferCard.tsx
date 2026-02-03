@@ -116,23 +116,26 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         <Card className="flex flex-col bg-white rounded-2xl overflow-hidden border border-border shadow-sm h-full cursor-pointer group">
       {/* Image Section - Similar to Too Good To Go */}
       <div className="relative w-full h-32 sm:h-36 md:h-40 overflow-hidden bg-muted">
-        {currentImage ? (
+        {currentImage && currentImage !== DEFAULT_LOGO ? (
           <Image
-            src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
+            key={currentImage}
+            src={sanitizeImageUrl(currentImage)}
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             onError={handleImageError}
-            priority
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(currentImage)}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">No image</span>
-          </div>
+          <Image
+            key="default-logo"
+            src={DEFAULT_LOGO}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            className="object-cover"
+          />
         )}
 
         {/* Quantity Badge - top right */}
@@ -270,20 +273,26 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         <div className="flex-1 min-h-0 flex flex-col">
           {/* Hero Image */}
           <div className="relative w-full h-40 sm:h-48 lg:h-44 flex-shrink-0 overflow-hidden">
-            {currentImage ? (
+            {currentImage && currentImage !== DEFAULT_LOGO ? (
               <Image
-                src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
+                key={currentImage}
+                src={sanitizeImageUrl(currentImage)}
                 alt={title}
                 fill
                 sizes="(max-width: 640px) calc(100vw - 1rem), 512px"
                 className="object-cover"
-                unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+                unoptimized={shouldUnoptimizeImage(currentImage)}
                 onError={handleImageError}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-muted to-secondary flex items-center justify-center">
-                <span className="text-muted-foreground">No image</span>
-              </div>
+              <Image
+                key="default-logo-modal"
+                src={DEFAULT_LOGO}
+                alt={title}
+                fill
+                sizes="(max-width: 640px) calc(100vw - 1rem), 512px"
+                className="object-cover"
+              />
             )}
             
             {/* Close Button - Top Right */}

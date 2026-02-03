@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { useUser } from "@/context/UserContext";
 import Image from "next/image";
@@ -89,18 +89,23 @@ const ProfilePage = () => {
   }, [contextUser, userLoading, router]);
 
   // Calculate impact metrics - orders that are confirmed and have been collected
-  const collectedOrders = orders.filter(o => o.status === "confirmed" && o.collectedAt) || [];
-  const mealsSaved = collectedOrders.length;
-  const co2Saved = mealsSaved * 2.5; // Approximate kg CO2 per meal saved
-  const moneySaved = collectedOrders.reduce((sum, order) => {
-    const originalPrice = order.offer?.originalPrice || 0;
-    const price = order.offer?.price || 0;
-    if (originalPrice > price && originalPrice > 0) {
-      const saved = (originalPrice - price) * order.quantity;
-      return sum + saved;
-    }
-    return sum;
-  }, 0);
+  // Memoize to avoid recalculating on every render
+  const { mealsSaved, co2Saved, moneySaved } = useMemo(() => {
+    const collectedOrders = orders.filter(o => o.status === "confirmed" && o.collectedAt) || [];
+    const meals = collectedOrders.length;
+    const co2 = meals * 2.5; // Approximate kg CO2 per meal saved
+    const money = collectedOrders.reduce((sum, order) => {
+      const originalPrice = order.offer?.originalPrice || 0;
+      const price = order.offer?.price || 0;
+      if (originalPrice > price && originalPrice > 0) {
+        const saved = (originalPrice - price) * order.quantity;
+        return sum + saved;
+      }
+      return sum;
+    }, 0);
+
+    return { mealsSaved: meals, co2Saved: co2, moneySaved: money };
+  }, [orders]);
 
   // Redirect will be handled by useEffect, but show loading while redirecting
   if (!isAuthenticated && !ordersLoading && !userLoading) {

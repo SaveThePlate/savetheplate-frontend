@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { getBackendOrigin } from "@/lib/backendOrigin";
@@ -14,9 +14,10 @@ import { isOfferExpired } from "@/components/offerCard/utils";
 import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
 import Link from "next/link";
 
-// Lazy load heavy components
+// Lazy load heavy components with better loading states
 const ClientOfferCard = dynamic(() => import("@/components/offerCard/ClientOfferCard").then(mod => ({ default: mod.ClientOfferCard })), {
   loading: () => <div className="h-64 animate-pulse bg-gray-200 rounded-lg" />,
+  ssr: false,
 });
 
 const Offers = dynamic(() => import("@/components/Offers"), {
@@ -474,38 +475,40 @@ const Home = () => {
     fetchOffers();
   }, [fetchOffers]);
 
-  // Recalculate distances when location changes
-  useEffect(() => {
-    if (locationData?.latitude && locationData?.longitude && offers.length > 0) {
-      const offersWithDistance = offers.map((offer) => {
-        const offerLat = offer.latitude || offer.owner?.latitude;
-        const offerLng = offer.longitude || offer.owner?.longitude;
-        
-        if (offerLat && offerLng && locationData.latitude && locationData.longitude) {
-          const distance = calculateDistance(
-            locationData.latitude,
-            locationData.longitude,
-            offerLat,
-            offerLng
-          );
-          return { ...offer, distance };
-        }
-        return { ...offer, distance: Infinity };
-      });
-      
-      // Sort by distance
-      offersWithDistance.sort((a, b) => {
-        const distA = a.distance ?? Infinity;
-        const distB = b.distance ?? Infinity;
-        return distA - distB;
-      });
-      
-      setOffers(offersWithDistance);
+  // Memoize distance calculations to avoid recalculating on every render
+  const offersWithDistance = useMemo(() => {
+    if (!locationData?.latitude || !locationData?.longitude || offers.length === 0) {
+      return offers;
     }
-  }, [locationData]);
+    
+    const withDistance = offers.map((offer) => {
+      const offerLat = offer.latitude || offer.owner?.latitude;
+      const offerLng = offer.longitude || offer.owner?.longitude;
+      
+      if (offerLat && offerLng && locationData.latitude && locationData.longitude) {
+        const distance = calculateDistance(
+          locationData.latitude,
+          locationData.longitude,
+          offerLat,
+          offerLng
+        );
+        return { ...offer, distance };
+      }
+      return { ...offer, distance: Infinity };
+    });
+    
+    // Sort by distance
+    withDistance.sort((a, b) => {
+      const distA = a.distance ?? Infinity;
+      const distB = b.distance ?? Infinity;
+      return distA - distB;
+    });
+    
+    return withDistance;
+  }, [locationData, offers]);
 
-  // Helper function to apply distance filter
-  const applyDistanceFilter = (offersList: Offer[]) => {
+  // Helper function to apply distance filter (memoized)
+  const applyDistanceFilter = useCallback((offersList: Offer[]) => {
     if (!distanceFilter || !locationData?.latitude || !locationData?.longitude) {
       return offersList;
     }
@@ -514,25 +517,30 @@ const Home = () => {
       // Include offers without distance or within the selected range
       return distance === undefined || distance === Infinity || distance <= distanceFilter;
     });
-  };
+  }, [distanceFilter, locationData]);
 
-  // Filter products by search query
-  const searchFilteredProducts = searchQuery.trim()
-    ? applyDistanceFilter(offers.filter(p => {
-        const query = searchQuery.toLowerCase();
-        return (
-          p.title.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query) ||
-          (p.owner?.location || p.pickupLocation || "").toLowerCase().includes(query) ||
-          (p.foodType && p.foodType.toLowerCase().includes(query))
-        );
-      }))
-    : null;
+  // Memoize filtered products to avoid unnecessary recalculations
+  const searchFilteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    
+    const query = searchQuery.toLowerCase();
+    return applyDistanceFilter(offers.filter(p => {
+      return (
+        p.title.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        (p.owner?.location || p.pickupLocation || "").toLowerCase().includes(query) ||
+        (p.foodType && p.foodType.toLowerCase().includes(query))
+      );
+    }));
+  }, [searchQuery, offers, applyDistanceFilter]);
 
-  const featuredProducts = applyDistanceFilter(offers.filter(p => !isOfferExpired(p.expirationDate) && p.quantity > 0)).slice(0, 5);
+  const featuredProducts = useMemo(() => 
+    applyDistanceFilter(offers.filter(p => !isOfferExpired(p.expirationDate) && p.quantity > 0)).slice(0, 5),
+    [offers, applyDistanceFilter]
+  );
 
   // Category definitions with icons and foodType mapping - matching the rest of the app
-  const categories = [
+  const categories = useMemo(() => [
     {
       name: t('offers.food_type_meal') || "Meals",
       foodType: 'meal',
@@ -561,12 +569,15 @@ const Home = () => {
       color: 'bg-emerald-100 text-emerald-600',
       count: applyDistanceFilter(offers.filter(p => p.foodType === 'other' && !isOfferExpired(p.expirationDate) && p.quantity > 0)).length,
     },
-  ];
+  ], [t, offers, applyDistanceFilter]);
 
-  // Filter products by selected category
-  const categoryFilteredProducts = selectedCategory
-    ? applyDistanceFilter(offers.filter(p => p.foodType === selectedCategory && !isOfferExpired(p.expirationDate) && p.quantity > 0))
-    : null;
+  // Filter products by selected category (memoized)
+  const categoryFilteredProducts = useMemo(() => 
+    selectedCategory
+      ? applyDistanceFilter(offers.filter(p => p.foodType === selectedCategory && !isOfferExpired(p.expirationDate) && p.quantity > 0))
+      : null,
+    [selectedCategory, offers, applyDistanceFilter]
+  );
 
   if (loading) {
     return (

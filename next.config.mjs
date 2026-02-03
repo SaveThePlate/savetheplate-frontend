@@ -30,10 +30,18 @@ const nextConfig = {
   turbopack: {},
   // Enable compression
   compress: true,
-  // Optimize production builds
-  // swcMinify is now enabled by default in Next.js 13+
   // Enable React strict mode for better performance
   reactStrictMode: true,
+  // Add compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  // Experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
   // Optimize images
   images: {
     remotePatterns: [

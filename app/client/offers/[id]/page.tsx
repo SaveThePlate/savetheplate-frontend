@@ -48,7 +48,6 @@ const Offers = () => {
   const [offer, setOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [inCart, setInCart] = useState(false);
   const [ordering, setOrdering] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string>(DEFAULT_BAG_IMAGE);
@@ -177,12 +176,19 @@ const Offers = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-          timeout: 8000,
+          timeout: 10000, // 10 second timeout
         }
       );
 
-      setInCart(true);
       toast.success(t("client.offers.detail.order_success") || "Order placed successfully!");
+      
+      // Redirect to the specific order details page
+      const orderId = response.data?.order?.id;
+      if (orderId) {
+        setTimeout(() => {
+          router.push(`/client/orders/${orderId}`);
+        }, 800);
+      }
     } catch (err: any) {
       console.error("Order error:", err);
       toast.error(err?.response?.data?.message || t("client.offers.detail.order_error") || "Failed to place order.");
@@ -235,14 +241,14 @@ const Offers = () => {
           
           {/* Hero Section with Offer Image */}
           <div className="relative h-64 sm:h-80 bg-gradient-to-br from-emerald-100 to-teal-100">
-            {offer?.images?.[0] ? (
+            {offer?.images?.[0] && imageSrc !== DEFAULT_BAG_IMAGE ? (
               <Image
+                key={imageSrc}
                 src={imageSrc}
                 alt={offer.title}
                 fill
                 className="object-cover"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                priority
                 onError={() => {
                   if (fallbackIndex < fallbacks.length - 1) {
                     setFallbackIndex(fallbackIndex + 1);
@@ -251,6 +257,15 @@ const Offers = () => {
                     setImageSrc(DEFAULT_BAG_IMAGE);
                   }
                 }}
+              />
+            ) : offer?.images?.[0] && imageSrc === DEFAULT_BAG_IMAGE ? (
+              <Image
+                key="default-bag-image"
+                src={DEFAULT_BAG_IMAGE}
+                alt={offer.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -446,12 +461,10 @@ const Offers = () => {
                   {/* Order Button */}
                   <button
                     onClick={handleOrder}
-                    disabled={ordering || inCart || isExpired || offer.quantity === 0}
+                    disabled={ordering || isExpired || offer.quantity === 0}
                     className={`w-full sm:w-auto px-6 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all ${
                       ordering
                         ? "bg-emerald-400 text-white cursor-wait"
-                        : inCart
-                        ? "bg-gray-200 text-gray-600 cursor-not-allowed"
                         : isExpired || offer.quantity === 0
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
@@ -459,8 +472,6 @@ const Offers = () => {
                   >
                     {ordering
                       ? t("client.offers.detail.order_processing") || "Order Processing..."
-                      : inCart
-                      ? `✓ ${t("common.added_to_cart")}`
                       : isExpired
                       ? t("common.expired")
                       : offer.quantity === 0

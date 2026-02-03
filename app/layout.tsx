@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" data-scroll-behavior="smooth">
       <head>
         {/* Mobile viewport optimization - viewport meta is handled by Next.js viewport export */}
         <meta name="mobile-web-app-capable" content="yes" />

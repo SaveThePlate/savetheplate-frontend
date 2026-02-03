@@ -539,23 +539,26 @@ export const ProviderOfferCard: FC<ProviderOfferCardProps> = ({
       <div className={`${isDeleting || internalDeleting ? 'invisible' : ''}`}>
       {/* Image */}
       <div className="relative w-full h-32 sm:h-40 md:h-44">
-        {currentImage ? (
+        {currentImage && currentImage !== DEFAULT_LOGO ? (
           <Image
-            src={sanitizeImageUrl(currentImage) || DEFAULT_LOGO}
+            key={currentImage}
+            src={sanitizeImageUrl(currentImage)}
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             onError={handleImageError}
-            priority
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml;base64,..."
             className="object-cover"
-            unoptimized={shouldUnoptimizeImage(currentImage || DEFAULT_LOGO)}
+            unoptimized={shouldUnoptimizeImage(currentImage)}
           />
         ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-            <span className="text-gray-400">No image</span>
-          </div>
+          <Image
+            key="default-logo-provider"
+            src={DEFAULT_LOGO}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            className="object-cover"
+          />
         )}
 
         <PriceBadge price={price} originalPrice={originalPrice} />
