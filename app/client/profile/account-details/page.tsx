@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, User, Mail, Phone, CheckCircle2, XCircle, Send, Check } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { useUser } from "@/context/UserContext";
 import { axiosInstance } from "@/lib/axiosInstance";
 import Image from "next/image";
 import { sanitizeImageUrl, shouldUnoptimizeImage } from "@/utils/imageUtils";
@@ -21,49 +22,23 @@ const DEFAULT_PROFILE_IMAGE = "/logo.png";
 export default function AccountDetails() {
   const router = useRouter();
   const { t } = useLanguage();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState<number | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
+  const { user, loading: userLoading } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<{ username: string; phoneNumber: number | null }>({ username: "", phoneNumber: null });
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [sendingVerification, setSendingVerification] = useState(false);
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [verifyingCode, setVerifyingCode] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          router.push("/signIn");
-          return;
-        }
-
-        const headers = { Authorization: `Bearer ${token}` };
-        const profileRes = await axiosInstance.get(`/users/me`, { headers });
-
-        const { username, email, phoneNumber, profileImage, emailVerified } = profileRes.data || {};
-        setUsername(username || "");
-        setEmail(email || "");
-        setPhoneNumber(phoneNumber ?? null);
-        setEmailVerified(emailVerified || false);
-        setFormData({ username: username || "", phoneNumber: phoneNumber ?? null });
-        setProfileImage(profileImage || DEFAULT_PROFILE_IMAGE);
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [router, t]);
+    if (!userLoading && user) {
+      setFormData({ username: user.username || "", phoneNumber: user.phoneNumber ?? null });
+    } else if (!userLoading && !user) {
+      router.push("/signIn");
+    }
+  }, [user, userLoading, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -160,17 +135,10 @@ export default function AccountDetails() {
       );
 
       if (response.data?.verified) {
-        setEmailVerified(true);
         setShowVerifyDialog(false);
         setVerificationCode("");
         toast.success("Email verified successfully!");
-        
-        // Refresh profile data
-        const profileRes = await axiosInstance.get(`/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const { emailVerified: newEmailVerified } = profileRes.data || {};
-        setEmailVerified(newEmailVerified || false);
+        // User data will be updated via UserContext
       } else {
         toast.error("Invalid verification code. Please try again.");
       }
@@ -185,7 +153,7 @@ export default function AccountDetails() {
     }
   };
 
-  if (loading) {
+  if (userLoading) {
     return (
       <div className="min-h-screen pb-24 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -193,7 +161,7 @@ export default function AccountDetails() {
     );
   }
 
-  const displayName = username || email || "User";
+  const displayName = user?.username || user?.email || "User";
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -302,7 +270,7 @@ export default function AccountDetails() {
               <User className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">{t("client.profile.username") || "Username"}</p>
-                <p className="font-medium">{username || "-"}</p>
+                <p className="font-medium">{user?.username || "-"}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-border">
@@ -311,9 +279,9 @@ export default function AccountDetails() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="font-medium">{email || "-"}</p>
+                    <p className="font-medium">{user?.email || "-"}</p>
                   </div>
-                  {emailVerified ? (
+                  {user?.emailVerified ? (
                     <div className="flex items-center gap-1 text-emerald-600">
                       <CheckCircle2 className="w-4 h-4" />
                       <span className="text-xs font-medium">Verified</span>
@@ -325,7 +293,7 @@ export default function AccountDetails() {
                     </div>
                   )}
                 </div>
-                {!emailVerified && (
+                {!user?.emailVerified && (
                   <div className="mt-2 flex flex-col gap-2">
                     <button
                       onClick={handleResendVerification}
@@ -349,7 +317,7 @@ export default function AccountDetails() {
               <Phone className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">{t("client.profile.phone_number") || "Phone Number"}</p>
-                <p className="font-medium">{phoneNumber || "-"}</p>
+                <p className="font-medium">{user?.phoneNumber || "-"}</p>
               </div>
             </div>
             <button

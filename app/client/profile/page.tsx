@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { axiosInstance } from "@/lib/axiosInstance";
+import { useUser } from "@/context/UserContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -37,10 +38,9 @@ interface UserData {
 const ProfilePage = () => {
   const router = useRouter();
   const { t } = useLanguage();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [profileImage, setProfileImage] = useState(DEFAULT_PROFILE_IMAGE);
+  const { user: contextUser, loading: userLoading } = useUser();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleSignOut = () => {
@@ -55,49 +55,38 @@ const ProfilePage = () => {
         const token = localStorage.getItem("accessToken");
         if (!token) {
           setIsAuthenticated(false);
-          setLoading(false);
+          setOrdersLoading(false);
           router.push("/signIn");
+          return;
+        }
+
+        // Use user data from context; if not available yet, wait
+        if (!contextUser) {
           return;
         }
 
         const headers = { Authorization: `Bearer ${token}` };
-        let userId;
-        
-        // Parse userId from token with error handling
-        try {
-          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-          userId = tokenPayload.id;
-        } catch (parseError) {
-          console.error("Error parsing token:", parseError);
-          setIsAuthenticated(false);
-          setLoading(false);
-          router.push("/signIn");
-          return;
-        }
+        const userId = contextUser.id;
 
-        // Fetch profile and orders in parallel
-        const [profileRes, ordersRes] = await Promise.all([
-          axiosInstance.get(`/users/me`, { headers }),
-          axiosInstance.get(`/orders/user/${userId}`, { headers }),
-        ]);
-
-        const userData = profileRes.data || {};
-        setUser(userData);
-        setProfileImage(userData.profileImage || DEFAULT_PROFILE_IMAGE);
+        // Fetch only orders (user data comes from context)
+        const ordersRes = await axiosInstance.get(`/orders/user/${userId}`, { headers });
         setOrders(ordersRes.data || []);
         setIsAuthenticated(true);
       } catch (err) {
-        console.error("Failed to fetch profile:", err);
+        console.error("Failed to fetch orders:", err);
         setIsAuthenticated(false);
-        // Redirect to sign in if authentication fails
         router.push("/signIn");
       } finally {
-        setLoading(false);
+        setOrdersLoading(false);
       }
     };
 
+    if (userLoading) {
+      return; // Wait for user context to load
+    }
+
     run();
-  }, [router]);
+  }, [contextUser, userLoading, router]);
 
   // Calculate impact metrics - orders that are confirmed and have been collected
   const collectedOrders = orders.filter(o => o.status === "confirmed" && o.collectedAt) || [];
@@ -114,11 +103,11 @@ const ProfilePage = () => {
   }, 0);
 
   // Redirect will be handled by useEffect, but show loading while redirecting
-  if (!isAuthenticated && !loading) {
+  if (!isAuthenticated && !ordersLoading && !userLoading) {
     return null;
   }
 
-  if (loading || !user) {
+  if (ordersLoading || userLoading || !contextUser) {
     return (
       <div className="min-h-screen pb-24 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -126,7 +115,7 @@ const ProfilePage = () => {
     );
   }
 
-  const displayName = user.username || user.email || "User";
+  const displayName = contextUser.username || contextUser.email || "User";
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -141,9 +130,9 @@ const ProfilePage = () => {
       {/* User Info */}
       <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6 flex items-center gap-4">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden">
-          {profileImage && profileImage !== DEFAULT_PROFILE_IMAGE ? (
+          {contextUser.profileImage && contextUser.profileImage !== DEFAULT_PROFILE_IMAGE ? (
               <Image 
-                src={sanitizeImageUrl(profileImage)} 
+                src={sanitizeImageUrl(contextUser.profileImage)} 
               alt={displayName}
               width={64}
               height={64}
