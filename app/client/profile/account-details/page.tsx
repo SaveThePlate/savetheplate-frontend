@@ -282,12 +282,10 @@ export default function AccountDetails() {
                   {user?.emailVerified ? (
                     <div className="flex items-center gap-1 text-emerald-600">
                       <CheckCircle2 className="w-4 h-4" />
-                      <span className="text-xs font-medium">Verified</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1 text-amber-600">
                       <XCircle className="w-4 h-4" />
-                      <span className="text-xs font-medium">Not Verified</span>
                     </div>
                   )}
                 </div>

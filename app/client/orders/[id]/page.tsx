@@ -150,173 +150,182 @@ const Orders = () => {
   const totalOrders = orders.length;
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-10">
+    <div className="min-h-screen pb-24">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-display font-bold text-3xl mb-2">{t("client.orders.my_orders")}</h1>
-        <p className="text-muted-foreground text-sm">{t("client.orders.track_orders")}</p>
-      </div>
-      {/* Stats Cards */}
-      {hasOrders && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-          {pendingOrders.length > 0 && (
-            <div className="bg-white rounded-2xl border border-border shadow-sm p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                      <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-700" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xl sm:text-2xl font-bold text-yellow-800">{pendingOrders.length}</p>
-                      <p className="text-xs sm:text-sm text-yellow-700 font-medium truncate">{t("orders.pending")}</p>
-                    </div>
-                  </div>
+      <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-3 sm:px-4 py-4">
+        <div>
+          <h1 className="font-display font-bold text-2xl sm:text-3xl text-foreground">
+            {t("client.orders.my_orders")}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            {t("client.orders.track_orders")}
+          </p>
+        </div>
+      </header>
+
+      <div className="px-3 sm:px-4 pt-4 sm:pt-6 pb-4 sm:pb-6 space-y-6 border-b border-border/50">
+        {/* Stats Cards */}
+        {hasOrders && (
+          <div className="grid grid-cols-3 gap-2 sm:gap-2">
+            {pendingOrders.length > 0 && (
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-2 sm:p-3 border border-amber-200/50 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-amber-600 text-white flex items-center justify-center mb-1 flex-shrink-0">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
-              )}
-          {confirmedOrders.length > 0 && (
-            <div className="bg-white rounded-2xl border border-border shadow-sm p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xl sm:text-2xl font-bold text-emerald-800">{confirmedOrders.length}</p>
-                      <p className="text-xs sm:text-sm text-emerald-700 font-medium truncate">{t("orders.confirmed")}</p>
-                    </div>
-                  </div>
+                <div className="text-base sm:text-lg font-bold text-amber-900">{pendingOrders.length}</div>
+                <div className="text-[9px] sm:text-[10px] text-amber-700 font-medium mt-0.5">
+                  {t("orders.pending")}
                 </div>
-              )}
-          {cancelledOrders.length > 0 && (
-            <div className="bg-white rounded-2xl border border-border shadow-sm p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                      <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-700" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xl sm:text-2xl font-bold text-red-800">{cancelledOrders.length}</p>
-                      <p className="text-xs sm:text-sm text-red-700 font-medium truncate">{t("orders.cancelled")}</p>
-                    </div>
-                  </div>
+              </div>
+            )}
+            {confirmedOrders.length > 0 && (
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-2 sm:p-3 border border-emerald-200/50 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-emerald-600 text-white flex items-center justify-center mb-1 flex-shrink-0">
+                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
-              )}
+                <div className="text-base sm:text-lg font-bold text-emerald-900">{confirmedOrders.length}</div>
+                <div className="text-[9px] sm:text-[10px] text-emerald-700 font-medium mt-0.5">
+                  {t("orders.confirmed")}
+                </div>
+              </div>
+            )}
+            {cancelledOrders.length > 0 && (
+              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-2 sm:p-3 border border-red-200/50 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-red-600 text-white flex items-center justify-center mb-1 flex-shrink-0">
+                  <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+                <div className="text-base sm:text-lg font-bold text-red-900">{cancelledOrders.length}</div>
+                <div className="text-[9px] sm:text-[10px] text-red-700 font-medium mt-0.5">
+                  {t("orders.cancelled")}
+                </div>
+              </div>
+            )}
           </div>
         )}
+      </div>
 
       {/* Orders List */}
       <section className="space-y-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
-              <p className="text-muted-foreground text-lg font-medium">{t("client.orders.loading")}</p>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin mb-4"></div>
+            <p className="text-muted-foreground font-medium">{t("client.orders.loading")}</p>
+          </div>
+        ) : error ? (
+          <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl border border-red-200 p-6 sm:p-8 text-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-red-600 text-white flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <XCircle className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
-          ) : error ? (
-            <div className="bg-white rounded-2xl border border-destructive/20 p-6 text-center">
-              <XCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-600 mx-auto mb-3 sm:mb-4" />
-              <p className="text-red-800 text-base sm:text-lg font-semibold mb-2 px-2">{t("client.orders.error_title")}</p>
-              <p className="text-sm sm:text-base text-red-600 mb-4 px-2 break-words">{error}</p>
-              <Button
-                onClick={() => window.location.reload()}
-                className="bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
-              >
-                {t("common.try_again")}
-              </Button>
+            <p className="text-red-900 text-base sm:text-lg font-bold mb-2">
+              {t("client.orders.error_title")}
+            </p>
+            <p className="text-sm sm:text-base text-red-800 mb-6 break-words">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium"
+            >
+              {t("common.try_again")}
+            </Button>
+          </div>
+        ) : !hasOrders ? (
+          <div className="bg-white rounded-2xl border border-border/50 shadow-sm p-8 sm:p-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <ShoppingBag className="w-8 h-8 text-emerald-600" />
             </div>
-          ) : !hasOrders ? (
-            <div className="bg-white rounded-2xl border border-border shadow-sm p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                <ShoppingBag className="w-8 h-8 text-primary" />
-              </div>
-              <h2 className="text-xl font-bold mb-2">{t("client.orders.no_orders_title")}</h2>
-              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-                {t("client.orders.no_orders_message")}
-              </p>
-              <Button
-                onClick={() => router.push("/client/home")}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-xl font-medium"
-              >
-                {t("client.orders.explore_offers")}
-              </Button>
-            </div>
-          ) : (
-            <>
-              {pendingOrders.length > 0 && (
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+              {t("client.orders.no_orders_title")}
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
+              {t("client.orders.no_orders_message")}
+            </p>
+            <Button
+              onClick={() => router.push("/client/home")}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-2 sm:py-3 rounded-lg font-medium"
+            >
+              {t("client.orders.explore_offers")}
+            </Button>
+          </div>
+        ) : (
+          <>
+            {pendingOrders.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 px-1">
+                  <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-foreground flex-1">
+                    {t("client.orders.pending_orders")}
+                  </h2>
+                  <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs sm:text-sm font-semibold">
+                    {pendingOrders.length}
+                  </span>
+                </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                      <Clock className="w-5 h-5 text-yellow-700" />
+                  {pendingOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-white rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
                     </div>
-                    <h2 className="text-xl font-bold flex-1">
-                      {t("client.orders.pending_orders")}
-                    </h2>
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
-                      {pendingOrders.length}
-                    </span>
-                  </div>
-                  <div className="space-y-3 sm:space-y-4">
-                    {pendingOrders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="bg-white rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-          {confirmedOrders.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-5 h-5 text-emerald-700" />
-                </div>
-                <h2 className="text-xl font-bold flex-1">
-                  {t("client.orders.confirmed_orders")}
-                </h2>
-                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm font-semibold">
-                  {confirmedOrders.length}
-                </span>
-              </div>
+            {confirmedOrders.length > 0 && (
               <div className="space-y-3">
-                {confirmedOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="bg-white rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                <div className="flex items-center gap-3 px-1">
+                  <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                    <CheckCircle className="w-5 h-5" />
                   </div>
-                ))}
+                  <h2 className="text-lg sm:text-xl font-bold text-foreground flex-1">
+                    {t("client.orders.confirmed_orders")}
+                  </h2>
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs sm:text-sm font-semibold">
+                    {confirmedOrders.length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {confirmedOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-white rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {cancelledOrders.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <XCircle className="w-5 h-5 text-red-700" />
-                </div>
-                <h2 className="text-xl font-bold flex-1">
-                  {t("client.orders.cancelled_orders")}
-                </h2>
-                <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
-                  {cancelledOrders.length}
-                </span>
-              </div>
+            {cancelledOrders.length > 0 && (
               <div className="space-y-3">
-                {cancelledOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="bg-white rounded-2xl border border-border shadow-sm opacity-75"
-                  >
-                    <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                <div className="flex items-center gap-3 px-1">
+                  <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                    <XCircle className="w-5 h-5" />
                   </div>
-                ))}
+                  <h2 className="text-lg sm:text-xl font-bold text-foreground flex-1">
+                    {t("client.orders.cancelled_orders")}
+                  </h2>
+                  <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs sm:text-sm font-semibold">
+                    {cancelledOrders.length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {cancelledOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-white rounded-2xl border border-border/50 shadow-sm opacity-75"
+                    >
+                      <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-            </>
-          )}
+            )}
+          </>
+        )}
       </section>
     </div>
   );
