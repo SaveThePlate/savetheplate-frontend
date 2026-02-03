@@ -103,81 +103,92 @@ const useProviderProfile = () => {
       }
 
       // Fetch profile, offers, and orders in parallel - ONLY ONE /users/me call
-      const [profileRes, offersRes, ordersRes] = await Promise.all([
-        axiosInstance.get(`/users/me`, { headers }),
-        axiosInstance.get(`/offers/owner/${userId}`, { headers }),
-        axiosInstance.get(`/orders/provider`, { headers }),
-      ]);
+      try {
+        const [profileRes, offersRes, ordersRes] = await Promise.all([
+          axiosInstance.get(`/users/me`, { headers }),
+          axiosInstance.get(`/offers/owner/${userId}`, { headers }),
+          axiosInstance.get(`/orders/provider`, { headers }),
+        ]);
 
-      // Process profile data first (show immediately)
-      const { username, location, phoneNumber, profileImage, mapsLink } =
-        profileRes.data || {};
-      
-      // Extract location if needed (non-blocking, can happen after profile is shown)
-      let finalLocation = location;
-      if (!finalLocation && mapsLink) {
-        // Don't await this - set profile first, then update location if needed
-        axiosInstance.post(
-          `/users/extract-location`,
-          { mapsLink },
-          { 
-            headers,
-            timeout: 10000, // 10 second timeout for hosted apps
-          }
-        ).then((locationRes) => {
-          const extractedLocation = locationRes.data.locationName || location;
-          setProfile((prev) => prev ? { ...prev, location: extractedLocation || "Location" } : null);
-        }).catch((err: any) => {
-          console.error("Failed to extract location:", err);
-          // Silently fail for profile page - location extraction is non-critical here
-          // User can manually edit location if needed
+        // Process profile data first (show immediately)
+        const { username, location, phoneNumber, profileImage, mapsLink } =
+          profileRes.data || {};
+        
+        // Extract location if needed (non-blocking, can happen after profile is shown)
+        let finalLocation = location;
+        if (!finalLocation && mapsLink) {
+          // Don't await this - set profile first, then update location if needed
+          axiosInstance.post(
+            `/users/extract-location`,
+            { mapsLink },
+            { 
+              headers,
+              timeout: 10000, // 10 second timeout for hosted apps
+            }
+          ).then((locationRes) => {
+            const extractedLocation = locationRes.data.locationName || location;
+            setProfile((prev) => prev ? { ...prev, location: extractedLocation || "Location" } : null);
+          }).catch((err: any) => {
+            console.error("Failed to extract location:", err);
+            // Silently fail for profile page - location extraction is non-critical here
+            // User can manually edit location if needed
+          });
+        }
+        
+        // Set profile immediately
+        setProfile({
+          username: username || "Username",
+          location: finalLocation || "Location",
+          phoneNumber: phoneNumber ? String(phoneNumber) : "Phone number",
+          mapsLink: mapsLink || "",
+          profileImage: profileImage ?? undefined,
         });
+
+        // Process stats
+        const offers = offersRes.data || [];
+        const totalOffers = offers.length;
+        const totalItems = offers.reduce(
+          (sum: number, o: any) => sum + (o.quantity ?? 0),
+          0
+        );
+
+        const orders: Order[] = ordersRes.data || [];
+        const confirmedOrders = orders.filter((o) => o.status === "confirmed");
+        
+        // Calculate revenue: sum of (quantity * price) for all confirmed orders
+        const revenue = confirmedOrders.reduce((sum, order) => {
+          const price = order.offer?.price || 0;
+          return sum + order.quantity * price;
+        }, 0);
+
+        // Calculate environmental impact from confirmed orders
+        // Each order quantity represents meals/bags saved
+        const totalMealsSaved = confirmedOrders.reduce((sum, order) => sum + order.quantity, 0);
+        
+        // Environmental impact calculations
+        // 1 meal saved ≈ 1.5 kg CO2 equivalent (conservative estimate)
+        // 1 meal ≈ 1,500 liters of water saved
+        const co2Saved = totalMealsSaved * 1.5; // kg CO2
+        const waterSaved = totalMealsSaved * 1500; // liters
+
+        setStats({
+          totalOffers,
+          totalItems,
+          revenue,
+          totalMealsSaved,
+          co2Saved,
+          waterSaved,
+        });
+      } catch (apiErr: any) {
+        console.error("API Error:", apiErr.response?.status, apiErr.response?.data);
+        if (apiErr.response?.status === 401) {
+          console.log("Token expired or invalid, redirecting to sign in");
+          localStorage.removeItem("accessToken");
+          router.push("/signIn");
+          return;
+        }
+        throw apiErr;
       }
-      
-      // Set profile immediately
-      setProfile({
-        username: username || "Username",
-        location: finalLocation || "Location",
-        phoneNumber: phoneNumber ? String(phoneNumber) : "Phone number",
-        mapsLink: mapsLink || "",
-        profileImage: profileImage ?? undefined,
-      });
-
-      // Process stats
-      const offers = offersRes.data || [];
-      const totalOffers = offers.length;
-      const totalItems = offers.reduce(
-        (sum: number, o: any) => sum + (o.quantity ?? 0),
-        0
-      );
-
-      const orders: Order[] = ordersRes.data || [];
-      const confirmedOrders = orders.filter((o) => o.status === "confirmed");
-      
-      // Calculate revenue: sum of (quantity * price) for all confirmed orders
-      const revenue = confirmedOrders.reduce((sum, order) => {
-        const price = order.offer?.price || 0;
-        return sum + order.quantity * price;
-      }, 0);
-
-      // Calculate environmental impact from confirmed orders
-      // Each order quantity represents meals/bags saved
-      const totalMealsSaved = confirmedOrders.reduce((sum, order) => sum + order.quantity, 0);
-      
-      // Environmental impact calculations
-      // 1 meal saved ≈ 1.5 kg CO2 equivalent (conservative estimate)
-      // 1 meal ≈ 1,500 liters of water saved
-      const co2Saved = totalMealsSaved * 1.5; // kg CO2
-      const waterSaved = totalMealsSaved * 1500; // liters
-
-      setStats({
-        totalOffers,
-        totalItems,
-        revenue,
-        totalMealsSaved,
-        co2Saved,
-        waterSaved,
-      });
     } catch (err: any) {
       console.error("Failed to fetch data:", err);
       const errorMsg = sanitizeErrorMessage(err, {
@@ -834,13 +845,17 @@ export default function ProviderProfile() {
   };
 
   return (
-    <div className="min-h-screen pb-24 px-4 pt-10">
+    <div className="min-h-screen pb-24">
       {loading ? (
         <ProfileSkeleton />
       ) : (
         <>
-          <h1 className="font-display font-bold text-3xl mb-8">{t("profile.title") || "Profile"}</h1>
+          {/* Sticky Header */}
+          <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-4 sm:px-6 py-4 mb-6">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl text-foreground">{t("profile.title") || "Profile"}</h1>
+          </header>
 
+          <div className="px-4 sm:px-6">
           {/* Profile Completion Banner */}
           <ProfileCompletionBanner
             profile={profile}
@@ -848,8 +863,8 @@ export default function ProviderProfile() {
           />
 
           {/* User Info */}
-          <div className="bg-white rounded-2xl p-6 border border-border shadow-sm mb-6 flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold overflow-hidden">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-border/50 shadow-sm mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600 text-xl sm:text-2xl font-bold overflow-hidden flex-shrink-0">
               <Image
                 src={profileImageSrc}
                 alt={profile?.username || "Store"}
@@ -863,32 +878,38 @@ export default function ProviderProfile() {
                 }}
               />
             </div>
-            <div className="flex-1">
-              <h2 className="font-bold text-lg sm:text-xl">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
-              <p className="text-muted-foreground text-xs sm:text-sm">{profile?.location || t("provider.profile.location")}</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="font-bold text-lg sm:text-xl text-foreground">{loading ? t("common.loading") : profile?.username || t("provider.profile.your_store")}</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">{profile?.location || t("provider.profile.location")}</p>
             </div>
+            <button
+              onClick={() => setShowEditDialog(true)}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium bg-teal-50 hover:bg-teal-100 text-teal-600 rounded-lg transition-colors"
+            >
+              {t("common.edit") || "Edit"}
+            </button>
           </div>
 
           {/* Impact Stats */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <ShoppingBag className="w-6 h-6 mb-2" />
-              <div className="text-2xl font-bold">{loading ? "..." : stats.totalOffers}</div>
-              <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.active_offers") || "Active Offers"}</div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6 pb-6 border-b border-border/50">
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-3 sm:p-4 text-foreground shadow-sm border border-emerald-200/50">
+              <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 mb-2 text-emerald-600" />
+              <div className="text-base sm:text-xl font-bold text-emerald-900">{loading ? "..." : stats.totalOffers}</div>
+              <div className="text-[9px] sm:text-[10px] text-emerald-700 font-medium mt-1">{t("provider.profile.active_offers") || "Active Offers"}</div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-              <Heart className="w-6 h-6 mb-2" />
-              <div className="text-2xl font-bold">{loading ? "..." : stats.totalMealsSaved}</div>
-              <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 sm:p-4 text-foreground shadow-sm border border-blue-200/50">
+              <Heart className="w-5 h-5 sm:w-6 sm:h-6 mb-2 text-blue-600" />
+              <div className="text-base sm:text-xl font-bold text-blue-900">{loading ? "..." : stats.totalMealsSaved}</div>
+              <div className="text-[9px] sm:text-[10px] text-blue-700 font-medium mt-1">{t("provider.profile.meals_saved") || "Meals Saved"}</div>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-              <svg className="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 sm:p-4 text-foreground shadow-sm border border-amber-200/50">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 mb-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <div className="text-2xl font-bold">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
-              <div className="text-[10px] sm:text-xs opacity-90">{t("provider.profile.total_revenue") || "Revenue (DT)"}</div>
+              <div className="text-base sm:text-xl font-bold text-amber-900">{loading ? "..." : `${stats.revenue.toFixed(0)}`}</div>
+              <div className="text-[9px] sm:text-[10px] text-amber-700 font-medium mt-1">{t("provider.profile.total_revenue") || "Revenue (DT)"}</div>
             </div>
           </div>
 
@@ -924,6 +945,7 @@ export default function ProviderProfile() {
             profile={profile}
             onSave={handleSaveProfile}
           />
+          </div>
         </>
       )}
     </div>
@@ -934,15 +956,15 @@ function MenuItem({ icon: Icon, label, onClick }: { icon: any, label: string, on
   return (
     <button 
       onClick={onClick}
-      className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-border hover:border-primary/50 transition-all group active:scale-[0.99]"
+      className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-border/50 hover:border-teal-200 transition-all group active:scale-[0.99] shadow-sm"
     >
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-secondary/50 flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-teal-100 flex items-center justify-center text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-colors">
           <Icon size={20} />
         </div>
-        <span className="font-medium">{label}</span>
+        <span className="font-medium text-sm sm:text-base text-foreground">{label}</span>
       </div>
-      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-teal-600 transition-colors" />
     </button>
   );
 }
