@@ -85,6 +85,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
   const [showDetails, setShowDetails] = useState(false); // For confirmed/cancelled orders
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  const [ratingCheckLoading, setRatingCheckLoading] = useState(false);
   // Local state for instant UI updates
   const [localOrderStatus, setLocalOrderStatus] = useState<string>(order.status);
   const { t } = useLanguage();
@@ -97,10 +98,17 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
   // Check if order has been rated
   useEffect(() => {
     const checkRating = async () => {
-      if (localOrderStatus !== "confirmed" || !order.collectedAt) return;
+      if (localOrderStatus !== "confirmed" || !order.collectedAt) {
+        setRatingCheckLoading(false);
+        return;
+      }
       
+      setRatingCheckLoading(true);
       const token = localStorage.getItem("accessToken");
-      if (!token) return;
+      if (!token) {
+        setRatingCheckLoading(false);
+        return;
+      }
 
       try {
         const ratingRes = await axiosInstance.get(
@@ -109,12 +117,17 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
         );
         if (ratingRes.data) {
           setHasRated(true);
+        } else {
+          setHasRated(false);
         }
       } catch (err: any) {
         // Rating doesn't exist yet or endpoint doesn't exist - that's okay
         if (err?.response?.status !== 404) {
           console.error("Failed to check rating:", err);
         }
+        setHasRated(false);
+      } finally {
+        setRatingCheckLoading(false);
       }
     };
 
@@ -540,7 +553,10 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
         {/* Rate Experience Section - Always visible for confirmed orders with pickup */}
         {currentStatus === "confirmed" && order.collectedAt && (
           <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
-            {!hasRated ? (
+            {ratingCheckLoading ? (
+              // Show skeleton loader while checking rating status
+              <div className="w-full h-12 sm:h-14 bg-gray-200 rounded-xl animate-pulse" />
+            ) : !hasRated ? (
               <button
                 onClick={() => setShowRatingDialog(true)}
                 className="w-full flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
