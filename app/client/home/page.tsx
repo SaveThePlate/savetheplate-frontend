@@ -66,6 +66,7 @@ interface Offer {
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // Track first load vs refresh
   const [error, setError] = useState<string | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [pendingCount, setPendingCount] = useState<number>(0);
@@ -467,6 +468,7 @@ const Home = () => {
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
+        setIsInitialLoad(false); // Mark that initial load is complete
       }
     }
   }, [router, t]);
@@ -579,7 +581,8 @@ const Home = () => {
     [selectedCategory, offers, applyDistanceFilter]
   );
 
-  if (loading) {
+  // Show skeleton only on initial load, otherwise show cached data while loading (stale-while-revalidate)
+  if (loading && isInitialLoad) {
     return (
       <div className="min-h-screen pb-24">
         <div className="p-4 space-y-6 animate-pulse">
@@ -596,152 +599,169 @@ const Home = () => {
       </div>
     );
   }
-
-  return (
-    <div className="min-h-screen pb-24">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-4 py-4">
-        {locationData && (
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={requestLocation}
-              disabled={isLoadingLocation}
-              className="flex items-center gap-2 text-emerald-600 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 active:scale-95"
-              title={locationPermission === 'granted' ? 'Update location' : 'Tap to enable location'}
-            >
-              {isLoadingLocation ? (
-                <>
-                  <Loader2 className="w-5 h-5 fill-current animate-spin" />
-                  <span className="font-bold text-foreground">{t("common.loading")}</span>
-                </>
-              ) : (
-                <>
-                  <MapPin className="w-5 h-5 fill-current" />
-                  <span className="font-bold text-foreground">
-                    {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' 
-                      ? `${locationData.city}, ${locationData.state}`
-                      : locationData.latitude && locationData.longitude
-                      ? `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`
-                      : t("home.getLocation") || "Get Location"}
-                  </span>
-                  {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' && (
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </>
-              )}
-            </button>
-          </div>
-        )}
-        {!locationData && (
-          <div className="mb-4">
-            <button
-              onClick={requestLocation}
-              disabled={isLoadingLocation}
-              className="flex items-center gap-2 text-emerald-600 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 active:scale-95"
-            >
-              {isLoadingLocation ? (
-                <>
-                  <Loader2 className="w-5 h-5 fill-current animate-spin" />
-                  <span className="font-bold text-foreground">{t("common.loading")}</span>
-                </>
-              ) : (
-                <>
-                  <MapPin className="w-5 h-5 fill-current" />
-                  <span className="font-bold text-foreground">{t("home.getLocation") || "Get Location"}</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
-        
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("home.searchPlaceholder") || "Search for food, stores..."} 
-            className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border-none focus:ring-2 focus:ring-emerald-600/20 focus:outline-none transition-all placeholder:text-muted-foreground text-sm font-medium shadow-sm"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white shadow-sm border border-border hover:bg-gray-50"
-            >
-              <X className="w-4 h-4 text-foreground" />
-            </button>
-          )}
+  
+  // If loading (but not initial load), show cached data with visual refresh indicator
+  if (loading && !isInitialLoad && offers.length > 0) {
+    // Show cached offers with slight opacity to indicate refresh in progress
+    return (
+      <div className="min-h-screen pb-24 opacity-90">
+        <div className="fixed top-2 right-4 text-sm text-gray-500 animate-pulse">
+          <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
+          {t.refreshing || "Refreshing..."}
         </div>
+        {renderHomeContent()}
+      </div>
+    );
+  }
 
-        {/* Distance Filter - Only show if location is available */}
-        {locationData?.latitude && locationData?.longitude && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-medium text-foreground">
-                {t("home.distance_filter") || "Maximum Distance"}
-              </span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+  // Show skeleton only on initial load, otherwise show cached data while loading (stale-while-revalidate)
+  const renderHomeContent = () => {
+    return (
+      <>
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-4 py-4">
+          {locationData && (
+            <div className="flex items-center justify-between mb-4">
               <button
-                onClick={() => setDistanceFilter(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                  distanceFilter === null
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "bg-white text-foreground hover:bg-emerald-50 border border-border"
-                }`}
+                onClick={requestLocation}
+                disabled={isLoadingLocation}
+                className="flex items-center gap-2 text-emerald-600 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 active:scale-95"
+                title={locationPermission === 'granted' ? 'Update location' : 'Tap to enable location'}
               >
-                {t("home.all_distances") || "All"}
+                {isLoadingLocation ? (
+                  <>
+                    <Loader2 className="w-5 h-5 fill-current animate-spin" />
+                    <span className="font-bold text-foreground">{t("common.loading")}</span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="w-5 h-5 fill-current" />
+                    <span className="font-bold text-foreground">
+                      {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' 
+                        ? `${locationData.city}, ${locationData.state}`
+                        : locationData.latitude && locationData.longitude
+                        ? `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`
+                        : t("home.getLocation") || "Get Location"}
+                    </span>
+                    {locationData.city !== 'Unknown' && locationData.state !== 'Unknown' && (
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </>
+                )}
               </button>
-              {[3, 5, 10, 20].map((distance) => (
+            </div>
+          )}
+          {!locationData && (
+            <div className="mb-4">
+              <button
+                onClick={requestLocation}
+                disabled={isLoadingLocation}
+                className="flex items-center gap-2 text-emerald-600 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 active:scale-95"
+              >
+                {isLoadingLocation ? (
+                  <>
+                    <Loader2 className="w-5 h-5 fill-current animate-spin" />
+                    <span className="font-bold text-foreground">{t("common.loading")}</span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="w-5 h-5 fill-current" />
+                    <span className="font-bold text-foreground">{t("home.getLocation") || "Get Location"}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+          
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("home.searchPlaceholder") || "Search for food, stores..."} 
+              className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border-none focus:ring-2 focus:ring-emerald-600/20 focus:outline-none transition-all placeholder:text-muted-foreground text-sm font-medium shadow-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white shadow-sm border border-border hover:bg-gray-50"
+              >
+                <X className="w-4 h-4 text-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Distance Filter - Only show if location is available */}
+          {locationData?.latitude && locationData?.longitude && (
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm font-medium text-foreground">
+                  {t("home.distance_filter") || "Maximum Distance"}
+                </span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 <button
-                  key={distance}
-                  onClick={() => setDistanceFilter(distance)}
+                  onClick={() => setDistanceFilter(null)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                    distanceFilter === distance
+                    distanceFilter === null
                       ? "bg-emerald-600 text-white shadow-md"
                       : "bg-white text-foreground hover:bg-emerald-50 border border-border"
                   }`}
                 >
-                  {distance} km
+                  {t("home.all_distances") || "All"}
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* Pickup Reminder Banner - Mobile Optimized */}
-      {pendingCount > 0 && (
-        <div className="px-3 sm:px-4 pt-3 sm:pt-4">
-          <Link
-            href={userId ? `/client/orders/${userId}` : "/client/orders"}
-            className="block bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-3 sm:p-4 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
-          >
-            <div className="flex items-start gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700" />
+                {[3, 5, 10, 20].map((distance) => (
+                  <button
+                    key={distance}
+                    onClick={() => setDistanceFilter(distance)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                      distanceFilter === distance
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "bg-white text-foreground hover:bg-emerald-50 border border-border"
+                    }`}
+                  >
+                    {distance} km
+                  </button>
+                ))}
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base sm:text-lg text-amber-900 mb-1">
-                  {t("client.home.pickup_reminder_title") || "Don't forget to pick up your order!"}
-                </h3>
-                <p className="text-xs sm:text-sm text-amber-800 mb-2 sm:mb-3">
-                  {pendingCount === 1
-                    ? t("client.home.pickup_reminder_message_singular") || "You have 1 pending order waiting for pickup."
-                    : t("client.home.pickup_reminder_message", { count: pendingCount, plural: "s" }) || `You have ${pendingCount} pending orders waiting for pickup.`}
-                </p>
-                <div className="flex items-center gap-2 text-amber-700 font-semibold text-xs sm:text-sm">
-                  <span>{t("client.home.view_orders") || "View Orders"}</span>
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+            </div>
+          )}
+        </header>
+
+        {/* Pickup Reminder Banner - Mobile Optimized */}
+        {pendingCount > 0 && (
+          <div className="px-3 sm:px-4 pt-3 sm:pt-4">
+            <Link
+              href={userId ? `/client/orders/${userId}` : "/client/orders"}
+              className="block bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-3 sm:p-4 shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-base sm:text-lg text-amber-900 mb-1">
+                    {t("client.home.pickup_reminder_title") || "Don't forget to pick up your order!"}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-amber-800 mb-2 sm:mb-3">
+                    {pendingCount === 1
+                      ? t("client.home.pickup_reminder_message_singular") || "You have 1 pending order waiting for pickup."
+                      : t("client.home.pickup_reminder_message", { count: pendingCount, plural: "s" }) || `You have ${pendingCount} pending orders waiting for pickup.`}
+                  </p>
+                  <div className="flex items-center gap-2 text-amber-700 font-semibold text-xs sm:text-sm">
+                    <span>{t("client.home.view_orders") || "View Orders"}</span>
+                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        </div>
-      )}
+            </Link>
+          </div>
+        )}
 
-      <main className="space-y-6 sm:space-y-8 pt-4 sm:pt-6">
+        <main className="space-y-6 sm:space-y-8 pt-4 sm:pt-6">
+
         {/* Search Results - Mobile Optimized */}
         {searchQuery.trim() && (
           <section className="px-3 sm:px-4">
@@ -968,8 +988,49 @@ const Home = () => {
             <Offers />
           </section>
         )}
-      </main>
+        </main>
+      </>
+    );
+  };
+
+  if (loading && isInitialLoad) {
+    return (
+      <div className="min-h-screen pb-24">
+        <div className="p-4 space-y-6 animate-pulse">
+          <div className="h-8 bg-muted rounded-lg w-1/3"></div>
+          <div className="h-40 bg-muted rounded-2xl w-full"></div>
+          <div className="space-y-4">
+            <div className="h-6 bg-muted rounded w-1/4"></div>
+            <div className="flex gap-4 overflow-hidden">
+              <div className="h-64 bg-muted rounded-2xl w-64 flex-shrink-0"></div>
+              <div className="h-64 bg-muted rounded-2xl w-64 flex-shrink-0"></div>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
+  
+  // If loading (but not initial load), show cached data with visual refresh indicator
+  if (loading && !isInitialLoad && offers.length > 0) {
+    return (
+      <div className="min-h-screen pb-24 opacity-90">
+        <div className="fixed top-2 right-4 text-sm text-gray-500 animate-pulse z-50">
+          <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
+          {t.refreshing || "Refreshing..."}
+        </div>
+        <div className="min-h-screen pb-24">
+          {renderHomeContent()}
+        </div>
+      </div>
+    );
+  }
+
+  // Default render with all data loaded
+  return (
+    <div className="min-h-screen pb-24">
+      {renderHomeContent()}
+    </div>
   );
 };
 
