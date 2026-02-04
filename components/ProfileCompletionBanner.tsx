@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import { AlertCircle, MapPin, Map, Camera, CheckCircle } from "lucide-react";
+import { AlertCircle as AlertCircleIcon, MapPin as MapPinIcon, Map as MapIcon, Camera as CameraIcon, CheckCircle as CheckCircleIcon } from "lucide-react";
 
 interface ProfileData {
   location?: string;
@@ -32,7 +32,7 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
     if (!profile?.location || profile.location.trim() === '') {
       items.push({
         key: 'location',
-        icon: MapPin,
+        icon: MapPinIcon,
         title: t("profile_completion.missing_location"),
         priority: 'high'
       });
@@ -41,7 +41,7 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
     if (!profile?.mapsLink || profile.mapsLink.trim() === '') {
       items.push({
         key: 'maps',
-        icon: Map,
+        icon: MapIcon,
         title: t("profile_completion.missing_maps"),
         priority: 'high'
       });
@@ -50,7 +50,7 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
     if (!profile?.profileImage) {
       items.push({
         key: 'image',
-        icon: Camera,
+        icon: CameraIcon,
         title: t("profile_completion.missing_image"),
         priority: 'medium'
       });
@@ -68,8 +68,8 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
         className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <CheckCircle className="w-5 h-5 text-emerald-700" />
+            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <CheckCircleIcon className="w-5 h-5 text-emerald-700" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-emerald-900">
@@ -98,7 +98,7 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-          <AlertCircle className="w-5 h-5 text-amber-700" />
+          <AlertCircleIcon className="w-5 h-5 text-amber-700" />
         </div>
         <div className="flex-1">
           <h3 className="font-semibold text-amber-900 mb-2">
@@ -107,10 +107,10 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
           
           <div className="space-y-2 mb-4">
             {sortedItems.map((item, index) => {
-              const Icon = item.icon;
+              const Icon = item.icon as React.ComponentType<any> | undefined;
               return (
                 <div key={item.key} className="flex items-center gap-2 text-sm text-amber-800">
-                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {Icon ? <Icon className="w-4 h-4 flex-shrink-0" /> : null}
                   <span>{item.title}</span>
                 </div>
               );
@@ -132,7 +132,7 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
                 onClick={() => router.push("https://maps.google.com")}
                 className="border-amber-300 text-amber-700 hover:bg-amber-100"
               >
-                <Map className="w-4 h-4 mr-1" />
+                <MapIcon className="w-4 h-4 mr-1" />
                 Get Maps Link
               </Button>
             )}
