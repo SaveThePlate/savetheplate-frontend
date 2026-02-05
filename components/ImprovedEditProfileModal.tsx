@@ -239,10 +239,10 @@ export const ImprovedEditProfileModal: React.FC<ImprovedEditProfileModalProps> =
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-6 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-gray-900">
@@ -380,7 +380,7 @@ export const ImprovedEditProfileModal: React.FC<ImprovedEditProfileModalProps> =
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-100">
+        <div className="p-6 border-t border-gray-100 flex-shrink-0">
           <div className="flex gap-3">
             <Button
               variant="outline"
