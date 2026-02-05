@@ -29,7 +29,7 @@ export default function SharedLayout({ children }: { children: React.ReactNode }
   }, [user?.id]);
 
   const isClient = userRole === "CLIENT";
-  const isProvider = userRole === "PROVIDER";
+  const isProvider = userRole === "PROVIDER" || userRole === "PENDING_PROVIDER";
   const homeLink = isClient ? "/client/home" : isProvider ? "/provider/home" : "/";
   const profileLink = isClient ? "/client/profile" : isProvider ? "/provider/profile" : "/";
   const ordersLink = isClient 

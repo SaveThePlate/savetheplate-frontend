@@ -232,7 +232,7 @@ const ImpactPage = () => {
                     {t("impact.browse_offers")}
                   </button>
                 )}
-                {userRole === "PROVIDER" && (
+                {(userRole === "PROVIDER" || userRole === "PENDING_PROVIDER") && (
                   <button
                     onClick={() => router.push("/provider/home")}
                     className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"

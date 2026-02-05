@@ -244,7 +244,7 @@ const ImpactPage = () => {
                     {t("impact.browse_offers")}
                   </Button>
                 )}
-                {userRole === "PROVIDER" && (
+                {(userRole === "PROVIDER" || userRole === "PENDING_PROVIDER") && (
                   <Button
                     onClick={() => router.push("/provider/home")}
                     variant="teal"
