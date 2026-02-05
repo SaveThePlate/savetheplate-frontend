@@ -459,7 +459,7 @@ const OffersPage = () => {
       result = result.filter(offer =>
         offer.title.toLowerCase().includes(query) ||
         offer.description.toLowerCase().includes(query) ||
-        (offer.owner?.location || offer.pickupLocation || "").toLowerCase().includes(query)
+        ((offer.owner?.username || offer.owner?.location || offer.pickupLocation || "").toLowerCase().includes(query))
       );
     }
 
@@ -866,8 +866,8 @@ const OffersPage = () => {
           const imageSrc = resolveImageSource(firstImage);
           const imageAlt = firstImage?.alt ?? offer.title;
 
-          // Use owner's current location if available, otherwise fallback to stored pickupLocation
-          const currentLocation = offer.owner?.location || offer.pickupLocation;
+          // Prefer owner's store name, otherwise use owner's location or stored pickupLocation
+          const currentLocation = offer.owner?.username || offer.owner?.location || offer.pickupLocation;
           const currentMapsLink = offer.owner?.mapsLink || offer.mapsLink;
 
           return (

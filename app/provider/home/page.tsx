@@ -513,7 +513,7 @@ const ProviderHome = () => {
               const firstImage = imagesArray?.[0] || (offer.imageFileName ? { filename: offer.imageFileName } : null);
               const imageSrc = resolveImageSource(firstImage);
               const expired = isOfferExpired(offer.expirationDate);
-              const currentLocation = (offer.pickupLocation && offer.pickupLocation.trim() !== '') ? offer.pickupLocation : (offer.owner?.location || offer.pickupLocation);
+              const currentLocation = offer.owner?.username || ((offer.pickupLocation && offer.pickupLocation.trim() !== '') ? offer.pickupLocation : (offer.owner?.location || ""));
 
               return (
                 <div
@@ -606,7 +606,7 @@ const ProviderHome = () => {
                                 expirationDate={offer.expirationDate}
                                 pickupStartTime={offer.pickupStartTime}
                                 pickupEndTime={offer.pickupEndTime}
-                                pickupLocation={offer.owner?.location || currentLocation}
+                                pickupLocation={offer.owner?.username || currentLocation}
                                 mapsLink={offer.mapsLink}
                                 foodType={offer.foodType}
                                 taste={offer.taste}

@@ -37,6 +37,11 @@ interface Offer {
   pickupLocation: string;
   latitude: number;
   longitude: number;
+  owner?: {
+    id?: number;
+    username?: string;
+    location?: string;
+  };
 }
 
 interface Props {
@@ -141,7 +146,7 @@ const OfferCarousel: React.FC<Props> = ({ ownerId }) => {
     <Slider {...carouselSettings}>
       {ownerOffers.map((offer) => (
         <div key={offer.id} className="p-3"> {/* Reduced padding */}
-          <h3 className="text-lg font-semibold mb-6">Offers by {offer.pickupLocation}</h3> {/* Smaller title size */}
+          <h3 className="text-lg font-semibold mb-6">Offers by {offer.owner?.username || offer.pickupLocation}</h3> {/* Prefer store name (owner.username) over pickup location */}
 
           <div className="bg-white shadow rounded-lg p-3 flex flex-col sm:flex-row gap-3">
             <div className="flex-shrink-0">

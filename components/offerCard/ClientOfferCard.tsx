@@ -107,7 +107,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
   const expired = isOfferExpired(expirationDate);
   const isRescuePack = title.toLowerCase().includes("rescue pack");
 
-  const providerName = owner?.location || owner?.username || pickupLocation;
+  const providerName = owner?.username || owner?.location || pickupLocation;
   const displayRating = averageRating && averageRating > 0 ? averageRating.toFixed(1) : null;
 
   return (
@@ -329,7 +329,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
                 )}
                 <div className="flex-1 min-w-0">
                   <h2 className="text-sm sm:text-base font-bold text-foreground mb-0.5">
-                    {owner?.location || pickupLocation}
+                    {owner?.username || owner?.location || pickupLocation}
                   </h2>
                   {/* Rating */}
                   {displayRating ? (

@@ -34,7 +34,7 @@ export const ProviderOverlay: FC<ProviderOverlayProps> = ({
           />
         </div>
         <p className="text-[10px] sm:text-xs font-semibold text-gray-800 truncate max-w-[70px] sm:max-w-[90px]">
-          {owner.location || pickupLocation || "Location"}
+          {owner.username || owner.location || pickupLocation || "Provider"}
         </p>
       </div>
     </div>
