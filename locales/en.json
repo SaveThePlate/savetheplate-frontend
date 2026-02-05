@@ -274,10 +274,17 @@
     "pending_orders": "Pending orders",
     "confirmed_orders": "Confirmed orders",
     "cancelled_orders": "Cancelled orders",
+    "expired_orders": "Expired orders",
     "scan_qr": "Scan QR Code",
     "refresh": "Refresh",
     "scan_qr_code": "Scan QR Code",
     "ordered_by": "Ordered by:",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
     "phone": "Phone:",
     "location": "Location:",
     "quantity": "Quantity:",
@@ -443,13 +450,15 @@
       "explore_offers": "Explore Offers",
       "pending_orders": "Pending Orders",
       "confirmed_orders": "Confirmed Orders",
-      "cancelled_orders": "Cancelled Orders"
+      "cancelled_orders": "Cancelled Orders",
+      "expired_orders": "Expired Orders"
     }
   },
   "orders": {
     "confirmed": "Order confirmed!",
     "cancelled": "Order cancelled",
     "pending": "Pending",
+    "expired": "Expired",
     "confirmed_title": "Order Confirmed!",
     "already_confirmed": "Order Already Confirmed",
     "already_confirmed_message": "This order was already confirmed previously.",

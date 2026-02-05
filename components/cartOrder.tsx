@@ -47,6 +47,7 @@ interface CartOrderProps {
     collectedAt?: string;
   };
   onOrderCancelled?: (orderId: number) => void;
+  onStatusChange?: (orderId: number, newStatus: string) => void;
 }
 
 type Offer = {
@@ -72,7 +73,7 @@ type Offer = {
 
 const DEFAULT_IMAGE = "/defaultBag.png";
 
-const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
+const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled, onStatusChange }) => {
   const router = useRouter();
   const [offer, setOffer] = useState<Offer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -218,9 +219,33 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
     run();
   }, [order.offerId, router, t]);
 
-  const isExpired = offer && new Date(offer.expirationDate).getTime() <= Date.now();
+  // Check if order should be expired and update status
+  useEffect(() => {
+    if (offer && order.status === "pending") {
+      // Use pickupEndTime if available, otherwise fall back to expirationDate
+      const deadlineStr = offer.pickupEndTime || offer.expirationDate;
+      if (deadlineStr) {
+        const deadline = new Date(deadlineStr);
+        const now = new Date();
+        const isExpired = deadline.getTime() <= now.getTime();
+        
+        if (isExpired && localOrderStatus === "pending") {
+          console.log(`Order ${order.id} expired: deadline=${deadline.toISOString()}, now=${now.toISOString()}`);
+          setLocalOrderStatus("expired");
+          // Notify parent component about status change
+          if (onStatusChange) {
+            onStatusChange(order.id, "expired");
+          }
+        }
+      }
+    }
+  }, [offer, order.status, order.id, localOrderStatus, onStatusChange]);
+
+  // Use pickupEndTime if available, otherwise fall back to expirationDate
+  const deadlineStr = offer?.pickupEndTime || offer?.expirationDate;
+  const isExpired = deadlineStr && new Date(deadlineStr).getTime() <= Date.now();
   
-  // Use local status for instant UI updates
+  // Use local status which is already updated to expired if needed
   const currentStatus = localOrderStatus;
   
   // For pending orders, always show details. For others, use state
@@ -252,6 +277,14 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
           text: "text-red-800",
           badge: "bg-red-100 text-red-800 border-red-300",
           icon: XCircle,
+        };
+      case "expired":
+        return {
+          bg: "bg-gray-50",
+          border: "border-gray-400",
+          text: "text-gray-700",
+          badge: "bg-gray-200 text-gray-800 border-gray-400",
+          icon: Clock,
         };
       default:
         return {
@@ -380,7 +413,13 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
             <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border ${statusConfig.badge} mb-2 sm:mb-3`}>
               <StatusIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="text-[10px] xs:text-xs font-bold uppercase tracking-wide whitespace-nowrap">
-                {currentStatus}
+                {currentStatus === "pending"
+                  ? t("orders.pending")
+                  : currentStatus === "confirmed"
+                  ? t("orders.confirmed")
+                  : currentStatus === "expired"
+                  ? t("common.expired") || "Expired"
+                  : t("orders.cancelled")}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 sm:mb-3 break-words">
@@ -423,9 +462,9 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
             </div>
 
             {/* Expiration Date */}
-            <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+            <div className={`flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border ${isExpired ? "bg-red-50 border-red-200" : "bg-gray-50 border-gray-200"}`}>
+              <div className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${isExpired ? "bg-red-100" : "bg-amber-100"}`}>
+                <Calendar className={`w-4 h-4 sm:w-5 sm:h-5 ${isExpired ? "text-red-700" : "text-amber-700"}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] xs:text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
@@ -524,7 +563,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
         {/* Actions Section - Only show for pending orders or when details are expanded */}
         {shouldShowDetails && (
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200">
-            {currentStatus === "pending" && order.qrCodeToken && (
+            {currentStatus === "pending" && !isExpired && order.qrCodeToken && (
               <button
                 onClick={() => setShowQRCodeModal(true)}
                 className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-sm sm:text-base min-w-0"
@@ -533,7 +572,7 @@ const CartOrder: React.FC<CartOrderProps> = ({ order, onOrderCancelled }) => {
                 <span className="truncate">{t("cart_order.show_qr")}</span>
               </button>
             )}
-            {currentStatus === "pending" && (
+            {currentStatus === "pending" && !isExpired && (
               <button
                 onClick={handleCancelOrder}
                 disabled={canceling}

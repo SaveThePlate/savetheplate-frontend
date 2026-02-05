@@ -274,10 +274,17 @@
     "pending_orders": "Commandes en attente",
     "confirmed_orders": "Commandes confirmées",
     "cancelled_orders": "Commandes annulées",
+    "expired_orders": "Commandes expirées",
     "scan_qr": "Scanner le Code QR",
     "refresh": "Actualiser",
     "scan_qr_code": "Scanner le Code QR",
     "ordered_by": "Commandé par :",
+    "status": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "cancelled": "Annulée",
+      "expired": "Expirée"
+    },
     "phone": "Téléphone :",
     "location": "Emplacement :",
     "quantity": "Quantité :",
@@ -443,13 +450,15 @@
       "explore_offers": "Explorer les Offres",
       "pending_orders": "Commandes en Attente",
       "confirmed_orders": "Commandes Confirmées",
-      "cancelled_orders": "Commandes Annulées"
+      "cancelled_orders": "Commandes Annulées",
+      "expired_orders": "Commandes Expirées"
     }
   },
   "orders": {
     "confirmed": "Commande confirmée !",
     "cancelled": "Commande annulée",
     "pending": "En attente",
+    "expired": "Expirée",
     "confirmed_title": "Commande Confirmée !",
     "already_confirmed": "Commande Déjà Confirmée",
     "already_confirmed_message": "Cette commande a déjà été confirmée précédemment.",

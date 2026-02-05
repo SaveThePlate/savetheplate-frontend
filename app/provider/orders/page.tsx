@@ -130,9 +130,25 @@ const ProviderOrdersContent = () => {
         }
       );
       
-      // Safely set orders - ensure it's an array
+      // Safely set orders - ensure it's an array and check for expired orders
       if (Array.isArray(res.data)) {
-        setOrders(res.data);
+        // Check and update expired orders
+        const ordersWithExpiredCheck = res.data.map((order: Order) => {
+          // If order is pending and expiration date has passed, mark as expired
+          if (order.status === "pending" && order.offer) {
+            // Use pickupEndTime if available, otherwise fall back to expirationDate
+            const deadlineStr = order.offer.pickupEndTime || order.offer.expirationDate;
+            if (deadlineStr) {
+              const isExpired = new Date(deadlineStr).getTime() <= Date.now();
+              if (isExpired) {
+                console.log(`Provider order ${order.id} expired: deadline=${deadlineStr}`);
+                return { ...order, status: "expired" };
+              }
+            }
+          }
+          return order;
+        });
+        setOrders(ordersWithExpiredCheck);
       } else {
         setOrders([]);
       }
@@ -179,6 +195,41 @@ const ProviderOrdersContent = () => {
       setLoading(false);
     }
   }, [fetchOrders]);
+
+  // Periodically check for expired orders and update them
+  useEffect(() => {
+    const checkExpiredOrders = () => {
+      setOrders((prevOrders) => {
+        if (!Array.isArray(prevOrders)) return prevOrders;
+        
+        let updated = false;
+        const updatedOrders = prevOrders.map((order) => {
+          if (order.status === "pending" && order.offer) {
+            // Use pickupEndTime if available, otherwise fall back to expirationDate
+            const deadlineStr = order.offer.pickupEndTime || order.offer.expirationDate;
+            if (deadlineStr) {
+              const isExpired = new Date(deadlineStr).getTime() <= Date.now();
+              if (isExpired) {
+                updated = true;
+                console.log(`Order ${order.id} marked as expired in periodic check`);
+                return { ...order, status: "expired" };
+              }
+            }
+          }
+          return order;
+        });
+        
+        return updated ? updatedOrders : prevOrders;
+      });
+    };
+
+    // Check every minute for expired orders
+    const interval = setInterval(checkExpiredOrders, 60000);
+    // Also check immediately on mount
+    checkExpiredOrders();
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Check for error query parameter (from backend redirects)
   useEffect(() => {
@@ -250,6 +301,7 @@ const ProviderOrdersContent = () => {
   const confirmed = safeOrders.filter((o) => o.status === "confirmed");
   const pending = safeOrders.filter((o) => o.status === "pending");
   const cancelled = safeOrders.filter((o) => o.status === "cancelled");
+  const expired = safeOrders.filter((o) => o.status === "expired");
 
   // Filter and sort orders
   const filteredOrders = useMemo(() => {
@@ -275,13 +327,36 @@ const ProviderOrdersContent = () => {
 
     // Filter by status tab
     if (activeTab !== "all") {
-      filtered = filtered.filter((o) => o.status === activeTab);
+      filtered = filtered.filter((o) => {
+        // For expired orders, check if pickup time has passed for pending orders
+        if (activeTab === "expired") {
+          if (o.status === "expired") return true;
+          if (o.status === "pending" && o.offer) {
+            const deadlineStr = o.offer.pickupEndTime || o.offer.expirationDate;
+            return deadlineStr && new Date(deadlineStr).getTime() <= Date.now();
+          }
+          return false;
+        }
+        return o.status === activeTab;
+      });
     }
 
-    // Sort by date (newest first)
-    return filtered.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    // Sort by status priority first (pending > confirmed > cancelled > expired), then by date
+    const statusPriority: Record<string, number> = {
+      pending: 1,
+      confirmed: 2,
+      cancelled: 3,
+      expired: 4
+    };
+
+    return filtered.sort((a, b) => {
+      // First sort by status priority
+      const priorityDiff = (statusPriority[a.status] || 999) - (statusPriority[b.status] || 999);
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // Then sort by date (newest first within same status)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   }, [safeOrders, searchQuery, activeTab]);
 
   return (
@@ -306,7 +381,7 @@ const ProviderOrdersContent = () => {
         </div>
 
         {/* Stats Cards - Clickable Filters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-2 sm:mb-3">
             <button
               onClick={() => setActiveTab("all")}
               className={`bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
@@ -371,6 +446,23 @@ const ProviderOrdersContent = () => {
                 </div>
                 <div className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg flex-shrink-0 ml-1 ${activeTab === "cancelled" ? "bg-red-200" : "bg-red-100"}`}>
                   <XCircle className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${activeTab === "cancelled" ? "text-red-800" : "text-red-700"}`} />
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("expired")}
+              className={`bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border-0 shadow-md hover:shadow-lg transition-all duration-200 text-left cursor-pointer ${
+                activeTab === "expired" ? "ring-2 ring-gray-500 scale-[1.02]" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">{t("provider.expired_orders") || "Expired"}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-700">{expired.length}</p>
+                </div>
+                <div className={`p-1.5 sm:p-2 md:p-2.5 rounded-lg flex-shrink-0 ml-1 ${activeTab === "expired" ? "bg-gray-300" : "bg-gray-200"}`}>
+                  <AlertCircle className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${activeTab === "expired" ? "text-gray-800" : "text-gray-700"}`} />
                 </div>
               </div>
             </button>
@@ -512,6 +604,14 @@ const OrderCard: React.FC<{
   const user = order.user;
   const [isExpanded, setIsExpanded] = useState(false);
   
+  // Check if order is expired based on pickup date (only if not already marked as expired)
+  // Use pickupEndTime if available, otherwise fall back to expirationDate
+  const deadlineStr = offer?.pickupEndTime || offer?.expirationDate;
+  const isExpired = order.status === "expired" || (deadlineStr && new Date(deadlineStr).getTime() <= Date.now());
+  
+  // Use expired status if order should be expired, otherwise use actual order status
+  const displayStatus = isExpired && (order.status === "pending" || order.status === "expired") ? "expired" : order.status;
+  
   // Format pickup deadline
   const pickupDeadline = offer?.expirationDate 
     ? formatDateTimeRange(offer.pickupStartTime, offer.pickupEndTime, offer.expirationDate)
@@ -590,6 +690,14 @@ const OrderCard: React.FC<{
           icon: XCircle,
           label: t("provider.status.cancelled")
         };
+      case "expired":
+        return { 
+          bg: "bg-gray-100", 
+          text: "text-gray-700", 
+          border: "border-gray-400",
+          icon: AlertCircle,
+          label: t("provider.status.expired") || "Expired"
+        };
       default:
         return { 
           bg: "bg-gray-100", 
@@ -601,7 +709,7 @@ const OrderCard: React.FC<{
     }
   };
 
-  const status = statusConfig(order.status);
+  const status = statusConfig(displayStatus);
   const StatusIcon = status.icon;
 
   const formatDate = (dateString: string) => {
@@ -636,8 +744,9 @@ const OrderCard: React.FC<{
 
   return (
     <Card className={`border-2 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden bg-white flex flex-col h-full ${
-      order.status === "pending" ? "border-yellow-200 hover:border-yellow-300" :
-      order.status === "confirmed" ? "border-emerald-200 hover:border-emerald-300" :
+      displayStatus === "pending" ? "border-yellow-200 hover:border-yellow-300" :
+      displayStatus === "confirmed" ? "border-emerald-200 hover:border-emerald-300" :
+      displayStatus === "expired" ? "border-gray-300 hover:border-gray-400" :
       "border-gray-200 hover:border-gray-300"
     }`}>
       <CardContent className="p-0 flex flex-col h-full">
@@ -649,7 +758,7 @@ const OrderCard: React.FC<{
               {status.label}
             </span>
           </div>
-          {order.status === "pending" && isPickupToday && (
+          {displayStatus === "pending" && isPickupToday && !isExpired && (
             <Badge className="bg-red-500 text-white text-xs font-semibold animate-pulse">
               {t("provider.pickup_today") || "Today!"}
             </Badge>

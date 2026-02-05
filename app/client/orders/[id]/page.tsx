@@ -57,7 +57,17 @@ const Orders = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setOrders(response.data);
+      // Check and update expired orders
+      const ordersWithExpiredCheck = response.data.map((order: Order) => {
+        // If order is pending and has an expiration date that has passed, mark as expired
+        if (order.status === "pending") {
+          // Note: We'll check expiration in the CartOrder component since it has access to the offer details
+          return order;
+        }
+        return order;
+      });
+
+      setOrders(ordersWithExpiredCheck);
     } catch (err: any) {
       console.error("Failed to fetch orders:", err);
       // Provide user-friendly error message
@@ -75,6 +85,15 @@ const Orders = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // Update order status when child component (CartOrder) detects expiration
+  const handleOrderStatusChange = useCallback((orderId: number, newStatus: string) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+  }, []);
 
   // WEBSOCKET INTEGRATION TEMPORARILY DISABLED - Using manual refresh instead
   // Handle real-time order updates
@@ -142,9 +161,29 @@ const Orders = () => {
     );
   }, []);
 
-  const pendingOrders = orders.filter((o) => o.status === "pending");
-  const confirmedOrders = orders.filter((o) => o.status === "confirmed");
-  const cancelledOrders = orders.filter((o) => o.status === "cancelled");
+  // Sort orders by status priority: pending > confirmed > cancelled > expired
+  const sortedOrders = useMemo(() => {
+    const statusPriority: Record<string, number> = {
+      pending: 1,
+      confirmed: 2,
+      cancelled: 3,
+      expired: 4
+    };
+
+    return [...orders].sort((a, b) => {
+      // First sort by status priority
+      const priorityDiff = (statusPriority[a.status] || 999) - (statusPriority[b.status] || 999);
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // Then sort by date (newest first within same status)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [orders]);
+
+  const pendingOrders = sortedOrders.filter((o) => o.status === "pending");
+  const confirmedOrders = sortedOrders.filter((o) => o.status === "confirmed");
+  const cancelledOrders = sortedOrders.filter((o) => o.status === "cancelled");
+  const expiredOrders = sortedOrders.filter((o) => o.status === "expired");
 
   const hasOrders = orders.length > 0;
   const totalOrders = orders.length;
@@ -266,7 +305,11 @@ const Orders = () => {
                       key={order.id}
                       className="bg-white rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                      <CartOrder 
+                        order={order} 
+                        onOrderCancelled={handleOrderCancelled}
+                        onStatusChange={handleOrderStatusChange}
+                      />
                     </div>
                   ))}
                 </div>
@@ -292,7 +335,11 @@ const Orders = () => {
                       key={order.id}
                       className="bg-white rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                      <CartOrder 
+                        order={order} 
+                        onOrderCancelled={handleOrderCancelled}
+                        onStatusChange={handleOrderStatusChange}
+                      />
                     </div>
                   ))}
                 </div>
@@ -318,7 +365,41 @@ const Orders = () => {
                       key={order.id}
                       className="bg-white rounded-2xl border border-border/50 shadow-sm opacity-75"
                     >
-                      <CartOrder order={order} onOrderCancelled={handleOrderCancelled} />
+                      <CartOrder 
+                        order={order} 
+                        onOrderCancelled={handleOrderCancelled}
+                        onStatusChange={handleOrderStatusChange}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {expiredOrders.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 px-1">
+                  <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-foreground flex-1">
+                    {t("client.orders.expired_orders") || "Expired Orders"}
+                  </h2>
+                  <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs sm:text-sm font-semibold">
+                    {expiredOrders.length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {expiredOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-white rounded-2xl border border-border/50 shadow-sm opacity-75"
+                    >
+                      <CartOrder 
+                        order={order} 
+                        onOrderCancelled={handleOrderCancelled}
+                        onStatusChange={handleOrderStatusChange}
+                      />
                     </div>
                   ))}
                 </div>
