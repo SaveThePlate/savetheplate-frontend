@@ -15,10 +15,20 @@ import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
 import Link from "next/link";
 
 // Lazy load heavy components with better loading states
-const ClientOfferCard = dynamic(() => import("@/components/offerCard/ClientOfferCard").then(mod => ({ default: mod.ClientOfferCard })), {
-  loading: () => <div className="h-64 animate-pulse bg-gray-200 rounded-lg" />,
-  ssr: false,
-});
+const ClientOfferCard = dynamic(
+  () => import("@/components/offerCard/ClientOfferCard").then((mod) => {
+    if (!mod || !mod.ClientOfferCard) {
+      // Log full module for debugging if the expected export is missing
+      // eslint-disable-next-line no-console
+      console.error("ClientOfferCard dynamic import did not provide ClientOfferCard export:", mod);
+    }
+    return { default: mod?.ClientOfferCard };
+  }),
+  {
+    loading: () => <div className="h-64 animate-pulse bg-gray-200 rounded-lg" />,
+    ssr: false,
+  }
+);
 
 const Offers = dynamic(() => import("@/components/Offers"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-200 rounded-lg" />,
@@ -65,6 +75,20 @@ interface Offer {
 }
 
 const Home = () => {
+  // Debug: detect undefined icon imports early to pinpoint invalid element types
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const icons: Record<string, any> = { Loader2, Search, MapPin, ChevronRight, X, Utensils, Croissant, ShoppingCart, Package, Clock, ArrowRight };
+      const missing = Object.entries(icons).filter(([, v]) => typeof v === "undefined").map(([k]) => k);
+      if (missing.length > 0) {
+        // eslint-disable-next-line no-console
+        console.error("Missing lucide-react icons detected in client/home/page.tsx:", missing);
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("Error while checking icons:", e);
+    }
+  }
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true); // Track first load vs refresh
   const [error, setError] = useState<string | null>(null);
