@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { ClientOfferCard } from "@/components/offerCard";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { getBackendOrigin } from "@/lib/backendOrigin";
 import { Button } from "@/components/ui/button";
@@ -15,20 +16,9 @@ import { calculateDistance, formatDistance } from "@/utils/distanceUtils";
 import Link from "next/link";
 
 // Lazy load heavy components with better loading states
-const ClientOfferCard = dynamic(
-  () => import("@/components/offerCard/ClientOfferCard").then((mod) => {
-    if (!mod || !mod.ClientOfferCard) {
-      // Log full module for debugging if the expected export is missing
-      // eslint-disable-next-line no-console
-      console.error("ClientOfferCard dynamic import did not provide ClientOfferCard export:", mod);
-    }
-    return { default: mod?.ClientOfferCard };
-  }),
-  {
-    loading: () => <div className="h-64 animate-pulse bg-gray-200 rounded-lg" />,
-    ssr: false,
-  }
-);
+// Note: `ClientOfferCard` is imported statically in production to avoid
+// runtime undefined component issues that can appear with dynamic imports
+// after minification or differing server bundling in hosted environments.
 
 const Offers = dynamic(() => import("@/components/Offers"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-200 rounded-lg" />,
