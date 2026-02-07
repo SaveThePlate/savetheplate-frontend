@@ -1097,7 +1097,31 @@ export default function SignIn() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => router.push("/")}
+                      onClick={async () => {
+                        try {
+                          const token = localStorage.getItem("accessToken");
+                          if (token) {
+                            // Set role to CLIENT for unverified users who want to explore
+                            await axiosInstance.post(
+                              `/users/set-role`,
+                              { role: "CLIENT" },
+                              { 
+                                headers: { 
+                                  Authorization: `Bearer ${token}`,
+                                  "Content-Type": "application/json"
+                                } 
+                              }
+                            );
+                            await fetchUserRole().catch(() => {});
+                          }
+                          // Redirect to client home
+                          router.push("/client/home");
+                        } catch (error) {
+                          console.error("Error setting role:", error);
+                          // Even if role setting fails, redirect to client home
+                          router.push("/client/home");
+                        }
+                      }}
                       className="w-full text-xs sm:text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors underline"
                     >
                       {t("signin.explore_platform") || "Explore the platform"}
