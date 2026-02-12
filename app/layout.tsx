@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     locale: "fr_TN",
     images: [
       {
-        url: "/logo.png",
+        url: new URL("/logo.png", process.env.NEXT_PUBLIC_FRONTEND_URL || "https://savetheplate.tn").toString(),
         width: 512,
         height: 512,
         alt: "Save The Plate Logo",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Save The Plate - Réduire le gaspillage alimentaire",
     description: "SaveThePlate permet aux commerces de vendre leurs invendus à prix réduit. Économisez et réduisez le gaspillage alimentaire.",
-    images: ["/logo.png"],
+    images: [new URL("/logo.png", process.env.NEXT_PUBLIC_FRONTEND_URL || "https://savetheplate.tn").toString()],
   },
   // App Icons
   icons: {
