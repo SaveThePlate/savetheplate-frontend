@@ -1250,7 +1250,8 @@ export default function SignIn() {
             </form>
 
             {/* Divider */}
-            <div className="mt-6 mb-6">
+            {/* COMMENTED OUT: Facebook and Google auth buttons disabled - they do not work currently */}
+            {/* <div className="mt-6 mb-6">
               <Separator className="my-6" />
               <div className="text-center -mt-9 mb-6">
                 <span className="bg-white px-4 text-sm text-gray-500 font-medium">
@@ -1260,9 +1261,9 @@ export default function SignIn() {
             </div>
 
             {/* Social Login Buttons */}
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               {/* Google Sign-In */}
-              <div className="flex justify-center">
+              {/* <div className="flex justify-center">
                 {googleLoading ? (
                   <Button
                     disabled
@@ -1287,7 +1288,7 @@ export default function SignIn() {
               </div>
 
               {/* Facebook Login Button */}
-              {facebookLoading ? (
+              {/* {facebookLoading ? (
                 <Button
                   disabled
                   className="w-full bg-[#1877F2] text-white font-semibold py-3 rounded-lg flex justify-center items-center text-base shadow-md"
@@ -1306,8 +1307,8 @@ export default function SignIn() {
                   </svg>
                   {isSignUp ? t("signin.sign_up_facebook") : t("signin.sign_in_facebook")}
                 </Button>
-              )}
-            </div>
+              )} */}
+            </div> */}
 
               {/* Toast Messages */}
               <div className="mt-6 space-y-3">
