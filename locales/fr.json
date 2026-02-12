@@ -162,8 +162,6 @@
     "sign_in_facebook": "Se connecter avec Facebook",
     "sign_up_facebook": "S'inscrire avec Facebook",
     "connecting_facebook": "Connexion avec Facebook...",
-    "facebook_sign_in": "Se connecter avec Facebook",
-    "facebook_signing_in": "Connexion avec Facebook...",
     "facebook_error": "La connexion Facebook a été annulée ou a échoué. Veuillez réessayer.",
     "facebook_https_required": "La connexion Facebook nécessite HTTPS. Veuillez accéder à ce site via HTTPS.",
     "facebook_https_error": "Facebook nécessite une connexion sécurisée (HTTPS).",

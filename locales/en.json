@@ -162,8 +162,6 @@
     "sign_in_facebook": "Sign in with Facebook",
     "sign_up_facebook": "Sign up with Facebook",
     "connecting_facebook": "Connecting with Facebook...",
-    "facebook_sign_in": "Sign in with Facebook",
-    "facebook_signing_in": "Signing in with Facebook...",
     "facebook_error": "Facebook sign-in was cancelled or failed. Please try again.",
     "facebook_https_required": "Facebook login requires HTTPS. Please access this site via HTTPS.",
     "facebook_https_error": "Facebook requires a secure connection (HTTPS).",
