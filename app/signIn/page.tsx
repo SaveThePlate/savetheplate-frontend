@@ -541,7 +541,7 @@ export default function SignIn() {
       const response = await axiosInstance.post(
         `/auth/google`,
         {
-          credential: credentialResponse.credential,
+          token: credentialResponse.credential,
         },
         {
           headers: {
@@ -1248,6 +1248,66 @@ export default function SignIn() {
                 </Button>
               )}
             </form>
+
+            {/* Divider */}
+            <div className="mt-6 mb-6">
+              <Separator className="my-6" />
+              <div className="text-center -mt-9 mb-6">
+                <span className="bg-white px-4 text-sm text-gray-500 font-medium">
+                  {t("signin.or_continue_with")}
+                </span>
+              </div>
+            </div>
+
+            {/* Social Login Buttons */}
+            <div className="space-y-3">
+              {/* Google Sign-In */}
+              <div className="flex justify-center">
+                {googleLoading ? (
+                  <Button
+                    disabled
+                    className="w-full bg-white border-2 border-gray-200 text-gray-700 font-semibold py-3 rounded-lg flex justify-center items-center text-base"
+                  >
+                    <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                    {t("signin.connecting_google")}
+                  </Button>
+                ) : (
+                  <div className="w-full flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap={false}
+                      theme="outline"
+                      size="large"
+                      text={isSignUp ? "signup_with" : "signin_with"}
+                      locale={language}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Facebook Login Button */}
+              {facebookLoading ? (
+                <Button
+                  disabled
+                  className="w-full bg-[#1877F2] text-white font-semibold py-3 rounded-lg flex justify-center items-center text-base shadow-md"
+                >
+                  <ReloadIcon className="mr-2 h-5 w-5 animate-spin" />
+                  {t("signin.connecting_facebook")}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleFacebookLogin}
+                  className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-base flex items-center justify-center gap-2"
+                  type="button"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                  </svg>
+                  {isSignUp ? t("signin.sign_up_facebook") : t("signin.sign_in_facebook")}
+                </Button>
+              )}
+            </div>
 
               {/* Toast Messages */}
               <div className="mt-6 space-y-3">
