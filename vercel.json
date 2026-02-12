@@ -1,0 +1,13 @@
+{
+  "headers": [
+    {
+      "source": "/data-deletion(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "all"
+        }
+      ]
+    }
+  ]
+}
