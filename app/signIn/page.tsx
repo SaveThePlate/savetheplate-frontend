@@ -268,7 +268,7 @@ export default function SignIn() {
               },
             }
           );
-
+        console.log(response)
           if (response.data?.accessToken && response.data?.refreshToken) {
             LocalStorage.setItem("refresh-token", response.data.refreshToken);
             LocalStorage.setItem("accessToken", response.data.accessToken);
