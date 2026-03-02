@@ -584,21 +584,21 @@ const OffersPage = () => {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4 md:space-y-5">
       {/* Search Bar - White (Too Good To Go style) */}
       {!loading && offers.length > 0 && (
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+          <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
           <input
             type="text"
             placeholder={t("offers.search_placeholder_extended") || "Bakery, restaurant, shop..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-14 py-3.5 sm:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-emerald-600/20 outline-none text-sm sm:text-base shadow-sm transition-all"
+            className="w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-3.5 md:py-4 bg-white border-0 rounded-2xl focus:ring-2 focus:ring-emerald-600/20 outline-none text-sm sm:text-base md:text-lg shadow-sm transition-all"
           />
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
           >
             <SlidersHorizontal className="w-5 h-5" />
           </button>
@@ -607,7 +607,7 @@ const OffersPage = () => {
 
       {/* Filters Section - Collapsible */}
       {!loading && offers.length > 0 && showFilters && (
-        <div className="space-y-4 bg-white border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div className="space-y-3 sm:space-y-4 md:space-y-5 bg-white border border-border rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm">
           
           {/* Filters Section */}
           <div className="space-y-3">

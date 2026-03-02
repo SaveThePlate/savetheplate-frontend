@@ -15,7 +15,7 @@ const Nav = () => {
 
   return (
     <header className='w-full fixed top-0 left-0 z-10 bg-white shadow-md border-b border-gray-200 h-16'>
-      <nav className='max-w-[1440px] mx-auto flex items-center justify-between sm:px-16 px-6 h-full'>
+      <nav className='max-w-[1440px] mx-auto flex items-center justify-between px-6 sm:px-10 md:px-16 h-full'>
         <Link href="/" className='flex items-center h-full'>
           <div className="relative lg:block md:block hidden h-full" style={{ width: '250px', minWidth: '200px' }}>
             <Image

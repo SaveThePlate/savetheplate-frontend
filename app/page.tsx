@@ -128,41 +128,43 @@ const WelcomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-white overflow-x-hidden  ">
       {/* Navigation Header */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm rounded-b-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-7 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20 md:gap-12">
             {/* Left side - Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-4 -ml-2 pl-1 mr-8 md:mr-12">
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={36}
-                height={36}
-                className="object-contain"
+                width={90}
+                height={90}
+                className="object-contain w-12 h-12 md:w-15 md:h-15"
               />
-              <span className="text-lg font-bold text-[#1B4332] hidden sm:block">SaveThePlate</span>
+              <span className="text-sm md:text-lg font-bold font-mono italic bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent hidden sm:block drop-shadow-md">
+                SaveThePlate
+              </span>
             </div>
             
             {/* Center - Navigation Links (Desktop) */}
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+            <div className="hidden md:flex items-center gap-6 md:gap-10">
+              <a href="#features" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
                 {t("landing.fun_header_badge")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+              <a href="#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
                 {t("landing.how_it_works")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="#business" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+              <a href="#business" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
                 {t("landing.for_business")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
             </div>
             
             {/* Right side - Language Switcher and Sign In */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 md:gap-4 md:ml-auto">
               <LanguageSwitcher variant="button" />
               <Button
                 onClick={handleSignIn}
@@ -194,9 +196,9 @@ const WelcomePage = () => {
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 sm:py-0">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center">
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-16 items-center">
             {/* Left Content */}
-            <div className="text-white space-y-3 sm:space-y-4 lg:space-y-6">
+            <div className="text-white space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 md:max-w-lg">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs font-medium mb-3 sm:mb-4 border border-white/20">
                   <Star className="w-3 h-3 fill-yellow-300 text-yellow-300" />
@@ -214,13 +216,13 @@ const WelcomePage = () => {
               </div>
               
               <div>
-                <p className="text-xs sm:text-sm lg:text-base text-white/90 leading-relaxed max-w-xl">
+                <p className="text-xs sm:text-sm md:text-base lg:text-base text-white/90 leading-relaxed max-w-xl md:max-w-lg">
                   {t("landing.welcome_description")}
                 </p>
               </div>
               
               <div>
-                <div className="flex gap-2.5 pt-2">
+                <div className="flex gap-2.5 md:gap-4 pt-2">
                   <Button
                     onClick={handleGetStarted}
                     className="flex-1 sm:flex-none bg-white text-[#1B4332] hover:bg-gray-100 font-bold shadow-lg transition-all duration-200 py-2 px-4 sm:py-3 sm:px-6 rounded-lg text-xs sm:text-sm"
@@ -242,7 +244,7 @@ const WelcomePage = () => {
             </div>
 
             {/* Right Image - App Preview - Mobile & Desktop */}
-            <div className="relative mt-6 sm:mt-8 lg:mt-0 flex justify-center">
+            <div className="relative mt-6 sm:mt-8 md:mt-0 lg:mt-0 flex justify-center">
               <div className="relative w-[240px] sm:w-[300px] md:w-[360px] lg:w-full max-w-md lg:max-w-lg xl:max-w-2xl">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-[3rem] blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
                 <Image

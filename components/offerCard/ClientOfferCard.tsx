@@ -153,17 +153,17 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
       </div>
 
       {/* Lower Section - Textual Information (Too Good To Go style) */}
-      <div className="flex flex-col flex-1 bg-white p-3 sm:p-4">
+      <div className="flex flex-col flex-1 bg-white p-3 sm:p-4 md:p-5">
         {/* Offer Title - Dark Teal, Prominent (replaces provider name) */}
-        <h3 className="text-base sm:text-lg font-bold text-foreground mb-1 line-clamp-2">
+        <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-1 md:mb-2 line-clamp-2">
           {title}
         </h3>
 
         {/* Distance Badge */}
         {distance !== undefined && distance !== Infinity && (
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1 mb-2 md:mb-3">
             <MapPin className="w-3 h-3 text-emerald-600" />
-            <span className="text-xs text-emerald-700 font-medium">
+            <span className="text-xs sm:text-sm text-emerald-700 font-medium">
               {formatDistance(distance)}
             </span>
           </div>
@@ -171,9 +171,9 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
         {/* Category Badges */}
         {(foodType || taste) && (
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-2.5 mb-2 sm:mb-3 md:mb-4">
             {foodType && (
-              <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 rounded-md sm:rounded-lg md:rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold bg-blue-100 text-blue-800">
                 {foodType === "snack" && "🍪"}
                 {foodType === "meal" && "🍽️"}
                 {foodType === "beverage" && "🥤"}
@@ -182,7 +182,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
               </span>
             )}
             {taste && (
-              <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 rounded-md sm:rounded-lg md:rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold bg-purple-100 text-purple-800">
                 {taste === "sweet" && "🍰"}
                 {taste === "salty" && "🧂"}
                 {taste === "both" && "🍬"}
@@ -194,7 +194,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
         )}
 
         {/* Bottom Row: Rating (left) and Pricing (right) */}
-        <div className="flex items-center justify-between mt-auto pt-2 sm:pt-3 border-t border-border">
+        <div className="flex items-center justify-between mt-auto pt-2 sm:pt-3 md:pt-4 border-t border-border">
           {/* Rating - Bottom Left (Light Green Star + Number) */}
           {displayRating ? (
             <div className="flex items-center gap-1 sm:gap-1.5">
@@ -216,7 +216,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
           <div className="flex flex-col items-end">
             {originalPrice && originalPrice > price ? (
               <>
-                <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
+                <span className="text-[10px] sm:text-xs md:text-sm text-muted-foreground line-through">
                   {originalPrice.toFixed(2)} dt
                 </span>
                 <span className="text-base sm:text-lg md:text-xl font-bold text-foreground">
@@ -234,7 +234,7 @@ const ClientOfferCardComponent: FC<ClientOfferCardProps> = ({
 
       {/* Footer - Order Button */}
       <CardFooter 
-        className="px-3 sm:px-4 md:px-5 pb-3 sm:pb-4 md:pb-5 pt-0 flex flex-row gap-2 sm:gap-3 w-full items-center justify-between border-t border-border bg-white"
+        className="px-3 sm:px-4 md:px-5 pb-3 sm:pb-4 md:pb-5 pt-0 flex flex-row gap-2 sm:gap-3 md:gap-4 w-full items-center justify-between border-t border-border bg-white"
         onClick={(e) => e.stopPropagation()} // Prevent card click when clicking footer
       >
         {expired ? (

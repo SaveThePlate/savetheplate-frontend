@@ -962,44 +962,53 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
-      {/* Navigation Header - Match Landing Page */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      {/* Navigation Header */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm rounded-b-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-7 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20 md:gap-12">
             {/* Left side - Logo */}
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-            >
+            <div className="flex items-center justify-between gap-4 -ml-2 pl-1 mr-8 md:mr-12">
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={36}
-                height={36}
-                className="object-contain"
+                width={90}
+                height={90}
+                className="object-contain w-12 h-12 md:w-15 md:h-15"
               />
-              <span className="text-lg font-bold text-[#1B4332] hidden sm:block">SaveThePlate</span>
-            </button>
+              <span className="text-sm md:text-lg font-bold font-mono italic bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent hidden sm:block drop-shadow-md">
+                SaveThePlate
+              </span>
+            </div>
             
             {/* Center - Navigation Links (Desktop) */}
-            <div className="hidden md:flex items-center gap-8">
-              <a href="/#features" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+            <div className="hidden md:flex items-center gap-6 md:gap-10">
+              <a href="/#features" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
                 {t("landing.fun_header_badge")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+              <a href="/#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
                 {t("landing.how_it_works")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#business" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
+              <a href="/#business" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
                 {t("landing.for_business")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
             </div>
             
-            {/* Right side - Language Switcher */}
-            <div className="flex items-center gap-3">
+            {/* Right side - Language Switcher and Back to Landing */}
+            <div className="flex items-center gap-3 md:gap-4 md:ml-auto">
               <LanguageSwitcher variant="button" />
+              <Button
+                onClick={() => router.push('/')}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 bg-white border-2 border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 shadow-sm"
+                aria-label="Back to landing"
+              >
+                {/*<Home className="w-4 h-4 text-emerald-600" />*/}
+                <span className="hidden sm:inline font-semibold text-gray-700">← Back</span>
+              </Button>
             </div>
           </div>
         </div>
