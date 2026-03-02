@@ -1,4 +1,4 @@
-import nextPWA from 'next-pwa';
+import withPWAInit from '@ducanh2912/next-pwa';
 
 // Bundle analyzer (optional - only when ANALYZE=true)
 // Install with: npm install --save-dev @next/bundle-analyzer
@@ -13,7 +13,7 @@ if (process.env.ANALYZE === 'true') {
   }
 }
 
-const withPWA = nextPWA({
+const withPWA = withPWAInit({
   dest: 'public',      // service worker will be generated in /public
   register: true,      // auto-register the service worker
   skipWaiting: true,   // activate new service worker immediately
