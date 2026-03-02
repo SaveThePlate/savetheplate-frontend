@@ -128,43 +128,41 @@ const WelcomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden  ">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Navigation Header */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm rounded-b-lg">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-7 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20 md:gap-12">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             {/* Left side - Logo */}
-            <div className="flex items-center justify-between gap-4 -ml-2 pl-1 mr-8 md:mr-12">
+            <div className="flex items-center gap-3">
               <Image
                 src="/logo.png"
                 alt="Save The Plate"
-                width={90}
-                height={90}
-                className="object-contain w-12 h-12 md:w-15 md:h-15"
+                width={36}
+                height={36}
+                className="object-contain"
               />
-              <span className="text-sm md:text-lg font-bold font-mono italic bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent hidden sm:block drop-shadow-md">
-                SaveThePlate
-              </span>
+              <span className="text-lg font-bold text-[#1B4332] hidden sm:block">SaveThePlate</span>
             </div>
             
             {/* Center - Navigation Links (Desktop) */}
-            <div className="hidden md:flex items-center gap-6 md:gap-10">
-              <a href="#features" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
                 {t("landing.fun_header_badge")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
+              <a href="#how-it-works" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
                 {t("landing.how_it_works")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="#business" className="text-gray-600 hover:text-primary transition-colors font-medium text-xs md:text-sm relative group">
+              <a href="#business" className="text-gray-600 hover:text-primary transition-colors font-medium relative group">
                 {t("landing.for_business")}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
             </div>
             
             {/* Right side - Language Switcher and Sign In */}
-            <div className="flex items-center gap-3 md:gap-4 md:ml-auto">
+            <div className="flex items-center gap-3">
               <LanguageSwitcher variant="button" />
               <Button
                 onClick={handleSignIn}
@@ -199,12 +197,6 @@ const WelcomePage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-16 items-center">
             {/* Left Content */}
             <div className="text-white space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 md:max-w-lg">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white text-xs font-medium mb-3 sm:mb-4 border border-white/20">
-                  <Star className="w-3 h-3 fill-yellow-300 text-yellow-300" />
-                  <span>{t("landing.badge_text")}</span>
-                </div>
-              </div>
               
               <div>
                 <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight">
@@ -286,7 +278,6 @@ const WelcomePage = () => {
           </div>
         </div>
       </section>
-
       {/* App Preview Section */}
       <section id="features" className="relative py-8 sm:py-12 lg:py-20 xl:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-white">
         <div className="max-w-[1600px] mx-auto">
@@ -512,10 +503,10 @@ const WelcomePage = () => {
               />
               <div className="relative z-20 p-4 sm:p-6 md:p-10 lg:p-16 max-w-2xl">
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3">
-                  Sauvez la nourriture, réduisez le gaspillage alimentaire !
+                  {t("landing.newlander_title")}
                 </h2>
                 <p className="text-xs sm:text-sm lg:text-base text-white/90 mb-4 sm:mb-6">
-                  Avec Save the Plate,profite de délicieux repas à prix réduits tout en aidant à réduire le gaspillage alimentaire.
+                  {t("landing.newlander_desc")}
                 </p>
                 <Button
                   onClick={handleGetStarted}
@@ -532,40 +523,40 @@ const WelcomePage = () => {
       </section>
 
       {/* Carbon Footprint Section */}
-      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-        <div className="max-w-4xl mx-auto">
+      <section className="py-10 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8 lg:px-8 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+        <div className="max-w-7xl mx-auto">
           <AnimatedSection>
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#1B4332] mb-4">
-                  Chaque geste compte pour la planète
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
+              <div className="order-2 md:order-1">
+                <h2 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-[#1B4332] mb-3 sm:mb-4 md:mb-5">
+                  {t("landing.carbon_title")}
                 </h2>
-                <p className="text-base text-gray-600 mb-8 leading-relaxed">
-                  En sauvant des repas, vous contribuez directement à la réduction du gaspillage alimentaire et à la protection de l'environnement. Chaque repas sauvé, c'est moins de CO₂ émis et moins de ressources gaspillées.
+                <p className="text-sm sm:text-base md:text-base lg:text-lg text-gray-600 mb-6 sm:mb-7 md:mb-8 leading-relaxed">
+                  {t("landing.carbon_desc")}
                 </p>
-                <div className="flex flex-col gap-4 mb-8">
-                  <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                <div className="flex flex-col gap-3 sm:gap-3.5 md:gap-4 mb-6 sm:mb-7 md:mb-8">
+                  <div className="flex items-center gap-3 sm:gap-3.5 md:gap-4 p-3 sm:p-3.5 md:p-4 bg-white rounded-xl sm:rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 text-primary" />
                     </div>
-                    <span className="text-gray-700 font-medium">Réduction de 70% des émissions de CO₂</span>
+                    <span className="text-sm sm:text-base md:text-base lg:text-lg text-gray-700 font-medium">{t("landing.carbon_benefit1")}</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <div className="flex items-center gap-3 sm:gap-3.5 md:gap-4 p-3 sm:p-3.5 md:p-4 bg-white rounded-xl sm:rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 text-primary" />
                     </div>
-                    <span className="text-gray-700 font-medium">Économie de 1000L d'eau par repas sauvé</span>
+                    <span className="text-sm sm:text-base md:text-base lg:text-lg text-gray-700 font-medium">{t("landing.carbon_benefit2")}</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <div className="flex items-center gap-3 sm:gap-3.5 md:gap-4 p-3 sm:p-3.5 md:p-4 bg-white rounded-xl sm:rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 text-primary" />
                     </div>
-                    <span className="text-gray-700 font-medium">Moins de déchets pour les décharges</span>
+                    <span className="text-sm sm:text-base md:text-base lg:text-lg text-gray-700 font-medium">{t("landing.carbon_benefit3")}</span>
                   </div>
                 </div>
               </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl" />
+              <div className="relative order-1 md:order-2">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl md:blur-3xl" />
                 <CarbonFootprint />
               </div>
             </div>
@@ -634,28 +625,28 @@ const WelcomePage = () => {
                         <TrendingUp className="w-8 h-8 text-emerald-400" />
                       </div>
                       <p className="text-3xl font-bold text-white">+30%</p>
-                      <p className="text-white/60 text-sm">Revenus supplémentaires</p>
+                      <p className="text-white/60 text-sm">{t("landing.business_stats1")}</p>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/30 to-indigo-500/30 flex items-center justify-center mx-auto mb-4">
                         <Users className="w-8 h-8 text-blue-400" />
                       </div>
                       <p className="text-3xl font-bold text-white">50+</p>
-                      <p className="text-white/60 text-sm">Nouveaux clients/mois</p>
+                      <p className="text-white/60 text-sm">{t("landing.business_stats2")}</p>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/30 to-orange-500/30 flex items-center justify-center mx-auto mb-4">
                         <Globe className="w-8 h-8 text-amber-400" />
                       </div>
                       <p className="text-3xl font-bold text-white">-50%</p>
-                      <p className="text-white/60 text-sm">Déchets alimentaires</p>
+                      <p className="text-white/60 text-sm">{t("landing.business_stats3")}</p>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/30 to-emerald-500/30 flex items-center justify-center mx-auto mb-4">
                         <Leaf className="w-8 h-8 text-green-400" />
                       </div>
                       <p className="text-3xl font-bold text-white">100%</p>
-                      <p className="text-white/60 text-sm">Engagement éco</p>
+                      <p className="text-white/60 text-sm">{t("landing.business_stats4")}</p>
                     </div>
                   </div>
                 </div>

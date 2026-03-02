@@ -124,7 +124,19 @@
     "illustration_alt": "Save The Plate illustration",
     "meals_saved": "Meals Saved",
     "local_partners": "Local Partners",
-    "happy_users": "Happy Users"
+    "happy_users": "Happy Users",
+    "carbon_title": "Every gesture counts for the planet",
+    "carbon_desc": "By saving meals, you directly contribute to reducing food waste and protecting the environment. Every meal saved means less CO₂ emissions and fewer wasted resources.",
+    "carbon_benefit1": "70% reduction in CO₂ emissions",
+    "carbon_benefit2": "Save 1000L of water per rescued meal",
+    "carbon_benefit3": "Less waste for landfills",
+    "business_stats1": "Additional Revenue",
+    "business_stats2": "New Customers/Month",
+    "business_stats3": "Food Waste Reduction",
+    "business_stats4": "Eco Commitment",
+    "newlander_title": "Food is not meant to be wasted!",
+    "newlander_desc": "With Save the Plate, enjoy delicious meals at reduced prices while reducing food waste.",
+    "footer_tagline": "Save food, save money and save the planet. Join our community of everyday heroes!"
   },
   "signin": {
     "welcome_new": "Welcome to SaveThePlate!",

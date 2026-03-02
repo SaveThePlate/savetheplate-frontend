@@ -124,7 +124,19 @@
     "illustration_alt": "Illustration Save The Plate",
     "meals_saved": "Repas Sauvés",
     "local_partners": "Partenaires Locaux",
-    "happy_users": "Utilisateurs Heureux"
+    "happy_users": "Utilisateurs Heureux",
+    "carbon_title": "Chaque geste compte pour la planète",
+    "carbon_desc": "En sauvant des repas, vous contribuez directement à la réduction du gaspillage alimentaire et à la protection de l'environnement. Chaque repas sauvé, c'est moins de CO₂ émis et moins de ressources gaspillées.",
+    "carbon_benefit1": "Réduction de 70% des émissions de CO₂",
+    "carbon_benefit2": "Économie de 1000L d'eau par repas sauvé",
+    "carbon_benefit3": "Moins de déchets pour les décharges",
+    "business_stats1": "Revenus supplémentaires",
+    "business_stats2": "Nouveaux clients/mois",
+    "business_stats3": "Déchets alimentaires",
+    "business_stats4": "Engagement éco",
+    "newlander_title": "La nourriture ne se jette pas !",
+    "newlander_desc": "Avec Save the Plate, profite de bons plats à prix réduit tout en réduisant le gaspillage alimentaire",
+    "footer_tagline": "Sauvez la nourriture, économisez de l'argent et sauvez la planète. Rejoignez notre communauté de héros du quotidien !"
   },
   "signin": {
     "welcome_new": "Bienvenue sur SaveThePlate !",
