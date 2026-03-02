@@ -177,7 +177,7 @@ const WelcomePage = () => {
       </nav>
 
       {/* Hero Section with Background Image */}
-      <section className="relative pt-0 pb-0 overflow-hidden min-h-screen flex items-center mt-16">
+      <section className="relative pt-0 pb-0 overflow-hidden min-h-screen flex items-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -304,11 +304,10 @@ const WelcomePage = () => {
             <AnimatedSection className="absolute top-3 right-1.5 sm:top-6 sm:right-4 md:top-12 md:right-12 lg:top-20 lg:right-24 max-w-[150px] sm:max-w-xs md:max-w-md z-10">
               <div className="backdrop-blur-xl bg-white/90 rounded-lg sm:rounded-2xl lg:rounded-3xl p-2 sm:p-4 md:p-6 shadow-xl border border-white/50">
                 <h2 className="text-[11px] sm:text-sm md:text-lg lg:text-2xl xl:text-3xl font-bold text-[#1B4332] leading-tight mb-1 sm:mb-2 md:mb-3">
-                  Une application simple et <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">intuitive</span>
+                  {t("landing.app_preview_title")} <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">intuitive</span>
                 </h2>
                 <p className="text-[9px] sm:text-xs md:text-sm lg:text-base text-gray-600 leading-snug">
-                  Découvre les meilleures offres près de chez toi en quelques clics. 
-                  Parcourt, réserve et récupère tes repas en toute simplicité.
+                  {t("landing.app_preview_desc")}
                 </p>
               </div>
             </AnimatedSection>
@@ -321,9 +320,9 @@ const WelcomePage = () => {
                     <MapPin className="w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-[#1B4332] text-[9px] sm:text-xs md:text-sm lg:text-base truncate">Géolocalisation</p>
+                    <p className="font-bold text-[#1B4332] text-[9px] sm:text-xs md:text-sm lg:text-base truncate">{t("landing.feature_geolocation")}</p>
                     <p className="text-[8px] sm:text-[10px] md:text-xs text-gray-600 truncate">
-                      Près de chez toi
+                      {t("landing.feature_geolocation_desc")}
                     </p>
                   </div>
                 </div>
@@ -335,9 +334,9 @@ const WelcomePage = () => {
                     <ShoppingBag className="w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-amber-600" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-[#1B4332] text-[9px] sm:text-xs md:text-sm lg:text-base truncate">Réservation</p>
+                    <p className="font-bold text-[#1B4332] text-[9px] sm:text-xs md:text-sm lg:text-base truncate">{t("landing.feature_reservation")}</p>
                     <p className="text-[8px] sm:text-[10px] md:text-xs text-gray-600 truncate">
-                      En 2 clics
+                      {t("landing.feature_reservation_desc")}
                     </p>
                   </div>
                 </div>
@@ -349,9 +348,9 @@ const WelcomePage = () => {
                     <Leaf className="w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-600" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-[#1B4332] text-[9px] sm:text-xs md:text-sm lg:text-base truncate">Impact</p>
+                    <p className="font-bold text-[#1B4332] text-[9px] sm:text-xs md:text-sm lg:text-base truncate">{t("landing.feature_impact")}</p>
                     <p className="text-[8px] sm:text-[10px] md:text-xs text-gray-600 truncate">
-                      Suis tes économies
+                      {t("landing.feature_impact_desc")}
                     </p>
                   </div>
                 </div>
@@ -785,7 +784,7 @@ const WelcomePage = () => {
               </svg>
             </a>
             <a 
-              href="https://www.instagram.com/savetheplate_tn/" 
+              href="https://www.instagram.com/savetheplate.tn/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
