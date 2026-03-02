@@ -607,137 +607,93 @@ const OffersPage = () => {
 
       {/* Filters Section - Collapsible */}
       {!loading && offers.length > 0 && showFilters && (
-        <div className="space-y-3 sm:space-y-4 md:space-y-5 bg-white border border-border rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm">
+        <div className="space-y-2 bg-white border border-border rounded-lg p-3 shadow-sm">
           
           {/* Filters Section */}
-          <div className="space-y-3">
-            {/* Distance Filter */}
-            {userLocation && (
-              <div className="pb-3 border-b border-border">
-                <label className="block text-xs font-medium text-foreground mb-2">
-                  {t("offers.distance_filter") || "Maximum Distance"}
-                </label>
-                <div className="flex gap-2">
-                  {[3, 5, 10, 20].map((distance) => (
-                    <button
-                      key={distance}
-                      onClick={() => setDistanceFilter(distance)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        distanceFilter === distance
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "bg-white text-foreground hover:bg-emerald-50 border border-border"
-                      }`}
-                    >
-                      {distance} km
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="space-y-2">
             {/* Status Filter - Button Group */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground min-w-[100px]">
-                <Filter className="w-4 h-4" />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground min-w-fit">
+                <Filter className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Status:</span>
               </div>
-              <div className="flex flex-wrap gap-2 flex-1">
+              <div className="flex flex-wrap gap-1.5 flex-1">
                 {[
-                  { value: "all", label: t("offers.filter_all") || "All Offers", icon: "✨" },
+                  { value: "all", label: t("offers.filter_all") || "All", icon: "✨" },
                   { value: "available", label: t("offers.filter_available") || "Available", icon: "✅" },
                   { value: "low_stock", label: t("offers.filter_low_stock") || "Low Stock", icon: "⚠️" },
                 ].map((option) => (
                   <button
                     key={option.value}
                     onClick={() => setFilter(option.value as FilterType)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                       filter === option.value
-                        ? "bg-emerald-600 text-white shadow-md scale-105"
+                        ? "bg-emerald-600 text-white shadow-md"
                         : "bg-white text-foreground hover:bg-emerald-50 border border-border"
                     }`}
                   >
                     <span>{option.icon}</span>
                     <span>{option.label}</span>
-                    {filter === option.value && <Check className="w-3.5 h-3.5" />}
+                    {filter === option.value && <Check className="w-3 h-3" />}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Category and Taste Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {/* Food Type Filter */}
-              <div className="relative">
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  {t("offers.filter_food_type") || "Food Type"}
-                </label>
-                <div className="relative">
-                  <select
-                    value={foodTypeFilter}
-                    onChange={(e) => setFoodTypeFilter(e.target.value as FoodTypeFilter)}
-                    className="w-full pl-4 pr-10 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
-                  >
-                    <option value="all">{t("offers.filter_all_types") || "All Types"}</option>
-                    <option value="snack">🍪 {t("offers.food_type_snack") || "Snack"}</option>
-                    <option value="meal">🍽️ {t("offers.food_type_meal") || "Meal"}</option>
-                    <option value="beverage">🥤 {t("offers.food_type_beverage") || "Beverage"}</option>
-                    <option value="other">📦 {t("offers.food_type_other") || "Other"}</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {/* Taste Filter */}
               <div className="relative">
-                <label className="block text-xs font-medium text-foreground mb-1.5">
+                <label className="block text-xs font-medium text-foreground mb-1">
                   {t("offers.filter_taste") || "Taste"}
                 </label>
                 <div className="relative">
                   <select
                     value={tasteFilter}
                     onChange={(e) => setTasteFilter(e.target.value as TasteFilter)}
-                    className="w-full pl-4 pr-10 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
+                    className="w-full pl-3 pr-8 py-1.5 border border-border rounded-lg focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-xs bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
                   >
-                    <option value="all">{t("offers.filter_all_tastes") || "All Tastes"}</option>
-                    <option value="sweet">🍰 {t("offers.taste_sweet") || "Sweet"}</option>
-                    <option value="salty">🧂 {t("offers.taste_salty") || "Salty"}</option>
-                    <option value="both">🍬 {t("offers.taste_both") || "Both"}</option>
-                    <option value="neutral">⚪ {t("offers.taste_neutral") || "Neutral"}</option>
+                    <option value="all">{t("offers.filter_all_tastes") || "All"}</option>
+                    <option value="sweet">🍰 Sweet</option>
+                    <option value="salty">🧂 Salty</option>
+                    <option value="both">🍬 Both</option>
+                    <option value="neutral">⚪ Neutral</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
               {/* Sort Filter */}
               <div className="relative">
-                <label className="block text-xs font-medium text-foreground mb-1.5">
-                  {t("offers.sort_by") || "Sort by"}
+                <label className="block text-xs font-medium text-foreground mb-1">
+                  {t("offers.sort_by") || "Sort"}
                 </label>
                 <div className="relative">
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortType)}
-                    className="w-full pl-4 pr-10 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-sm bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
+                    className="w-full pl-3 pr-8 py-1.5 border border-border rounded-lg focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none text-xs bg-white shadow-sm appearance-none cursor-pointer hover:border-emerald-600/50 transition-colors"
                   >
-                    <option value="newest">{t("offers.sort_newest") || "Newest First"}</option>
-                    <option value="price_low">{t("offers.sort_price_low") || "Price: Low to High"}</option>
-                    <option value="price_high">{t("offers.sort_price_high") || "Price: High to Low"}</option>
-                    <option value="earliest_pickup">{t("offers.sort_earliest_pickup") || "Earliest Pickup"}</option>
+                    <option value="newest">{t("offers.sort_newest") || "Newest"}</option>
+                    <option value="price_low">{t("offers.sort_price_low") || "Price ↑"}</option>
+                    <option value="price_high">{t("offers.sort_price_high") || "Price ↓"}</option>
+                    <option value="earliest_pickup">{t("offers.sort_earliest_pickup") || "Pickup"}</option>
                     {userLocation && (
-                      <option value="distance">{t("offers.sort_distance") || "Distance: Nearest First"}</option>
+                      <option value="distance">{t("offers.sort_distance") || "Distance"}</option>
                     )}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
             </div>
 
             {/* Active Filters Badges */}
             {(filter !== "all" || foodTypeFilter !== "all" || tasteFilter !== "all" || searchQuery) && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
-                <span className="text-xs font-medium text-muted-foreground">Active filters:</span>
+              <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-border">
+                <span className="text-xs font-medium text-muted-foreground">Active:</span>
                 {filter !== "all" && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
-                    <span>{filter === "available" ? "✅ Available" : "⚠️ Low Stock"}</span>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
+                    <span>{filter === "available" ? "✅" : "⚠️"} {filter === "available" ? "Available" : "Low Stock"}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -745,13 +701,13 @@ const OffersPage = () => {
                       }}
                       className="hover:bg-emerald-100 rounded-full p-0.5 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
                     </button>
                   </div>
                 )}
                 {foodTypeFilter !== "all" && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">
-                    <span>{foodTypeFilter === "snack" ? "🍪" : foodTypeFilter === "meal" ? "🍽️" : foodTypeFilter === "beverage" ? "🥤" : "📦"} {t(`offers.food_type_${foodTypeFilter}`)}</span>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">
+                    <span>{foodTypeFilter === "snack" ? "🍪" : foodTypeFilter === "meal" ? "🍽️" : foodTypeFilter === "beverage" ? "🥤" : "📦"} {foodTypeFilter}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -759,13 +715,13 @@ const OffersPage = () => {
                       }}
                       className="hover:bg-blue-100 rounded-full p-0.5 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
                     </button>
                   </div>
                 )}
                 {tasteFilter !== "all" && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium">
-                    <span>{tasteFilter === "sweet" ? "🍰" : tasteFilter === "salty" ? "🧂" : tasteFilter === "both" ? "🍬" : "⚪"} {t(`offers.taste_${tasteFilter}`)}</span>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium">
+                    <span>{tasteFilter === "sweet" ? "🍰" : tasteFilter === "salty" ? "🧂" : tasteFilter === "both" ? "🍬" : "⚪"} {tasteFilter}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -773,12 +729,12 @@ const OffersPage = () => {
                       }}
                       className="hover:bg-amber-100 rounded-full p-0.5 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
                     </button>
                   </div>
                 )}
                 {searchQuery && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-xs font-medium">
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-purple-50 text-purple-700 border border-purple-200 text-xs font-medium">
                     <span>🔍 &ldquo;{searchQuery}&rdquo;</span>
                     <button
                       onClick={(e) => {
@@ -787,23 +743,21 @@ const OffersPage = () => {
                       }}
                       className="hover:bg-purple-100 rounded-full p-0.5 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
                     </button>
                   </div>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => {
                     setFilter("all");
                     setFoodTypeFilter("all");
                     setTasteFilter("all");
                     setSearchQuery("");
                   }}
-                  className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-white border border-border rounded"
+                  className="text-xs text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-border hover:bg-gray-50"
                 >
-                  Clear all
-                </Button>
+                  Clear
+                </button>
               </div>
             )}
           </div>

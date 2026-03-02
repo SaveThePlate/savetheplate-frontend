@@ -653,62 +653,6 @@ const Home = () => {
               </button>
             </div>
           )}
-          
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("home.searchPlaceholder") || "Search for food, stores..."} 
-              className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border-none focus:ring-2 focus:ring-emerald-600/20 focus:outline-none transition-all placeholder:text-muted-foreground text-sm font-medium shadow-sm"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white shadow-sm border border-border hover:bg-gray-50"
-              >
-                <X className="w-4 h-4 text-foreground" />
-              </button>
-            )}
-          </div>
-
-          {/* Distance Filter - Only show if location is available */}
-          {locationData?.latitude && locationData?.longitude && (
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-4 h-4 text-emerald-600" />
-                <span className="text-sm font-medium text-foreground">
-                  {t("home.distance_filter") || "Maximum Distance"}
-                </span>
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                <button
-                  onClick={() => setDistanceFilter(null)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                    distanceFilter === null
-                      ? "bg-emerald-600 text-white shadow-md"
-                      : "bg-white text-foreground hover:bg-emerald-50 border border-border"
-                  }`}
-                >
-                  {t("home.all_distances") || "All"}
-                </button>
-                {[3, 5, 10, 20].map((distance) => (
-                  <button
-                    key={distance}
-                    onClick={() => setDistanceFilter(distance)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                      distanceFilter === distance
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-white text-foreground hover:bg-emerald-50 border border-border"
-                    }`}
-                  >
-                    {distance} km
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </header>
 
         {/* Pickup Reminder Banner - Mobile Optimized */}
@@ -810,7 +754,7 @@ const Home = () => {
               <div className="relative z-10">
                 <h2 className="text-xl sm:text-2xl font-display font-bold mb-2">{t("home.title") || "Save food, Save money"}</h2>
                 <p className="text-white/90 text-xs sm:text-sm mb-4 sm:mb-6 max-w-[90%] sm:max-w-[80%]">{t("home.subtitle") || "Help the planet by rescuing delicious unsold food from local shops."}</p>
-                <Link href="/client/home" className="inline-block bg-white text-emerald-600 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95">
+                <Link href="/client/home" className="inline-block bg-white text-emerald-600 px-4 py-3 sm:px-5 sm:py-2 rounded-xl font-bold text-xs sm:text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95 text-center">
                   {t("home.browseBags") || "Discover Exclusive Offers"}
                 </Link>
               </div>
