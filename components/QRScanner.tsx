@@ -310,10 +310,10 @@ const QRScanner: React.FC<QRScannerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-sm md:max-w-md max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-3rem)] flex flex-col overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 flex-shrink-0">
+        <div className="flex items-center justify-between p-3 sm:p-4 md:p-5 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate pr-2">{t("qr_scanner.title")}</h2>
           <button
             onClick={handleClose}

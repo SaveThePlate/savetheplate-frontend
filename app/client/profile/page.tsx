@@ -131,17 +131,17 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-4 py-4">
-        <h1 className="font-display font-bold text-2xl sm:text-3xl text-foreground">
+      <header className="sticky top-0 z-40 bg-transparent backdrop-blur-md border-b border-border/50 px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5">
+        <h1 className="font-display font-bold text-2xl sm:text-3xl md:text-4xl text-foreground">
           {t("profile.title") || "Profile"}
         </h1>
       </header>
 
-      <div className="px-3 sm:px-4 pt-4 sm:pt-6 space-y-6">
+      <div className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-5 md:pt-6 space-y-5 sm:space-y-6 md:space-y-7">
         {/* User Info Card */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 text-xl sm:text-2xl font-bold overflow-hidden flex-shrink-0 border-2 border-emerald-100">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 md:p-6 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-emerald-600 text-xl sm:text-2xl md:text-3xl font-bold overflow-hidden flex-shrink-0 border-2 md:border-3 border-emerald-100">
               {contextUser.profileImage && contextUser.profileImage !== DEFAULT_PROFILE_IMAGE ? (
                 <Image 
                   src={sanitizeImageUrl(contextUser.profileImage)} 

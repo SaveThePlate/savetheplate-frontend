@@ -593,7 +593,7 @@ const EnhancedAddOffer: React.FC = () => {
               <p className="text-sm sm:text-base text-gray-600 px-4">{t("add_offer.step2_description")}</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Price */}
               <div>
                 <label htmlFor="price" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -679,7 +679,7 @@ const EnhancedAddOffer: React.FC = () => {
             {/* Quick Time Presets */}
             <div className="bg-emerald-50 rounded-xl p-3 sm:p-4">
               <p className="text-sm font-semibold text-emerald-700 mb-2 sm:mb-3">{t("add_offer.quick_presets")}:</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3">
                 <button
                   type="button"
                   onClick={() => applyTimePreset('today-afternoon')}
@@ -711,7 +711,7 @@ const EnhancedAddOffer: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
               {/* Date */}
               <div>
                 <label htmlFor="pickupDate" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -773,10 +773,10 @@ const EnhancedAddOffer: React.FC = () => {
               <p className="text-sm sm:text-base text-gray-600 px-4">{t("add_offer.step4_description")}</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Food Type */}
               <div>
-                <label htmlFor="foodType" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="foodType" className="block text-sm md:text-base font-semibold text-gray-700 mb-2">
                   Food Type <span className="text-red-500">*</span>
                 </label>
                 <select

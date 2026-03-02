@@ -8,16 +8,16 @@ const CarbonFootprint = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="bg-gradient-to-br from-primary/5 via-primary/3 to-accent/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-primary/20 hover:shadow-xl transition-all duration-300">
-      <div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Leaf className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+    <div className="bg-gradient-to-br from-primary/5 via-primary/3 to-accent/5 rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 shadow-lg border-2 border-primary/20 hover:shadow-xl transition-all duration-300">
+      <div className="flex items-start gap-4 mb-4 md:mb-6">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Leaf className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-primary" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">
             {t("home.carbon_footprint_title")}
           </h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
             {t("home.carbon_footprint_subtitle")}
           </p>
         </div>

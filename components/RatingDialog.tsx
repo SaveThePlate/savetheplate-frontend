@@ -133,12 +133,12 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl bg-white">
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-2xl bg-white">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">
+          <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
             {t("rating.title") || "Rate Your Experience"}
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-1 sm:mt-2">
+          <DialogDescription className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1 sm:mt-2 md:mt-3">
             {providerName
               ? t("rating.description_with_name", { name: providerName }) ||
                 `How was your experience with ${providerName}?`
@@ -146,10 +146,10 @@ const RatingDialog: React.FC<RatingDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6 py-3 sm:py-4 overflow-y-auto flex-1 min-h-0">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 py-3 sm:py-4 md:py-5 overflow-y-auto flex-1 min-h-0">
           {/* Star Rating */}
-          <div className="flex flex-col items-center space-y-2 sm:space-y-3">
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+          <div className="flex flex-col items-center space-y-2 sm:space-y-3 md:space-y-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
