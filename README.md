@@ -8,7 +8,7 @@ This is the frontend for SaveThePlate, a platform to reduce food waste by connec
 ## Quick Start
 
 1. Clone the repo and run `npm install`
-2. Copy `.env.example` or `.env.local.example` to `.env.local` and fill in the required values
+2. Remove .local from the `.env.local` and fill in the required values
 3. Start the dev server: `npm run dev`
 
 The app will be available at http://localhost:3000
