@@ -191,6 +191,10 @@
     "error_password_required": "Password is required.",
     "error_password_short": "Password must be at least 8 characters long.",
     "error_username_required": "Username is required.",
+    "error_confirm_password_required": "Please confirm your password.",
+    "error_password_mismatch": "Passwords do not match. Please try again.",
+    "confirm_password_label": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
     "error_verification_email_failed": "Account created but failed to send verification email. Please click 'Resend Code' to try again."
   },
   "home": {

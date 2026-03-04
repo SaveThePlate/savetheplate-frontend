@@ -191,6 +191,10 @@
     "error_password_required": "Le mot de passe est requis.",
     "error_password_short": "Le mot de passe doit contenir au moins 8 caractères.",
     "error_username_required": "Le nom d'utilisateur est requis.",
+    "error_confirm_password_required": "Veuillez confirmer votre mot de passe.",
+    "error_password_mismatch": "Les mots de passe ne correspondent pas. Veuillez réessayer.",
+    "confirm_password_label": "Confirmer le Mot de Passe",
+    "confirm_password_placeholder": "Confirmez votre mot de passe",
     "error_verification_email_failed": "Compte créé mais échec de l'envoi de l'email de vérification. Veuillez cliquer sur 'Renvoyer le Code' pour réessayer."
   },
   "home": {

@@ -25,6 +25,7 @@ export default function SignIn() {
   const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -134,6 +135,18 @@ export default function SignIn() {
           if (!password || password.length < 8) {
             setShowErrorToast(true);
             setErrorMessage(t("signin.error_password_short"));
+            setLoading(false);
+            return;
+          }
+          if (!confirmPassword || confirmPassword.length < 8) {
+            setShowErrorToast(true);
+            setErrorMessage(t("signin.error_confirm_password_required"));
+            setLoading(false);
+            return;
+          }
+          if (password !== confirmPassword) {
+            setShowErrorToast(true);
+            setErrorMessage(t("signin.error_password_mismatch") || "Passwords do not match. Please try again.");
             setLoading(false);
             return;
           }
@@ -1145,6 +1158,7 @@ export default function SignIn() {
                 onClick={() => {
                   setIsSignUp(false);
                   setPassword("");
+                  setConfirmPassword("");
                   setUsername("");
                 }}
                 className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold rounded-md sm:rounded-lg transition-all duration-200 ${
@@ -1160,6 +1174,7 @@ export default function SignIn() {
                 onClick={() => {
                   setIsSignUp(true);
                   setPassword("");
+                  setConfirmPassword("");
                 }}
                 className={`flex-1 py-2 sm:py-2.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold rounded-md sm:rounded-lg transition-all duration-200 ${
                   isSignUp
@@ -1228,6 +1243,24 @@ export default function SignIn() {
                     </p>
                   )}
                 </div>
+                {isSignUp && (
+                  <div className="space-y-2.5">
+                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#1B4332]">
+                      {t("signin.confirm_password_label") || "Confirm Password"}
+                    </label>
+                    <Input
+                      id="confirmPassword"
+                      placeholder={t("signin.confirm_password_placeholder") || "Confirm your password"}
+                      className="w-full px-4 py-3 text-base border-2 border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all hover:border-emerald-200"
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      minLength={8}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                )}
               </div>
 
               {loading ? (
