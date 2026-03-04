@@ -22,7 +22,7 @@ const DEFAULT_PROFILE_IMAGE = "/logo.png";
 export default function AccountDetails() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { user, loading: userLoading } = useUser();
+  const { user, loading: userLoading, fetchUserRole } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<{ username: string; phoneNumber: number | null }>({ username: "", phoneNumber: null });
   const [isSaving, setIsSaving] = useState(false);
@@ -63,6 +63,8 @@ export default function AccountDetails() {
       await axiosInstance.post(`/users/me`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      await fetchUserRole();
 
       setIsEditing(false);
       setSaveSuccess(true);

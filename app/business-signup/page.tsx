@@ -34,6 +34,8 @@ export default function BusinessSignUp() {
   // Form state - only essential fields for quick onboarding
   const [formData, setFormData] = useState({
     businessName: "",
+    mapsLink: "",
+    location: "",
     email: "",
     phoneNumber: "",
     password: "",
@@ -42,6 +44,7 @@ export default function BusinessSignUp() {
   
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [extractingLocation, setExtractingLocation] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -100,6 +103,31 @@ export default function BusinessSignUp() {
     setFormData(prev => ({ ...prev, businessType: value }));
   };
 
+  const extractLocationFromMapsLink = async (mapsLink: string) => {
+    const trimmedLink = mapsLink.trim();
+    if (!trimmedLink) return;
+
+    try {
+      setExtractingLocation(true);
+      const response = await axiosInstance.post("/users/extract-location", {
+        mapsLink: trimmedLink,
+      });
+
+      const extractedLocation = (response.data?.locationName || "").trim();
+      if (extractedLocation) {
+        setFormData((prev) => ({
+          ...prev,
+          location: extractedLocation,
+        }));
+      }
+    } catch (error) {
+      // Non-blocking: user can still type location manually
+      console.debug("Could not extract location from maps link", error);
+    } finally {
+      setExtractingLocation(false);
+    }
+  };
+
   const validateForm = () => {
     const normalizedPhone = normalizePhoneNumber(formData.phoneNumber);
     
@@ -107,7 +135,16 @@ export default function BusinessSignUp() {
       setErrorMessage(t("business_signup.error_generic") || "Business name is required");
       return false;
     }
-    if (!formData.email.includes('@')) {
+    if (!formData.mapsLink.trim()) {
+      setErrorMessage("Google Maps link is required");
+      return false;
+    }
+    if (!formData.location.trim()) {
+      setErrorMessage("Business location is required");
+      return false;
+    }
+    // Email is optional, but if provided, it must be valid
+    if (formData.email && !formData.email.includes('@')) {
       setErrorMessage("Please enter a valid email address");
       return false;
     }
@@ -146,16 +183,28 @@ export default function BusinessSignUp() {
 
     try {
       const normalizedPhone = normalizePhoneNumber(formData.phoneNumber);
+      // Backend currently stores phone as Int, keep a safe 10-digit value to avoid overflow (400)
+      const phoneForBackend =
+        normalizedPhone.length > 10
+          ? normalizedPhone.slice(-10)
+          : normalizedPhone;
       
       // First, sign up the user with PROVIDER role intent
+      // Email is optional, so only include it if provided
+      const signupPayload: any = {
+        phoneNumber: phoneForBackend,
+        password: formData.password,
+        username: formData.businessName, // Use business name as username
+      };
+      
+      // Add email only if provided
+      if (formData.email.trim()) {
+        signupPayload.email = formData.email;
+      }
+      
       const signupResponse = await axiosInstance.post(
         `/auth/signup`,
-        {
-          email: formData.email,
-          phoneNumber: normalizedPhone,
-          password: formData.password,
-          username: formData.businessName, // Use business name as username
-        },
+        signupPayload,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -181,6 +230,22 @@ export default function BusinessSignUp() {
               "Content-Type": "application/json"
             } 
           }
+        );
+
+        // Save required business details immediately
+        await axiosInstance.post(
+          `/users/update-details`,
+          {
+            phoneNumber: phoneForBackend,
+            mapsLink: formData.mapsLink.trim(),
+            location: formData.location.trim(),
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
         );
 
         // User can complete their profile with phone, address, maps link, etc. later
@@ -392,7 +457,7 @@ export default function BusinessSignUp() {
             {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-semibold text-foreground">
-                {t("business_signup.email")} <span className="text-red-500">*</span>
+                {t("business_signup.email")} <span className="text-gray-500 text-xs">({t("common.optional")})</span>
               </label>
               <Input
                 id="email"
@@ -403,6 +468,47 @@ export default function BusinessSignUp() {
                 value={formData.email}
                 onChange={handleInputChange}
               />
+            </div>
+
+            {/* Google Maps Link */}
+            <div className="space-y-2">
+              <label htmlFor="mapsLink" className="block text-sm font-semibold text-foreground">
+                Google Maps Link <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="mapsLink"
+                name="mapsLink"
+                placeholder="https://maps.app.goo.gl/..."
+                className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
+                type="url"
+                required
+                value={formData.mapsLink}
+                onChange={handleInputChange}
+                onBlur={() => extractLocationFromMapsLink(formData.mapsLink)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Add your business Google Maps link. We use it to extract and suggest your location.
+              </p>
+            </div>
+
+            {/* Business Location */}
+            <div className="space-y-2">
+              <label htmlFor="location" className="block text-sm font-semibold text-foreground">
+                Business Location <span className="text-red-500">*</span>
+              </label>
+              <Input
+                id="location"
+                name="location"
+                placeholder={extractingLocation ? "Extracting from maps link..." : "Ex: Lac 1, Tunis"}
+                className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
+                type="text"
+                required
+                value={formData.location}
+                onChange={handleInputChange}
+              />
+              {extractingLocation && (
+                <p className="text-xs text-emerald-700">Extracting location from your maps link…</p>
+              )}
             </div>
 
             {/* Phone Number */}
