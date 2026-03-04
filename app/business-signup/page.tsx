@@ -400,7 +400,6 @@ export default function BusinessSignUp() {
                 placeholder={t("business_signup.email_placeholder")}
                 className="w-full px-4 py-3 text-base border-2 border-border rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white transition-all"
                 type="email"
-                required
                 value={formData.email}
                 onChange={handleInputChange}
               />
